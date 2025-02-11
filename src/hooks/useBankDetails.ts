@@ -87,11 +87,10 @@ export const useBankDetails = () => {
             paypal_email: bankDetails.paypal_email || "",
           });
 
-          // Si el país no soporta transferencia bancaria y el método de pago es transferencia,
-          // actualizamos a PayPal
-          const loadedCountry = bankDetails.country?.name_es || "";
-          if (!SUPPORTED_BANK_TRANSFER_COUNTRIES.includes(loadedCountry as any) && 
-              bankDetails.payment_method === "bank_transfer") {
+          // Verificar si el país soporta transferencia bancaria después de cargar los datos
+          if (SUPPORTED_BANK_TRANSFER_COUNTRIES.includes(countryName as any)) {
+            form.setValue("payment_method", "bank_transfer");
+          } else {
             form.setValue("payment_method", "paypal");
           }
         } else {
@@ -113,6 +112,8 @@ export const useBankDetails = () => {
   useEffect(() => {
     if (isPayPalOnly && watchPaymentMethod === "bank_transfer") {
       form.setValue("payment_method", "paypal");
+    } else if (!isPayPalOnly && !watchPaymentMethod) {
+      form.setValue("payment_method", "bank_transfer");
     }
   }, [watchCountry, isPayPalOnly, form, watchPaymentMethod]);
 
