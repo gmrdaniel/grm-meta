@@ -17,23 +17,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
-interface Creator {
-  id: string;
-  created_at: string;
-  role: string;
-  email?: string;
-}
-
 interface Profile {
   id: string;
   created_at: string;
   role: 'creator' | 'admin';
-  updated_at: string;
+  email?: string;
 }
 
 export default function Creators() {
   const [loading, setLoading] = useState(false);
-  const [creators, setCreators] = useState<Creator[]>([]);
+  const [creators, setCreators] = useState<Profile[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
