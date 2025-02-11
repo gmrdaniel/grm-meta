@@ -14,7 +14,7 @@ export const useBankDetails = () => {
   const form = useForm<BankDetailsFormValues>({
     resolver: zodResolver(bankDetailsSchema),
     defaultValues: {
-      payment_method: "",
+      payment_method: "bank_transfer",
       country: "",
       country_id: "",
       beneficiary_name: "",
@@ -75,7 +75,7 @@ export const useBankDetails = () => {
           form.reset({
             country: countryName,
             country_id: countryId,
-            payment_method: bankDetails.payment_method || "",
+            payment_method: bankDetails.payment_method || "bank_transfer",
             beneficiary_name: bankDetails.beneficiary_name || "",
             bank_account_number: bankDetails.bank_account_number || "",
             iban: bankDetails.iban || "",
