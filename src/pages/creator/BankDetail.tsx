@@ -1,3 +1,5 @@
+
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, CreditCard } from "lucide-react";
@@ -37,6 +39,40 @@ export default function CreatorBankDetail() {
     },
   });
 
+  useEffect(() => {
+    const loadBankDetails = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Primero obtenemos el perfil del usuario
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .single();
+
+        if (!profiles) return;
+
+        // Luego buscamos los detalles bancarios asociados a ese perfil
+        const { data: bankDetails } = await supabase
+          .from('bank_details')
+          .select('*')
+          .eq('profile_id', profiles.id)
+          .single();
+
+        if (bankDetails) {
+          // Si encontramos detalles bancarios, actualizamos el formulario
+          form.reset(bankDetails);
+        }
+      } catch (error) {
+        console.error('Error loading bank details:', error);
+      }
+    };
+
+    loadBankDetails();
+  }, [form]);
+
   const watchCountry = form.watch("country");
   const watchPaymentMethod = form.watch("payment_method");
   const isPayPalOnly = !SUPPORTED_COUNTRIES.includes(watchCountry as any);
@@ -55,21 +91,39 @@ export default function CreatorBankDetail() {
         ...data,
         beneficiary_name: data.beneficiary_name || "",
         country: data.country || "",
-        user_id: user.id,
+        profile_id: user.id,
       };
 
-      const { error } = await supabase
-        .from("bank_details")
-        .insert(bankDetails);
+      // Primero intentamos obtener el registro existente
+      const { data: existingRecord } = await supabase
+        .from('bank_details')
+        .select('id')
+        .eq('profile_id', user.id)
+        .single();
 
-      if (error) throw error;
+      let result;
+      if (existingRecord) {
+        // Si existe, actualizamos
+        result = await supabase
+          .from('bank_details')
+          .update(bankDetails)
+          .eq('profile_id', user.id);
+      } else {
+        // Si no existe, insertamos
+        result = await supabase
+          .from('bank_details')
+          .insert(bankDetails);
+      }
+
+      if (result.error) throw result.error;
 
       toast({
-        title: "Datos bancarios guardados",
-        description: "Los datos bancarios se han guardado correctamente",
+        title: existingRecord ? "Datos bancarios actualizados" : "Datos bancarios guardados",
+        description: existingRecord 
+          ? "Los datos bancarios se han actualizado correctamente"
+          : "Los datos bancarios se han guardado correctamente",
       });
 
-      form.reset();
     } catch (error) {
       console.error("Error saving bank details:", error);
       toast({
