@@ -17,6 +17,7 @@ export type Database = {
           beneficiary_name: string
           clabe: string | null
           country: string
+          country_id: string | null
           created_at: string
           iban: string | null
           id: string
@@ -34,6 +35,7 @@ export type Database = {
           beneficiary_name: string
           clabe?: string | null
           country: string
+          country_id?: string | null
           created_at?: string
           iban?: string | null
           id?: string
@@ -51,6 +53,7 @@ export type Database = {
           beneficiary_name?: string
           clabe?: string | null
           country?: string
+          country_id?: string | null
           created_at?: string
           iban?: string | null
           id?: string
@@ -62,6 +65,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bank_details_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "country"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bank_details_profile_id_fkey"
             columns: ["profile_id"]

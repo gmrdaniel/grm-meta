@@ -16,6 +16,7 @@ export const useBankDetails = () => {
     defaultValues: {
       payment_method: "bank_transfer",
       country: "",
+      country_id: "",
       beneficiary_name: "",
       clabe: "",
     },
@@ -57,7 +58,7 @@ export const useBankDetails = () => {
         console.log('Fetching bank details for profile:', profile.id);
         const { data: bankDetails, error: bankDetailsError } = await supabase
           .from('bank_details')
-          .select('*')
+          .select('*, country:country_id(id, name_es)')
           .eq('profile_id', profile.id)
           .maybeSingle();
 
@@ -68,8 +69,12 @@ export const useBankDetails = () => {
 
         if (bankDetails) {
           console.log('Bank details loaded:', bankDetails);
+          const countryName = bankDetails.country?.name_es || bankDetails.country || "";
+          const countryId = bankDetails.country?.id || bankDetails.country_id || "";
+          
           form.reset({
-            country: bankDetails.country || "",
+            country: countryName,
+            country_id: countryId,
             payment_method: bankDetails.payment_method || "bank_transfer",
             beneficiary_name: bankDetails.beneficiary_name || "",
             bank_account_number: bankDetails.bank_account_number || "",
@@ -95,10 +100,8 @@ export const useBankDetails = () => {
   const watchCountry = form.watch("country");
   const watchPaymentMethod = form.watch("payment_method");
   
-  // Actualizada la lógica para determinar si solo se permite PayPal
   const isPayPalOnly = !SUPPORTED_BANK_TRANSFER_COUNTRIES.includes(watchCountry as any);
 
-  // Si el país seleccionado no permite transferencia bancaria, forzar PayPal
   useEffect(() => {
     if (isPayPalOnly && watchPaymentMethod === "bank_transfer") {
       form.setValue("payment_method", "paypal");
@@ -117,6 +120,7 @@ export const useBankDetails = () => {
         ...data,
         beneficiary_name: data.beneficiary_name || "",
         country: data.country || "",
+        country_id: data.country_id,
         payment_method: data.payment_method || "bank_transfer",
         profile_id: user.id,
       };

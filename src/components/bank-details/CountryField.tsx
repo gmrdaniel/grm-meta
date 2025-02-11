@@ -20,7 +20,13 @@ export function CountryField({ form, countries, isLoadingCountries }: CountryFie
         <FormItem>
           <FormLabel>País de destino</FormLabel>
           <Select 
-            onValueChange={field.onChange} 
+            onValueChange={(value) => {
+              const selectedCountry = countries.find(c => c.name_es === value);
+              field.onChange(value);
+              if (selectedCountry) {
+                form.setValue("country_id", selectedCountry.id);
+              }
+            }}
             defaultValue={field.value}
             disabled={isLoadingCountries}
           >
