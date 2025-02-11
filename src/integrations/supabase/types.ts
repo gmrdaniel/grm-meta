@@ -149,6 +149,7 @@ export type Database = {
           pinterest_followers: number | null
           pinterest_username: string | null
           profile_id: string
+          profile_photo_url: string | null
           state_of_residence: string | null
           tiktok_followers: number | null
           tiktok_username: string | null
@@ -170,6 +171,7 @@ export type Database = {
           pinterest_followers?: number | null
           pinterest_username?: string | null
           profile_id: string
+          profile_photo_url?: string | null
           state_of_residence?: string | null
           tiktok_followers?: number | null
           tiktok_username?: string | null
@@ -191,6 +193,7 @@ export type Database = {
           pinterest_followers?: number | null
           pinterest_username?: string | null
           profile_id?: string
+          profile_photo_url?: string | null
           state_of_residence?: string | null
           tiktok_followers?: number | null
           tiktok_username?: string | null

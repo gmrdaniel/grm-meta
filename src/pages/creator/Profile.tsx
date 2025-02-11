@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { PersonalInfoInputs } from "@/components/profile/PersonalInfoInputs";
 import { SocialMediaInputs } from "@/components/profile/SocialMediaInputs";
+import { ProfilePhotoUpload } from "@/components/profile/ProfilePhotoUpload";
 
 const COUNTRIES = [
   { label: "México", value: "Mexico", code: "+52" },
@@ -62,6 +63,7 @@ export default function CreatorProfile() {
     pinterest_followers: "",
     category: "",
     gender: "",
+    profile_photo_url: "",
   });
 
   useEffect(() => {
@@ -104,6 +106,7 @@ export default function CreatorProfile() {
           pinterest_followers: data.pinterest_followers?.toString() || "",
           category: data.category || "",
           gender: data.gender || "",
+          profile_photo_url: data.profile_photo_url || "",
         });
       }
     } catch (error) {
@@ -128,7 +131,7 @@ export default function CreatorProfile() {
             pinterest_followers: parseInt(formData.pinterest_followers) || 0,
           },
           {
-            onConflict: 'profile_id'
+            onConflict: "profile_id",
           }
         );
 
@@ -161,6 +164,15 @@ export default function CreatorProfile() {
     }));
   };
 
+  const handlePhotoUpdate = (url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      profile_photo_url: url,
+    }));
+  };
+
+  if (!user) return null;
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -170,6 +182,12 @@ export default function CreatorProfile() {
           <div className="max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Información Personal</h1>
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
+              <ProfilePhotoUpload
+                currentPhotoUrl={formData.profile_photo_url}
+                userId={user.id}
+                onPhotoUpdate={handlePhotoUpdate}
+              />
+
               <PersonalInfoInputs
                 formData={formData}
                 handleInputChange={handleInputChange}
