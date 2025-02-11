@@ -19,12 +19,28 @@ export default function Auth() {
     
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
-        navigate("/");
+        if (authError) throw authError;
+
+        // Get user role from profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authData.user?.id)
+          .single();
+        
+        if (profileError) throw profileError;
+
+        // Navigate based on role
+        if (profileData.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (profileData.role === 'creator') {
+          navigate('/creator/dashboard');
+        }
+
       } else {
         const { error } = await supabase.auth.signUp({
           email,
