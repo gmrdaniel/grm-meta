@@ -71,6 +71,39 @@ export type Database = {
           },
         ]
       }
+      country: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          display_order: number
+          id: string
+          name_en: string
+          name_es: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_en: string
+          name_es: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_en?: string
+          name_es?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creators: {
         Row: {
           created_at: string
