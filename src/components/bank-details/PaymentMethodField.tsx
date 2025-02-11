@@ -21,7 +21,7 @@ export function PaymentMethodField({ form, isPayPalOnly, watchCountry }: Payment
           <FormLabel>Método de pago</FormLabel>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value || ""}
             disabled={!watchCountry || (isPayPalOnly && field.value === "paypal")}
           >
             <FormControl>

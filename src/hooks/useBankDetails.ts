@@ -14,7 +14,7 @@ export const useBankDetails = () => {
   const form = useForm<BankDetailsFormValues>({
     resolver: zodResolver(bankDetailsSchema),
     defaultValues: {
-      payment_method: "bank_transfer",
+      payment_method: "",
       country: "",
       country_id: "",
       beneficiary_name: "",
@@ -75,7 +75,7 @@ export const useBankDetails = () => {
           form.reset({
             country: countryName,
             country_id: countryId,
-            payment_method: bankDetails.payment_method || "bank_transfer",
+            payment_method: bankDetails.payment_method || "",
             beneficiary_name: bankDetails.beneficiary_name || "",
             bank_account_number: bankDetails.bank_account_number || "",
             iban: bankDetails.iban || "",
@@ -86,6 +86,14 @@ export const useBankDetails = () => {
             clabe: bankDetails.clabe || "",
             paypal_email: bankDetails.paypal_email || "",
           });
+
+          // Si el país no soporta transferencia bancaria y el método de pago es transferencia,
+          // actualizamos a PayPal
+          const loadedCountry = bankDetails.country?.name_es || "";
+          if (!SUPPORTED_BANK_TRANSFER_COUNTRIES.includes(loadedCountry as any) && 
+              bankDetails.payment_method === "bank_transfer") {
+            form.setValue("payment_method", "paypal");
+          }
         } else {
           console.log('No bank details found for this user');
         }
