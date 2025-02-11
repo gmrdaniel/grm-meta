@@ -24,6 +24,13 @@ interface Creator {
   email?: string;
 }
 
+interface Profile {
+  id: string;
+  created_at: string;
+  role: 'creator' | 'admin';
+  updated_at: string;
+}
+
 export default function Creators() {
   const [loading, setLoading] = useState(false);
   const [creators, setCreators] = useState<Creator[]>([]);
@@ -41,7 +48,8 @@ export default function Creators() {
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
-        .eq("role", "creator");
+        .eq("role", "creator")
+        .returns<Profile[]>();
 
       if (profilesError) throw profilesError;
 
@@ -50,7 +58,7 @@ export default function Creators() {
       if (usersError) throw usersError;
 
       // Combine profiles with user emails
-      const creatorsWithEmails = profiles.map((profile) => {
+      const creatorsWithEmails = (profiles || []).map((profile) => {
         const user = users.find((u) => u.id === profile.id);
         return {
           ...profile,
