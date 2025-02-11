@@ -11,20 +11,21 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
+        "h-screen transition-all duration-300 ease-in-out backdrop-blur-xl",
+        "bg-white/80 border-r border-gray-200/50",
         expanded ? "w-64" : "w-16"
       )}
     >
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
           {expanded && (
-            <h2 className="text-xl font-semibold animate-fadeIn">Panel Creador</h2>
+            <h2 className="text-xl font-medium text-gray-800 animate-fadeIn">Panel Creador</h2>
           )}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100/50 rounded-xl transition-colors"
           >
-            {expanded ? <X size={20} /> : <Menu size={20} />}
+            {expanded ? <X size={20} className="text-gray-600" /> : <Menu size={20} className="text-gray-600" />}
           </button>
         </div>
         
@@ -69,14 +70,23 @@ function NavItem({ icon, label, to, active, expanded }: NavItemProps) {
     <Link
       to={to}
       className={cn(
-        "flex items-center p-3 rounded-lg transition-all duration-200",
-        "hover:bg-gray-100 group",
-        active && "bg-gray-100"
+        "flex items-center p-3 rounded-xl transition-all duration-200",
+        "hover:bg-gray-100/50 group",
+        active && "bg-gray-100/50 shadow-sm"
       )}
     >
-      <span className="text-gray-600 group-hover:text-gray-900">{icon}</span>
+      <span className={cn(
+        "text-gray-600 group-hover:text-gray-900 transition-colors",
+        active && "text-gray-900"
+      )}>
+        {icon}
+      </span>
       {expanded && (
-        <span className="ml-3 text-gray-600 group-hover:text-gray-900 animate-fadeIn">
+        <span className={cn(
+          "ml-3 text-gray-600 group-hover:text-gray-900 transition-colors animate-fadeIn",
+          "font-medium",
+          active && "text-gray-900"
+        )}>
           {label}
         </span>
       )}
