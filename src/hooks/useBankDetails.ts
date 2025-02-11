@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getActiveCountries } from "@/services/countryService";
+import { SUPPORTED_BANK_TRANSFER_COUNTRIES } from "@/lib/constants/supported-bank-countries";
 
 export const useBankDetails = () => {
   const { toast } = useToast();
@@ -93,7 +94,16 @@ export const useBankDetails = () => {
 
   const watchCountry = form.watch("country");
   const watchPaymentMethod = form.watch("payment_method");
-  const isPayPalOnly = !countries.some(country => country.name_es === watchCountry);
+  
+  // Actualizada la lógica para determinar si solo se permite PayPal
+  const isPayPalOnly = !SUPPORTED_BANK_TRANSFER_COUNTRIES.includes(watchCountry as any);
+
+  // Si el país seleccionado no permite transferencia bancaria, forzar PayPal
+  useEffect(() => {
+    if (isPayPalOnly && watchPaymentMethod === "bank_transfer") {
+      form.setValue("payment_method", "paypal");
+    }
+  }, [watchCountry, isPayPalOnly, form, watchPaymentMethod]);
 
   const onSubmit = async (data: BankDetailsFormValues) => {
     try {
