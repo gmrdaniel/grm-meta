@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Bank, CreditCard } from "lucide-react";
+import { Building2, CreditCard } from "lucide-react"; // Changed Bank to Building2
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -237,7 +237,7 @@ export default function CreatorBankDetail() {
                             {!isPayPalOnly && (
                               <SelectItem value="bank_transfer">
                                 <span className="flex items-center gap-2">
-                                  <Bank className="h-4 w-4" />
+                                  <Building2 className="h-4 w-4" /> {/* Changed from Bank to Building2 */}
                                   Transferencia Bancaria
                                 </span>
                               </SelectItem>
