@@ -17,9 +17,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
+interface Creator {
+  id: string;
+  created_at: string;
+  role: string;
+  email?: string;
+}
+
 export default function Creators() {
   const [loading, setLoading] = useState(false);
-  const [creators, setCreators] = useState<any[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -30,13 +37,28 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      const { data, error } = await supabase
+      // Get all profiles with role = creator
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .eq("role", "creator");
 
-      if (error) throw error;
-      setCreators(data || []);
+      if (profilesError) throw profilesError;
+
+      // Get all users
+      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+      if (usersError) throw usersError;
+
+      // Combine profiles with user emails
+      const creatorsWithEmails = profiles.map((profile) => {
+        const user = users.find((u) => u.id === profile.id);
+        return {
+          ...profile,
+          email: user?.email,
+        };
+      });
+
+      setCreators(creatorsWithEmails);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
@@ -88,7 +110,7 @@ export default function Creators() {
               <TabsList className="mb-6">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Creators List
+                  Creators List ({creators.length})
                 </TabsTrigger>
                 <TabsTrigger value="add" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
@@ -102,18 +124,28 @@ export default function Creators() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Created At</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.map((creator) => (
-                        <TableRow key={creator.id}>
-                          <TableCell>{creator.email}</TableCell>
-                          <TableCell>
-                            {new Date(creator.created_at).toLocaleDateString()}
+                      {creators.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center py-4">
+                            No creators found
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        creators.map((creator) => (
+                          <TableRow key={creator.id}>
+                            <TableCell>{creator.email}</TableCell>
+                            <TableCell>{creator.role}</TableCell>
+                            <TableCell>
+                              {new Date(creator.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
