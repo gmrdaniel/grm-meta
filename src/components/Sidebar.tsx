@@ -1,29 +1,46 @@
 
 import { useState } from "react";
-import { UserCircle, Wallet, LayoutDashboard, Menu, X } from "lucide-react";
+import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message);
+    } else {
+      navigate("/auth");
+    }
+  };
 
   const navigationItems = [
     {
       icon: <UserCircle size={24} />,
       label: "Perfil",
+      shortLabel: "Perfil",
       to: "/creator/profile",
     },
     {
       icon: <Wallet size={24} />,
       label: "Datos Bancarios",
+      shortLabel: "Banco",
       to: "/creator/bankDetail",
     },
     {
       icon: <LayoutDashboard size={24} />,
       label: "Mis Campañas",
+      shortLabel: "Campañas",
       to: "/creator/campaigns",
     },
   ];
@@ -48,9 +65,18 @@ export function Sidebar() {
               )}>
                 {item.icon}
               </span>
-              <span className="text-xs mt-1 font-medium">{item.label}</span>
+              <span className="text-xs mt-1 font-medium">{item.shortLabel}</span>
             </Link>
           ))}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center w-16 py-1 rounded-2xl transition-all text-red-500 hover:text-red-600"
+          >
+            <span className="p-2 rounded-xl transition-all">
+              <LogOut size={24} />
+            </span>
+            <span className="text-xs mt-1 font-medium">Salir</span>
+          </button>
         </div>
       </nav>
     );
@@ -95,6 +121,23 @@ export function Sidebar() {
             />
           ))}
         </nav>
+
+        <div className="p-4 border-t border-gray-200/50">
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "flex items-center w-full p-3 rounded-xl transition-all duration-200",
+              "hover:bg-red-50 text-red-600 group"
+            )}
+          >
+            <LogOut size={24} />
+            {expanded && (
+              <span className="ml-3 font-medium animate-fadeIn">
+                Cerrar Sesión
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );
