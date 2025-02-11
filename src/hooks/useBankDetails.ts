@@ -25,28 +25,49 @@ export const useBankDetails = () => {
   useEffect(() => {
     const loadBankDetails = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error('Error getting user:', userError);
+          return;
+        }
+        if (!user) {
+          console.log('No user found');
+          return;
+        }
 
-        const { data: profiles } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (!profiles) return;
+        if (profileError) {
+          console.error('Error getting profile:', profileError);
+          return;
+        }
+        if (!profile) {
+          console.log('No profile found');
+          return;
+        }
 
-        const { data: bankDetails } = await supabase
+        const { data: bankDetails, error: bankDetailsError } = await supabase
           .from('bank_details')
           .select('*')
-          .eq('profile_id', profiles.id)
-          .single();
+          .eq('profile_id', profile.id)
+          .maybeSingle();
+
+        if (bankDetailsError) {
+          console.error('Error loading bank details:', bankDetailsError);
+          return;
+        }
 
         if (bankDetails) {
           form.reset(bankDetails);
+        } else {
+          console.log('No bank details found for this user');
         }
       } catch (error) {
-        console.error('Error loading bank details:', error);
+        console.error('Error in loadBankDetails:', error);
       }
     };
 
@@ -59,7 +80,8 @@ export const useBankDetails = () => {
 
   const onSubmit = async (data: BankDetailsFormValues) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       if (!user) {
         throw new Error("No se encontró el usuario");
       }
@@ -72,11 +94,13 @@ export const useBankDetails = () => {
         profile_id: user.id,
       };
 
-      const { data: existingRecord } = await supabase
+      const { data: existingRecord, error: searchError } = await supabase
         .from('bank_details')
         .select('id')
         .eq('profile_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (searchError) throw searchError;
 
       let result;
       if (existingRecord) {
@@ -118,3 +142,4 @@ export const useBankDetails = () => {
     onSubmit,
   };
 };
+
