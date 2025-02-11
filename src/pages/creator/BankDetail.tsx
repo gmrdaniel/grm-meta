@@ -51,12 +51,16 @@ export default function CreatorBankDetail() {
         throw new Error("No se encontró el usuario");
       }
 
+      const bankDetails = {
+        ...data,
+        beneficiary_name: data.beneficiary_name || "",
+        country: data.country || "",
+        user_id: user.id,
+      };
+
       const { error } = await supabase
         .from("bank_details")
-        .insert({
-          ...data,
-          profile_id: user.id,
-        });
+        .insert(bankDetails);
 
       if (error) throw error;
 

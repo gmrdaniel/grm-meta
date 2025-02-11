@@ -50,16 +50,19 @@ export function Sidebar() {
     {
       icon: <LayoutDashboard size={24} />,
       label: "Dashboard",
+      shortLabel: "Dashboard",
       to: "/admin/dashboard",
     },
     {
       icon: <Users size={24} />,
       label: "Creators",
+      shortLabel: "Creators",
       to: "/admin/creators",
     },
     {
       icon: <DollarSign size={24} />,
       label: "Payments",
+      shortLabel: "Payments",
       to: "/admin/payments",
     },
   ];
