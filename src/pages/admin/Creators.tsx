@@ -14,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, UserPlus } from "lucide-react";
 
 export default function Creators() {
   const [loading, setLoading] = useState(false);
@@ -82,56 +84,71 @@ export default function Creators() {
           <div className="max-w-7xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Manage Creators</h1>
 
-            {/* Add Creator Form */}
-            <div className="bg-white p-6 rounded-lg shadow mb-6">
-              <h2 className="text-xl font-semibold mb-4">Add New Creator</h2>
-              <form onSubmit={handleAddCreator} className="space-y-4">
-                <div>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Adding..." : "Add Creator"}
-                </Button>
-              </form>
-            </div>
+            <Tabs defaultValue="list" className="w-full">
+              <TabsList className="mb-6">
+                <TabsTrigger value="list" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Creators List
+                </TabsTrigger>
+                <TabsTrigger value="add" className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Add New Creator
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Creators List */}
-            <div className="bg-white rounded-lg shadow">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {creators.map((creator) => (
-                    <TableRow key={creator.id}>
-                      <TableCell>{creator.email}</TableCell>
-                      <TableCell>
-                        {new Date(creator.created_at).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+              <TabsContent value="list" className="mt-0">
+                <div className="bg-white rounded-lg shadow">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Created At</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {creators.map((creator) => (
+                        <TableRow key={creator.id}>
+                          <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {new Date(creator.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="add" className="mt-0">
+                <div className="bg-white p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold mb-4">Add New Creator</h2>
+                  <form onSubmit={handleAddCreator} className="space-y-4">
+                    <div>
+                      <Input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Adding..." : "Add Creator"}
+                    </Button>
+                  </form>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
