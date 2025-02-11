@@ -27,7 +27,7 @@ export function CountryField({ form, countries, isLoadingCountries }: CountryFie
                 form.setValue("country_id", selectedCountry.id);
               }
             }}
-            defaultValue={field.value}
+            value={field.value}
             disabled={isLoadingCountries}
           >
             <FormControl>
