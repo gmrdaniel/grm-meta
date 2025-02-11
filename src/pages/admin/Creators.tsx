@@ -17,9 +17,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
+type Creator = {
+  id: string;
+  role: 'creator' | 'admin';
+  created_at: string;
+  updated_at: string;
+}
+
 export default function Creators() {
   const [loading, setLoading] = useState(false);
-  const [creators, setCreators] = useState<any[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -30,13 +37,26 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      const { data, error } = await supabase
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      if (authError) throw authError;
+
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .eq("role", "creator");
 
-      if (error) throw error;
-      setCreators(data || []);
+      if (profilesError) throw profilesError;
+
+      // Combine auth users with profiles to get emails
+      const creatorsWithEmail = profiles?.map((profile) => {
+        const authUser = authUsers.users.find(user => user.id === profile.id);
+        return {
+          ...profile,
+          email: authUser?.email,
+        };
+      }) || [];
+
+      setCreators(creatorsWithEmail);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
@@ -88,7 +108,7 @@ export default function Creators() {
               <TabsList className="mb-6">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Creators List
+                  Creators List ({creators.length})
                 </TabsTrigger>
                 <TabsTrigger value="add" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
@@ -101,19 +121,37 @@ export default function Creators() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>ID</TableHead>
                         <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Created At</TableHead>
+                        <TableHead>Updated At</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.map((creator) => (
-                        <TableRow key={creator.id}>
-                          <TableCell>{creator.email}</TableCell>
-                          <TableCell>
-                            {new Date(creator.created_at).toLocaleDateString()}
+                      {creators.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-4">
+                            No creators found
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        creators.map((creator) => (
+                          <TableRow key={creator.id}>
+                            <TableCell className="font-mono text-sm">
+                              {creator.id}
+                            </TableCell>
+                            <TableCell>{creator.email}</TableCell>
+                            <TableCell>{creator.role}</TableCell>
+                            <TableCell>
+                              {new Date(creator.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(creator.updated_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
