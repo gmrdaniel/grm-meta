@@ -78,16 +78,24 @@ export default function CreatorProfile() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("personal_data").upsert({
-        profile_id: user?.id,
-        ...formData,
-      });
+      const { error } = await supabase
+        .from("personal_data")
+        .upsert(
+          {
+            profile_id: user?.id,
+            ...formData,
+          },
+          {
+            onConflict: 'profile_id'
+          }
+        );
 
       if (error) throw error;
 
       toast.success("Perfil actualizado exitosamente!");
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Error details:", error);
+      toast.error("Error al actualizar el perfil: " + error.message);
     } finally {
       setLoading(false);
     }
