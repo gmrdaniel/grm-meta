@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { LayoutDashboard, Users, Settings, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(true);
+  const location = useLocation();
 
   return (
     <aside
@@ -27,9 +29,27 @@ export function Sidebar() {
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active expanded={expanded} />
-          <NavItem icon={<Users size={20} />} label="Users" expanded={expanded} />
-          <NavItem icon={<Settings size={20} />} label="Settings" expanded={expanded} />
+          <NavItem 
+            icon={<LayoutDashboard size={20} />} 
+            label="Dashboard" 
+            to="/admin/dashboard"
+            active={location.pathname === "/admin/dashboard"}
+            expanded={expanded} 
+          />
+          <NavItem 
+            icon={<Users size={20} />} 
+            label="Creators" 
+            to="/admin/creators"
+            active={location.pathname === "/admin/creators"}
+            expanded={expanded} 
+          />
+          <NavItem 
+            icon={<Settings size={20} />} 
+            label="Settings" 
+            to="/admin/settings"
+            active={location.pathname === "/admin/settings"}
+            expanded={expanded} 
+          />
         </nav>
       </div>
     </aside>
@@ -39,14 +59,15 @@ export function Sidebar() {
 type NavItemProps = {
   icon: React.ReactNode;
   label: string;
+  to: string;
   active?: boolean;
   expanded: boolean;
 };
 
-function NavItem({ icon, label, active, expanded }: NavItemProps) {
+function NavItem({ icon, label, to, active, expanded }: NavItemProps) {
   return (
-    <a
-      href="#"
+    <Link
+      to={to}
       className={cn(
         "flex items-center p-3 rounded-lg transition-all duration-200",
         "hover:bg-gray-100 group",
@@ -59,6 +80,6 @@ function NavItem({ icon, label, active, expanded }: NavItemProps) {
           {label}
         </span>
       )}
-    </a>
+    </Link>
   );
 }
