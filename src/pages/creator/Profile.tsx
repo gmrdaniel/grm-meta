@@ -111,6 +111,7 @@ export default function CreatorProfile() {
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Error al cargar los datos del perfil");
     }
   };
 
