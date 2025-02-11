@@ -1,5 +1,4 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, CreditCard } from "lucide-react";
@@ -24,9 +23,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { SUPPORTED_COUNTRIES } from "@/lib/constants";
 import { bankDetailsSchema, type BankDetailsFormValues } from "@/lib/schemas/bank-details";
 import { supabase } from "@/integrations/supabase/client";
+import { getActiveCountries, type Country } from "@/services/countryService";
+import { useQuery } from "@tanstack/react-query";
 
 export default function CreatorBankDetail() {
   const { toast } = useToast();
@@ -37,13 +37,17 @@ export default function CreatorBankDetail() {
     },
   });
 
+  const { data: countries = [], isLoading: isLoadingCountries } = useQuery({
+    queryKey: ['countries'],
+    queryFn: getActiveCountries,
+  });
+
   useEffect(() => {
     const loadBankDetails = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Primero obtenemos el perfil del usuario
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id')
@@ -52,7 +56,6 @@ export default function CreatorBankDetail() {
 
         if (!profiles) return;
 
-        // Luego buscamos los detalles bancarios asociados a ese perfil
         const { data: bankDetails } = await supabase
           .from('bank_details')
           .select('*')
@@ -60,7 +63,6 @@ export default function CreatorBankDetail() {
           .single();
 
         if (bankDetails) {
-          // Si encontramos detalles bancarios, actualizamos el formulario
           form.reset(bankDetails);
         }
       } catch (error) {
@@ -73,7 +75,7 @@ export default function CreatorBankDetail() {
 
   const watchCountry = form.watch("country");
   const watchPaymentMethod = form.watch("payment_method");
-  const isPayPalOnly = !SUPPORTED_COUNTRIES.includes(watchCountry as any);
+  const isPayPalOnly = !countries.some(country => country.name_es === watchCountry);
 
   const onSubmit = async (data: BankDetailsFormValues) => {
     try {
@@ -93,7 +95,6 @@ export default function CreatorBankDetail() {
         profile_id: user.id,
       };
 
-      // Primero intentamos obtener el registro existente
       const { data: existingRecord } = await supabase
         .from('bank_details')
         .select('id')
@@ -102,13 +103,11 @@ export default function CreatorBankDetail() {
 
       let result;
       if (existingRecord) {
-        // Si existe, actualizamos
         result = await supabase
           .from('bank_details')
           .update(bankDetails)
           .eq('profile_id', user.id);
       } else {
-        // Si no existe, insertamos
         result = await supabase
           .from('bank_details')
           .insert(bankDetails);
@@ -257,18 +256,23 @@ export default function CreatorBankDetail() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>País de destino</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                          disabled={isLoadingCountries}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Selecciona un país" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {[...SUPPORTED_COUNTRIES, "Otro"].map((country) => (
-                              <SelectItem key={country} value={country}>
-                                {country}
+                            {countries.map((country) => (
+                              <SelectItem key={country.id} value={country.name_es}>
+                                {country.name_es}
                               </SelectItem>
                             ))}
+                            <SelectItem value="Otro">Otro</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -358,4 +362,3 @@ export default function CreatorBankDetail() {
     </div>
   );
 }
-
