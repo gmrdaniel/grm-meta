@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { LayoutDashboard, Users, Settings, Menu, X } from "lucide-react";
+import { UserCircle, Wallet, LayoutDashboard, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 
@@ -18,7 +18,7 @@ export function Sidebar() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4 border-b">
           {expanded && (
-            <h2 className="text-xl font-semibold animate-fadeIn">Admin Hub</h2>
+            <h2 className="text-xl font-semibold animate-fadeIn">Panel Creador</h2>
           )}
           <button
             onClick={() => setExpanded(!expanded)}
@@ -30,24 +30,24 @@ export function Sidebar() {
         
         <nav className="flex-1 p-4 space-y-2">
           <NavItem 
+            icon={<UserCircle size={20} />} 
+            label="Perfil" 
+            to="/creator/profile"
+            active={location.pathname === "/creator/profile"}
+            expanded={expanded} 
+          />
+          <NavItem 
+            icon={<Wallet size={20} />} 
+            label="Datos Bancarios" 
+            to="/creator/banking"
+            active={location.pathname === "/creator/banking"}
+            expanded={expanded} 
+          />
+          <NavItem 
             icon={<LayoutDashboard size={20} />} 
-            label="Dashboard" 
-            to="/admin/dashboard"
-            active={location.pathname === "/admin/dashboard"}
-            expanded={expanded} 
-          />
-          <NavItem 
-            icon={<Users size={20} />} 
-            label="Creators" 
-            to="/admin/creators"
-            active={location.pathname === "/admin/creators"}
-            expanded={expanded} 
-          />
-          <NavItem 
-            icon={<Settings size={20} />} 
-            label="Settings" 
-            to="/admin/settings"
-            active={location.pathname === "/admin/settings"}
+            label="Mis Campañas" 
+            to="/creator/campaigns"
+            active={location.pathname === "/creator/campaigns"}
             expanded={expanded} 
           />
         </nav>
