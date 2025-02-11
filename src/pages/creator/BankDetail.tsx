@@ -23,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { SUPPORTED_COUNTRIES } from "@/lib/constants";
 import { bankDetailsSchema, type BankDetailsFormValues } from "@/lib/schemas/bank-details";
@@ -35,7 +34,6 @@ export default function CreatorBankDetail() {
     resolver: zodResolver(bankDetailsSchema),
     defaultValues: {
       payment_method: "bank_transfer",
-      is_favorite: false,
     },
   });
 
@@ -348,27 +346,6 @@ export default function CreatorBankDetail() {
                     />
                   )}
 
-                  <FormField
-                    control={form.control}
-                    name="is_favorite"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Marcar como método de pago favorito</FormLabel>
-                          <FormDescription>
-                            Este será tu método de pago predeterminado
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
                   <Button type="submit" className="w-full">
                     Guardar datos bancarios
                   </Button>
@@ -381,3 +358,4 @@ export default function CreatorBankDetail() {
     </div>
   );
 }
+

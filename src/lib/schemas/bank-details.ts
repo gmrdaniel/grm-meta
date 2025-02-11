@@ -16,7 +16,7 @@ export const bankDetailsSchema = z.object({
   clabe: z.string().optional(),
   // PayPal fields
   paypal_email: z.string().email().optional(),
-  is_favorite: z.boolean().default(false),
 });
 
 export type BankDetailsFormValues = z.infer<typeof bankDetailsSchema>;
+

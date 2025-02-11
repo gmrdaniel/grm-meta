@@ -20,7 +20,6 @@ export type Database = {
           created_at: string
           iban: string | null
           id: string
-          is_favorite: boolean | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           paypal_email: string | null
           profile_id: string
@@ -38,7 +37,6 @@ export type Database = {
           created_at?: string
           iban?: string | null
           id?: string
-          is_favorite?: boolean | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           paypal_email?: string | null
           profile_id: string
@@ -56,7 +54,6 @@ export type Database = {
           created_at?: string
           iban?: string | null
           id?: string
-          is_favorite?: boolean | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           paypal_email?: string | null
           profile_id?: string
