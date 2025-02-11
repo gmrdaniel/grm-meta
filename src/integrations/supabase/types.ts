@@ -9,6 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bank_details: {
+        Row: {
+          bank_account_number: string | null
+          bank_address: string | null
+          bank_name: string | null
+          beneficiary_name: string
+          clabe: string | null
+          country: string
+          created_at: string
+          iban: string | null
+          id: string
+          is_favorite: boolean | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          paypal_email: string | null
+          profile_id: string
+          routing_number: string | null
+          swift_bic: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          beneficiary_name: string
+          clabe?: string | null
+          country: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          paypal_email?: string | null
+          profile_id: string
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          beneficiary_name?: string
+          clabe?: string | null
+          country?: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          paypal_email?: string | null
+          profile_id?: string
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creators: {
         Row: {
           created_at: string
@@ -109,6 +174,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      payment_method: "bank_transfer" | "paypal"
       user_role: "admin" | "creator"
     }
     CompositeTypes: {
