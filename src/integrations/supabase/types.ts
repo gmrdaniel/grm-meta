@@ -39,6 +39,47 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_data: {
+        Row: {
+          birth_date: string | null
+          country_code: string | null
+          created_at: string
+          id: string
+          nationality: string | null
+          phone_number: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          nationality?: string | null
+          phone_number?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          nationality?: string | null
+          phone_number?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_data_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
