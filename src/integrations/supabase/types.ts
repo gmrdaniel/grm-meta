@@ -114,6 +114,36 @@ export type Database = {
         }
         Relationships: []
       }
+      creators: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       personal_data: {
         Row: {
           birth_date: string | null
@@ -193,31 +223,22 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_url: string | null
           created_at: string
-          full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
-          website: string | null
         }
         Insert: {
-          avatar_url?: string | null
           created_at?: string
-          full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
-          website?: string | null
         }
         Update: {
-          avatar_url?: string | null
           created_at?: string
-          full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
-          website?: string | null
         }
         Relationships: []
       }
@@ -226,12 +247,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: {
-          user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       payment_method: "bank_transfer" | "paypal"

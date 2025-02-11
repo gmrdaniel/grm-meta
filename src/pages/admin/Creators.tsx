@@ -17,16 +17,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
-interface Profile {
-  id: string;
-  created_at: string;
-  role: 'creator' | 'admin';
-  email?: string;
-}
-
 export default function Creators() {
   const [loading, setLoading] = useState(false);
-  const [creators, setCreators] = useState<Profile[]>([]);
+  const [creators, setCreators] = useState<any[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -37,38 +30,13 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      // Get current session for the auth token
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-      if (!session) throw new Error('No active session');
-
-      // Get all profiles with role = creator
-      const { data: profiles, error: profilesError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("role", "creator")
-        .returns<Profile[]>();
+        .eq("role", "creator");
 
-      if (profilesError) throw profilesError;
-
-      // Get users data through our secure edge function
-      const response = await supabase.functions.invoke('admin-operations', {
-        body: { action: 'listUsers' }
-      });
-
-      if (response.error) throw response.error;
-      const users = response.data;
-
-      // Combine profiles with user emails
-      const creatorsWithEmails = profiles.map((profile) => {
-        const user = users.find((u: any) => u.id === profile.id);
-        return {
-          ...profile,
-          email: user?.email,
-        };
-      });
-
-      setCreators(creatorsWithEmails);
+      if (error) throw error;
+      setCreators(data || []);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
@@ -87,13 +55,12 @@ export default function Creators() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('No user data returned');
 
       // Update their role to creator
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user.id);
+        .eq("id", authData.user?.id);
 
       if (updateError) throw updateError;
 
@@ -121,7 +88,7 @@ export default function Creators() {
               <TabsList className="mb-6">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Creators List ({creators.length})
+                  Creators List
                 </TabsTrigger>
                 <TabsTrigger value="add" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
@@ -135,28 +102,18 @@ export default function Creators() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
                         <TableHead>Created At</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={3} className="text-center py-4">
-                            No creators found
+                      {creators.map((creator) => (
+                        <TableRow key={creator.id}>
+                          <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {new Date(creator.created_at).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        creators.map((creator) => (
-                          <TableRow key={creator.id}>
-                            <TableCell>{creator.email}</TableCell>
-                            <TableCell>{creator.role}</TableCell>
-                            <TableCell>
-                              {new Date(creator.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>

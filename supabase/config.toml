@@ -1,5 +1,1 @@
-
 project_id = "ovyakbwetiwkmpqjdhme"
-
-[functions.admin-operations]
-verify_jwt = true
