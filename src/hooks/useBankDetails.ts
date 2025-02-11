@@ -14,6 +14,9 @@ export const useBankDetails = () => {
     resolver: zodResolver(bankDetailsSchema),
     defaultValues: {
       payment_method: "bank_transfer",
+      country: "",
+      beneficiary_name: "",
+      clabe: "",
     },
   });
 
@@ -50,6 +53,7 @@ export const useBankDetails = () => {
           return;
         }
 
+        console.log('Fetching bank details for profile:', profile.id);
         const { data: bankDetails, error: bankDetailsError } = await supabase
           .from('bank_details')
           .select('*')
@@ -62,7 +66,20 @@ export const useBankDetails = () => {
         }
 
         if (bankDetails) {
-          form.reset(bankDetails);
+          console.log('Bank details loaded:', bankDetails);
+          form.reset({
+            country: bankDetails.country || "",
+            payment_method: bankDetails.payment_method || "bank_transfer",
+            beneficiary_name: bankDetails.beneficiary_name || "",
+            bank_account_number: bankDetails.bank_account_number || "",
+            iban: bankDetails.iban || "",
+            swift_bic: bankDetails.swift_bic || "",
+            bank_name: bankDetails.bank_name || "",
+            bank_address: bankDetails.bank_address || "",
+            routing_number: bankDetails.routing_number || "",
+            clabe: bankDetails.clabe || "",
+            paypal_email: bankDetails.paypal_email || "",
+          });
         } else {
           console.log('No bank details found for this user');
         }
@@ -94,6 +111,7 @@ export const useBankDetails = () => {
         profile_id: user.id,
       };
 
+      console.log('Saving bank details:', bankDetails);
       const { data: existingRecord, error: searchError } = await supabase
         .from('bank_details')
         .select('id')
@@ -142,4 +160,3 @@ export const useBankDetails = () => {
     onSubmit,
   };
 };
-
