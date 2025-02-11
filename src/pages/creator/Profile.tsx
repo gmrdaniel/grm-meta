@@ -26,14 +26,49 @@ const COUNTRIES = [
   { label: "Estados Unidos", value: "EU", code: "+1" },
 ];
 
+const CATEGORIES = [
+  "Moda y Belleza",
+  "Fitness y Salud",
+  "Tecnología",
+  "Viajes",
+  "Gastronomía",
+  "Gaming",
+  "Educación",
+  "Finanzas y Negocios",
+  "Entretenimiento",
+  "Arte y Diseño",
+  "Lifestyle",
+  "mama",
+  "papa",
+  "niños",
+];
+
+const GENDERS = [
+  { label: "Masculino", value: "Masculino" },
+  { label: "Femenino", value: "Femenino" },
+  { label: "No binario", value: "No binario" },
+  { label: "Prefiero no decirlo", value: "Prefiero no decirlo" },
+];
+
 export default function CreatorProfile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     birth_date: "",
-    nationality: "",
+    country_of_residence: "",
+    state_of_residence: "",
     country_code: "",
     phone_number: "",
+    instagram_username: "",
+    instagram_followers: "",
+    tiktok_username: "",
+    tiktok_followers: "",
+    youtube_username: "",
+    youtube_followers: "",
+    pinterest_username: "",
+    pinterest_followers: "",
+    category: "",
+    gender: "",
   });
 
   useEffect(() => {
@@ -52,7 +87,6 @@ export default function CreatorProfile() {
 
       if (error) {
         if (error.code === "PGRST116") {
-          // No data found - first time user
           console.log("No existing data found");
           return;
         }
@@ -63,9 +97,20 @@ export default function CreatorProfile() {
       if (data) {
         setFormData({
           birth_date: data.birth_date || "",
-          nationality: data.nationality || "",
+          country_of_residence: data.country_of_residence || "",
+          state_of_residence: data.state_of_residence || "",
           country_code: data.country_code || "",
           phone_number: data.phone_number || "",
+          instagram_username: data.instagram_username || "",
+          instagram_followers: data.instagram_followers?.toString() || "",
+          tiktok_username: data.tiktok_username || "",
+          tiktok_followers: data.tiktok_followers?.toString() || "",
+          youtube_username: data.youtube_username || "",
+          youtube_followers: data.youtube_followers?.toString() || "",
+          pinterest_username: data.pinterest_username || "",
+          pinterest_followers: data.pinterest_followers?.toString() || "",
+          category: data.category || "",
+          gender: data.gender || "",
         });
       }
     } catch (error) {
@@ -84,6 +129,10 @@ export default function CreatorProfile() {
           {
             profile_id: user?.id,
             ...formData,
+            instagram_followers: parseInt(formData.instagram_followers) || 0,
+            tiktok_followers: parseInt(formData.tiktok_followers) || 0,
+            youtube_followers: parseInt(formData.youtube_followers) || 0,
+            pinterest_followers: parseInt(formData.pinterest_followers) || 0,
           },
           {
             onConflict: 'profile_id'
@@ -140,13 +189,13 @@ export default function CreatorProfile() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nationality">Nacionalidad</Label>
+                <Label htmlFor="country_of_residence">País de Residencia</Label>
                 <Select 
-                  value={formData.nationality} 
-                  onValueChange={(value) => handleSelectChange("nationality", value)}
+                  value={formData.country_of_residence} 
+                  onValueChange={(value) => handleSelectChange("country_of_residence", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu nacionalidad" />
+                    <SelectValue placeholder="Selecciona tu país de residencia" />
                   </SelectTrigger>
                   <SelectContent>
                     {COUNTRIES.map((country) => (
@@ -158,9 +207,20 @@ export default function CreatorProfile() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="state_of_residence">Estado de Residencia</Label>
+                <Input
+                  id="state_of_residence"
+                  name="state_of_residence"
+                  value={formData.state_of_residence}
+                  onChange={handleInputChange}
+                  placeholder="Ingresa tu estado de residencia"
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country_code">País</Label>
+                  <Label htmlFor="country_code">País (Código)</Label>
                   <Select
                     value={COUNTRIES.find(c => c.code === formData.country_code)?.value || ""}
                     onValueChange={(value) => handleSelectChange("country_code", value)}
@@ -187,6 +247,144 @@ export default function CreatorProfile() {
                     onChange={handleInputChange}
                     placeholder="Ingresa tu número de teléfono"
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Categoría</Label>
+                <Select 
+                  value={formData.category} 
+                  onValueChange={(value) => handleSelectChange("category", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tu categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gender">Género</Label>
+                <Select 
+                  value={formData.gender} 
+                  onValueChange={(value) => handleSelectChange("gender", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tu género" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GENDERS.map((gender) => (
+                      <SelectItem key={gender.value} value={gender.value}>
+                        {gender.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Redes Sociales</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram_username">Usuario de Instagram</Label>
+                    <Input
+                      id="instagram_username"
+                      name="instagram_username"
+                      value={formData.instagram_username}
+                      onChange={handleInputChange}
+                      placeholder="@usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram_followers">Seguidores en Instagram</Label>
+                    <Input
+                      id="instagram_followers"
+                      name="instagram_followers"
+                      type="number"
+                      value={formData.instagram_followers}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tiktok_username">Usuario de TikTok</Label>
+                    <Input
+                      id="tiktok_username"
+                      name="tiktok_username"
+                      value={formData.tiktok_username}
+                      onChange={handleInputChange}
+                      placeholder="@usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tiktok_followers">Seguidores en TikTok</Label>
+                    <Input
+                      id="tiktok_followers"
+                      name="tiktok_followers"
+                      type="number"
+                      value={formData.tiktok_followers}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="youtube_username">Usuario de YouTube</Label>
+                    <Input
+                      id="youtube_username"
+                      name="youtube_username"
+                      value={formData.youtube_username}
+                      onChange={handleInputChange}
+                      placeholder="@usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="youtube_followers">Seguidores en YouTube</Label>
+                    <Input
+                      id="youtube_followers"
+                      name="youtube_followers"
+                      type="number"
+                      value={formData.youtube_followers}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pinterest_username">Usuario de Pinterest</Label>
+                    <Input
+                      id="pinterest_username"
+                      name="pinterest_username"
+                      value={formData.pinterest_username}
+                      onChange={handleInputChange}
+                      placeholder="@usuario"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pinterest_followers">Seguidores en Pinterest</Label>
+                    <Input
+                      id="pinterest_followers"
+                      name="pinterest_followers"
+                      type="number"
+                      value={formData.pinterest_followers}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
               </div>
 

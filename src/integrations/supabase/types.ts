@@ -137,33 +137,66 @@ export type Database = {
       personal_data: {
         Row: {
           birth_date: string | null
+          category: string | null
           country_code: string | null
+          country_of_residence: string | null
           created_at: string
+          gender: string | null
           id: string
-          nationality: string | null
+          instagram_followers: number | null
+          instagram_username: string | null
           phone_number: string | null
+          pinterest_followers: number | null
+          pinterest_username: string | null
           profile_id: string
+          state_of_residence: string | null
+          tiktok_followers: number | null
+          tiktok_username: string | null
           updated_at: string
+          youtube_followers: number | null
+          youtube_username: string | null
         }
         Insert: {
           birth_date?: string | null
+          category?: string | null
           country_code?: string | null
+          country_of_residence?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
-          nationality?: string | null
+          instagram_followers?: number | null
+          instagram_username?: string | null
           phone_number?: string | null
+          pinterest_followers?: number | null
+          pinterest_username?: string | null
           profile_id: string
+          state_of_residence?: string | null
+          tiktok_followers?: number | null
+          tiktok_username?: string | null
           updated_at?: string
+          youtube_followers?: number | null
+          youtube_username?: string | null
         }
         Update: {
           birth_date?: string | null
+          category?: string | null
           country_code?: string | null
+          country_of_residence?: string | null
           created_at?: string
+          gender?: string | null
           id?: string
-          nationality?: string | null
+          instagram_followers?: number | null
+          instagram_username?: string | null
           phone_number?: string | null
+          pinterest_followers?: number | null
+          pinterest_username?: string | null
           profile_id?: string
+          state_of_residence?: string | null
+          tiktok_followers?: number | null
+          tiktok_username?: string | null
           updated_at?: string
+          youtube_followers?: number | null
+          youtube_username?: string | null
         }
         Relationships: [
           {
