@@ -37,6 +37,11 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
+      // Get current session for the auth token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!session) throw new Error('No active session');
+
       // Get all profiles with role = creator
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
@@ -46,13 +51,17 @@ export default function Creators() {
 
       if (profilesError) throw profilesError;
 
-      // Get all users
-      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
-      if (usersError) throw usersError;
+      // Get users data through our secure edge function
+      const response = await supabase.functions.invoke('admin-operations', {
+        body: { action: 'listUsers' }
+      });
+
+      if (response.error) throw response.error;
+      const users = response.data;
 
       // Combine profiles with user emails
-      const creatorsWithEmails = (profiles || []).map((profile) => {
-        const user = users.find((u) => u.id === profile.id);
+      const creatorsWithEmails = profiles.map((profile) => {
+        const user = users.find((u: any) => u.id === profile.id);
         return {
           ...profile,
           email: user?.email,
@@ -78,12 +87,13 @@ export default function Creators() {
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error('No user data returned');
 
       // Update their role to creator
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user?.id);
+        .eq("id", authData.user.id);
 
       if (updateError) throw updateError;
 
