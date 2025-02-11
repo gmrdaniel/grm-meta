@@ -8,6 +8,23 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const COUNTRIES = [
+  { label: "México", value: "Mexico", code: "+52" },
+  { label: "Colombia", value: "Colombia", code: "+57" },
+  { label: "Venezuela", value: "Venezuela", code: "+58" },
+  { label: "Brasil", value: "Brasil", code: "+55" },
+  { label: "Chile", value: "Chile", code: "+56" },
+  { label: "Perú", value: "Peru", code: "+51" },
+  { label: "Estados Unidos", value: "EU", code: "+1" },
+];
 
 export default function CreatorProfile() {
   const { user } = useAuth();
@@ -30,9 +47,15 @@ export default function CreatorProfile() {
       const { data, error } = await supabase
         .from("personal_data")
         .select("*")
+        .eq("profile_id", user?.id)
         .single();
 
       if (error) {
+        if (error.code === "PGRST116") {
+          // No data found - first time user
+          console.log("No existing data found");
+          return;
+        }
         console.error("Error fetching personal data:", error);
         return;
       }
@@ -62,7 +85,7 @@ export default function CreatorProfile() {
 
       if (error) throw error;
 
-      toast.success("Profile updated successfully!");
+      toast.success("Perfil actualizado exitosamente!");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -78,6 +101,16 @@ export default function CreatorProfile() {
     }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "country_code" && {
+        country_code: COUNTRIES.find((c) => c.value === value)?.code || "",
+      }),
+    }));
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -85,10 +118,10 @@ export default function CreatorProfile() {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">Personal Information</h1>
+            <h1 className="text-2xl font-bold mb-6">Información Personal</h1>
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
               <div className="space-y-2">
-                <Label htmlFor="birth_date">Birth Date</Label>
+                <Label htmlFor="birth_date">Fecha de Nacimiento</Label>
                 <Input
                   id="birth_date"
                   name="birth_date"
@@ -99,42 +132,58 @@ export default function CreatorProfile() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nationality">Nationality</Label>
-                <Input
-                  id="nationality"
-                  name="nationality"
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  placeholder="Enter your nationality"
-                />
+                <Label htmlFor="nationality">Nacionalidad</Label>
+                <Select 
+                  value={formData.nationality} 
+                  onValueChange={(value) => handleSelectChange("nationality", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona tu nacionalidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country.value} value={country.value}>
+                        {country.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="country_code">Country Code</Label>
-                  <Input
-                    id="country_code"
-                    name="country_code"
-                    value={formData.country_code}
-                    onChange={handleInputChange}
-                    placeholder="+1"
-                  />
+                  <Label htmlFor="country_code">País</Label>
+                  <Select
+                    value={COUNTRIES.find(c => c.code === formData.country_code)?.value || ""}
+                    onValueChange={(value) => handleSelectChange("country_code", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona tu país" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((country) => (
+                        <SelectItem key={country.value} value={country.value}>
+                          {country.label} ({country.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone_number">Phone Number</Label>
+                  <Label htmlFor="phone_number">Número de Teléfono</Label>
                   <Input
                     id="phone_number"
                     name="phone_number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
-                    placeholder="Enter your phone number"
+                    placeholder="Ingresa tu número de teléfono"
                   />
                 </div>
               </div>
 
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </Button>
             </form>
           </div>
