@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -9,6 +8,27 @@ import { useAuth } from "@/components/AuthProvider";
 import { PersonalInfoInputs } from "@/components/profile/PersonalInfoInputs";
 import { SocialMediaInputs } from "@/components/profile/SocialMediaInputs";
 import { ProfilePhotoUpload } from "@/components/profile/ProfilePhotoUpload";
+
+interface PersonalData {
+  first_name: string | null;
+  last_name: string | null;
+  birth_date: string | null;
+  country_of_residence: string | null;
+  state_of_residence: string | null;
+  country_code: string | null;
+  phone_number: string | null;
+  instagram_username: string | null;
+  instagram_followers: number | null;
+  tiktok_username: string | null;
+  tiktok_followers: number | null;
+  youtube_username: string | null;
+  youtube_followers: number | null;
+  pinterest_username: string | null;
+  pinterest_followers: number | null;
+  category: string | null;
+  gender: string | null;
+  profile_photo_url: string | null;
+}
 
 const COUNTRIES = [
   { label: "México", value: "Mexico", code: "+52" },
