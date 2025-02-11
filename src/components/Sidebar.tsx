@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut } from "lucide-react";
+import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Users, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,6 +14,7 @@ export function Sidebar() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -24,7 +25,7 @@ export function Sidebar() {
     }
   };
 
-  const navigationItems = [
+  const creatorNavigationItems = [
     {
       icon: <UserCircle size={24} />,
       label: "Perfil",
@@ -45,7 +46,28 @@ export function Sidebar() {
     },
   ];
 
-  if (isMobile) {
+  const adminNavigationItems = [
+    {
+      icon: <LayoutDashboard size={24} />,
+      label: "Dashboard",
+      to: "/admin/dashboard",
+    },
+    {
+      icon: <Users size={24} />,
+      label: "Creators",
+      to: "/admin/creators",
+    },
+    {
+      icon: <DollarSign size={24} />,
+      label: "Payments",
+      to: "/admin/payments",
+    },
+  ];
+
+  const navigationItems = isAdminRoute ? adminNavigationItems : creatorNavigationItems;
+
+  // Mobile menu for creators
+  if (!isAdminRoute && isMobile) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 z-50">
         <div className="flex justify-around items-center h-16 px-4">
@@ -82,6 +104,7 @@ export function Sidebar() {
     );
   }
 
+  // Desktop sidebar for admin and creator (when not mobile)
   return (
     <aside
       className={cn(
@@ -94,7 +117,7 @@ export function Sidebar() {
         <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
           {expanded && (
             <h2 className="text-xl font-medium text-gray-800 animate-fadeIn">
-              Panel Creador
+              {isAdminRoute ? "Panel Admin" : "Panel Creador"}
             </h2>
           )}
           <button
