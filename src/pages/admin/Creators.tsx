@@ -17,9 +17,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
+interface Creator {
+  id: string;
+  email: string;
+  created_at: string;
+  personal_data?: {
+    instagram_username: string | null;
+  };
+}
+
 export default function Creators() {
   const [loading, setLoading] = useState(false);
-  const [creators, setCreators] = useState<any[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -32,7 +41,12 @@ export default function Creators() {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select(`
+          *,
+          personal_data (
+            instagram_username
+          )
+        `)
         .eq("role", "creator");
 
       if (error) throw error;
@@ -102,6 +116,7 @@ export default function Creators() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Email</TableHead>
+                        <TableHead>Instagram Username</TableHead>
                         <TableHead>Created At</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -109,6 +124,9 @@ export default function Creators() {
                       {creators.map((creator) => (
                         <TableRow key={creator.id}>
                           <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {creator.personal_data?.instagram_username || "Not set"}
+                          </TableCell>
                           <TableCell>
                             {new Date(creator.created_at).toLocaleDateString()}
                           </TableCell>
