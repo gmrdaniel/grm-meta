@@ -19,14 +19,14 @@ export function StatsCard({
   trendValue,
 }: StatsCardProps) {
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-200/50 hover:shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between">
-        <span className="text-gray-500 text-sm">{title}</span>
-        <span className="text-gray-600">{icon}</span>
+        <span className="text-gray-500 text-sm font-medium">{title}</span>
+        <span className="text-gray-600 bg-gray-50/50 p-2 rounded-xl">{icon}</span>
       </div>
       
       <div className="mt-4">
-        <h3 className="text-3xl font-semibold">{value}</h3>
+        <h3 className="text-3xl font-semibold text-gray-800">{value}</h3>
         <p className="text-gray-500 mt-1 text-sm">{description}</p>
       </div>
       
@@ -34,13 +34,13 @@ export function StatsCard({
         <div className="mt-4 flex items-center">
           <span
             className={cn(
-              "text-sm font-medium",
-              trend === "up" ? "text-green-600" : "text-red-600"
+              "text-sm font-medium rounded-full px-2 py-0.5",
+              trend === "up" ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
             )}
           >
             {trendValue}
           </span>
-          <span className="text-gray-500 text-sm ml-1">vs last month</span>
+          <span className="text-gray-500 text-sm ml-2">vs last month</span>
         </div>
       )}
     </div>

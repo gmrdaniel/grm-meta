@@ -9,6 +9,218 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bank_details: {
+        Row: {
+          bank_account_number: string | null
+          bank_address: string | null
+          bank_name: string | null
+          beneficiary_name: string
+          clabe: string | null
+          country: string
+          country_id: string | null
+          created_at: string
+          iban: string | null
+          id: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          paypal_email: string | null
+          profile_id: string
+          routing_number: string | null
+          swift_bic: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          beneficiary_name: string
+          clabe?: string | null
+          country: string
+          country_id?: string | null
+          created_at?: string
+          iban?: string | null
+          id?: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          paypal_email?: string | null
+          profile_id: string
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          beneficiary_name?: string
+          clabe?: string | null
+          country?: string
+          country_id?: string | null
+          created_at?: string
+          iban?: string | null
+          id?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          paypal_email?: string | null
+          profile_id?: string
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_details_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "country"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_details_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      country: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          display_order: number
+          id: string
+          name_en: string
+          name_es: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_en: string
+          name_es: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name_en?: string
+          name_es?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      creators: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      personal_data: {
+        Row: {
+          birth_date: string | null
+          category: string | null
+          country_code: string | null
+          country_of_residence: string | null
+          created_at: string
+          gender: string | null
+          id: string
+          instagram_followers: number | null
+          instagram_username: string | null
+          phone_number: string | null
+          pinterest_followers: number | null
+          pinterest_username: string | null
+          profile_id: string
+          profile_photo_url: string | null
+          state_of_residence: string | null
+          tiktok_followers: number | null
+          tiktok_username: string | null
+          updated_at: string
+          youtube_followers: number | null
+          youtube_username: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          category?: string | null
+          country_code?: string | null
+          country_of_residence?: string | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          instagram_followers?: number | null
+          instagram_username?: string | null
+          phone_number?: string | null
+          pinterest_followers?: number | null
+          pinterest_username?: string | null
+          profile_id: string
+          profile_photo_url?: string | null
+          state_of_residence?: string | null
+          tiktok_followers?: number | null
+          tiktok_username?: string | null
+          updated_at?: string
+          youtube_followers?: number | null
+          youtube_username?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          category?: string | null
+          country_code?: string | null
+          country_of_residence?: string | null
+          created_at?: string
+          gender?: string | null
+          id?: string
+          instagram_followers?: number | null
+          instagram_username?: string | null
+          phone_number?: string | null
+          pinterest_followers?: number | null
+          pinterest_username?: string | null
+          profile_id?: string
+          profile_photo_url?: string | null
+          state_of_residence?: string | null
+          tiktok_followers?: number | null
+          tiktok_username?: string | null
+          updated_at?: string
+          youtube_followers?: number | null
+          youtube_username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_data_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +250,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      payment_method: "bank_transfer" | "paypal"
       user_role: "admin" | "creator"
     }
     CompositeTypes: {

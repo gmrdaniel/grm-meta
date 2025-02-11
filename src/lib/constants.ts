@@ -1,0 +1,30 @@
+
+export const SUPPORTED_COUNTRIES = [
+  "Australia",
+  "Brasil",
+  "Canadá",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Guatemala",
+  "India",
+  "Indonesia",
+  "Israel",
+  "Japón",
+  "México",
+  "Marruecos",
+  "Nueva Zelanda",
+  "Singapur",
+  "Sudáfrica",
+  "Corea del Sur",
+  "Tailandia",
+  "Turquía",
+  "Uganda",
+  "Ucrania",
+  "Emiratos Árabes Unidos",
+  "Reino Unido",
+  "Estados Unidos de América",
+  "Uruguay",
+] as const;
+
+export type SupportedCountry = (typeof SUPPORTED_COUNTRIES)[number];
