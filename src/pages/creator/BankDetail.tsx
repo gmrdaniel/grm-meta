@@ -91,6 +91,7 @@ export default function CreatorBankDetail() {
         ...data,
         beneficiary_name: data.beneficiary_name || "",
         country: data.country || "",
+        payment_method: data.payment_method || "bank_transfer",
         profile_id: user.id,
       };
 
