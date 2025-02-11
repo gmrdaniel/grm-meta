@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CreatorDashboard from "./pages/creator/Dashboard";
+import CreatorProfile from "./pages/creator/Profile";
 import Creators from "./pages/admin/Creators";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["creator"]}>
                   <CreatorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/profile"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <CreatorProfile />
                 </ProtectedRoute>
               }
             />
