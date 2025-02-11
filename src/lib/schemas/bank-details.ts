@@ -4,7 +4,7 @@ import { SUPPORTED_COUNTRIES } from "../constants";
 
 export const bankDetailsSchema = z.object({
   country: z.string().min(1, "El país es requerido"),
-  payment_method: z.enum(["bank_transfer", "paypal"]),
+  payment_method: z.enum(["bank_transfer", "paypal"]).default("bank_transfer"),
   beneficiary_name: z.string().min(1, "El nombre del beneficiario es requerido"),
   // Bank transfer fields
   bank_account_number: z.string().optional(),

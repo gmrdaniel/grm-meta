@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, CreditCard } from "lucide-react";
@@ -33,6 +32,7 @@ export default function CreatorBankDetail() {
   const form = useForm<BankDetailsFormValues>({
     resolver: zodResolver(bankDetailsSchema),
     defaultValues: {
+      payment_method: "bank_transfer",
       is_favorite: false,
     },
   });
@@ -51,22 +51,12 @@ export default function CreatorBankDetail() {
         throw new Error("No se encontró el usuario");
       }
 
-      // Ensure required fields are present
-      if (!data.beneficiary_name || !data.country) {
-        throw new Error("Faltan campos requeridos");
-      }
-
-      // Create the insert data object with required fields
-      const insertData = {
-        ...data,
-        beneficiary_name: data.beneficiary_name,
-        country: data.country,
-        profile_id: user.id,
-      };
-
       const { error } = await supabase
         .from("bank_details")
-        .insert(insertData);
+        .insert({
+          ...data,
+          profile_id: user.id,
+        });
 
       if (error) throw error;
 
@@ -249,7 +239,7 @@ export default function CreatorBankDetail() {
                             {!isPayPalOnly && (
                               <SelectItem value="bank_transfer">
                                 <span className="flex items-center gap-2">
-                                  <Building2 className="h-4 w-4" /> {/* Changed from Bank to Building2 */}
+                                  <Building2 className="h-4 w-4" />
                                   Transferencia Bancaria
                                 </span>
                               </SelectItem>
