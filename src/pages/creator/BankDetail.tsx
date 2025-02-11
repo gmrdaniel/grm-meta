@@ -1,7 +1,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2, CreditCard } from "lucide-react"; // Changed Bank to Building2
+import { Building2, CreditCard } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -51,10 +51,22 @@ export default function CreatorBankDetail() {
         throw new Error("No se encontró el usuario");
       }
 
-      const { error } = await supabase.from("bank_details").insert({
+      // Ensure required fields are present
+      if (!data.beneficiary_name || !data.country) {
+        throw new Error("Faltan campos requeridos");
+      }
+
+      // Create the insert data object with required fields
+      const insertData = {
         ...data,
+        beneficiary_name: data.beneficiary_name,
+        country: data.country,
         profile_id: user.id,
-      });
+      };
+
+      const { error } = await supabase
+        .from("bank_details")
+        .insert(insertData);
 
       if (error) throw error;
 
@@ -189,7 +201,7 @@ export default function CreatorBankDetail() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Datos bancarios</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-200/50 hover:shadow-lg transition-all duration-300">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
