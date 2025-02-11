@@ -39,8 +39,8 @@ export function Sidebar() {
           <NavItem 
             icon={<Wallet size={20} />} 
             label="Datos Bancarios" 
-            to="/creator/banking"
-            active={location.pathname === "/creator/banking"}
+            to="/creator/bankDetail"
+            active={location.pathname === "/creator/bankDetail"}
             expanded={expanded} 
           />
           <NavItem 

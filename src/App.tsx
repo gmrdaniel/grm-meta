@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
+import CreatorBankDetail from "./pages/creator/BankDetail";
 import Creators from "./pages/admin/Creators";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["creator"]}>
                   <CreatorProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/bankDetail"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <CreatorBankDetail />
                 </ProtectedRoute>
               }
             />
