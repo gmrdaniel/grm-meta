@@ -19,11 +19,11 @@ import { Users, UserPlus } from "lucide-react";
 
 interface Creator {
   id: string;
-  email: string;
+  email?: string;
   created_at: string;
   personal_data?: {
     instagram_username: string | null;
-  };
+  } | null;
 }
 
 export default function Creators() {
@@ -39,18 +39,39 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      const { data, error } = await supabase
+      // First get auth users
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      if (authError) throw authError;
+
+      // Then get profiles with personal data
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select(`
-          *,
+          id,
+          created_at,
           personal_data (
             instagram_username
           )
         `)
         .eq("role", "creator");
 
-      if (error) throw error;
-      setCreators(data || []);
+      if (profilesError) throw profilesError;
+
+      if (!profilesData) {
+        setCreators([]);
+        return;
+      }
+
+      // Merge the data
+      const creators = profilesData.map((profile) => {
+        const authUser = authData.users.find(user => user.id === profile.id);
+        return {
+          ...profile,
+          email: authUser?.email
+        };
+      });
+
+      setCreators(creators);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
@@ -69,14 +90,27 @@ export default function Creators() {
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
 
       // Update their role to creator
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user?.id);
+        .eq("id", authData.user.id);
 
       if (updateError) throw updateError;
+
+      // Create personal_data record
+      const { error: personalDataError } = await supabase
+        .from("personal_data")
+        .insert({
+          profile_id: authData.user.id,
+        });
+
+      if (personalDataError) {
+        console.error("Error creating personal data:", personalDataError);
+        throw new Error("Error creating personal data record");
+      }
 
       toast.success("Creator added successfully!");
       setEmail("");
@@ -121,17 +155,25 @@ export default function Creators() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.map((creator) => (
-                        <TableRow key={creator.id}>
-                          <TableCell>{creator.email}</TableCell>
-                          <TableCell>
-                            {creator.personal_data?.instagram_username || "Not set"}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(creator.created_at).toLocaleDateString()}
+                      {creators.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center py-4">
+                            No creators found
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        creators.map((creator) => (
+                          <TableRow key={creator.id}>
+                            <TableCell>{creator.email || "Not set"}</TableCell>
+                            <TableCell>
+                              {creator.personal_data?.instagram_username || "Not set"}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(creator.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>

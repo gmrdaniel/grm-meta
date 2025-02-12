@@ -121,10 +121,12 @@ export type Database = {
           country_code: string | null
           country_of_residence: string | null
           created_at: string
+          first_name: string | null
           gender: string | null
           id: string
           instagram_followers: number | null
           instagram_username: string | null
+          last_name: string | null
           phone_number: string | null
           pinterest_followers: number | null
           pinterest_username: string | null
@@ -143,10 +145,12 @@ export type Database = {
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
+          first_name?: string | null
           gender?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_username?: string | null
+          last_name?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
@@ -165,10 +169,12 @@ export type Database = {
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
+          first_name?: string | null
           gender?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_username?: string | null
+          last_name?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
