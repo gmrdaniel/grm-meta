@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -110,47 +109,52 @@ export default function PendingServices() {
           "flex-1 overflow-y-auto p-6",
           isMobile && "pb-20"
         )}>
-          <div className="max-w-7xl mx-auto space-y-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Pending Services</h1>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <h1 className="text-xl font-semibold text-gray-800">Pending Services</h1>
             
             <Card>
               <CardHeader>
-                <CardTitle>Services Pending Approval</CardTitle>
+                <CardTitle className="text-lg">Services Pending Approval</CardTitle>
               </CardHeader>
               <CardContent>
                 {pendingServices.length === 0 ? (
-                  <p className="text-gray-500">No pending services</p>
+                  <p className="text-sm text-gray-500">No pending services</p>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {pendingServices.map((service) => (
                       <div
                         key={service.creator_service_id}
-                        className="p-6 border rounded-lg bg-gray-50"
+                        className="p-4 border rounded-lg bg-gray-50"
                       >
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <div>
-                            <h4 className="text-lg font-medium text-gray-900">{service.name}</h4>
-                            <p className="text-sm text-gray-500 mb-4">
+                            <h4 className="text-base font-medium text-gray-900">{service.name}</h4>
+                            <p className="text-xs text-gray-500">
                               Please review and accept the terms for this service
                             </p>
                           </div>
                           
-                          <div className="bg-white p-4 rounded-md">
-                            <h5 className="font-medium text-gray-700 mb-2">Terms & Conditions</h5>
+                          <div className="bg-white p-3 rounded-md">
+                            <h5 className="text-sm font-medium text-gray-700 mb-2">Terms & Conditions</h5>
                             {service.terms_conditions ? (
-                              <div data-color-mode="light" className="mb-4">
+                              <div data-color-mode="light" className="prose prose-sm max-w-none">
                                 <MDEditor.Markdown 
                                   source={service.terms_conditions} 
-                                  style={{ whiteSpace: 'pre-wrap' }}
+                                  style={{ 
+                                    whiteSpace: 'pre-wrap',
+                                    fontSize: '0.875rem',
+                                    lineHeight: '1.25rem'
+                                  }}
                                 />
                               </div>
                             ) : (
-                              <p className="text-gray-500 italic">No terms and conditions provided</p>
+                              <p className="text-xs text-gray-500 italic">No terms and conditions provided</p>
                             )}
                           </div>
 
                           <div className="flex justify-end">
                             <Button
+                              size="sm"
                               onClick={() => acceptTerms(service.creator_service_id, service.name, service.terms_conditions)}
                               disabled={loading}
                             >
