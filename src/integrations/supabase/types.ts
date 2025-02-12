@@ -401,6 +401,7 @@ export type Database = {
           max_revenue: number | null
           name: string
           renewable: boolean | null
+          terms_conditions: string | null
           type: string
           updated_at: string | null
         }
@@ -415,6 +416,7 @@ export type Database = {
           max_revenue?: number | null
           name: string
           renewable?: boolean | null
+          terms_conditions?: string | null
           type: string
           updated_at?: string | null
         }
@@ -429,6 +431,7 @@ export type Database = {
           max_revenue?: number | null
           name?: string
           renewable?: boolean | null
+          terms_conditions?: string | null
           type?: string
           updated_at?: string | null
         }

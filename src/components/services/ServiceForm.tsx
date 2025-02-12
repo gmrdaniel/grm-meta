@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import MDEditor from '@uiw/react-md-editor';
 
 const serviceSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -32,6 +33,7 @@ const serviceSchema = z.object({
   max_revenue: z.number().optional().nullable(),
   contract_duration: z.number().optional().nullable(),
   renewable: z.boolean().default(false),
+  terms_conditions: z.string().optional(),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
@@ -55,6 +57,7 @@ export function ServiceForm({ initialData, onSubmit, isLoading }: ServiceFormPro
       max_revenue: initialData?.max_revenue || null,
       contract_duration: initialData?.contract_duration || null,
       renewable: initialData?.renewable || false,
+      terms_conditions: initialData?.terms_conditions || "# Terms and Conditions\n\nEnter the terms and conditions here...",
     },
   });
 
@@ -83,6 +86,27 @@ export function ServiceForm({ initialData, onSubmit, isLoading }: ServiceFormPro
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="terms_conditions"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Terms & Conditions</FormLabel>
+              <FormControl>
+                <div data-color-mode="light">
+                  <MDEditor
+                    value={field.value}
+                    onChange={(value) => field.onChange(value || '')}
+                    height={400}
+                    preview="edit"
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
