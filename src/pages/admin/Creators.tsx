@@ -22,6 +22,8 @@ interface Creator {
   email: string;
   created_at: string;
   personal_data?: {
+    first_name: string | null;
+    last_name: string | null;
     instagram_username: string | null;
   };
 }
@@ -44,6 +46,8 @@ export default function Creators() {
         .select(`
           *,
           personal_data (
+            first_name,
+            last_name,
             instagram_username
           )
         `)
@@ -115,7 +119,8 @@ export default function Creators() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Email</TableHead>
+                        <TableHead>First Name</TableHead>
+                        <TableHead>Last Name</TableHead>
                         <TableHead>Instagram Username</TableHead>
                         <TableHead>Created At</TableHead>
                       </TableRow>
@@ -123,7 +128,12 @@ export default function Creators() {
                     <TableBody>
                       {creators.map((creator) => (
                         <TableRow key={creator.id}>
-                          <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {creator.personal_data?.first_name || "Not set"}
+                          </TableCell>
+                          <TableCell>
+                            {creator.personal_data?.last_name || "Not set"}
+                          </TableCell>
                           <TableCell>
                             {creator.personal_data?.instagram_username || "Not set"}
                           </TableCell>
