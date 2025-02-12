@@ -227,6 +227,51 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          company_share_max: number | null
+          company_share_min: number | null
+          contract_duration: number | null
+          created_at: string | null
+          description: string | null
+          fixed_fee: number | null
+          id: string
+          max_revenue: number | null
+          name: string
+          renewable: boolean | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_share_max?: number | null
+          company_share_min?: number | null
+          contract_duration?: number | null
+          created_at?: string | null
+          description?: string | null
+          fixed_fee?: number | null
+          id?: string
+          max_revenue?: number | null
+          name: string
+          renewable?: boolean | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_share_max?: number | null
+          company_share_min?: number | null
+          contract_duration?: number | null
+          created_at?: string | null
+          description?: string | null
+          fixed_fee?: number | null
+          id?: string
+          max_revenue?: number | null
+          name?: string
+          renewable?: boolean | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

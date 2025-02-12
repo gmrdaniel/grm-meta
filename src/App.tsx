@@ -14,6 +14,7 @@ import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
 import Creators from "./pages/admin/Creators";
 import CreatorDetail from "./pages/admin/CreatorDetail";
+import Services from "./pages/admin/Services";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <CreatorDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/services"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Services />
                 </ProtectedRoute>
               }
             />
