@@ -27,6 +27,7 @@ export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
 
   useEffect(() => {
     fetchServices();
@@ -41,7 +42,6 @@ export default function Services() {
 
       if (error) throw error;
       
-      // Asegurarnos de que los datos cumplen con el tipo Service
       const typedServices = data?.map(service => ({
         ...service,
         type: service.type as 'único' | 'recurrente' | 'contrato'
@@ -75,6 +75,7 @@ export default function Services() {
       }
 
       setEditingService(null);
+      setActiveTab("list");
       fetchServices();
     } catch (error: any) {
       toast.error(error.message);
@@ -98,6 +99,11 @@ export default function Services() {
     }
   }
 
+  const handleEdit = (service: Service) => {
+    setEditingService(service);
+    setActiveTab("form");
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
@@ -107,7 +113,7 @@ export default function Services() {
           <div className="max-w-7xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Manage Services</h1>
 
-            <Tabs defaultValue="list" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="mb-6">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <List className="h-4 w-4" />
@@ -122,7 +128,7 @@ export default function Services() {
               <TabsContent value="list" className="mt-0">
                 <ServicesTable 
                   services={services} 
-                  onEdit={(service) => setEditingService(service)} 
+                  onEdit={handleEdit} 
                   onDelete={handleDelete} 
                 />
               </TabsContent>
