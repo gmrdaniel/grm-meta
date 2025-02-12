@@ -17,16 +17,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
-type UserRole = 'admin' | 'creator';
-
 interface Creator {
   id: string;
-  email?: string;
+  email: string;
   created_at: string;
-  role: UserRole;
   personal_data?: {
     instagram_username: string | null;
-  } | null;
+  };
 }
 
 export default function Creators() {
@@ -42,43 +39,18 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      // First get auth users
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-
-      // Then get profiles with personal data
-      const { data: profilesData, error: profilesError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
-          id,
-          created_at,
-          role,
+          *,
           personal_data (
             instagram_username
           )
         `)
-        .eq('role', 'creator' as UserRole);
+        .eq("role", "creator");
 
-      if (profilesError) throw profilesError;
-
-      if (!profilesData) {
-        setCreators([]);
-        return;
-      }
-
-      // Verificar que solo tenemos creators
-      const creatorProfiles = profilesData.filter(profile => profile.role === 'creator');
-
-      // Merge the data
-      const creators = creatorProfiles.map((profile) => {
-        const authUser = authData.users.find(user => user.id === profile.id);
-        return {
-          ...profile,
-          email: authUser?.email
-        };
-      });
-
-      setCreators(creators);
+      if (error) throw error;
+      setCreators(data || []);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
@@ -97,27 +69,14 @@ export default function Creators() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
 
       // Update their role to creator
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user.id);
+        .eq("id", authData.user?.id);
 
       if (updateError) throw updateError;
-
-      // Create personal_data record
-      const { error: personalDataError } = await supabase
-        .from("personal_data")
-        .insert({
-          profile_id: authData.user.id,
-        });
-
-      if (personalDataError) {
-        console.error("Error creating personal data:", personalDataError);
-        throw new Error("Error creating personal data record");
-      }
 
       toast.success("Creator added successfully!");
       setEmail("");
@@ -162,25 +121,17 @@ export default function Creators() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={3} className="text-center py-4">
-                            No creators found
+                      {creators.map((creator) => (
+                        <TableRow key={creator.id}>
+                          <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {creator.personal_data?.instagram_username || "Not set"}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(creator.created_at).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        creators.map((creator) => (
-                          <TableRow key={creator.id}>
-                            <TableCell>{creator.email || "Not set"}</TableCell>
-                            <TableCell>
-                              {creator.personal_data?.instagram_username || "Not set"}
-                            </TableCell>
-                            <TableCell>
-                              {new Date(creator.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
