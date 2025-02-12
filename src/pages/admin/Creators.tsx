@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,8 @@ import { Users, UserPlus } from "lucide-react";
 
 interface Creator {
   id: string;
-  email: string;
   created_at: string;
+  role: string;
   personal_data?: {
     first_name: string | null;
     last_name: string | null;
@@ -42,7 +43,9 @@ export default function Creators() {
       const { data, error } = await supabase
         .from("profiles")
         .select(`
-          *,
+          id,
+          created_at,
+          role,
           personal_data (
             first_name,
             last_name,
@@ -64,27 +67,26 @@ export default function Creators() {
     setLoading(true);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // 1. Crear el usuario usando la API de administración
+      const { data: { user }, error: createError } = await supabase.auth.admin.createUser({
         email,
         password,
-        options: {
-          data: {
-            role: "creator",
-          },
-        },
+        email_confirm: true,
+        user_metadata: { role: 'creator' }
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
+      if (createError) throw createError;
+      if (!user) throw new Error("No user data returned");
 
+      // 2. Actualizar el perfil con el rol de creator
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user.id);
+        .eq("id", user.id);
 
       if (profileError) throw profileError;
 
-      toast.success("Creator added successfully! Check email for verification.");
+      toast.success("Creator added successfully!");
       setEmail("");
       setPassword("");
       await fetchCreators();
