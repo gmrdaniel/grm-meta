@@ -2,7 +2,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormValues } from "../ServiceForm";
-import MDEditor from '@uiw/react-md-editor';
+import { Textarea } from "@/components/ui/textarea";
 
 interface TermsConditionsFieldProps {
   form: UseFormReturn<ServiceFormValues>;
@@ -17,14 +17,11 @@ export function TermsConditionsField({ form }: TermsConditionsFieldProps) {
         <FormItem>
           <FormLabel>Terms & Conditions</FormLabel>
           <FormControl>
-            <div data-color-mode="light">
-              <MDEditor
-                value={field.value}
-                onChange={(value) => field.onChange(value || '')}
-                height={400}
-                preview="edit"
-              />
-            </div>
+            <Textarea
+              placeholder="Enter terms and conditions here..."
+              className="min-h-[200px] font-mono text-sm"
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
