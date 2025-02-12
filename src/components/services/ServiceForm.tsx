@@ -3,25 +3,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import MDEditor from '@uiw/react-md-editor';
+import { Form } from "@/components/ui/form";
+import { BasicInfoFields } from "./form-sections/BasicInfoFields";
+import { TermsConditionsField } from "./form-sections/TermsConditionsField";
+import { ServiceTypeField } from "./form-sections/ServiceTypeField";
+import { CompanyShareFields } from "./form-sections/CompanyShareFields";
+import { FeesAndDurationFields } from "./form-sections/FeesAndDurationFields";
+import { RenewableField } from "./form-sections/RenewableField";
 
 const serviceSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -36,7 +24,7 @@ const serviceSchema = z.object({
   terms_conditions: z.string().optional(),
 });
 
-type ServiceFormValues = z.infer<typeof serviceSchema>;
+export type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 interface ServiceFormProps {
   initialData?: Partial<ServiceFormValues>;
@@ -64,175 +52,12 @@ export function ServiceForm({ initialData, onSubmit, isLoading }: ServiceFormPro
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="terms_conditions"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Terms & Conditions</FormLabel>
-              <FormControl>
-                <div data-color-mode="light">
-                  <MDEditor
-                    value={field.value}
-                    onChange={(value) => field.onChange(value || '')}
-                    height={400}
-                    preview="edit"
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="único">Único</SelectItem>
-                  <SelectItem value="recurrente">Recurrente</SelectItem>
-                  <SelectItem value="contrato">Contrato</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="company_share_min"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Min Company Share (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="company_share_max"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Company Share (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="fixed_fee"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fixed Fee ($)</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="max_revenue"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Max Revenue ($)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
-                  onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="contract_duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contract Duration (months)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field} 
-                  onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="renewable"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Renewable</FormLabel>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <BasicInfoFields form={form} />
+        <TermsConditionsField form={form} />
+        <ServiceTypeField form={form} />
+        <CompanyShareFields form={form} />
+        <FeesAndDurationFields form={form} />
+        <RenewableField form={form} />
 
         <Button type="submit" disabled={isLoading}>
           {isLoading ? "Saving..." : "Save Service"}
