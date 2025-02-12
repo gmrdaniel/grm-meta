@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ interface Creator {
   created_at: string;
   personal_data?: {
     instagram_username: string | null;
-  };
+  } | null;
 }
 
 export default function Creators() {
@@ -56,8 +57,13 @@ export default function Creators() {
 
       if (profilesError) throw profilesError;
 
+      if (!profilesData) {
+        setCreators([]);
+        return;
+      }
+
       // Merge the data
-      const creators = profilesData.map(profile => {
+      const creators = profilesData.map((profile: any) => {
         const authUser = authData.users.find(user => user.id === profile.id);
         return {
           ...profile,
@@ -136,17 +142,25 @@ export default function Creators() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.map((creator) => (
-                        <TableRow key={creator.id}>
-                          <TableCell>{creator.email}</TableCell>
-                          <TableCell>
-                            {creator.personal_data?.instagram_username || "Not set"}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(creator.created_at).toLocaleDateString()}
+                      {creators.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center py-4">
+                            No creators found
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        creators.map((creator) => (
+                          <TableRow key={creator.id}>
+                            <TableCell>{creator.email || "Not set"}</TableCell>
+                            <TableCell>
+                              {creator.personal_data?.instagram_username || "Not set"}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(creator.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
