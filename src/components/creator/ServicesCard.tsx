@@ -53,8 +53,8 @@ export function ServicesCard({
           Services
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {creatorServices.length > 0 ? (
+      <CardContent className="space-y-6">
+        {creatorServices.length > 0 && (
           <div className="space-y-4">
             {creatorServices.map((creatorService) => (
               <div key={creatorService.id} className="border p-4 rounded-lg">
@@ -100,31 +100,33 @@ export function ServicesCard({
               </div>
             ))}
           </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-gray-500">No services added yet</p>
-            <div className="flex gap-4">
-              <Select value={selectedServiceId} onValueChange={onServiceSelect}>
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Select a service" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableServices.map((service) => (
+        )}
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Add New Service</h3>
+          <div className="flex gap-4">
+            <Select value={selectedServiceId} onValueChange={onServiceSelect}>
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableServices
+                  .filter(service => !creatorServices.some(cs => cs.service.id === service.id))
+                  .map((service) => (
                     <SelectItem key={service.id} value={service.id}>
                       {service.name}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={onAddService} 
-                disabled={addingService || !selectedServiceId}
-              >
-                {addingService ? "Adding..." : "Add Service"}
-              </Button>
-            </div>
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={onAddService} 
+              disabled={addingService || !selectedServiceId}
+            >
+              {addingService ? "Adding..." : "Add Service"}
+            </Button>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
