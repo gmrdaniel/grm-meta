@@ -26,6 +26,19 @@ interface Creator {
   } | null;
 }
 
+interface Profile {
+  id: string;
+  created_at: string;
+  personal_data?: {
+    instagram_username: string | null;
+  } | null;
+}
+
+interface AuthUser {
+  id: string;
+  email: string;
+}
+
 export default function Creators() {
   const [loading, setLoading] = useState(false);
   const [creators, setCreators] = useState<Creator[]>([]);
@@ -63,8 +76,8 @@ export default function Creators() {
       }
 
       // Merge the data
-      const creators = profilesData.map((profile: any) => {
-        const authUser = authData.users.find(user => user.id === profile.id);
+      const creators = profilesData.map((profile: Profile) => {
+        const authUser = authData.users.find((user: AuthUser) => user.id === profile.id);
         return {
           ...profile,
           email: authUser?.email
