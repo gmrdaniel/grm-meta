@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { Users, UserPlus } from "lucide-react";
 
 interface Creator {
   id: string;
-  email?: string;
+  email: string;
   created_at: string;
   personal_data?: {
     instagram_username: string | null;
@@ -38,34 +39,18 @@ export default function Creators() {
 
   async function fetchCreators() {
     try {
-      // First get auth users
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-
-      // Then get profiles with personal data
-      const { data: profilesData, error: profilesError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
-          id,
-          created_at,
+          *,
           personal_data (
             instagram_username
           )
         `)
         .eq("role", "creator");
 
-      if (profilesError) throw profilesError;
-
-      // Merge the data
-      const creators = profilesData.map(profile => {
-        const authUser = authData.users.find(user => user.id === profile.id);
-        return {
-          ...profile,
-          email: authUser?.email
-        };
-      });
-
-      setCreators(creators);
+      if (error) throw error;
+      setCreators(data || []);
     } catch (error: any) {
       toast.error("Error fetching creators");
       console.error("Error:", error.message);
