@@ -20,6 +20,7 @@ interface Service {
   max_revenue: number | null;
   contract_duration: number | null;
   renewable: boolean;
+  terms_conditions: string | null;
 }
 
 export default function Services() {
