@@ -39,7 +39,14 @@ export default function Services() {
         .order("name");
 
       if (error) throw error;
-      setServices(data || []);
+      
+      // Asegurarnos de que los datos cumplen con el tipo Service
+      const typedServices = data?.map(service => ({
+        ...service,
+        type: service.type as 'único' | 'recurrente' | 'contrato'
+      })) || [];
+      
+      setServices(typedServices);
     } catch (error: any) {
       toast.error("Error fetching services");
       console.error("Error:", error.message);

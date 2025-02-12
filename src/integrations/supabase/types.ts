@@ -168,6 +168,76 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_services: {
+        Row: {
+          company_share: number | null
+          contract_id: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          monthly_fee: number | null
+          profile_id: string | null
+          service_id: string | null
+          start_date: string | null
+          status: string
+          terms_accepted: boolean | null
+          total_revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_share?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          monthly_fee?: number | null
+          profile_id?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          status: string
+          terms_accepted?: boolean | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_share?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          monthly_fee?: number | null
+          profile_id?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          status?: string
+          terms_accepted?: boolean | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_services_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personal_data: {
         Row: {
           birth_date: string | null
