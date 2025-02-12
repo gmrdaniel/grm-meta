@@ -81,6 +81,60 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          contract_status: string
+          created_at: string | null
+          duration: number | null
+          end_date: string | null
+          id: string
+          profile_id: string | null
+          renewable: boolean | null
+          service_id: string | null
+          start_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contract_status: string
+          created_at?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          profile_id?: string | null
+          renewable?: boolean | null
+          service_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contract_status?: string
+          created_at?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          profile_id?: string | null
+          renewable?: boolean | null
+          service_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country: {
         Row: {
           active: boolean
