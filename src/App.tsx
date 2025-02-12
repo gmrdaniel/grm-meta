@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
+import PendingServices from "./pages/creator/PendingServices";
 import Creators from "./pages/admin/Creators";
 import CreatorDetail from "./pages/admin/CreatorDetail";
 import Services from "./pages/admin/Services";
@@ -85,6 +86,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["creator"]}>
                   <CreatorBankDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/pending-services"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <PendingServices />
                 </ProtectedRoute>
               }
             />
