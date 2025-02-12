@@ -17,10 +17,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, UserPlus } from "lucide-react";
 
+type UserRole = 'admin' | 'creator';
+
 interface Creator {
   id: string;
   email?: string;
   created_at: string;
+  role: UserRole;
   personal_data?: {
     instagram_username: string | null;
   } | null;
@@ -49,11 +52,12 @@ export default function Creators() {
         .select(`
           id,
           created_at,
+          role,
           personal_data (
             instagram_username
           )
         `)
-        .eq("role", "creator");
+        .eq('role', 'creator' as UserRole);
 
       if (profilesError) throw profilesError;
 
@@ -62,8 +66,11 @@ export default function Creators() {
         return;
       }
 
+      // Verificar que solo tenemos creators
+      const creatorProfiles = profilesData.filter(profile => profile.role === 'creator');
+
       // Merge the data
-      const creators = profilesData.map((profile) => {
+      const creators = creatorProfiles.map((profile) => {
         const authUser = authData.users.find(user => user.id === profile.id);
         return {
           ...profile,
