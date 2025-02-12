@@ -11,6 +11,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 
+interface Service {
+  id: string;
+  name: string;
+}
+
+interface CreatorService {
+  id: string;
+  services: Service;
+}
+
 interface PendingService {
   id: string;
   name: string;
@@ -34,7 +44,7 @@ export function PendingServicesDialog() {
       const { data, error } = await supabase
         .from("creator_services")
         .select(`
-          id as creator_service_id,
+          id,
           services (
             id,
             name
@@ -47,10 +57,10 @@ export function PendingServicesDialog() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const formattedServices = data.map(item => ({
+        const formattedServices = data.map((item: CreatorService) => ({
           id: item.services.id,
           name: item.services.name,
-          creator_service_id: item.creator_service_id
+          creator_service_id: item.id
         }));
         setPendingServices(formattedServices);
         setIsOpen(true);
