@@ -15,7 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, UserPlus } from "lucide-react";
+import { Users, UserPlus, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Creator {
   id: string;
@@ -127,6 +128,7 @@ export default function Creators() {
                         <TableHead>Last Name</TableHead>
                         <TableHead>Instagram Username</TableHead>
                         <TableHead>Created At</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -143,6 +145,13 @@ export default function Creators() {
                           </TableCell>
                           <TableCell>
                             {new Date(creator.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <Link to={`/admin/creators/${creator.id}`}>
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
                           </TableCell>
                         </TableRow>
                       ))}
