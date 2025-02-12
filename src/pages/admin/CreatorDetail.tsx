@@ -1,20 +1,16 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CreditCard, User, Package } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { PersonalInfoCard } from "@/components/creator/PersonalInfoCard";
+import { BankDetailsCard } from "@/components/creator/BankDetailsCard";
+import { ServicesCard } from "@/components/creator/ServicesCard";
 
 interface CreatorDetail {
   id: string;
@@ -145,7 +141,16 @@ export default function CreatorDetail() {
         .eq("profile_id", id);
 
       if (error) throw error;
-      setCreatorServices(data || []);
+      
+      const typedServices = data?.map(service => ({
+        ...service,
+        service: {
+          ...service.service,
+          type: service.service.type as 'único' | 'recurrente' | 'contrato'
+        }
+      })) || [];
+      
+      setCreatorServices(typedServices);
     } catch (error: any) {
       toast.error("Error fetching creator services");
       console.error("Error:", error.message);
@@ -160,7 +165,13 @@ export default function CreatorDetail() {
         .order("name");
 
       if (error) throw error;
-      setAvailableServices(data || []);
+      
+      const typedServices = data?.map(service => ({
+        ...service,
+        type: service.type as 'único' | 'recurrente' | 'contrato'
+      })) || [];
+      
+      setAvailableServices(typedServices);
     } catch (error: any) {
       toast.error("Error fetching available services");
       console.error("Error:", error.message);
@@ -220,217 +231,16 @@ export default function CreatorDetail() {
             </div>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Personal Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <dt className="font-medium text-gray-500">First Name</dt>
-                      <dd>{creator.personal_data?.first_name || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Last Name</dt>
-                      <dd>{creator.personal_data?.last_name || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Instagram Username</dt>
-                      <dd>{creator.personal_data?.instagram_username || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Birth Date</dt>
-                      <dd>{creator.personal_data?.birth_date || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Country</dt>
-                      <dd>{creator.personal_data?.country_of_residence || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">State</dt>
-                      <dd>{creator.personal_data?.state_of_residence || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Phone Number</dt>
-                      <dd>{creator.personal_data?.phone_number || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Gender</dt>
-                      <dd>{creator.personal_data?.gender || "Not set"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium text-gray-500">Category</dt>
-                      <dd>{creator.personal_data?.category || "Not set"}</dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Bank Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {creator.bank_details ? (
-                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <dt className="font-medium text-gray-500">Payment Method</dt>
-                        <dd className="capitalize">{creator.bank_details.payment_method.replace('_', ' ')}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-gray-500">Beneficiary Name</dt>
-                        <dd>{creator.bank_details.beneficiary_name}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-gray-500">Country</dt>
-                        <dd>{creator.bank_details.country}</dd>
-                      </div>
-                      {creator.bank_details.payment_method === "bank_transfer" && (
-                        <>
-                          {creator.bank_details.bank_account_number && (
-                            <div>
-                              <dt className="font-medium text-gray-500">Account Number</dt>
-                              <dd>{creator.bank_details.bank_account_number}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.routing_number && (
-                            <div>
-                              <dt className="font-medium text-gray-500">Routing Number</dt>
-                              <dd>{creator.bank_details.routing_number}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.iban && (
-                            <div>
-                              <dt className="font-medium text-gray-500">IBAN</dt>
-                              <dd>{creator.bank_details.iban}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.swift_bic && (
-                            <div>
-                              <dt className="font-medium text-gray-500">SWIFT/BIC</dt>
-                              <dd>{creator.bank_details.swift_bic}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.clabe && (
-                            <div>
-                              <dt className="font-medium text-gray-500">CLABE</dt>
-                              <dd>{creator.bank_details.clabe}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.bank_name && (
-                            <div>
-                              <dt className="font-medium text-gray-500">Bank Name</dt>
-                              <dd>{creator.bank_details.bank_name}</dd>
-                            </div>
-                          )}
-                          {creator.bank_details.bank_address && (
-                            <div>
-                              <dt className="font-medium text-gray-500">Bank Address</dt>
-                              <dd>{creator.bank_details.bank_address}</dd>
-                            </div>
-                          )}
-                        </>
-                      )}
-                      {creator.bank_details.payment_method === "paypal" && (
-                        <div>
-                          <dt className="font-medium text-gray-500">PayPal Email</dt>
-                          <dd>{creator.bank_details.paypal_email}</dd>
-                        </div>
-                      )}
-                    </dl>
-                  ) : (
-                    <p className="text-gray-500">No bank details provided</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Services
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {creatorServices.length > 0 ? (
-                    <div className="space-y-4">
-                      {creatorServices.map((creatorService) => (
-                        <div key={creatorService.id} className="border p-4 rounded-lg">
-                          <h3 className="font-medium text-lg mb-2">{creatorService.service.name}</h3>
-                          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <dt className="font-medium text-gray-500">Type</dt>
-                              <dd className="capitalize">{creatorService.service.type}</dd>
-                            </div>
-                            <div>
-                              <dt className="font-medium text-gray-500">Status</dt>
-                              <dd className="capitalize">{creatorService.status}</dd>
-                            </div>
-                            <div>
-                              <dt className="font-medium text-gray-500">Start Date</dt>
-                              <dd>{new Date(creatorService.start_date).toLocaleDateString()}</dd>
-                            </div>
-                            {creatorService.end_date && (
-                              <div>
-                                <dt className="font-medium text-gray-500">End Date</dt>
-                                <dd>{new Date(creatorService.end_date).toLocaleDateString()}</dd>
-                              </div>
-                            )}
-                            {creatorService.monthly_fee && (
-                              <div>
-                                <dt className="font-medium text-gray-500">Monthly Fee</dt>
-                                <dd>${creatorService.monthly_fee}</dd>
-                              </div>
-                            )}
-                            {creatorService.company_share && (
-                              <div>
-                                <dt className="font-medium text-gray-500">Company Share</dt>
-                                <dd>{creatorService.company_share}%</dd>
-                              </div>
-                            )}
-                            {creatorService.total_revenue && (
-                              <div>
-                                <dt className="font-medium text-gray-500">Total Revenue</dt>
-                                <dd>${creatorService.total_revenue}</dd>
-                              </div>
-                            )}
-                          </dl>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="text-gray-500">No services added yet</p>
-                      <div className="flex gap-4">
-                        <Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
-                          <SelectTrigger className="w-[300px]">
-                            <SelectValue placeholder="Select a service" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableServices.map((service) => (
-                              <SelectItem key={service.id} value={service.id}>
-                                {service.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button 
-                          onClick={handleAddService} 
-                          disabled={addingService || !selectedServiceId}
-                        >
-                          {addingService ? "Adding..." : "Add Service"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <PersonalInfoCard personalData={creator.personal_data} />
+              <BankDetailsCard bankDetails={creator.bank_details} />
+              <ServicesCard
+                creatorServices={creatorServices}
+                availableServices={availableServices}
+                selectedServiceId={selectedServiceId}
+                onServiceSelect={setSelectedServiceId}
+                onAddService={handleAddService}
+                addingService={addingService}
+              />
             </div>
           </div>
         </main>
