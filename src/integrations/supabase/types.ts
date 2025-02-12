@@ -183,6 +183,7 @@ export type Database = {
           start_date: string | null
           status: string
           terms_accepted: boolean | null
+          terms_conditions: string | null
           total_revenue: number | null
           updated_at: string | null
         }
@@ -200,6 +201,7 @@ export type Database = {
           start_date?: string | null
           status: string
           terms_accepted?: boolean | null
+          terms_conditions?: string | null
           total_revenue?: number | null
           updated_at?: string | null
         }
@@ -217,6 +219,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           terms_accepted?: boolean | null
+          terms_conditions?: string | null
           total_revenue?: number | null
           updated_at?: string | null
         }

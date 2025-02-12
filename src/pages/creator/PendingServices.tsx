@@ -9,10 +9,12 @@ import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import MDEditor from '@uiw/react-md-editor';
 
 interface Service {
   id: string;
   name: string;
+  terms_conditions: string | null;
 }
 
 interface CreatorService {
@@ -24,6 +26,7 @@ interface PendingService {
   id: string;
   name: string;
   creator_service_id: string;
+  terms_conditions: string | null;
 }
 
 export default function PendingServices() {
@@ -46,7 +49,8 @@ export default function PendingServices() {
           id,
           services (
             id,
-            name
+            name,
+            terms_conditions
           )
         `)
         .eq("profile_id", user?.id)
@@ -59,7 +63,8 @@ export default function PendingServices() {
         const formattedServices = data.map((item: CreatorService) => ({
           id: item.services.id,
           name: item.services.name,
-          creator_service_id: item.id
+          creator_service_id: item.id,
+          terms_conditions: item.services.terms_conditions
         }));
         setPendingServices(formattedServices);
       }
@@ -69,14 +74,15 @@ export default function PendingServices() {
     }
   }
 
-  async function acceptTerms(creatorServiceId: string, serviceName: string) {
+  async function acceptTerms(creatorServiceId: string, serviceName: string, terms_conditions: string | null) {
     setLoading(true);
     try {
       const { error } = await supabase
         .from("creator_services")
         .update({
           terms_accepted: true,
-          status: "activo"
+          status: "activo",
+          terms_conditions: terms_conditions // Guardamos una copia de los términos aceptados
         })
         .eq("id", creatorServiceId);
 
@@ -115,25 +121,42 @@ export default function PendingServices() {
                 {pendingServices.length === 0 ? (
                   <p className="text-gray-500">No pending services</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {pendingServices.map((service) => (
                       <div
                         key={service.creator_service_id}
-                        className="p-4 border rounded-lg bg-gray-50"
+                        className="p-6 border rounded-lg bg-gray-50"
                       >
-                        <div className="flex justify-between items-center">
+                        <div className="space-y-4">
                           <div>
-                            <h4 className="font-medium text-gray-900">{service.name}</h4>
-                            <p className="text-sm text-gray-500">
+                            <h4 className="text-lg font-medium text-gray-900">{service.name}</h4>
+                            <p className="text-sm text-gray-500 mb-4">
                               Please review and accept the terms for this service
                             </p>
                           </div>
-                          <Button
-                            onClick={() => acceptTerms(service.creator_service_id, service.name)}
-                            disabled={loading}
-                          >
-                            Accept
-                          </Button>
+                          
+                          <div className="bg-white p-4 rounded-md">
+                            <h5 className="font-medium text-gray-700 mb-2">Terms & Conditions</h5>
+                            {service.terms_conditions ? (
+                              <div data-color-mode="light" className="mb-4">
+                                <MDEditor.Markdown 
+                                  source={service.terms_conditions} 
+                                  style={{ whiteSpace: 'pre-wrap' }}
+                                />
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 italic">No terms and conditions provided</p>
+                            )}
+                          </div>
+
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={() => acceptTerms(service.creator_service_id, service.name, service.terms_conditions)}
+                              disabled={loading}
+                            >
+                              Accept Terms & Conditions
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
