@@ -171,9 +171,11 @@ export type Database = {
       creator_services: {
         Row: {
           company_share: number | null
+          contract_duration: number | null
           contract_id: string | null
           created_at: string | null
           end_date: string | null
+          fixed_fee: number | null
           id: string
           monthly_fee: number | null
           profile_id: string | null
@@ -186,9 +188,11 @@ export type Database = {
         }
         Insert: {
           company_share?: number | null
+          contract_duration?: number | null
           contract_id?: string | null
           created_at?: string | null
           end_date?: string | null
+          fixed_fee?: number | null
           id?: string
           monthly_fee?: number | null
           profile_id?: string | null
@@ -201,9 +205,11 @@ export type Database = {
         }
         Update: {
           company_share?: number | null
+          contract_duration?: number | null
           contract_id?: string | null
           created_at?: string | null
           end_date?: string | null
+          fixed_fee?: number | null
           id?: string
           monthly_fee?: number | null
           profile_id?: string | null

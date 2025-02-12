@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +56,8 @@ interface CreatorService {
   monthly_fee: number | null;
   company_share: number | null;
   total_revenue: number | null;
+  fixed_fee: number | null;
+  contract_duration: number | null;
 }
 
 export default function CreatorDetail() {
@@ -186,14 +187,21 @@ export default function CreatorDetail() {
 
     setAddingService(true);
     try {
-      // Iniciamos una transacción para asegurar que ambas operaciones se completen
+      const selectedService = availableServices.find(service => service.id === selectedServiceId);
+      
+      if (!selectedService) {
+        throw new Error("Selected service not found");
+      }
+
       const { data: serviceData, error: serviceError } = await supabase
         .from("creator_services")
         .insert({
           profile_id: id,
           service_id: selectedServiceId,
           status: 'pendiente',
-          terms_accepted: false
+          terms_accepted: false,
+          fixed_fee: selectedService.fixed_fee,
+          contract_duration: selectedService.contract_duration
         })
         .select(`
           id,
@@ -205,7 +213,6 @@ export default function CreatorDetail() {
 
       if (serviceError) throw serviceError;
 
-      // Crear la notificación para el creador
       const { error: notificationError } = await supabase
         .from("notifications")
         .insert({
