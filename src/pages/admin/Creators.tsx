@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ export default function Creators() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Fetch creators on component mount
   useEffect(() => {
     fetchCreators();
   }, []);
@@ -66,26 +64,30 @@ export default function Creators() {
     setLoading(true);
 
     try {
-      // Sign up the creator
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            role: "creator",
+          },
+        },
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
 
-      // Update their role to creator
-      const { error: updateError } = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({ role: "creator" })
-        .eq("id", authData.user?.id);
+        .eq("id", authData.user.id);
 
-      if (updateError) throw updateError;
+      if (profileError) throw profileError;
 
-      toast.success("Creator added successfully!");
+      toast.success("Creator added successfully! Check email for verification.");
       setEmail("");
       setPassword("");
-      fetchCreators(); // Refresh the list
+      await fetchCreators();
     } catch (error: any) {
       toast.error(error.message);
     } finally {
