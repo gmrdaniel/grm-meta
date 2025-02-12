@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,20 +22,7 @@ interface Creator {
   created_at: string;
   personal_data?: {
     instagram_username: string | null;
-  } | null;
-}
-
-interface Profile {
-  id: string;
-  created_at: string;
-  personal_data?: {
-    instagram_username: string | null;
-  } | null;
-}
-
-interface AuthUser {
-  id: string;
-  email: string;
+  };
 }
 
 export default function Creators() {
@@ -70,14 +56,9 @@ export default function Creators() {
 
       if (profilesError) throw profilesError;
 
-      if (!profilesData) {
-        setCreators([]);
-        return;
-      }
-
       // Merge the data
-      const creators = profilesData.map((profile: Profile) => {
-        const authUser = authData.users.find((user: AuthUser) => user.id === profile.id);
+      const creators = profilesData.map(profile => {
+        const authUser = authData.users.find(user => user.id === profile.id);
         return {
           ...profile,
           email: authUser?.email
@@ -155,25 +136,17 @@ export default function Creators() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {creators.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={3} className="text-center py-4">
-                            No creators found
+                      {creators.map((creator) => (
+                        <TableRow key={creator.id}>
+                          <TableCell>{creator.email}</TableCell>
+                          <TableCell>
+                            {creator.personal_data?.instagram_username || "Not set"}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(creator.created_at).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        creators.map((creator) => (
-                          <TableRow key={creator.id}>
-                            <TableCell>{creator.email || "Not set"}</TableCell>
-                            <TableCell>
-                              {creator.personal_data?.instagram_username || "Not set"}
-                            </TableCell>
-                            <TableCell>
-                              {new Date(creator.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
