@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +46,8 @@ interface Service {
   name: string;
   type: 'único' | 'recurrente' | 'contrato';
   description: string | null;
+  fixed_fee: number;
+  contract_duration: number | null;
 }
 
 interface CreatorService {
@@ -132,11 +135,15 @@ export default function CreatorDetail() {
           monthly_fee,
           company_share,
           total_revenue,
+          fixed_fee,
+          contract_duration,
           service:services (
             id,
             name,
             type,
-            description
+            description,
+            fixed_fee,
+            contract_duration
           )
         `)
         .eq("profile_id", id);
@@ -162,7 +169,7 @@ export default function CreatorDetail() {
     try {
       const { data, error } = await supabase
         .from("services")
-        .select("id, name, type, description")
+        .select("id, name, type, description, fixed_fee, contract_duration")
         .order("name");
 
       if (error) throw error;
