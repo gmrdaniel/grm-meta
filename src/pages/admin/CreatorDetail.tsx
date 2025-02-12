@@ -186,21 +186,43 @@ export default function CreatorDetail() {
 
     setAddingService(true);
     try {
-      const { error } = await supabase
+      // Iniciamos una transacción para asegurar que ambas operaciones se completen
+      const { data: serviceData, error: serviceError } = await supabase
         .from("creator_services")
         .insert({
           profile_id: id,
           service_id: selectedServiceId,
-          status: 'pendiente'
+          status: 'pendiente',
+          terms_accepted: false
+        })
+        .select(`
+          id,
+          service:services (
+            name
+          )
+        `)
+        .single();
+
+      if (serviceError) throw serviceError;
+
+      // Crear la notificación para el creador
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert({
+          profile_id: id,
+          type: "new_service",
+          message: `Se ha asignado un nuevo servicio: ${serviceData.service.name}. Por favor, revisa los términos y condiciones.`,
+          status: "unread"
         });
 
-      if (error) throw error;
+      if (notificationError) throw notificationError;
       
       toast.success("Service added successfully");
       fetchCreatorServices();
       setSelectedServiceId("");
     } catch (error: any) {
       toast.error(error.message);
+      console.error("Error:", error);
     } finally {
       setAddingService(false);
     }
