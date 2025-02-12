@@ -2,13 +2,29 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormValues } from "../ServiceForm";
-import { Textarea } from "@/components/ui/textarea";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface TermsConditionsFieldProps {
   form: UseFormReturn<ServiceFormValues>;
 }
 
 export function TermsConditionsField({ form }: TermsConditionsFieldProps) {
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline'],
+      ['list', 'bullet'],
+      ['clean']
+    ]
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline',
+    'list', 'bullet'
+  ];
+
   return (
     <FormField
       control={form.control}
@@ -17,11 +33,16 @@ export function TermsConditionsField({ form }: TermsConditionsFieldProps) {
         <FormItem>
           <FormLabel>Terms & Conditions</FormLabel>
           <FormControl>
-            <Textarea
-              placeholder="Enter terms and conditions here..."
-              className="min-h-[200px] font-mono text-sm"
-              {...field}
-            />
+            <div className="h-[300px] bg-white rounded-md border">
+              <ReactQuill
+                theme="snow"
+                value={field.value || ''}
+                onChange={field.onChange}
+                modules={modules}
+                formats={formats}
+                className="h-[250px]"
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>
