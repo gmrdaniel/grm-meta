@@ -1,14 +1,20 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CreditCard, User } from "lucide-react";
+import { ArrowLeft, CreditCard, User, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreatorDetail {
   id: string;
@@ -39,13 +45,37 @@ interface CreatorDetail {
   };
 }
 
+interface Service {
+  id: string;
+  name: string;
+  type: 'único' | 'recurrente' | 'contrato';
+  description: string | null;
+}
+
+interface CreatorService {
+  id: string;
+  service: Service;
+  status: string;
+  start_date: string;
+  end_date: string | null;
+  monthly_fee: number | null;
+  company_share: number | null;
+  total_revenue: number | null;
+}
+
 export default function CreatorDetail() {
   const { id } = useParams<{ id: string }>();
   const [creator, setCreator] = useState<CreatorDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatorServices, setCreatorServices] = useState<CreatorService[]>([]);
+  const [availableServices, setAvailableServices] = useState<Service[]>([]);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [addingService, setAddingService] = useState(false);
 
   useEffect(() => {
     fetchCreatorDetail();
+    fetchCreatorServices();
+    fetchAvailableServices();
   }, [id]);
 
   async function fetchCreatorDetail() {
@@ -90,6 +120,78 @@ export default function CreatorDetail() {
       console.error("Error:", error.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchCreatorServices() {
+    try {
+      const { data, error } = await supabase
+        .from("creator_services")
+        .select(`
+          id,
+          status,
+          start_date,
+          end_date,
+          monthly_fee,
+          company_share,
+          total_revenue,
+          service:services (
+            id,
+            name,
+            type,
+            description
+          )
+        `)
+        .eq("profile_id", id);
+
+      if (error) throw error;
+      setCreatorServices(data || []);
+    } catch (error: any) {
+      toast.error("Error fetching creator services");
+      console.error("Error:", error.message);
+    }
+  }
+
+  async function fetchAvailableServices() {
+    try {
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, name, type, description")
+        .order("name");
+
+      if (error) throw error;
+      setAvailableServices(data || []);
+    } catch (error: any) {
+      toast.error("Error fetching available services");
+      console.error("Error:", error.message);
+    }
+  }
+
+  async function handleAddService() {
+    if (!selectedServiceId) {
+      toast.error("Please select a service");
+      return;
+    }
+
+    setAddingService(true);
+    try {
+      const { error } = await supabase
+        .from("creator_services")
+        .insert({
+          profile_id: id,
+          service_id: selectedServiceId,
+          status: 'pendiente'
+        });
+
+      if (error) throw error;
+      
+      toast.success("Service added successfully");
+      fetchCreatorServices();
+      setSelectedServiceId("");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setAddingService(false);
     }
   }
 
@@ -244,6 +346,88 @@ export default function CreatorDetail() {
                     </dl>
                   ) : (
                     <p className="text-gray-500">No bank details provided</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Services
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {creatorServices.length > 0 ? (
+                    <div className="space-y-4">
+                      {creatorServices.map((creatorService) => (
+                        <div key={creatorService.id} className="border p-4 rounded-lg">
+                          <h3 className="font-medium text-lg mb-2">{creatorService.service.name}</h3>
+                          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <dt className="font-medium text-gray-500">Type</dt>
+                              <dd className="capitalize">{creatorService.service.type}</dd>
+                            </div>
+                            <div>
+                              <dt className="font-medium text-gray-500">Status</dt>
+                              <dd className="capitalize">{creatorService.status}</dd>
+                            </div>
+                            <div>
+                              <dt className="font-medium text-gray-500">Start Date</dt>
+                              <dd>{new Date(creatorService.start_date).toLocaleDateString()}</dd>
+                            </div>
+                            {creatorService.end_date && (
+                              <div>
+                                <dt className="font-medium text-gray-500">End Date</dt>
+                                <dd>{new Date(creatorService.end_date).toLocaleDateString()}</dd>
+                              </div>
+                            )}
+                            {creatorService.monthly_fee && (
+                              <div>
+                                <dt className="font-medium text-gray-500">Monthly Fee</dt>
+                                <dd>${creatorService.monthly_fee}</dd>
+                              </div>
+                            )}
+                            {creatorService.company_share && (
+                              <div>
+                                <dt className="font-medium text-gray-500">Company Share</dt>
+                                <dd>{creatorService.company_share}%</dd>
+                              </div>
+                            )}
+                            {creatorService.total_revenue && (
+                              <div>
+                                <dt className="font-medium text-gray-500">Total Revenue</dt>
+                                <dd>${creatorService.total_revenue}</dd>
+                              </div>
+                            )}
+                          </dl>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-gray-500">No services added yet</p>
+                      <div className="flex gap-4">
+                        <Select value={selectedServiceId} onValueChange={setSelectedServiceId}>
+                          <SelectTrigger className="w-[300px]">
+                            <SelectValue placeholder="Select a service" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableServices.map((service) => (
+                              <SelectItem key={service.id} value={service.id}>
+                                {service.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          onClick={handleAddService} 
+                          disabled={addingService || !selectedServiceId}
+                        >
+                          {addingService ? "Adding..." : "Add Service"}
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
