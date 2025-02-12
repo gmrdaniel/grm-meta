@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { StatsCard } from "@/components/StatsCard";
 import { NotificationsCard } from "@/components/creator/NotificationsCard";
+import { PendingServicesDialog } from "@/components/creator/PendingServicesDialog";
 import { Image, Star, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ export default function CreatorDashboard() {
           </div>
         </main>
       </div>
+      <PendingServicesDialog />
     </div>
   );
 }
