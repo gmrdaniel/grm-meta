@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -183,15 +182,6 @@ export default function PendingServices() {
                         <div className="space-y-3">
                           <div>
                             <h4 className="text-base font-medium text-gray-900">{service.name}</h4>
-                            {service.terms_accepted ? (
-                              <p className="text-xs text-green-600">
-                                Terms accepted on {format(new Date(service.updated_at), 'PPP')}
-                              </p>
-                            ) : (
-                              <p className="text-xs text-gray-500">
-                                Please review and accept the terms for this service
-                              </p>
-                            )}
                           </div>
                           
                           <div className="bg-white p-3 rounded-md">
@@ -206,16 +196,25 @@ export default function PendingServices() {
                             )}
                           </div>
 
-                          {!service.terms_accepted && (
-                            <div className="flex justify-end">
-                              <Button
-                                size="sm"
-                                onClick={() => acceptTerms(service.creator_service_id, service.name, service.terms_conditions)}
-                                disabled={loading}
-                              >
-                                Accept Terms & Conditions
-                              </Button>
-                            </div>
+                          {!service.terms_accepted ? (
+                            <>
+                              <p className="text-[0.7rem] text-gray-500">
+                                Please review and accept the terms for this service
+                              </p>
+                              <div className="flex justify-end">
+                                <Button
+                                  size="sm"
+                                  onClick={() => acceptTerms(service.creator_service_id, service.name, service.terms_conditions)}
+                                  disabled={loading}
+                                >
+                                  Accept Terms & Conditions
+                                </Button>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-xs text-green-600">
+                              Terms accepted on {format(new Date(service.updated_at), 'PPP')}
+                            </p>
                           )}
                         </div>
                       </div>
