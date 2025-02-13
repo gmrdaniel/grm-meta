@@ -18,6 +18,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Mail,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ interface InvitationData {
 export function InvitationsTable() {
   const [page, setPage] = useState(1);
   const [isResending, setIsResending] = useState<string | null>(null);
+  const [isCopying, setIsCopying] = useState<string | null>(null);
   const pageSize = 10;
 
   const { data, isLoading } = useQuery({
@@ -95,6 +97,20 @@ export function InvitationsTable() {
     }
   };
 
+  const handleCopyUrl = async (invitation: InvitationData) => {
+    setIsCopying(invitation.id);
+    try {
+      const inviteUrl = `${window.location.origin}/auth?invitation=${invitation.token}`;
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.success("Invitation URL copied to clipboard");
+    } catch (error: any) {
+      console.error("Error copying URL:", error);
+      toast.error("Failed to copy URL to clipboard");
+    } finally {
+      setIsCopying(null);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -132,16 +148,28 @@ export function InvitationsTable() {
                   {format(new Date(invitation.created_at), "dd/MM/yyyy HH:mm")}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleResendEmail(invitation)}
-                    disabled={invitation.status === "accepted" || isResending === invitation.id}
-                    className="flex items-center gap-2"
-                  >
-                    <Mail className="h-4 w-4" />
-                    {isResending === invitation.id ? "Sending..." : "Resend"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleResendEmail(invitation)}
+                      disabled={invitation.status === "accepted" || isResending === invitation.id}
+                      className="flex items-center gap-2"
+                    >
+                      <Mail className="h-4 w-4" />
+                      {isResending === invitation.id ? "Sending..." : "Resend"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyUrl(invitation)}
+                      disabled={isCopying === invitation.id}
+                      className="flex items-center gap-2"
+                    >
+                      <Copy className="h-4 w-4" />
+                      {isCopying === invitation.id ? "Copying..." : "Copy URL"}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
