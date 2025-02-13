@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Package, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,12 +36,6 @@ export function Sidebar() {
       label: "Datos Bancarios",
       shortLabel: "Banco",
       to: "/creator/bankDetail",
-    },
-    {
-      icon: <Package size={24} />,
-      label: "Mis Servicios",
-      shortLabel: "Servicios",
-      to: "/creator/services",
     },
     {
       icon: <Inbox size={24} />,
