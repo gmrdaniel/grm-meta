@@ -166,10 +166,7 @@ export default function PendingServices() {
             )}
             
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Services & Terms</CardTitle>
-              </CardHeader>
-              <CardContent>
+                           
                 {pendingServices.length === 0 ? (
                   <p className="text-sm text-gray-500">No services found</p>
                 ) : (
@@ -221,7 +218,7 @@ export default function PendingServices() {
                     ))}
                   </div>
                 )}
-              </CardContent>
+              
             </Card>
           </div>
         </main>
