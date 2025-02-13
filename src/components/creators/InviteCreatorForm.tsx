@@ -97,71 +97,76 @@ export function InviteCreatorForm({ onInviteSent }: InviteCreatorFormProps) {
   }
 
   return (
-    <div className="w-full">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="example@email.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="service_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Service</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <div className="space-y-8">
+      <div className="p-6 bg-white rounded-lg border">
+        <h2 className="text-lg font-semibold mb-4">Send New Invitation</h2>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a service" />
-                    </SelectTrigger>
+                    <Input placeholder="example@email.com" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {services?.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit" disabled={isSubmitting || isServicesLoading}>
-            {isSubmitting
-              ? "Submitting..."
-              : isServicesLoading
-              ? "Loading services..."
-              : "Invite Creator"}
-          </Button>
-        </form>
-      </Form>
+            <FormField
+              control={form.control}
+              name="service_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Service</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a service" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {services?.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-      {invitationUrl && (
-        <div className="mt-4 p-4 rounded-md bg-gray-100">
-          <p className="text-sm text-gray-500">
-            Invitation URL:
-          </p>
-          <Input
-            type="text"
-            value={invitationUrl}
-            readOnly
-            className="mt-2"
-          />
+            <Button type="submit" disabled={isSubmitting || isServicesLoading}>
+              {isSubmitting
+                ? "Submitting..."
+                : isServicesLoading
+                ? "Loading services..."
+                : "Invite Creator"}
+            </Button>
+          </form>
+        </Form>
+
+        {invitationUrl && (
+          <div className="mt-4 p-4 rounded-md bg-gray-100">
+            <p className="text-sm text-gray-500">Invitation URL:</p>
+            <Input type="text" value={invitationUrl} readOnly className="mt-2" />
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg border">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-semibold">Sent Invitations</h2>
         </div>
-      )}
+        <div className="p-6">
+          <InvitationsTable />
+        </div>
+      </div>
     </div>
   );
 }
