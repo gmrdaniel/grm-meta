@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { StatsCard } from "@/components/StatsCard";
-import { NotificationsCard } from "@/components/creator/NotificationsCard";
-import { PersonalInfoCard } from "@/components/creator/PersonalInfoCard";
 import { Button } from "@/components/ui/button";
 import { Image, Star, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,31 +16,13 @@ export default function CreatorDashboard() {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [personalData, setPersonalData] = useState(null);
   const [hasPendingServices, setHasPendingServices] = useState(false);
 
   useEffect(() => {
     if (user) {
-      loadPersonalData();
       checkPendingServices();
     }
   }, [user]);
-
-  async function loadPersonalData() {
-    try {
-      const { data, error } = await supabase
-        .from("personal_data")
-        .select("*")
-        .eq("profile_id", user?.id)
-        .single();
-
-      if (error) throw error;
-      setPersonalData(data);
-    } catch (error: any) {
-      console.error("Error loading personal data:", error);
-      toast.error("Error loading personal data");
-    }
-  }
 
   async function checkPendingServices() {
     try {
@@ -81,10 +61,6 @@ export default function CreatorDashboard() {
                 </Button>
               )}
             </div>
-            
-            <NotificationsCard />
-            
-            <PersonalInfoCard personalData={personalData} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
               <StatsCard
