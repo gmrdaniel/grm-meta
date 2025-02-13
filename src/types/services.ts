@@ -10,6 +10,8 @@ export interface CreatorService {
   services: Service;
   updated_at: string;
   terms_accepted: boolean;
+  terms_conditions: string | null;
+  status: string;
 }
 
 export interface PendingService {
@@ -19,4 +21,5 @@ export interface PendingService {
   terms_conditions: string | null;
   terms_accepted: boolean;
   updated_at: string;
+  status: string;
 }

@@ -10,10 +10,11 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useParams, useNavigate } from "react-router-dom";
 import { PendingServiceCard } from "@/components/services/PendingServiceCard";
+import { SignedServiceCard } from "@/components/services/SignedServiceCard";
 import type { CreatorService, PendingService } from "@/types/services";
 
 export default function PendingServices() {
-  const [pendingServices, setPendingServices] = useState<PendingService[]>([]);
+  const [services, setServices] = useState<PendingService[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const isMobile = useIsMobile();
@@ -22,11 +23,11 @@ export default function PendingServices() {
 
   useEffect(() => {
     if (user) {
-      checkPendingServices();
+      fetchServices();
     }
   }, [user, id]);
 
-  async function checkPendingServices() {
+  async function fetchServices() {
     try {
       const query = supabase
         .from("creator_services")
@@ -38,10 +39,11 @@ export default function PendingServices() {
             terms_conditions
           ),
           terms_accepted,
+          terms_conditions,
+          status,
           updated_at
         `)
-        .eq("profile_id", user?.id)
-        .eq("terms_accepted", false);
+        .eq("profile_id", user?.id);
 
       if (id) {
         query.eq("id", id);
@@ -56,15 +58,16 @@ export default function PendingServices() {
           id: item.services.id,
           name: item.services.name,
           creator_service_id: item.id,
-          terms_conditions: item.services.terms_conditions,
+          terms_conditions: item.terms_conditions || item.services.terms_conditions,
           terms_accepted: item.terms_accepted,
+          status: item.status,
           updated_at: item.updated_at
         }));
-        setPendingServices(formattedServices);
+        setServices(formattedServices);
       }
     } catch (error: any) {
-      console.error("Error checking pending services:", error);
-      toast.error("Error checking pending services");
+      console.error("Error fetching services:", error);
+      toast.error("Error fetching services");
     }
   }
 
@@ -82,12 +85,9 @@ export default function PendingServices() {
 
       if (error) throw error;
 
-      setPendingServices(prev => 
-        prev.filter(service => service.creator_service_id !== creatorServiceId)
-      );
-
+      // Refresh services after accepting terms
+      await fetchServices();
       toast.success(`Terms accepted for ${serviceName}`);
-      navigate("/creator/services");
     } catch (error: any) {
       console.error("Error accepting terms:", error);
       toast.error("Error accepting terms");
@@ -95,6 +95,10 @@ export default function PendingServices() {
       setLoading(false);
     }
   }
+
+  // Separate services into signed and unsigned
+  const signedServices = services.filter(service => service.terms_accepted);
+  const unsignedServices = services.filter(service => !service.terms_accepted);
 
   return (
     <div className="flex h-screen bg-gray-50/50">
@@ -106,24 +110,47 @@ export default function PendingServices() {
           isMobile && "pb-20"
         )}>
           <div className="max-w-3xl mx-auto space-y-6">
-            <Card>
-              {pendingServices.length === 0 ? (
+            {unsignedServices.length > 0 && (
+              <Card>
                 <CardContent className="p-6">
-                  <p className="text-sm text-gray-500">No pending services found</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Servicios Pendientes de Firma</h3>
+                  <div className="space-y-4">
+                    {unsignedServices.map((service) => (
+                      <PendingServiceCard
+                        key={service.creator_service_id}
+                        service={service}
+                        onAcceptTerms={acceptTerms}
+                        loading={loading}
+                      />
+                    ))}
+                  </div>
                 </CardContent>
-              ) : (
-                <div className="space-y-4 p-6">
-                  {pendingServices.map((service) => (
-                    <PendingServiceCard
-                      key={service.creator_service_id}
-                      service={service}
-                      onAcceptTerms={acceptTerms}
-                      loading={loading}
-                    />
-                  ))}
-                </div>
-              )}
-            </Card>
+              </Card>
+            )}
+
+            {signedServices.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Servicios Firmados</h3>
+                  <div className="space-y-4">
+                    {signedServices.map((service) => (
+                      <SignedServiceCard
+                        key={service.creator_service_id}
+                        service={service}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {services.length === 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <p className="text-sm text-gray-500">No se encontraron servicios</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </main>
       </div>
