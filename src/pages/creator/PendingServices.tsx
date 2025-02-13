@@ -2,37 +2,15 @@
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useParams, useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-
-interface Service {
-  id: string;
-  name: string;
-  terms_conditions: string | null;
-}
-
-interface CreatorService {
-  id: string;
-  services: Service;
-  updated_at: string;
-  terms_accepted: boolean;
-}
-
-interface PendingService {
-  id: string;
-  name: string;
-  creator_service_id: string;
-  terms_conditions: string | null;
-  terms_accepted: boolean;
-  updated_at: string;
-}
+import { PendingServiceCard } from "@/components/services/PendingServiceCard";
+import type { CreatorService, PendingService } from "@/types/services";
 
 export default function PendingServices() {
   const [pendingServices, setPendingServices] = useState<PendingService[]>([]);
@@ -136,45 +114,12 @@ export default function PendingServices() {
               ) : (
                 <div className="space-y-4 p-6">
                   {pendingServices.map((service) => (
-                    <div
+                    <PendingServiceCard
                       key={service.creator_service_id}
-                      className="p-4 border rounded-lg bg-gray-50"
-                    >
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="text-base font-medium text-gray-900">{service.name}</h4>
-                        </div>
-                        
-                        <div className="bg-white p-3 rounded-md">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">Terms & Conditions</h5>
-                          {service.terms_conditions ? (
-                            <div 
-                              className="prose prose-sm max-w-none text-gray-600 [&>*]:p-0 [&>*]:m-0"
-                              dangerouslySetInnerHTML={{ __html: service.terms_conditions }}
-                            />
-                          ) : (
-                            <p className="text-xs text-gray-500 italic">No terms and conditions provided</p>
-                          )}
-                        </div>
-
-                        {!service.terms_accepted && (
-                          <>
-                            <p className="text-[0.7rem] text-gray-500">
-                              Please review and accept the terms for this service
-                            </p>
-                            <div className="flex justify-end">
-                              <Button
-                                size="sm"
-                                onClick={() => acceptTerms(service.creator_service_id, service.name, service.terms_conditions)}
-                                disabled={loading}
-                              >
-                                Accept Terms & Conditions
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                      service={service}
+                      onAcceptTerms={acceptTerms}
+                      loading={loading}
+                    />
                   ))}
                 </div>
               )}
