@@ -48,6 +48,8 @@ export default function CreatorProfile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     birth_date: "",
     country_of_residence: "",
     state_of_residence: "",
@@ -91,6 +93,8 @@ export default function CreatorProfile() {
 
       if (data) {
         setFormData({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
           birth_date: data.birth_date || "",
           country_of_residence: data.country_of_residence || "",
           state_of_residence: data.state_of_residence || "",
@@ -188,6 +192,37 @@ export default function CreatorProfile() {
                 userId={user.id}
                 onPhotoUpdate={handlePhotoUpdate}
               />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="first_name" className="text-sm font-medium text-gray-700">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="last_name" className="text-sm font-medium text-gray-700">
+                    Apellidos
+                  </label>
+                  <input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Tus apellidos"
+                  />
+                </div>
+              </div>
 
               <PersonalInfoInputs
                 formData={formData}

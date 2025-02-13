@@ -81,6 +81,60 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          contract_status: string
+          created_at: string | null
+          duration: number | null
+          end_date: string | null
+          id: string
+          profile_id: string | null
+          renewable: boolean | null
+          service_id: string | null
+          start_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contract_status: string
+          created_at?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          profile_id?: string | null
+          renewable?: boolean | null
+          service_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contract_status?: string
+          created_at?: string | null
+          duration?: number | null
+          end_date?: string | null
+          id?: string
+          profile_id?: string | null
+          renewable?: boolean | null
+          service_id?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country: {
         Row: {
           active: boolean
@@ -114,35 +168,122 @@ export type Database = {
         }
         Relationships: []
       }
-      creators: {
+      creator_services: {
+        Row: {
+          company_share: number | null
+          contract_duration: number | null
+          contract_id: string | null
+          created_at: string | null
+          end_date: string | null
+          fixed_fee: number | null
+          id: string
+          monthly_fee: number | null
+          profile_id: string | null
+          service_id: string | null
+          start_date: string | null
+          status: string
+          terms_accepted: boolean | null
+          terms_conditions: string | null
+          total_revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_share?: number | null
+          contract_duration?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          fixed_fee?: number | null
+          id?: string
+          monthly_fee?: number | null
+          profile_id?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          status: string
+          terms_accepted?: boolean | null
+          terms_conditions?: string | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_share?: number | null
+          contract_duration?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          fixed_fee?: number | null
+          id?: string
+          monthly_fee?: number | null
+          profile_id?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          status?: string
+          terms_accepted?: boolean | null
+          terms_conditions?: string | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_services_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
         Row: {
           created_at: string
-          email: string
           id: string
-          name: string
-          status: string | null
+          message: string
+          profile_id: string
+          status: string
+          type: string
           updated_at: string
-          user_id: string | null
         }
         Insert: {
           created_at?: string
-          email: string
           id?: string
-          name: string
-          status?: string | null
+          message: string
+          profile_id: string
+          status?: string
+          type: string
           updated_at?: string
-          user_id?: string | null
         }
         Update: {
           created_at?: string
-          email?: string
           id?: string
-          name?: string
-          status?: string | null
+          message?: string
+          profile_id?: string
+          status?: string
+          type?: string
           updated_at?: string
-          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       personal_data: {
         Row: {
@@ -151,10 +292,12 @@ export type Database = {
           country_code: string | null
           country_of_residence: string | null
           created_at: string
+          first_name: string | null
           gender: string | null
           id: string
           instagram_followers: number | null
           instagram_username: string | null
+          last_name: string | null
           phone_number: string | null
           pinterest_followers: number | null
           pinterest_username: string | null
@@ -173,10 +316,12 @@ export type Database = {
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
+          first_name?: string | null
           gender?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_username?: string | null
+          last_name?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
@@ -195,10 +340,12 @@ export type Database = {
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
+          first_name?: string | null
           gender?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_username?: string | null
+          last_name?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
@@ -223,22 +370,79 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
+          website: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          company_share_max: number | null
+          company_share_min: number | null
+          contract_duration: number | null
+          created_at: string | null
+          description: string | null
+          fixed_fee: number | null
+          id: string
+          max_revenue: number | null
+          name: string
+          renewable: boolean | null
+          terms_conditions: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_share_max?: number | null
+          company_share_min?: number | null
+          contract_duration?: number | null
+          created_at?: string | null
+          description?: string | null
+          fixed_fee?: number | null
+          id?: string
+          max_revenue?: number | null
+          name: string
+          renewable?: boolean | null
+          terms_conditions?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_share_max?: number | null
+          company_share_min?: number | null
+          contract_duration?: number | null
+          created_at?: string | null
+          description?: string | null
+          fixed_fee?: number | null
+          id?: string
+          max_revenue?: number | null
+          name?: string
+          renewable?: boolean | null
+          terms_conditions?: string | null
+          type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -247,7 +451,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       payment_method: "bank_transfer" | "paypal"

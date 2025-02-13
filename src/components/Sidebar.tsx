@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Users, DollarSign } from "lucide-react";
+import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Package, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +38,12 @@ export function Sidebar() {
       to: "/creator/bankDetail",
     },
     {
+      icon: <Inbox size={24} />,
+      label: "Servicios Pendientes",
+      shortLabel: "Pendientes",
+      to: "/creator/pending-services",
+    },
+    {
       icon: <LayoutDashboard size={24} />,
       label: "Mis Campañas",
       shortLabel: "Campañas",
@@ -54,16 +59,16 @@ export function Sidebar() {
       to: "/admin/dashboard",
     },
     {
-      icon: <Users size={24} />,
+      icon: <UserCircle size={24} />,
       label: "Creators",
       shortLabel: "Creators",
       to: "/admin/creators",
     },
     {
-      icon: <DollarSign size={24} />,
-      label: "Payments",
-      shortLabel: "Payments",
-      to: "/admin/payments",
+      icon: <Package size={24} />,
+      label: "Services",
+      shortLabel: "Services",
+      to: "/admin/services",
     },
   ];
 

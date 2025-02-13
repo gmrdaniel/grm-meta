@@ -34,11 +34,25 @@ export default function Auth() {
         
         if (profileError) throw profileError;
 
-        // Navigate based on role
-        if (profileData.role === 'admin') {
+        // Si es creator, verificar servicios pendientes
+        if (profileData.role === 'creator') {
+          const { count, error: servicesError } = await supabase
+            .from("creator_services")
+            .select("*", { count: 'exact', head: true })
+            .eq("profile_id", authData.user?.id)
+            .eq("terms_accepted", false)
+            .eq("status", "pendiente");
+
+          if (servicesError) throw servicesError;
+
+          // Redireccionar según si hay servicios pendientes o no
+          if (count && count > 0) {
+            navigate('/creator/pending-services');
+          } else {
+            navigate('/creator/dashboard');
+          }
+        } else if (profileData.role === 'admin') {
           navigate('/admin/dashboard');
-        } else if (profileData.role === 'creator') {
-          navigate('/creator/dashboard');
         }
 
       } else {

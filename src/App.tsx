@@ -12,7 +12,10 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
+import PendingServices from "./pages/creator/PendingServices";
 import Creators from "./pages/admin/Creators";
+import CreatorDetail from "./pages/admin/CreatorDetail";
+import Services from "./pages/admin/Services";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,22 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/creators/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CreatorDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/services"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Services />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Creator routes */}
             <Route
@@ -67,6 +86,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["creator"]}>
                   <CreatorBankDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/pending-services"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <PendingServices />
                 </ProtectedRoute>
               }
             />
