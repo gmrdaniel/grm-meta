@@ -17,13 +17,16 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Mail,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface InvitationData {
   id: string;
   email: string;
   status: string;
   created_at: string;
+  token: string;
   service: {
     name: string;
   };
@@ -31,6 +34,7 @@ interface InvitationData {
 
 export function InvitationsTable() {
   const [page, setPage] = useState(1);
+  const [isResending, setIsResending] = useState<string | null>(null);
   const pageSize = 10;
 
   const { data, isLoading } = useQuery({
@@ -47,6 +51,7 @@ export function InvitationsTable() {
           email,
           status,
           created_at,
+          token,
           service:services (
             name
           )
@@ -67,6 +72,29 @@ export function InvitationsTable() {
 
   const totalPages = Math.ceil((data?.total || 0) / pageSize);
 
+  const handleResendEmail = async (invitation: InvitationData) => {
+    setIsResending(invitation.id);
+    try {
+      const inviteUrl = `${window.location.origin}/auth?invitation=${invitation.token}`;
+      
+      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
+        body: {
+          email: invitation.email,
+          invitationUrl: inviteUrl,
+        },
+      });
+
+      if (emailError) throw emailError;
+      
+      toast.success(`Invitation resent to ${invitation.email}`);
+    } catch (error: any) {
+      console.error("Error resending invitation:", error);
+      toast.error(`Error resending invitation: ${error.message}`);
+    } finally {
+      setIsResending(null);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -81,6 +109,7 @@ export function InvitationsTable() {
               <TableHead>Service</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -101,6 +130,18 @@ export function InvitationsTable() {
                 </TableCell>
                 <TableCell>
                   {format(new Date(invitation.created_at), "dd/MM/yyyy HH:mm")}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResendEmail(invitation)}
+                    disabled={invitation.status === "accepted" || isResending === invitation.id}
+                    className="flex items-center gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    {isResending === invitation.id ? "Sending..." : "Resend"}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
