@@ -10,22 +10,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
-
-interface Service {
-  id: string;
-  name: string;
-}
-
-interface CreatorService {
-  id: string;
-  services: Service;
-}
-
-interface PendingService {
-  id: string;
-  name: string;
-  creator_service_id: string;
-}
+import type { PendingService } from "@/types/services";
 
 export function PendingServicesDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,8 +32,13 @@ export function PendingServicesDialog() {
           id,
           services (
             id,
-            name
-          )
+            name,
+            terms_conditions
+          ),
+          terms_accepted,
+          terms_conditions,
+          status,
+          updated_at
         `)
         .eq("profile_id", user?.id)
         .eq("terms_accepted", false)
@@ -57,10 +47,14 @@ export function PendingServicesDialog() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const formattedServices = data.map((item: CreatorService) => ({
+        const formattedServices = data.map((item) => ({
           id: item.services.id,
           name: item.services.name,
-          creator_service_id: item.id
+          creator_service_id: item.id,
+          terms_conditions: item.terms_conditions || item.services.terms_conditions,
+          terms_accepted: item.terms_accepted,
+          updated_at: item.updated_at,
+          status: item.status
         }));
         setPendingServices(formattedServices);
         setIsOpen(true);
@@ -80,7 +74,8 @@ export function PendingServicesDialog() {
           terms_accepted: true,
           status: "activo"
         })
-        .eq("id", creatorServiceId);
+        .eq("id", creatorServiceId)
+        .eq("profile_id", user?.id);
 
       if (error) throw error;
 
