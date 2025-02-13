@@ -168,6 +168,50 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          service_id: string
+          status: string
+          token: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          service_id: string
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          service_id?: string
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invitations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_services: {
         Row: {
           company_share: number | null
