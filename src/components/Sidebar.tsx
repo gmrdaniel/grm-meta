@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Users, DollarSign, List } from "lucide-react";
+import { UserCircle, Wallet, LayoutDashboard, Menu, X, LogOut, Package, Users, DollarSign, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,6 +36,12 @@ export function Sidebar() {
       label: "Datos Bancarios",
       shortLabel: "Banco",
       to: "/creator/bankDetail",
+    },
+    {
+      icon: <Package size={24} />,
+      label: "Mis Servicios",
+      shortLabel: "Servicios",
+      to: "/creator/services",
     },
     {
       icon: <LayoutDashboard size={24} />,
