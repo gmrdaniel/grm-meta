@@ -188,7 +188,7 @@ export default function PendingServices() {
                             <h5 className="text-sm font-medium text-gray-700 mb-2">Terms & Conditions</h5>
                             {service.terms_conditions ? (
                               <div 
-                                className="prose prose-sm max-w-none"
+                                className="prose prose-sm max-w-none text-gray-600 [&>*]:p-0 [&>*]:m-0"
                                 dangerouslySetInnerHTML={{ __html: service.terms_conditions }}
                               />
                             ) : (
