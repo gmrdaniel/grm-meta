@@ -444,32 +444,56 @@ export type Database = {
       }
       service_payments: {
         Row: {
+          brand_payment_date: string | null
+          brand_payment_status: string
           company_earning: number
           created_at: string | null
           creator_earning: number
+          creator_payment_date: string | null
+          creator_payment_status: string
           creator_service_id: string | null
           id: string
+          is_recurring: boolean | null
           payment_date: string | null
+          payment_month: string | null
+          payment_period: string | null
+          payment_receipt_url: string | null
           total_amount: number
           updated_at: string | null
         }
         Insert: {
+          brand_payment_date?: string | null
+          brand_payment_status?: string
           company_earning: number
           created_at?: string | null
           creator_earning: number
+          creator_payment_date?: string | null
+          creator_payment_status?: string
           creator_service_id?: string | null
           id?: string
+          is_recurring?: boolean | null
           payment_date?: string | null
+          payment_month?: string | null
+          payment_period?: string | null
+          payment_receipt_url?: string | null
           total_amount: number
           updated_at?: string | null
         }
         Update: {
+          brand_payment_date?: string | null
+          brand_payment_status?: string
           company_earning?: number
           created_at?: string | null
           creator_earning?: number
+          creator_payment_date?: string | null
+          creator_payment_status?: string
           creator_service_id?: string | null
           id?: string
+          is_recurring?: boolean | null
           payment_date?: string | null
+          payment_month?: string | null
+          payment_period?: string | null
+          payment_receipt_url?: string | null
           total_amount?: number
           updated_at?: string | null
         }
