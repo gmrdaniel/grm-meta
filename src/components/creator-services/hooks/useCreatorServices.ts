@@ -7,13 +7,15 @@ export function useCreatorServices(
   pageSize: number,
   searchTerm: string,
   selectedServiceId: string,
-  showAll: boolean = false
+  showAll: boolean = false,
+  showRecurring: boolean = true
 ) {
   return useQuery({
-    queryKey: ["creator-services", page, searchTerm, selectedServiceId, showAll],
+    queryKey: ["creator-services", page, searchTerm, selectedServiceId, showAll, showRecurring],
     queryFn: async () => {
       console.log("Selected service ID:", selectedServiceId);
       console.log("Show all services:", showAll);
+      console.log("Show recurring services:", showRecurring);
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
@@ -49,6 +51,12 @@ export function useCreatorServices(
         console.log("Filtering only active creator services");
       }
 
+      // Filtrar por servicios recurrentes si showRecurring es true
+      if (showRecurring) {
+        query = query.eq("services.type", "recurrente");
+        console.log("Filtering only recurring services");
+      }
+
       if (selectedServiceId && selectedServiceId !== "all") {
         query = query.eq("service_id", selectedServiceId);
       }
@@ -77,6 +85,7 @@ export function useCreatorServices(
       console.log("Fetched creator services:", data);
       console.log("Total count:", count);
       console.log("Status filter applied:", !showAll);
+      console.log("Recurring filter applied:", showRecurring);
 
       return {
         creatorServices: data,

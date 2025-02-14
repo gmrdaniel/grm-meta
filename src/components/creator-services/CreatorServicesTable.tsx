@@ -4,13 +4,14 @@ import { CreatorServicesHeader } from "./CreatorServicesHeader";
 import { CreatorServicesTableContent } from "./CreatorServicesTableContent";
 import { CreatorServicesPagination } from "./CreatorServicesPagination";
 import { useCreatorServices } from "./hooks/useCreatorServices";
-import { useServices } from "./hooks/useServices";
+import { useServices } from "@/hooks/useServices";
 
 export function CreatorServicesTable() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState<string>("all");
   const [showAll, setShowAll] = useState(false);
+  const [showRecurring, setShowRecurring] = useState(true);
   const pageSize = 10;
 
   const { data: services } = useServices();
@@ -19,7 +20,8 @@ export function CreatorServicesTable() {
     pageSize,
     searchTerm,
     selectedServiceId,
-    showAll
+    showAll,
+    showRecurring
   );
 
   const totalPages = Math.ceil((data?.total || 0) / pageSize);
@@ -34,6 +36,8 @@ export function CreatorServicesTable() {
         services={services}
         showAll={showAll}
         setShowAll={setShowAll}
+        showRecurring={showRecurring}
+        setShowRecurring={setShowRecurring}
       />
 
       <div className="rounded-md border">

@@ -19,6 +19,8 @@ interface CreatorServicesHeaderProps {
   services: Array<{ id: string; name: string; }> | null;
   showAll: boolean;
   setShowAll: (value: boolean) => void;
+  showRecurring: boolean;
+  setShowRecurring: (value: boolean) => void;
 }
 
 export function CreatorServicesHeader({
@@ -29,6 +31,8 @@ export function CreatorServicesHeader({
   services,
   showAll,
   setShowAll,
+  showRecurring,
+  setShowRecurring,
 }: CreatorServicesHeaderProps) {
   const validServices = services?.filter(service => service.id && service.name) || [];
   
@@ -43,13 +47,23 @@ export function CreatorServicesHeader({
             Manage all creator services in the platform
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="show-all"
-            checked={showAll}
-            onCheckedChange={setShowAll}
-          />
-          <Label htmlFor="show-all">Show all statuses</Label>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-all"
+              checked={showAll}
+              onCheckedChange={setShowAll}
+            />
+            <Label htmlFor="show-all">Show all statuses</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-recurring"
+              checked={showRecurring}
+              onCheckedChange={setShowRecurring}
+            />
+            <Label htmlFor="show-recurring">Show recurring only</Label>
+          </div>
         </div>
       </div>
 
