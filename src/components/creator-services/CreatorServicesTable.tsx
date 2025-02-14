@@ -9,7 +9,8 @@ import { useServices } from "./hooks/useServices";
 export function CreatorServicesTable() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("all");
+  const [showAll, setShowAll] = useState(false);
   const pageSize = 10;
 
   const { data: services } = useServices();
@@ -17,7 +18,8 @@ export function CreatorServicesTable() {
     page,
     pageSize,
     searchTerm,
-    selectedServiceId
+    selectedServiceId,
+    showAll
   );
 
   const totalPages = Math.ceil((data?.total || 0) / pageSize);
@@ -30,6 +32,8 @@ export function CreatorServicesTable() {
         selectedServiceId={selectedServiceId}
         setSelectedServiceId={setSelectedServiceId}
         services={services}
+        showAll={showAll}
+        setShowAll={setShowAll}
       />
 
       <div className="rounded-md border">

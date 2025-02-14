@@ -8,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface CreatorServicesHeaderProps {
   searchTerm: string;
@@ -15,6 +17,8 @@ interface CreatorServicesHeaderProps {
   selectedServiceId: string;
   setSelectedServiceId: (value: string) => void;
   services: Array<{ id: string; name: string; }> | null;
+  showAll: boolean;
+  setShowAll: (value: boolean) => void;
 }
 
 export function CreatorServicesHeader({
@@ -23,8 +27,9 @@ export function CreatorServicesHeader({
   selectedServiceId,
   setSelectedServiceId,
   services,
+  showAll,
+  setShowAll,
 }: CreatorServicesHeaderProps) {
-  // Filtramos servicios para asegurar que solo usamos los que tienen id y name válidos
   const validServices = services?.filter(service => service.id && service.name) || [];
   
   console.log("Valid services for select:", validServices);
@@ -37,6 +42,14 @@ export function CreatorServicesHeader({
           <p className="text-sm text-muted-foreground">
             Manage all creator services in the platform
           </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="show-all"
+            checked={showAll}
+            onCheckedChange={setShowAll}
+          />
+          <Label htmlFor="show-all">Show all statuses</Label>
         </div>
       </div>
 

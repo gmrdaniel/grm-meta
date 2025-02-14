@@ -6,12 +6,14 @@ export function useCreatorServices(
   page: number,
   pageSize: number,
   searchTerm: string,
-  selectedServiceId: string
+  selectedServiceId: string,
+  showAll: boolean = false
 ) {
   return useQuery({
-    queryKey: ["creator-services", page, searchTerm, selectedServiceId],
+    queryKey: ["creator-services", page, searchTerm, selectedServiceId, showAll],
     queryFn: async () => {
       console.log("Selected service ID:", selectedServiceId);
+      console.log("Show all services:", showAll);
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
@@ -39,10 +41,14 @@ export function useCreatorServices(
         `,
           { count: "exact" }
         )
-        .order("created_at", { ascending: false })
-        .range(from, to);
+        .order("created_at", { ascending: false });
 
-      if (selectedServiceId) {
+      // Por defecto, solo mostrar activos a menos que showAll sea true
+      if (!showAll) {
+        query = query.eq("status", "active");
+      }
+
+      if (selectedServiceId && selectedServiceId !== "all") {
         query = query.eq("service_id", selectedServiceId);
       }
 
@@ -56,6 +62,9 @@ export function useCreatorServices(
           }
         );
       }
+
+      // Aplicar paginación después de todos los filtros
+      query = query.range(from, to);
 
       const { data, count, error } = await query;
 
