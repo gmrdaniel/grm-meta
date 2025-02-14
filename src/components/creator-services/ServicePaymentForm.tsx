@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
@@ -16,10 +15,7 @@ const formSchema = z.object({
   creator_earning: z.number().min(0, "El monto del creador debe ser mayor o igual a 0"),
   brand_payment_status: z.enum(["pending", "completed"]),
   creator_payment_status: z.enum(["pending", "completed"]),
-  is_recurring: z.boolean(),
-  payment_period: z.enum(["monthly", "quarterly", "yearly"]).optional(),
   payment_receipt: z.instanceof(File).optional(),
-  payment_month: z.string().optional(),
 });
 
 interface ServicePaymentFormProps {
@@ -37,11 +33,8 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       creator_earning: 0,
       brand_payment_status: "pending",
       creator_payment_status: "pending",
-      is_recurring: false,
     },
   });
-
-  const isRecurring = form.watch("is_recurring");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let payment_receipt_url = null;
@@ -74,9 +67,6 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       creator_earning: values.creator_earning,
       brand_payment_status: values.brand_payment_status,
       creator_payment_status: values.creator_payment_status,
-      is_recurring: values.is_recurring,
-      payment_period: values.payment_period,
-      payment_month: values.payment_month,
       payment_receipt_url,
       brand_payment_date: values.brand_payment_status === "completed" ? new Date().toISOString() : null,
       creator_payment_date: values.creator_payment_status === "completed" ? new Date().toISOString() : null,
@@ -207,68 +197,6 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="is_recurring"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel>Pago Recurrente</FormLabel>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {isRecurring && (
-          <>
-            <FormField
-              control={form.control}
-              name="payment_period"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Periodicidad</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccione la periodicidad" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="monthly">Mensual</SelectItem>
-                      <SelectItem value="quarterly">Trimestral</SelectItem>
-                      <SelectItem value="yearly">Anual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="payment_month"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mes de Pago</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="date" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
 
         <FormField
           control={form.control}
