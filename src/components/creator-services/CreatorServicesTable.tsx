@@ -47,24 +47,31 @@ interface CreatorService {
   };
 }
 
-const SERVICE_TYPES = [
-  { value: "único", label: "Único" },
-  { value: "recurrente", label: "Recurrente" },
-  { value: "contrato", label: "Contrato" }
-] as const;
-
-type ServiceType = typeof SERVICE_TYPES[number]["value"];
-
 export function CreatorServicesTable() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [serviceType, setServiceType] = useState<ServiceType | "">("");
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const pageSize = 10;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["creator-services", page, searchTerm, serviceType],
+  // Query para obtener la lista de servicios disponibles
+  const { data: services } = useQuery({
+    queryKey: ["services"],
     queryFn: async () => {
-      console.log("Current service type filter:", serviceType); // Debug log
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, name")
+        .order("name");
+
+      if (error) throw error;
+      console.log("Available services:", data); // Debug log
+      return data;
+    },
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["creator-services", page, searchTerm, selectedServiceId],
+    queryFn: async () => {
+      console.log("Selected service ID:", selectedServiceId); // Debug log
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
@@ -95,8 +102,8 @@ export function CreatorServicesTable() {
         .order("created_at", { ascending: false })
         .range(from, to);
 
-      if (serviceType) {
-        query = query.eq("services.type", serviceType);
+      if (selectedServiceId) {
+        query = query.eq("service_id", selectedServiceId);
       }
 
       if (searchTerm) {
@@ -114,8 +121,7 @@ export function CreatorServicesTable() {
 
       if (error) throw error;
 
-      // Debug log para revisar los datos
-      console.log("Fetched creator services:", data);
+      console.log("Fetched creator services:", data); // Debug log
 
       return {
         creatorServices: data as CreatorService[],
@@ -148,20 +154,20 @@ export function CreatorServicesTable() {
           />
         </div>
         <Select 
-          value={serviceType} 
-          onValueChange={(value: ServiceType | "") => {
-            console.log("Selected service type:", value); // Debug log
-            setServiceType(value);
+          value={selectedServiceId} 
+          onValueChange={(value: string) => {
+            console.log("Selected service:", value); // Debug log
+            setSelectedServiceId(value);
           }}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by type" />
+            <SelectValue placeholder="Filter by service" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            {SERVICE_TYPES.map(type => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
+            <SelectItem value="">All services</SelectItem>
+            {services?.map(service => (
+              <SelectItem key={service.id} value={service.id}>
+                {service.name}
               </SelectItem>
             ))}
           </SelectContent>
