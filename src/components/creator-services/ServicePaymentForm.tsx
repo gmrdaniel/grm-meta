@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   total_amount: z.number().min(0, "El monto total debe ser mayor o igual a 0"),
@@ -15,6 +20,8 @@ const formSchema = z.object({
   creator_earning: z.number().min(0, "El monto del creador debe ser mayor o igual a 0"),
   brand_payment_status: z.enum(["pending", "completed"]),
   creator_payment_status: z.enum(["pending", "completed"]),
+  brand_payment_date: z.date().optional(),
+  creator_payment_date: z.date().optional(),
   payment_receipt: z.instanceof(File).optional(),
 });
 
@@ -39,7 +46,6 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let payment_receipt_url = null;
 
-    // Si hay un archivo de comprobante, subirlo primero
     if (values.payment_receipt) {
       const fileExt = values.payment_receipt.name.split('.').pop();
       const fileName = `${creatorServiceId}-${Date.now()}.${fileExt}`;
@@ -68,8 +74,8 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       brand_payment_status: values.brand_payment_status,
       creator_payment_status: values.creator_payment_status,
       payment_receipt_url,
-      brand_payment_date: values.brand_payment_status === "completed" ? new Date().toISOString() : null,
-      creator_payment_date: values.creator_payment_status === "completed" ? new Date().toISOString() : null,
+      brand_payment_date: values.brand_payment_date?.toISOString() || null,
+      creator_payment_date: values.creator_payment_date?.toISOString() || null,
     };
 
     const { error } = await supabase.from("service_payments").insert(paymentData);
@@ -176,6 +182,50 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           )}
         />
 
+        {form.watch("brand_payment_status") === "completed" && (
+          <FormField
+            control={form.control}
+            name="brand_payment_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Fecha de Pago de la Marca</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
           name="creator_payment_status"
@@ -197,6 +247,50 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
             </FormItem>
           )}
         />
+
+        {form.watch("creator_payment_status") === "completed" && (
+          <FormField
+            control={form.control}
+            name="creator_payment_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Fecha de Pago al Creador</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
