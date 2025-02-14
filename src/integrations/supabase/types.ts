@@ -442,6 +442,47 @@ export type Database = {
         }
         Relationships: []
       }
+      service_payments: {
+        Row: {
+          company_earning: number
+          created_at: string | null
+          creator_earning: number
+          creator_service_id: string | null
+          id: string
+          payment_date: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          company_earning: number
+          created_at?: string | null
+          creator_earning: number
+          creator_service_id?: string | null
+          id?: string
+          payment_date?: string | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          company_earning?: number
+          created_at?: string | null
+          creator_earning?: number
+          creator_service_id?: string | null
+          id?: string
+          payment_date?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_payments_creator_service_id_fkey"
+            columns: ["creator_service_id"]
+            isOneToOne: false
+            referencedRelation: "creator_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           company_share_max: number | null
