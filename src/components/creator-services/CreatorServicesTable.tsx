@@ -47,15 +47,25 @@ interface CreatorService {
   };
 }
 
+const SERVICE_TYPES = [
+  { value: "único", label: "Único" },
+  { value: "recurrente", label: "Recurrente" },
+  { value: "contrato", label: "Contrato" }
+] as const;
+
+type ServiceType = typeof SERVICE_TYPES[number]["value"];
+
 export function CreatorServicesTable() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [serviceType, setServiceType] = useState<string>("");
+  const [serviceType, setServiceType] = useState<ServiceType | "">("");
   const pageSize = 10;
 
   const { data, isLoading } = useQuery({
     queryKey: ["creator-services", page, searchTerm, serviceType],
     queryFn: async () => {
+      console.log("Current service type filter:", serviceType); // Debug log
+
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
@@ -104,6 +114,9 @@ export function CreatorServicesTable() {
 
       if (error) throw error;
 
+      // Debug log para revisar los datos
+      console.log("Fetched creator services:", data);
+
       return {
         creatorServices: data as CreatorService[],
         total: count || 0,
@@ -134,15 +147,23 @@ export function CreatorServicesTable() {
             className="pl-8"
           />
         </div>
-        <Select value={serviceType} onValueChange={setServiceType}>
+        <Select 
+          value={serviceType} 
+          onValueChange={(value: ServiceType | "") => {
+            console.log("Selected service type:", value); // Debug log
+            setServiceType(value);
+          }}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All types</SelectItem>
-            <SelectItem value="único">Único</SelectItem>
-            <SelectItem value="recurrente">Recurrente</SelectItem>
-            <SelectItem value="contrato">Contrato</SelectItem>
+            <SelectItem value="all">All types</SelectItem>
+            {SERVICE_TYPES.map(type => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

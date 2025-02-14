@@ -34,6 +34,16 @@ export const PersonalInfoInputs = ({
   CATEGORIES,
   GENDERS,
 }: PersonalInfoInputsProps) => {
+  // Debug logs para verificar los datos
+  console.log("Countries data:", COUNTRIES);
+  console.log("Categories data:", CATEGORIES);
+  console.log("Genders data:", GENDERS);
+
+  // Filtrar datos vacíos
+  const validCountries = COUNTRIES.filter(country => country.value && country.code);
+  const validCategories = CATEGORIES.filter(Boolean);
+  const validGenders = GENDERS.filter(gender => gender.value);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -50,15 +60,15 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="country_of_residence">País de Residencia</Label>
         <Select 
-          value={formData.country_of_residence} 
+          value={formData.country_of_residence || "default"} 
           onValueChange={(value) => handleSelectChange("country_of_residence", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecciona tu país de residencia" />
           </SelectTrigger>
           <SelectContent>
-            {COUNTRIES.map((country) => (
-              <SelectItem key={country.value} value={country.value || "default"}>
+            {validCountries.map((country) => (
+              <SelectItem key={country.value} value={country.value}>
                 {country.label}
               </SelectItem>
             ))}
@@ -81,15 +91,15 @@ export const PersonalInfoInputs = ({
         <div className="space-y-2">
           <Label htmlFor="country_code">País (Código)</Label>
           <Select
-            value={formData.country_code}
+            value={formData.country_code || "default"}
             onValueChange={(value) => handleSelectChange("country_code", value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecciona tu país" />
             </SelectTrigger>
             <SelectContent>
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.code} value={country.code || "default"}>
+              {validCountries.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
                   {country.label} ({country.code})
                 </SelectItem>
               ))}
@@ -112,15 +122,15 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="category">Categoría</Label>
         <Select 
-          value={formData.category} 
+          value={formData.category || "default"} 
           onValueChange={(value) => handleSelectChange("category", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category || "default"}>
+            {validCategories.map((category) => (
+              <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
             ))}
@@ -131,15 +141,15 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="gender">Género</Label>
         <Select 
-          value={formData.gender} 
+          value={formData.gender || "default"} 
           onValueChange={(value) => handleSelectChange("gender", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecciona tu género" />
           </SelectTrigger>
           <SelectContent>
-            {GENDERS.map((gender) => (
-              <SelectItem key={gender.value} value={gender.value || "default"}>
+            {validGenders.map((gender) => (
+              <SelectItem key={gender.value} value={gender.value}>
                 {gender.label}
               </SelectItem>
             ))}
