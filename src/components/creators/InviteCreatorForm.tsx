@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -73,11 +72,9 @@ export function InviteCreatorForm({ onInviteSent }: InviteCreatorFormProps) {
 
       if (error) throw error;
 
-      // Construct the invitation URL
       const inviteUrl = `${window.location.origin}/auth?invitation=${invitation.token}`;
       setInvitationUrl(inviteUrl);
 
-      // Send invitation email
       const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
         body: {
           email: values.email,
@@ -132,7 +129,7 @@ export function InviteCreatorForm({ onInviteSent }: InviteCreatorFormProps) {
                     </FormControl>
                     <SelectContent>
                       {services?.map((service) => (
-                        <SelectItem key={service.id} value={service.id}>
+                        <SelectItem key={service.id} value={service.id || "default"}>
                           {service.name}
                         </SelectItem>
                       ))}

@@ -58,7 +58,7 @@ export const PersonalInfoInputs = ({
           </SelectTrigger>
           <SelectContent>
             {COUNTRIES.map((country) => (
-              <SelectItem key={country.value} value={country.value}>
+              <SelectItem key={country.value} value={country.value || "default"}>
                 {country.label}
               </SelectItem>
             ))}
@@ -81,7 +81,7 @@ export const PersonalInfoInputs = ({
         <div className="space-y-2">
           <Label htmlFor="country_code">País (Código)</Label>
           <Select
-            value={COUNTRIES.find(c => c.code === formData.country_code)?.value || ""}
+            value={formData.country_code}
             onValueChange={(value) => handleSelectChange("country_code", value)}
           >
             <SelectTrigger>
@@ -89,7 +89,7 @@ export const PersonalInfoInputs = ({
             </SelectTrigger>
             <SelectContent>
               {COUNTRIES.map((country) => (
-                <SelectItem key={country.value} value={country.value}>
+                <SelectItem key={country.code} value={country.code || "default"}>
                   {country.label} ({country.code})
                 </SelectItem>
               ))}
@@ -120,7 +120,7 @@ export const PersonalInfoInputs = ({
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category}>
+              <SelectItem key={category} value={category || "default"}>
                 {category}
               </SelectItem>
             ))}
@@ -139,7 +139,7 @@ export const PersonalInfoInputs = ({
           </SelectTrigger>
           <SelectContent>
             {GENDERS.map((gender) => (
-              <SelectItem key={gender.value} value={gender.value}>
+              <SelectItem key={gender.value} value={gender.value || "default"}>
                 {gender.label}
               </SelectItem>
             ))}
