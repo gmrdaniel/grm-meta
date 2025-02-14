@@ -45,7 +45,7 @@ export function useCreatorServices(
 
       // Por defecto, solo mostrar activos a menos que showAll sea true
       if (!showAll) {
-        query = query.eq("status", "active");
+        query = query.eq("status", "activo");
         console.log("Filtering only active creator services");
       }
 
