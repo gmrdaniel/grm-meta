@@ -74,7 +74,7 @@ export function Sidebar() {
       icon: <Inbox size={24} />,
       label: "Creator Services",
       shortLabel: "Creator Services",
-      to: "/admin/creatorServices",
+      to: "/admin/creator-services",
     },
   ];
 
