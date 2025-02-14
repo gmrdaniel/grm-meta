@@ -46,6 +46,7 @@ export function useCreatorServices(
       // Por defecto, solo mostrar activos a menos que showAll sea true
       if (!showAll) {
         query = query.eq("status", "active");
+        console.log("Filtering only active creator services");
       }
 
       if (selectedServiceId && selectedServiceId !== "all") {
@@ -68,9 +69,14 @@ export function useCreatorServices(
 
       const { data, count, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching creator services:", error);
+        throw error;
+      }
 
       console.log("Fetched creator services:", data);
+      console.log("Total count:", count);
+      console.log("Status filter applied:", !showAll);
 
       return {
         creatorServices: data,
