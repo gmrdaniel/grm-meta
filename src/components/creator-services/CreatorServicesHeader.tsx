@@ -24,6 +24,11 @@ export function CreatorServicesHeader({
   setSelectedServiceId,
   services,
 }: CreatorServicesHeaderProps) {
+  // Filtramos servicios para asegurar que solo usamos los que tienen id y name válidos
+  const validServices = services?.filter(service => service.id && service.name) || [];
+  
+  console.log("Valid services for select:", validServices);
+
   return (
     <>
       <div className="flex justify-between items-center">
@@ -56,8 +61,8 @@ export function CreatorServicesHeader({
             <SelectValue placeholder="Filter by service" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All services</SelectItem>
-            {services?.map(service => (
+            <SelectItem value="all">All services</SelectItem>
+            {validServices.map(service => (
               <SelectItem key={service.id} value={service.id}>
                 {service.name}
               </SelectItem>
