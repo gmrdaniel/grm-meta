@@ -70,6 +70,12 @@ export function Sidebar() {
       shortLabel: "Services",
       to: "/admin/services",
     },
+    {
+      icon: <Inbox size={24} />,
+      label: "Creator Services",
+      shortLabel: "Creator Services",
+      to: "/admin/creatorServices",
+    },
   ];
 
   const navigationItems = isAdminRoute ? adminNavigationItems : creatorNavigationItems;
