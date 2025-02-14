@@ -27,7 +27,7 @@ interface CreatorService {
   status: string;
   created_at: string;
   updated_at: string;
-  services: Service;
+  services: Service | null;
   profiles: Creator;
 }
 
@@ -38,7 +38,7 @@ interface CreatorServicesTableContentProps {
 
 export function CreatorServicesTableContent({
   isLoading,
-  creatorServices,
+  creatorServices = [],
 }: CreatorServicesTableContentProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
 
@@ -48,6 +48,14 @@ export function CreatorServicesTableContent({
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-8 w-full" />
+      </div>
+    );
+  }
+
+  if (!creatorServices || creatorServices.length === 0) {
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        No hay servicios disponibles
       </div>
     );
   }
@@ -66,48 +74,57 @@ export function CreatorServicesTableContent({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {creatorServices?.map((creatorService) => (
-          <TableRow key={creatorService.id}>
-            <TableCell>
-              {creatorService.profiles.personal_data
-                ? `${creatorService.profiles.personal_data.first_name} ${creatorService.profiles.personal_data.last_name}`
-                : "N/A"}
-            </TableCell>
-            <TableCell>{creatorService.services.name}</TableCell>
-            <TableCell>{creatorService.services.type}</TableCell>
-            <TableCell>{creatorService.status}</TableCell>
-            <TableCell>
-              {format(new Date(creatorService.created_at), "dd/MM/yyyy")}
-            </TableCell>
-            <TableCell>
-              {format(new Date(creatorService.updated_at), "dd/MM/yyyy")}
-            </TableCell>
-            <TableCell>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => setSelectedServiceId(creatorService.id)}
-                  >
-                    <DollarSign className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Registrar Pago</SheetTitle>
-                  </SheetHeader>
-                  {selectedServiceId && (
-                    <ServicePaymentForm
-                      creatorServiceId={selectedServiceId}
-                      onClose={() => setSelectedServiceId(null)}
-                    />
-                  )}
-                </SheetContent>
-              </Sheet>
-            </TableCell>
-          </TableRow>
-        ))}
+        {creatorServices.map((creatorService) => {
+          // Validar que el servicio exista antes de renderizar la fila
+          if (!creatorService) return null;
+
+          return (
+            <TableRow key={creatorService.id}>
+              <TableCell>
+                {creatorService.profiles?.personal_data
+                  ? `${creatorService.profiles.personal_data.first_name} ${creatorService.profiles.personal_data.last_name}`
+                  : "N/A"}
+              </TableCell>
+              <TableCell>{creatorService.services?.name ?? "N/A"}</TableCell>
+              <TableCell>{creatorService.services?.type ?? "N/A"}</TableCell>
+              <TableCell>{creatorService.status ?? "N/A"}</TableCell>
+              <TableCell>
+                {creatorService.created_at
+                  ? format(new Date(creatorService.created_at), "dd/MM/yyyy")
+                  : "N/A"}
+              </TableCell>
+              <TableCell>
+                {creatorService.updated_at
+                  ? format(new Date(creatorService.updated_at), "dd/MM/yyyy")
+                  : "N/A"}
+              </TableCell>
+              <TableCell>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => setSelectedServiceId(creatorService.id)}
+                    >
+                      <DollarSign className="h-4 w-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Registrar Pago</SheetTitle>
+                    </SheetHeader>
+                    {selectedServiceId && (
+                      <ServicePaymentForm
+                        creatorServiceId={selectedServiceId}
+                        onClose={() => setSelectedServiceId(null)}
+                      />
+                    )}
+                  </SheetContent>
+                </Sheet>
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

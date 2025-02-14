@@ -24,17 +24,21 @@ interface CreatorServicesHeaderProps {
 }
 
 export function CreatorServicesHeader({
-  searchTerm,
+  searchTerm = "",
   setSearchTerm,
-  selectedServiceId,
+  selectedServiceId = "all",
   setSelectedServiceId,
-  services,
-  showAll,
+  services = [],
+  showAll = false,
   setShowAll,
-  showRecurring,
+  showRecurring = true,
   setShowRecurring,
 }: CreatorServicesHeaderProps) {
-  const validServices = services?.filter(service => service.id && service.name) || [];
+  const validServices = services?.filter(service => 
+    service && 
+    typeof service.id === 'string' && 
+    typeof service.name === 'string'
+  ) || [];
   
   console.log("Valid services for select:", validServices);
 

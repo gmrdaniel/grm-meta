@@ -7,6 +7,7 @@ import { useCreatorServices } from "./hooks/useCreatorServices";
 import { useServices } from "@/hooks/useServices";
 
 export function CreatorServicesTable() {
+  // Inicializar estados con valores por defecto
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState<string>("all");
@@ -14,8 +15,8 @@ export function CreatorServicesTable() {
   const [showRecurring, setShowRecurring] = useState(true);
   const pageSize = 10;
 
-  const { data: services } = useServices();
-  const { data, isLoading } = useCreatorServices(
+  const { data: services, isLoading: isLoadingServices } = useServices();
+  const { data, isLoading: isLoadingCreatorServices } = useCreatorServices(
     page,
     pageSize,
     searchTerm,
@@ -25,6 +26,10 @@ export function CreatorServicesTable() {
   );
 
   const totalPages = Math.ceil((data?.total || 0) / pageSize);
+
+  if (isLoadingServices) {
+    return <div className="p-4">Cargando servicios...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -42,7 +47,7 @@ export function CreatorServicesTable() {
 
       <div className="rounded-md border">
         <CreatorServicesTableContent
-          isLoading={isLoading}
+          isLoading={isLoadingCreatorServices}
           creatorServices={data?.creatorServices}
         />
       </div>
