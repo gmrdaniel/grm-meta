@@ -9,9 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
-  total_amount: z.string().min(1, "El monto total es requerido").transform(Number),
-  company_earning: z.string().min(1, "El monto de la empresa es requerido").transform(Number),
-  creator_earning: z.string().min(1, "El monto del creador es requerido").transform(Number),
+  total_amount: z.number().min(0, "El monto total debe ser mayor o igual a 0"),
+  company_earning: z.number().min(0, "El monto de la empresa debe ser mayor o igual a 0"),
+  creator_earning: z.number().min(0, "El monto del creador debe ser mayor o igual a 0"),
 });
 
 interface ServicePaymentFormProps {
@@ -24,9 +24,9 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      total_amount: "",
-      company_earning: "",
-      creator_earning: "",
+      total_amount: 0,
+      company_earning: 0,
+      creator_earning: 0,
     },
   });
 
@@ -65,7 +65,13 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
             <FormItem>
               <FormLabel>Monto Total</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0.00" 
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,7 +85,13 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
             <FormItem>
               <FormLabel>Monto Empresa</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0.00" 
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -93,7 +105,13 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
             <FormItem>
               <FormLabel>Monto Creador</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0.00" 
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
