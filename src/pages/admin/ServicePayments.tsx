@@ -9,6 +9,8 @@ import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorServicesPagination } from "@/components/creator-services/CreatorServicesPagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Home } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -79,6 +81,20 @@ export default function ServicePayments() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/admin/dashboard">
+              <Home className="h-4 w-4" />
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Pagos de Servicios</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Pagos de Servicios</h1>
         <p className="text-muted-foreground">
