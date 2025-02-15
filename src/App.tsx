@@ -17,6 +17,7 @@ import Creators from "./pages/admin/Creators";
 import CreatorDetail from "./pages/admin/CreatorDetail";
 import Services from "./pages/admin/Services";
 import CreatorServices from "./pages/admin/CreatorServices";
+import ServicePayments from "./pages/admin/ServicePayments";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <CreatorServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/service_payments"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ServicePayments />
                 </ProtectedRoute>
               }
             />
