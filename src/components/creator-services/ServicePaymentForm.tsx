@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -99,7 +98,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 h-[calc(100vh-120px)] overflow-y-auto pr-4">
         <FormField
           control={form.control}
           name="total_amount"
@@ -213,9 +212,6 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
                       initialFocus
                     />
                   </PopoverContent>
@@ -279,9 +275,6 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
                       initialFocus
                     />
                   </PopoverContent>
@@ -316,7 +309,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           )}
         />
 
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-2 mt-6">
           <Button variant="outline" type="button" onClick={onClose}>
             Cancelar
           </Button>
