@@ -58,6 +58,6 @@ export const adminNavigationItems: NavigationItem[] = [
     icon: <DollarSign size={24} />,
     label: "Payments",
     shortLabel: "Payments",
-    to: "/admin/service_payments",
+    to: "/admin/service-payments",
   },
 ];

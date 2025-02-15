@@ -74,7 +74,7 @@ const App = () => (
               }
             />
             <Route
-              path="/admin/service_payments"
+              path="/admin/service-payments"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <ServicePayments />
