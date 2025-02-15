@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,22 +12,19 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Home } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-
 const PAGE_SIZE = 10;
-
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
   const [showRecurringOnly, setShowRecurringOnly] = useState(true);
-
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading
+  } = useQuery({
     queryKey: ['service-payments', page, showRecurringOnly],
     queryFn: async () => {
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
-
-      let query = supabase
-        .from('service_payments')
-        .select(`
+      let query = supabase.from('service_payments').select(`
           *,
           creator_service:creator_services (
             profiles (
@@ -41,24 +37,26 @@ export default function ServicePayments() {
               name
             )
           )
-        `, { count: 'exact' })
-        .order('payment_date', { ascending: false })
-        .range(from, to);
-
+        `, {
+        count: 'exact'
+      }).order('payment_date', {
+        ascending: false
+      }).range(from, to);
       if (showRecurringOnly) {
         query = query.eq('is_recurring', true);
       }
-
-      const { data: payments, error, count } = await query;
-
+      const {
+        data: payments,
+        error,
+        count
+      } = await query;
       if (error) throw error;
       return {
         payments,
         totalCount: count || 0
       };
-    },
+    }
   });
-
   const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -69,23 +67,10 @@ export default function ServicePayments() {
         return 'bg-gray-500';
     }
   };
-
   const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
-
-  const content = (
-    <div className="container mx-auto py-6 space-y-6">
+  const content = <div className="container mx-auto py-6 space-y-6">
       <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/admin/dashboard">
-              <Home className="h-4 w-4" />
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Pagos de Servicios</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
+        
       </Breadcrumb>
 
       <div>
@@ -96,11 +81,7 @@ export default function ServicePayments() {
       </div>
 
       <div className="flex items-center space-x-2">
-        <Switch
-          id="recurring"
-          checked={showRecurringOnly}
-          onCheckedChange={setShowRecurringOnly}
-        />
+        <Switch id="recurring" checked={showRecurringOnly} onCheckedChange={setShowRecurringOnly} />
         <Label htmlFor="recurring">Show recurring only</Label>
       </div>
 
@@ -120,12 +101,9 @@ export default function ServicePayments() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.payments.map((payment: any) => (
-              <TableRow key={payment.id}>
+            {data?.payments.map((payment: any) => <TableRow key={payment.id}>
                 <TableCell>
-                  {payment.creator_service?.profiles?.personal_data
-                    ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}`
-                    : "N/A"}
+                  {payment.creator_service?.profiles?.personal_data ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}` : "N/A"}
                 </TableCell>
                 <TableCell>
                   {payment.creator_service?.services?.name ?? "N/A"}
@@ -139,9 +117,7 @@ export default function ServicePayments() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {payment.brand_payment_date
-                    ? format(new Date(payment.brand_payment_date), "dd/MM/yyyy")
-                    : "N/A"}
+                  {payment.brand_payment_date ? format(new Date(payment.brand_payment_date), "dd/MM/yyyy") : "N/A"}
                 </TableCell>
                 <TableCell>
                   <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
@@ -149,27 +125,17 @@ export default function ServicePayments() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {payment.creator_payment_date
-                    ? format(new Date(payment.creator_payment_date), "dd/MM/yyyy")
-                    : "N/A"}
+                  {payment.creator_payment_date ? format(new Date(payment.creator_payment_date), "dd/MM/yyyy") : "N/A"}
                 </TableCell>
-              </TableRow>
-            ))}
+              </TableRow>)}
           </TableBody>
         </Table>
       </div>
 
-      <CreatorServicesPagination
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
-      />
-    </div>
-  );
-
+      <CreatorServicesPagination page={page} totalPages={totalPages} setPage={setPage} />
+    </div>;
   if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gray-50">
+    return <div className="flex h-screen bg-gray-50">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
@@ -180,12 +146,9 @@ export default function ServicePayments() {
             </div>
           </main>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="flex h-screen bg-gray-50">
+  return <div className="flex h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
@@ -193,6 +156,5 @@ export default function ServicePayments() {
           {content}
         </main>
       </div>
-    </div>
-  );
+    </div>;
 }
