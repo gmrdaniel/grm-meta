@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Package, Inbox } from "lucide-react";
+import { LayoutDashboard, UserCircle, Wallet, Package, Inbox, DollarSign } from "lucide-react";
 import { NavigationItem } from "./types";
 
 export const creatorNavigationItems: NavigationItem[] = [
@@ -53,5 +53,11 @@ export const adminNavigationItems: NavigationItem[] = [
     label: "Creator Services",
     shortLabel: "Creator Services",
     to: "/admin/creator-services",
+  },
+  {
+    icon: <DollarSign size={24} />,
+    label: "Payments",
+    shortLabel: "Payments",
+    to: "/admin/service_payments",
   },
 ];
