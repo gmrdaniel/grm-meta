@@ -11,6 +11,8 @@ import { CreatorServicesPagination } from "@/components/creator-services/Creator
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Home } from "lucide-react";
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 
 const PAGE_SIZE = 10;
 
@@ -68,18 +70,7 @@ export default function ServicePayments() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-6 space-y-4">
-        <Skeleton className="h-8 w-1/4" />
-        <Skeleton className="h-[400px] w-full" />
-      </div>
-    );
-  }
-
-  const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
-
-  return (
+  const content = (
     <div className="container mx-auto py-6 space-y-6">
       <Breadcrumb>
         <BreadcrumbList>
@@ -171,6 +162,35 @@ export default function ServicePayments() {
         totalPages={totalPages}
         setPage={setPage}
       />
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto py-6 space-y-4">
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-[400px] w-full" />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          {content}
+        </main>
+      </div>
     </div>
   );
 }
