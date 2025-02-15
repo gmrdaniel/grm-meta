@@ -70,6 +70,8 @@ export default function ServicePayments() {
     }
   };
 
+  const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
+
   const content = (
     <div className="container mx-auto py-6 space-y-6">
       <Breadcrumb>
