@@ -22,12 +22,14 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
 
 const paymentSchema = z.object({
   company_earning: z.number().min(0),
   creator_earning: z.number().min(0),
   brand_payment_status: z.string(),
   creator_payment_status: z.string(),
+  payment_receipt: z.instanceof(File).optional(),
 });
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
@@ -60,6 +62,21 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
   async function onSubmit(data: PaymentFormValues) {
     try {
       setIsSubmitting(true);
+      let payment_receipt_url = null;
+
+      // Si hay un archivo PDF para subir y el pago al creador está marcado como pagado
+      if (data.payment_receipt && data.creator_payment_status === 'pagado') {
+        const fileExt = data.payment_receipt.name.split('.').pop();
+        const fileName = `${payment.id}-${Date.now()}.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('payment_receipts')
+          .upload(fileName, data.payment_receipt);
+
+        if (uploadError) throw uploadError;
+        payment_receipt_url = fileName;
+      }
+
       const { error } = await supabase
         .from('service_payments')
         .update({
@@ -67,8 +84,9 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           creator_earning: data.creator_earning,
           brand_payment_status: data.brand_payment_status,
           creator_payment_status: data.creator_payment_status,
-          brand_payment_date: data.brand_payment_status === 'completed' ? new Date().toISOString() : null,
-          creator_payment_date: data.creator_payment_status === 'completed' ? new Date().toISOString() : null,
+          brand_payment_date: data.brand_payment_status === 'pagado' ? new Date().toISOString() : null,
+          creator_payment_date: data.creator_payment_status === 'pagado' ? new Date().toISOString() : null,
+          ...(payment_receipt_url && { payment_receipt_url }),
         })
         .eq('id', payment.id);
 
@@ -143,8 +161,9 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="pagado">Pagado</SelectItem>
+                  <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -165,14 +184,32 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="pagado">Pagado</SelectItem>
+                  <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {form.watch("creator_payment_status") === "pagado" && (
+          <div className="space-y-2">
+            <Label htmlFor="payment_receipt">Comprobante de Pago (PDF)</Label>
+            <Input
+              id="payment_receipt"
+              type="file"
+              accept=".pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  form.setValue("payment_receipt", file);
+                }
+              }}
+            />
+          </div>
+        )}
 
         <div className="flex justify-end space-x-4">
           <Button variant="outline" onClick={onClose} type="button">
