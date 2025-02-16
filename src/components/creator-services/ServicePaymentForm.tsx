@@ -9,6 +9,7 @@ import { PaymentAmountFields } from "./payment-form/PaymentAmountFields";
 import { PaymentStatusFields } from "./payment-form/PaymentStatusFields";
 import { PaymentReceiptField } from "./payment-form/PaymentReceiptField";
 import { paymentFormSchema, type PaymentFormValues } from "./payment-form/schema";
+import { useEffect, useState } from "react";
 
 interface ServicePaymentFormProps {
   creatorServiceId: string;
@@ -17,6 +18,7 @@ interface ServicePaymentFormProps {
 
 export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePaymentFormProps) {
   const { toast } = useToast();
+  const [isRecurring, setIsRecurring] = useState(false);
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
@@ -27,6 +29,29 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       creator_payment_status: "pendiente",
     },
   });
+
+  useEffect(() => {
+    async function checkServiceType() {
+      const { data, error } = await supabase
+        .from('creator_services')
+        .select(`
+          services (
+            type
+          )
+        `)
+        .eq('id', creatorServiceId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching service type:', error);
+        return;
+      }
+
+      setIsRecurring(data?.services?.type === 'recurrente');
+    }
+
+    checkServiceType();
+  }, [creatorServiceId]);
 
   async function onSubmit(values: PaymentFormValues) {
     let payment_receipt_url = null;
@@ -61,6 +86,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       payment_receipt_url,
       brand_payment_date: values.brand_payment_date?.toISOString() || null,
       creator_payment_date: values.creator_payment_date?.toISOString() || null,
+      is_recurring: isRecurring, // Agregamos el campo is_recurring
     };
 
     const { error } = await supabase.from("service_payments").insert(paymentData);
