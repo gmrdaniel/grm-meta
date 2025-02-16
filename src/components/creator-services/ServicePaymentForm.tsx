@@ -10,6 +10,7 @@ import { PaymentStatusFields } from "./payment-form/PaymentStatusFields";
 import { PaymentReceiptField } from "./payment-form/PaymentReceiptField";
 import { paymentFormSchema, type PaymentFormValues } from "./payment-form/schema";
 import { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ServicePaymentFormProps {
   creatorServiceId: string;
@@ -69,6 +70,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
   }, [creatorServiceId, onClose, toast]);
 
   async function onSubmit(values: PaymentFormValues) {
+    console.log('Valores del formulario:', values);
     let payment_receipt_url = null;
 
     if (values.payment_receipt) {
@@ -104,6 +106,8 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       is_recurring: isRecurring,
     };
 
+    console.log('Datos a guardar:', paymentData);
+
     const { error } = await supabase.from("service_payments").insert(paymentData);
 
     if (error) {
@@ -126,9 +130,25 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 h-[calc(100vh-120px)] overflow-y-auto pr-4">
-        <PaymentAmountFields form={form} />
-        <PaymentStatusFields form={form} />
-        <PaymentReceiptField form={form} />
+        <Tabs defaultValue="amounts" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="amounts">Montos</TabsTrigger>
+            <TabsTrigger value="status">Estados de Pago</TabsTrigger>
+            <TabsTrigger value="receipt">Comprobante</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="amounts" className="space-y-4 mt-4">
+            <PaymentAmountFields form={form} />
+          </TabsContent>
+
+          <TabsContent value="status" className="space-y-4 mt-4">
+            <PaymentStatusFields form={form} />
+          </TabsContent>
+
+          <TabsContent value="receipt" className="space-y-4 mt-4">
+            <PaymentReceiptField form={form} />
+          </TabsContent>
+        </Tabs>
 
         <div className="flex justify-end space-x-2 mt-6">
           <Button variant="outline" type="button" onClick={onClose}>
