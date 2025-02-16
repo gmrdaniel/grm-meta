@@ -40,10 +40,25 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           )
         `)
         .eq('id', creatorServiceId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching service type:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo obtener la información del servicio.",
+        });
+        return;
+      }
+
+      if (!data) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se encontró el servicio especificado.",
+        });
+        onClose();
         return;
       }
 
@@ -51,7 +66,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
     }
 
     checkServiceType();
-  }, [creatorServiceId]);
+  }, [creatorServiceId, onClose, toast]);
 
   async function onSubmit(values: PaymentFormValues) {
     let payment_receipt_url = null;
@@ -86,7 +101,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       payment_receipt_url,
       brand_payment_date: values.brand_payment_date?.toISOString() || null,
       creator_payment_date: values.creator_payment_date?.toISOString() || null,
-      is_recurring: isRecurring, // Agregamos el campo is_recurring
+      is_recurring: isRecurring,
     };
 
     const { error } = await supabase.from("service_payments").insert(paymentData);
