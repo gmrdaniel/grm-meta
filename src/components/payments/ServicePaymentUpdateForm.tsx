@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
+import { DateSelector } from "../creator-services/payment-form/DateSelector";
 
 const paymentSchema = z.object({
   company_earning: z.number().min(0),
@@ -30,6 +31,8 @@ const paymentSchema = z.object({
   brand_payment_status: z.string(),
   creator_payment_status: z.string(),
   payment_receipt: z.instanceof(File).optional(),
+  brand_payment_date: z.date().optional(),
+  creator_payment_date: z.date().optional(),
 });
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
@@ -41,6 +44,8 @@ interface ServicePaymentUpdateFormProps {
     creator_earning: number;
     brand_payment_status: string;
     creator_payment_status: string;
+    brand_payment_date?: string;
+    creator_payment_date?: string;
   };
   onClose: () => void;
 }
@@ -56,15 +61,19 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
       creator_earning: payment.creator_earning,
       brand_payment_status: payment.brand_payment_status,
       creator_payment_status: payment.creator_payment_status,
+      brand_payment_date: payment.brand_payment_date ? new Date(payment.brand_payment_date) : undefined,
+      creator_payment_date: payment.creator_payment_date ? new Date(payment.creator_payment_date) : undefined,
     },
   });
+
+  const brandPaymentStatus = form.watch("brand_payment_status");
+  const creatorPaymentStatus = form.watch("creator_payment_status");
 
   async function onSubmit(data: PaymentFormValues) {
     try {
       setIsSubmitting(true);
       let payment_receipt_url = null;
 
-      // Si hay un archivo PDF para subir y el pago al creador está marcado como pagado
       if (data.payment_receipt && data.creator_payment_status === 'pagado') {
         const fileExt = data.payment_receipt.name.split('.').pop();
         const fileName = `${payment.id}-${Date.now()}.${fileExt}`;
@@ -84,8 +93,8 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           creator_earning: data.creator_earning,
           brand_payment_status: data.brand_payment_status,
           creator_payment_status: data.creator_payment_status,
-          brand_payment_date: data.brand_payment_status === 'pagado' ? new Date().toISOString() : null,
-          creator_payment_date: data.creator_payment_status === 'pagado' ? new Date().toISOString() : null,
+          brand_payment_date: data.brand_payment_date?.toISOString(),
+          creator_payment_date: data.creator_payment_date?.toISOString(),
           ...(payment_receipt_url && { payment_receipt_url }),
         })
         .eq('id', payment.id);
@@ -171,6 +180,16 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           )}
         />
 
+        {brandPaymentStatus === "pagado" && (
+          <FormField
+            control={form.control}
+            name="brand_payment_date"
+            render={({ field }) => (
+              <DateSelector field={field} label="Fecha de Pago de la Marca" />
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
           name="creator_payment_status"
@@ -194,21 +213,30 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           )}
         />
 
-        {form.watch("creator_payment_status") === "pagado" && (
-          <div className="space-y-2">
-            <Label htmlFor="payment_receipt">Comprobante de Pago (PDF)</Label>
-            <Input
-              id="payment_receipt"
-              type="file"
-              accept=".pdf"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  form.setValue("payment_receipt", file);
-                }
-              }}
+        {creatorPaymentStatus === "pagado" && (
+          <>
+            <FormField
+              control={form.control}
+              name="creator_payment_date"
+              render={({ field }) => (
+                <DateSelector field={field} label="Fecha de Pago al Creador" />
+              )}
             />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="payment_receipt">Comprobante de Pago (PDF)</Label>
+              <Input
+                id="payment_receipt"
+                type="file"
+                accept=".pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    form.setValue("payment_receipt", file);
+                  }
+                }}
+              />
+            </div>
+          </>
         )}
 
         <div className="flex justify-end space-x-4">
