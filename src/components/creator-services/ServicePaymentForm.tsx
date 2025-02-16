@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,8 +18,8 @@ const formSchema = z.object({
   total_amount: z.number().min(0, "El monto total debe ser mayor o igual a 0"),
   company_earning: z.number().min(0, "El monto de la empresa debe ser mayor o igual a 0"),
   creator_earning: z.number().min(0, "El monto del creador debe ser mayor o igual a 0"),
-  brand_payment_status: z.enum(["pending", "completed"]),
-  creator_payment_status: z.enum(["pending", "completed"]),
+  brand_payment_status: z.enum(["pendiente", "pagado", "atrasado"]),
+  creator_payment_status: z.enum(["pendiente", "pagado", "atrasado"]),
   brand_payment_date: z.date().optional(),
   creator_payment_date: z.date().optional(),
   payment_receipt: z.instanceof(File).optional(),
@@ -37,8 +38,8 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       total_amount: 0,
       company_earning: 0,
       creator_earning: 0,
-      brand_payment_status: "pending",
-      creator_payment_status: "pending",
+      brand_payment_status: "pendiente",
+      creator_payment_status: "pendiente",
     },
   });
 
@@ -172,8 +173,9 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="pagado">Pagado</SelectItem>
+                  <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -181,7 +183,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           )}
         />
 
-        {form.watch("brand_payment_status") === "completed" && (
+        {form.watch("brand_payment_status") === "pagado" && (
           <FormField
             control={form.control}
             name="brand_payment_date"
@@ -235,8 +237,9 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="completed">Completado</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                  <SelectItem value="pagado">Pagado</SelectItem>
+                  <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -244,7 +247,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           )}
         />
 
-        {form.watch("creator_payment_status") === "completed" && (
+        {form.watch("creator_payment_status") === "pagado" && (
           <FormField
             control={form.control}
             name="creator_payment_date"
