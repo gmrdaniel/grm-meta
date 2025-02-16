@@ -15,9 +15,7 @@ interface DateSelectorProps {
 
 export function DateSelector({ field, label }: DateSelectorProps) {
   const handleSelect = (date: Date | undefined) => {
-    if (date) {
-      field.onChange(date);
-    }
+    field.onChange(date);
   };
 
   return (
@@ -35,7 +33,7 @@ export function DateSelector({ field, label }: DateSelectorProps) {
               type="button"
             >
               {field.value ? (
-                format(new Date(field.value), "dd/MM/yyyy")
+                format(field.value, "dd/MM/yyyy")
               ) : (
                 <span>Seleccione una fecha</span>
               )}
@@ -46,14 +44,9 @@ export function DateSelector({ field, label }: DateSelectorProps) {
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={field.value ? new Date(field.value) : undefined}
+            selected={field.value}
             onSelect={handleSelect}
             initialFocus
-            disabled={false}
-            captionLayout="dropdown-buttons"
-            fromYear={2000}
-            toYear={2100}
-            showOutsideDays={true}
           />
         </PopoverContent>
       </Popover>
