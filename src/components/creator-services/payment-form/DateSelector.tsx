@@ -42,6 +42,9 @@ export function DateSelector({ field, label }: DateSelectorProps) {
             selected={field.value}
             onSelect={field.onChange}
             initialFocus
+            disabled={false}
+            fromDate={undefined}
+            toDate={undefined}
           />
         </PopoverContent>
       </Popover>
