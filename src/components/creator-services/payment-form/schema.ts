@@ -7,8 +7,8 @@ export const paymentFormSchema = z.object({
   creator_earning: z.number().min(0, "El monto del creador debe ser mayor o igual a 0"),
   brand_payment_status: z.enum(["pendiente", "pagado", "atrasado"]),
   creator_payment_status: z.enum(["pendiente", "pagado", "atrasado"]),
-  brand_payment_date: z.date().optional(),
-  creator_payment_date: z.date().optional(),
+  brand_payment_date: z.date().nullable(),
+  creator_payment_date: z.date().nullable(),
   payment_receipt: z.instanceof(File).optional(),
 });
 

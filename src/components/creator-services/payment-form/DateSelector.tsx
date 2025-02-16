@@ -14,6 +14,8 @@ interface DateSelectorProps {
 }
 
 export function DateSelector({ field, label }: DateSelectorProps) {
+  const value = field.value ? new Date(field.value) : undefined;
+
   return (
     <FormItem className="flex flex-col">
       <FormLabel>{label}</FormLabel>
@@ -28,8 +30,8 @@ export function DateSelector({ field, label }: DateSelectorProps) {
               )}
               type="button"
             >
-              {field.value ? (
-                format(new Date(field.value), "dd/MM/yyyy")
+              {value ? (
+                format(value, "dd/MM/yyyy")
               ) : (
                 <span>Seleccione una fecha</span>
               )}
@@ -40,10 +42,13 @@ export function DateSelector({ field, label }: DateSelectorProps) {
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={field.value ? new Date(field.value) : undefined}
+            selected={value}
             onSelect={(date) => {
-              console.log('Fecha seleccionada:', date);
-              field.onChange(date);
+              if (date) {
+                console.log('Fecha seleccionada antes de onChange:', date);
+                field.onChange(date);
+                console.log('Valor del campo después de onChange:', field.value);
+              }
             }}
             className="rounded-md border"
           />

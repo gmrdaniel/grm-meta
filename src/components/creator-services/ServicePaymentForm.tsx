@@ -28,6 +28,8 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       creator_earning: 0,
       brand_payment_status: "pendiente",
       creator_payment_status: "pendiente",
+      brand_payment_date: null,
+      creator_payment_date: null,
     },
   });
 
@@ -70,7 +72,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
   }, [creatorServiceId, onClose, toast]);
 
   async function onSubmit(values: PaymentFormValues) {
-    console.log('Valores del formulario:', values);
+    console.log('Valores del formulario antes de procesar:', values);
     let payment_receipt_url = null;
 
     if (values.payment_receipt) {
@@ -106,7 +108,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       is_recurring: isRecurring,
     };
 
-    console.log('Datos a guardar:', paymentData);
+    console.log('Datos a guardar en la BD:', paymentData);
 
     const { error } = await supabase.from("service_payments").insert(paymentData);
 
