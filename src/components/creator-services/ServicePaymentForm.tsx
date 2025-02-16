@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PaymentAmountFields } from "./payment-form/PaymentAmountFields";
 import { PaymentStatusFields } from "./payment-form/PaymentStatusFields";
 import { PaymentReceiptField } from "./payment-form/PaymentReceiptField";
+import { PaymentMonthField } from "./payment-form/PaymentMonthField";
 import { paymentFormSchema, type PaymentFormValues } from "./payment-form/schema";
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +31,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       creator_payment_status: "pendiente",
       brand_payment_date: null,
       creator_payment_date: null,
+      payment_month: null,
     },
   });
 
@@ -65,13 +67,27 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
         return;
       }
 
-      setIsRecurring(data?.services?.type === 'recurrente');
+      const isServiceRecurring = data?.services?.type === 'recurrente';
+      setIsRecurring(isServiceRecurring);
+      
+      if (!isServiceRecurring) {
+        form.setValue('payment_month', null);
+      }
     }
 
     checkServiceType();
-  }, [creatorServiceId, onClose, toast]);
+  }, [creatorServiceId, onClose, toast, form]);
 
   async function onSubmit(values: PaymentFormValues) {
+    if (isRecurring && !values.payment_month) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Debe seleccionar un mes de pago para servicios recurrentes.",
+      });
+      return;
+    }
+
     console.log('Valores del formulario antes de procesar:', values);
     let payment_receipt_url = null;
 
@@ -106,6 +122,7 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
       brand_payment_date: values.brand_payment_date?.toISOString() || null,
       creator_payment_date: values.creator_payment_date?.toISOString() || null,
       is_recurring: isRecurring,
+      payment_month: values.payment_month?.toISOString() || null,
     };
 
     console.log('Datos a guardar en la BD:', paymentData);
@@ -113,10 +130,16 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
     const { error } = await supabase.from("service_payments").insert(paymentData);
 
     if (error) {
+      let errorMessage = "No se pudo registrar el pago. Por favor intente nuevamente.";
+      
+      if (error.code === '23505') {
+        errorMessage = "Ya existe un pago registrado para este mes y servicio.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No se pudo registrar el pago. Por favor intente nuevamente.",
+        description: errorMessage,
       });
       console.error("Error registering payment:", error);
       return;
@@ -140,6 +163,9 @@ export function ServicePaymentForm({ creatorServiceId, onClose }: ServicePayment
           </TabsList>
 
           <TabsContent value="amounts" className="space-y-4 mt-4">
+            {isRecurring && (
+              <PaymentMonthField form={form} isRecurring={isRecurring} />
+            )}
             <PaymentAmountFields form={form} />
           </TabsContent>
 

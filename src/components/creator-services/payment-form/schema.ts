@@ -10,6 +10,7 @@ export const paymentFormSchema = z.object({
   brand_payment_date: z.date().nullable(),
   creator_payment_date: z.date().nullable(),
   payment_receipt: z.instanceof(File).optional(),
+  payment_month: z.date().nullable(),
 });
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;
