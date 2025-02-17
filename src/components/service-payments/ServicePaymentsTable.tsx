@@ -29,13 +29,12 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
           <TableRow>
             <TableHead>Creador</TableHead>
             <TableHead>Servicio</TableHead>
-            <TableHead>Monto Total</TableHead>
             <TableHead>Ganancia Empresa</TableHead>
             <TableHead>Ganancia Creador</TableHead>
             <TableHead>Estado Pago Marca</TableHead>
             <TableHead>Fecha Pago Marca</TableHead>
             <TableHead>Estado Pago Creador</TableHead>
-            <TableHead>Fecha Pago Creador</TableHead>
+            <TableHead>Mes de Pago Creador</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,7 +49,6 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
               <TableCell>
                 {payment.creator_service?.services?.name ?? "N/A"}
               </TableCell>
-              <TableCell>${payment.total_amount}</TableCell>
               <TableCell>${payment.company_earning}</TableCell>
               <TableCell>${payment.creator_earning}</TableCell>
               <TableCell>
@@ -70,7 +68,7 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
               </TableCell>
               <TableCell>
                 {payment.creator_payment_date
-                  ? format(new Date(payment.creator_payment_date), "dd/MM/yyyy")
+                  ? format(new Date(payment.creator_payment_date), "MMMM yyyy")
                   : "N/A"}
               </TableCell>
               <TableCell>
