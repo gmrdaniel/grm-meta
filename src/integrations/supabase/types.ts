@@ -168,6 +168,50 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          service_id: string
+          status: string
+          token: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          service_id: string
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          service_id?: string
+          status?: string
+          token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invitations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_services: {
         Row: {
           company_share: number | null
@@ -397,6 +441,71 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      service_payments: {
+        Row: {
+          brand_payment_date: string | null
+          brand_payment_status: string
+          company_earning: number
+          created_at: string | null
+          creator_earning: number
+          creator_payment_date: string | null
+          creator_payment_status: string
+          creator_service_id: string | null
+          id: string
+          is_recurring: boolean | null
+          payment_date: string | null
+          payment_month: string | null
+          payment_period: string | null
+          payment_receipt_url: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          brand_payment_date?: string | null
+          brand_payment_status?: string
+          company_earning: number
+          created_at?: string | null
+          creator_earning: number
+          creator_payment_date?: string | null
+          creator_payment_status?: string
+          creator_service_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          payment_date?: string | null
+          payment_month?: string | null
+          payment_period?: string | null
+          payment_receipt_url?: string | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          brand_payment_date?: string | null
+          brand_payment_status?: string
+          company_earning?: number
+          created_at?: string | null
+          creator_earning?: number
+          creator_payment_date?: string | null
+          creator_payment_status?: string
+          creator_service_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          payment_date?: string | null
+          payment_month?: string | null
+          payment_period?: string | null
+          payment_receipt_url?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_payments_creator_service_id_fkey"
+            columns: ["creator_service_id"]
+            isOneToOne: false
+            referencedRelation: "creator_services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {
