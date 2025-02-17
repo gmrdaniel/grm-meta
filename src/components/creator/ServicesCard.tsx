@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface Service {
   id: string;
@@ -21,6 +23,7 @@ interface CreatorService {
   id: string;
   service: Service;
   status: string;
+  terms_accepted: boolean;
   start_date: string;
   end_date: string | null;
   monthly_fee: number | null;
@@ -45,6 +48,18 @@ export function ServicesCard({
   onAddService,
   addingService,
 }: ServicesCardProps) {
+  const getStatusColor = (status: string, isActive: boolean) => {
+    if (!isActive) return "bg-gray-500";
+    switch (status.toLowerCase()) {
+      case 'activo':
+        return 'bg-green-500';
+      case 'pendiente':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -58,41 +73,45 @@ export function ServicesCard({
           <div className="space-y-4">
             {creatorServices.map((creatorService) => (
               <div key={creatorService.id} className="border p-4 rounded-lg">
-                <h3 className="font-medium text-lg mb-2">{creatorService.service.name}</h3>
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-medium text-lg">{creatorService.service.name}</h3>
+                  <div className="flex gap-2">
+                    <Badge className={getStatusColor(creatorService.status, creatorService.terms_accepted)}>
+                      {creatorService.terms_accepted ? "Activo" : "Inactivo"}
+                    </Badge>
+                    <Badge variant="outline">
+                      {creatorService.status}
+                    </Badge>
+                  </div>
+                </div>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <dt className="font-medium text-gray-500">Type</dt>
+                    <dt className="font-medium text-gray-500">Tipo</dt>
                     <dd className="capitalize">{creatorService.service.type}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-gray-500">Status</dt>
-                    <dd className="capitalize">{creatorService.status}</dd>
+                    <dt className="font-medium text-gray-500">Fecha de Firma</dt>
+                    <dd>
+                      {creatorService.start_date
+                        ? format(new Date(creatorService.start_date), "dd/MM/yyyy")
+                        : "No firmado"}
+                    </dd>
                   </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Start Date</dt>
-                    <dd>{new Date(creatorService.start_date).toLocaleDateString()}</dd>
-                  </div>
-                  {creatorService.end_date && (
-                    <div>
-                      <dt className="font-medium text-gray-500">End Date</dt>
-                      <dd>{new Date(creatorService.end_date).toLocaleDateString()}</dd>
-                    </div>
-                  )}
                   {creatorService.monthly_fee && (
                     <div>
-                      <dt className="font-medium text-gray-500">Monthly Fee</dt>
+                      <dt className="font-medium text-gray-500">Cuota Mensual</dt>
                       <dd>${creatorService.monthly_fee}</dd>
                     </div>
                   )}
                   {creatorService.company_share && (
                     <div>
-                      <dt className="font-medium text-gray-500">Company Share</dt>
+                      <dt className="font-medium text-gray-500">Comisión Empresa</dt>
                       <dd>{creatorService.company_share}%</dd>
                     </div>
                   )}
                   {creatorService.total_revenue && (
                     <div>
-                      <dt className="font-medium text-gray-500">Total Revenue</dt>
+                      <dt className="font-medium text-gray-500">Ingresos Totales</dt>
                       <dd>${creatorService.total_revenue}</dd>
                     </div>
                   )}
