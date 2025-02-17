@@ -75,7 +75,6 @@ export function CreatorServicesTableContent({
       </TableHeader>
       <TableBody>
         {creatorServices.map((creatorService) => {
-          // Validar que el servicio exista antes de renderizar la fila
           if (!creatorService) return null;
 
           return (
