@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { format } from "date-fns";
 
 interface Service {
   id: string;
@@ -26,6 +28,7 @@ interface CreatorService {
   monthly_fee: number | null;
   company_share: number | null;
   total_revenue: number | null;
+  terms_accepted: boolean;
 }
 
 interface ServicesCardProps {
@@ -45,6 +48,20 @@ export function ServicesCard({
   onAddService,
   addingService,
 }: ServicesCardProps) {
+  const getStatusBadgeVariant = (status: string, terms_accepted: boolean) => {
+    if (!terms_accepted) return "secondary";
+    switch (status.toLowerCase()) {
+      case 'activo':
+        return 'default';
+      case 'pendiente':
+        return 'secondary';
+      case 'terminado':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -58,42 +75,52 @@ export function ServicesCard({
           <div className="space-y-4">
             {creatorServices.map((creatorService) => (
               <div key={creatorService.id} className="border p-4 rounded-lg">
-                <h3 className="font-medium text-lg mb-2">{creatorService.service.name}</h3>
+                <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+                  <h3 className="font-medium text-lg">{creatorService.service.name}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={getStatusBadgeVariant(creatorService.status, creatorService.terms_accepted)}>
+                      {creatorService.terms_accepted ? "Activo" : "Inactivo"}
+                    </Badge>
+                    <Badge variant="outline">
+                      {creatorService.status}
+                    </Badge>
+                  </div>
+                </div>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <dt className="font-medium text-gray-500">Type</dt>
+                    <dt className="font-medium text-gray-500">Tipo</dt>
                     <dd className="capitalize">{creatorService.service.type}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-gray-500">Status</dt>
-                    <dd className="capitalize">{creatorService.status}</dd>
+                    <dt className="font-medium text-gray-500">Fecha de Firma</dt>
+                    <dd>
+                      {creatorService.terms_accepted 
+                        ? format(new Date(creatorService.start_date), "dd/MM/yyyy")
+                        : "No firmado"}
+                    </dd>
                   </div>
-                  <div>
-                    <dt className="font-medium text-gray-500">Start Date</dt>
-                    <dd>{new Date(creatorService.start_date).toLocaleDateString()}</dd>
-                  </div>
-                  {creatorService.end_date && (
+                  {creatorService.monthly_fee !== null && (
                     <div>
-                      <dt className="font-medium text-gray-500">End Date</dt>
-                      <dd>{new Date(creatorService.end_date).toLocaleDateString()}</dd>
+                      <dt className="font-medium text-gray-500">Cuota Mensual</dt>
+                      <dd>${creatorService.monthly_fee.toFixed(2)}</dd>
                     </div>
                   )}
-                  {creatorService.monthly_fee && (
+                  {creatorService.company_share !== null && (
                     <div>
-                      <dt className="font-medium text-gray-500">Monthly Fee</dt>
-                      <dd>${creatorService.monthly_fee}</dd>
-                    </div>
-                  )}
-                  {creatorService.company_share && (
-                    <div>
-                      <dt className="font-medium text-gray-500">Company Share</dt>
+                      <dt className="font-medium text-gray-500">Comisión Empresa</dt>
                       <dd>{creatorService.company_share}%</dd>
                     </div>
                   )}
-                  {creatorService.total_revenue && (
+                  {creatorService.total_revenue !== null && (
                     <div>
-                      <dt className="font-medium text-gray-500">Total Revenue</dt>
-                      <dd>${creatorService.total_revenue}</dd>
+                      <dt className="font-medium text-gray-500">Ingresos Totales</dt>
+                      <dd>${creatorService.total_revenue.toFixed(2)}</dd>
+                    </div>
+                  )}
+                  {creatorService.end_date && (
+                    <div>
+                      <dt className="font-medium text-gray-500">Fecha de Finalización</dt>
+                      <dd>{format(new Date(creatorService.end_date), "dd/MM/yyyy")}</dd>
                     </div>
                   )}
                 </dl>
@@ -103,11 +130,11 @@ export function ServicesCard({
         )}
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Add New Service</h3>
+          <h3 className="text-lg font-medium">Agregar Nuevo Servicio</h3>
           <div className="flex gap-4">
             <Select value={selectedServiceId} onValueChange={onServiceSelect}>
               <SelectTrigger className="w-[300px]">
-                <SelectValue placeholder="Select a service" />
+                <SelectValue placeholder="Seleccionar servicio" />
               </SelectTrigger>
               <SelectContent>
                 {availableServices
@@ -123,7 +150,7 @@ export function ServicesCard({
               onClick={onAddService} 
               disabled={addingService || !selectedServiceId}
             >
-              {addingService ? "Adding..." : "Add Service"}
+              {addingService ? "Agregando..." : "Agregar Servicio"}
             </Button>
           </div>
         </div>

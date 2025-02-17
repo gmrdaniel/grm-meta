@@ -14,6 +14,7 @@ import { ServicesCard } from "@/components/creator/ServicesCard";
 
 interface CreatorDetail {
   id: string;
+  email: string | null;
   created_at: string;
   personal_data?: {
     first_name: string | null;
@@ -46,8 +47,6 @@ interface Service {
   name: string;
   type: 'único' | 'recurrente' | 'contrato';
   description: string | null;
-  fixed_fee: number;
-  contract_duration: number | null;
 }
 
 interface CreatorService {
@@ -59,8 +58,7 @@ interface CreatorService {
   monthly_fee: number | null;
   company_share: number | null;
   total_revenue: number | null;
-  fixed_fee: number | null;
-  contract_duration: number | null;
+  terms_accepted: boolean;
 }
 
 export default function CreatorDetail() {
@@ -80,6 +78,11 @@ export default function CreatorDetail() {
 
   async function fetchCreatorDetail() {
     try {
+      const { data: emailData, error: emailError } = await supabase
+        .rpc('get_user_email', { user_id: id });
+
+      if (emailError) throw emailError;
+
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -114,7 +117,7 @@ export default function CreatorDetail() {
         .single();
 
       if (error) throw error;
-      setCreator(data);
+      setCreator({ ...data, email: emailData });
     } catch (error: any) {
       toast.error("Error fetching creator details");
       console.error("Error:", error.message);
@@ -135,15 +138,12 @@ export default function CreatorDetail() {
           monthly_fee,
           company_share,
           total_revenue,
-          fixed_fee,
-          contract_duration,
+          terms_accepted,
           service:services (
             id,
             name,
             type,
-            description,
-            fixed_fee,
-            contract_duration
+            description
           )
         `)
         .eq("profile_id", id);
@@ -267,6 +267,15 @@ export default function CreatorDetail() {
             </div>
 
             <div className="space-y-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-medium mb-4">Correo Electrónico</h3>
+                <input
+                  type="email"
+                  value={creator.email || ''}
+                  readOnly
+                  className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600"
+                />
+              </div>
               <PersonalInfoCard personalData={creator.personal_data} />
               <BankDetailsCard bankDetails={creator.bank_details} />
               <ServicesCard

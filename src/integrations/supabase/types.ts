@@ -560,6 +560,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_email: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: {
           user_id: string
