@@ -28,12 +28,13 @@ export function useCreatorServices(
           status,
           created_at,
           updated_at,
-          services (
+          service_id,
+          services!creator_services_service_id_fkey (
             id,
             name,
             type
           ),
-          profiles (
+          profiles!creator_services_profile_id_fkey (
             id,
             personal_data (
               first_name,
