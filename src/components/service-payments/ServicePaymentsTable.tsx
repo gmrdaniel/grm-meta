@@ -27,14 +27,14 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Creador</TableHead>
+            <TableHead>Mes de Pago Creador</TableHead>
             <TableHead>Servicio</TableHead>
+            <TableHead>Creador</TableHead>
             <TableHead>Ganancia Empresa</TableHead>
-            <TableHead>Ganancia Creador</TableHead>
             <TableHead>Estado Pago Marca</TableHead>
             <TableHead>Fecha Pago Marca</TableHead>
+            <TableHead>Ganancia Creador</TableHead>
             <TableHead>Estado Pago Creador</TableHead>
-            <TableHead>Mes de Pago Creador</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -42,15 +42,19 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
           {payments.map((payment: any) => (
             <TableRow key={payment.id}>
               <TableCell>
-                {payment.creator_service?.profiles?.personal_data
-                  ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}`
+                {payment.creator_payment_date
+                  ? format(new Date(payment.creator_payment_date), "MMMM yyyy")
                   : "N/A"}
               </TableCell>
               <TableCell>
                 {payment.creator_service?.services?.name ?? "N/A"}
               </TableCell>
+              <TableCell>
+                {payment.creator_service?.profiles?.personal_data
+                  ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}`
+                  : "N/A"}
+              </TableCell>
               <TableCell>${payment.company_earning}</TableCell>
-              <TableCell>${payment.creator_earning}</TableCell>
               <TableCell>
                 <Badge className={getStatusBadgeColor(payment.brand_payment_status)}>
                   {payment.brand_payment_status}
@@ -61,15 +65,11 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
                   ? format(new Date(payment.brand_payment_date), "dd/MM/yyyy")
                   : "N/A"}
               </TableCell>
+              <TableCell>${payment.creator_earning}</TableCell>
               <TableCell>
                 <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
                   {payment.creator_payment_status}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {payment.creator_payment_date
-                  ? format(new Date(payment.creator_payment_date), "MMMM yyyy")
-                  : "N/A"}
               </TableCell>
               <TableCell>
                 <Button 
