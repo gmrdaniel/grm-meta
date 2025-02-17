@@ -2,11 +2,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { DollarSign } from "lucide-react";
-import { useState } from "react";
-import { ServicePaymentForm } from "./ServicePaymentForm";
 
 interface Creator {
   id: string;
@@ -34,14 +31,14 @@ interface CreatorService {
 interface CreatorServicesTableContentProps {
   isLoading: boolean;
   creatorServices?: CreatorService[];
+  onServiceSelect: (serviceId: string) => void;
 }
 
 export function CreatorServicesTableContent({
   isLoading,
   creatorServices = [],
+  onServiceSelect,
 }: CreatorServicesTableContentProps) {
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -98,28 +95,13 @@ export function CreatorServicesTableContent({
                   : "N/A"}
               </TableCell>
               <TableCell>
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setSelectedServiceId(creatorService.id)}
-                    >
-                      <DollarSign className="h-4 w-4" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Registrar Pago</SheetTitle>
-                    </SheetHeader>
-                    {selectedServiceId && (
-                      <ServicePaymentForm
-                        creatorServiceId={selectedServiceId}
-                        onClose={() => setSelectedServiceId(null)}
-                      />
-                    )}
-                  </SheetContent>
-                </Sheet>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onServiceSelect(creatorService.id)}
+                >
+                  <DollarSign className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           );

@@ -6,8 +6,11 @@ import { CreatorServicesPagination } from "./CreatorServicesPagination";
 import { useCreatorServices } from "./hooks/useCreatorServices";
 import { useServices } from "@/hooks/useServices";
 
-export function CreatorServicesTable() {
-  // Inicializar estados con valores por defecto
+interface CreatorServicesTableProps {
+  onServiceSelect: (serviceId: string) => void;
+}
+
+export function CreatorServicesTable({ onServiceSelect }: CreatorServicesTableProps) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState<string>("all");
@@ -49,6 +52,7 @@ export function CreatorServicesTable() {
         <CreatorServicesTableContent
           isLoading={isLoadingCreatorServices}
           creatorServices={data?.creatorServices}
+          onServiceSelect={onServiceSelect}
         />
       </div>
 
