@@ -17,6 +17,8 @@ interface Service {
   name: string;
   type: 'único' | 'recurrente' | 'contrato';
   description: string | null;
+  fixed_fee: number | null;
+  contract_duration: number | null;
 }
 
 interface CreatorService {
@@ -99,6 +101,18 @@ export function ServicesCard({
                         : "No firmado"}
                     </dd>
                   </div>
+                  {creatorService.service.fixed_fee !== null && (
+                    <div>
+                      <dt className="font-medium text-gray-500">Cuota Fija</dt>
+                      <dd>${creatorService.service.fixed_fee.toFixed(2)}</dd>
+                    </div>
+                  )}
+                  {creatorService.service.contract_duration !== null && (
+                    <div>
+                      <dt className="font-medium text-gray-500">Duración del Contrato</dt>
+                      <dd>{creatorService.service.contract_duration} meses</dd>
+                    </div>
+                  )}
                   {creatorService.monthly_fee !== null && (
                     <div>
                       <dt className="font-medium text-gray-500">Cuota Mensual</dt>

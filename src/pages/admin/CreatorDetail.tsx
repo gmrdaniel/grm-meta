@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +46,8 @@ interface Service {
   name: string;
   type: 'único' | 'recurrente' | 'contrato';
   description: string | null;
+  fixed_fee: number | null;
+  contract_duration: number | null;
 }
 
 interface CreatorService {
@@ -59,6 +60,8 @@ interface CreatorService {
   company_share: number | null;
   total_revenue: number | null;
   terms_accepted: boolean;
+  fixed_fee: number | null;
+  contract_duration: number | null;
 }
 
 export default function CreatorDetail() {
@@ -143,7 +146,9 @@ export default function CreatorDetail() {
             id,
             name,
             type,
-            description
+            description,
+            fixed_fee,
+            contract_duration
           )
         `)
         .eq("profile_id", id);
@@ -154,7 +159,9 @@ export default function CreatorDetail() {
         ...service,
         service: {
           ...service.service,
-          type: service.service.type as 'único' | 'recurrente' | 'contrato'
+          type: service.service.type as 'único' | 'recurrente' | 'contrato',
+          fixed_fee: service.service.fixed_fee,
+          contract_duration: service.service.contract_duration
         }
       })) || [];
       
@@ -176,7 +183,9 @@ export default function CreatorDetail() {
       
       const typedServices = data?.map(service => ({
         ...service,
-        type: service.type as 'único' | 'recurrente' | 'contrato'
+        type: service.type as 'único' | 'recurrente' | 'contrato',
+        fixed_fee: service.fixed_fee,
+        contract_duration: service.contract_duration
       })) || [];
       
       setAvailableServices(typedServices);
