@@ -4,23 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PencilIcon } from "lucide-react";
 import { format } from "date-fns";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ServicePaymentUpdateForm } from "@/components/payments/ServicePaymentUpdateForm";
-import { useState } from "react";
 
 interface ServicePaymentsTableProps {
   payments: any[];
+  onPaymentSelect: (payment: any) => void;
 }
 
-export function ServicePaymentsTable({ payments }: ServicePaymentsTableProps) {
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
-
+export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePaymentsTableProps) {
   const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -84,28 +74,13 @@ export function ServicePaymentsTable({ payments }: ServicePaymentsTableProps) {
                   : "N/A"}
               </TableCell>
               <TableCell>
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setSelectedPayment(payment)}
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Registrar Pago</SheetTitle>
-                    </SheetHeader>
-                    {selectedPayment && (
-                      <ServicePaymentUpdateForm
-                        payment={selectedPayment}
-                        onClose={() => setSelectedPayment(null)}
-                      />
-                    )}
-                  </SheetContent>
-                </Sheet>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => onPaymentSelect(payment)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

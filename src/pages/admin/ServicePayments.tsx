@@ -7,16 +7,30 @@ import { CreatorServicesPagination } from "@/components/creator-services/Creator
 import { ServicePaymentsHeader } from "@/components/service-payments/ServicePaymentsHeader";
 import { ServicePaymentsTable } from "@/components/service-payments/ServicePaymentsTable";
 import { useServicePayments } from "@/hooks/useServicePayments";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ServicePaymentUpdateForm } from "@/components/payments/ServicePaymentUpdateForm";
 
 const PAGE_SIZE = 10;
 
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
   const [showRecurringOnly, setShowRecurringOnly] = useState(true);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("list");
 
   const { data, isLoading } = useServicePayments(page, PAGE_SIZE, showRecurringOnly);
 
   const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
+
+  const handlePaymentSelect = (payment: any) => {
+    setSelectedPayment(payment);
+    setActiveTab("edit");
+  };
+
+  const handleEditClose = () => {
+    setSelectedPayment(null);
+    setActiveTab("list");
+  };
 
   const content = (
     <div className="container mx-auto py-6 space-y-6">
@@ -25,15 +39,41 @@ export default function ServicePayments() {
         setShowRecurringOnly={setShowRecurringOnly}
       />
 
-      {data?.payments && (
-        <ServicePaymentsTable payments={data.payments} />
-      )}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="list">Lista de Pagos</TabsTrigger>
+          <TabsTrigger value="edit" disabled={!selectedPayment}>
+            Editar Pago
+          </TabsTrigger>
+        </TabsList>
 
-      <CreatorServicesPagination
-        page={page}
-        totalPages={totalPages}
-        setPage={setPage}
-      />
+        <TabsContent value="list" className="mt-6">
+          {data?.payments && (
+            <>
+              <ServicePaymentsTable 
+                payments={data.payments} 
+                onPaymentSelect={handlePaymentSelect}
+              />
+              <div className="mt-4">
+                <CreatorServicesPagination
+                  page={page}
+                  totalPages={totalPages}
+                  setPage={setPage}
+                />
+              </div>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="edit">
+          {selectedPayment && (
+            <ServicePaymentUpdateForm
+              payment={selectedPayment}
+              onClose={handleEditClose}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 
