@@ -412,6 +412,41 @@ export type Database = {
           },
         ]
       }
+      post_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          platform_id: string
+          status: Database["public"]["Enums"]["status_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          platform_id: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          platform_id?: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_types_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -555,6 +590,30 @@ export type Database = {
         }
         Relationships: []
       }
+      social_platforms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["status_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -575,6 +634,7 @@ export type Database = {
     }
     Enums: {
       payment_method: "bank_transfer" | "paypal"
+      status_type: "active" | "inactive"
       user_role: "admin" | "creator"
     }
     CompositeTypes: {
