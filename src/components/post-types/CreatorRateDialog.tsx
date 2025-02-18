@@ -29,7 +29,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import type { CreatorBasicInfo, Platform, PostType, CreatorRate } from "@/types/services";
+
+interface CreatorRateDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+}
+
+interface Creator {
+  id: string;
+  personal_data?: {
+    first_name: string | null;
+    last_name: string | null;
+    instagram_username: string | null;
+  } | null;
+}
+
+interface Platform {
+  id: string;
+  name: string;
+  status: string;
+}
+
+interface PostType {
+  id: string;
+  name: string;
+  status: string;
+  platform_id: string;
+}
 
 const formSchema = z.object({
   creator_id: z.string().min(1, "Seleccione un creador"),
@@ -39,12 +66,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-interface CreatorRateDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
-}
 
 export function CreatorRateDialog({
   open,
@@ -63,7 +84,7 @@ export function CreatorRateDialog({
     },
   });
 
-  const { data: creators = [] } = useQuery<CreatorBasicInfo[]>({
+  const { data: creators = [] } = useQuery<Creator[]>({
     queryKey: ["creators", creatorSearch],
     queryFn: async () => {
       const { data, error } = await supabase

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { CreatorRateDialog } from "@/components/post-types/CreatorRateDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 
 type CreatorRate = {
   id: string;
@@ -87,89 +90,97 @@ export default function CreatorRates() {
   });
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Tarifas de Creadores</h1>
-        <Button onClick={() => setRateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nueva Tarifa
-        </Button>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold">Tarifas de Creadores</h1>
+              <Button onClick={() => setRateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Tarifa
+              </Button>
+            </div>
+
+            <div className="flex items-center space-x-2 mb-4">
+              <Search className="w-4 h-4 text-gray-500" />
+              <Input
+                placeholder="Buscar por nombre o usuario de Instagram..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                className="max-w-sm"
+              />
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Creador</TableHead>
+                  <TableHead>Red Social</TableHead>
+                  <TableHead>Tipo de Publicación</TableHead>
+                  <TableHead>Tarifa (USD)</TableHead>
+                  <TableHead>Fecha de Creación</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rates?.rates.map((rate) => (
+                  <TableRow key={rate.id}>
+                    <TableCell>
+                      {rate.profiles.personal_data?.first_name} {rate.profiles.personal_data?.last_name}
+                      {rate.profiles.personal_data?.instagram_username && (
+                        <span className="text-sm text-gray-500 block">
+                          @{rate.profiles.personal_data.instagram_username}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{rate.social_platforms.name}</TableCell>
+                    <TableCell>{rate.post_types.name}</TableCell>
+                    <TableCell>${rate.rate_usd}</TableCell>
+                    <TableCell>
+                      {new Date(rate.created_at).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {rates?.totalPages > 1 && (
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                  disabled={page === 1}
+                >
+                  Anterior
+                </Button>
+                <span className="flex items-center px-3">
+                  Página {page} de {rates.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(prev => Math.min(rates.totalPages, prev + 1))}
+                  disabled={page === rates.totalPages}
+                >
+                  Siguiente
+                </Button>
+              </div>
+            )}
+
+            <CreatorRateDialog
+              open={rateDialogOpen}
+              onOpenChange={setRateDialogOpen}
+              onSuccess={refetchRates}
+            />
+          </div>
+        </main>
       </div>
-
-      <div className="flex items-center space-x-2 mb-4">
-        <Search className="w-4 h-4 text-gray-500" />
-        <Input
-          placeholder="Buscar por nombre o usuario de Instagram..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setPage(1);
-          }}
-          className="max-w-sm"
-        />
-      </div>
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Creador</TableHead>
-            <TableHead>Red Social</TableHead>
-            <TableHead>Tipo de Publicación</TableHead>
-            <TableHead>Tarifa (USD)</TableHead>
-            <TableHead>Fecha de Creación</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rates?.rates.map((rate) => (
-            <TableRow key={rate.id}>
-              <TableCell>
-                {rate.profiles.personal_data?.first_name} {rate.profiles.personal_data?.last_name}
-                {rate.profiles.personal_data?.instagram_username && (
-                  <span className="text-sm text-gray-500 block">
-                    @{rate.profiles.personal_data.instagram_username}
-                  </span>
-                )}
-              </TableCell>
-              <TableCell>{rate.social_platforms.name}</TableCell>
-              <TableCell>{rate.post_types.name}</TableCell>
-              <TableCell>${rate.rate_usd}</TableCell>
-              <TableCell>
-                {new Date(rate.created_at).toLocaleDateString()}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      {rates?.totalPages > 1 && (
-        <div className="flex justify-end gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(prev => Math.max(1, prev - 1))}
-            disabled={page === 1}
-          >
-            Anterior
-          </Button>
-          <span className="flex items-center px-3">
-            Página {page} de {rates.totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(prev => Math.min(rates.totalPages, prev + 1))}
-            disabled={page === rates.totalPages}
-          >
-            Siguiente
-          </Button>
-        </div>
-      )}
-
-      <CreatorRateDialog
-        open={rateDialogOpen}
-        onOpenChange={setRateDialogOpen}
-        onSuccess={refetchRates}
-      />
     </div>
   );
 }
