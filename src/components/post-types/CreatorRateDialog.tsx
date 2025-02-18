@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 
+// Simplified schema
 const formSchema = z.object({
   creator_id: z.string().min(1, "Seleccione un creador"),
   platform_id: z.string().min(1, "Seleccione una red social"),
@@ -37,6 +38,7 @@ const formSchema = z.object({
   rate_usd: z.number().min(0, "La tarifa debe ser mayor o igual a 0"),
 });
 
+// Simplified types
 type FormValues = z.infer<typeof formSchema>;
 
 interface CreatorRateDialogProps {
@@ -45,21 +47,33 @@ interface CreatorRateDialogProps {
   onSuccess: () => void;
 }
 
-type Creator = {
+interface CreatorData {
+  first_name: string | null;
+  last_name: string | null;
+  instagram_username: string | null;
+}
+
+interface Creator {
   id: string;
-  personal_data: {
-    first_name: string | null;
-    last_name: string | null;
-    instagram_username: string | null;
-  } | null;
-};
+  personal_data: CreatorData | null;
+}
+
+interface Platform {
+  id: string;
+  name: string;
+}
+
+interface PostType {
+  id: string;
+  name: string;
+}
 
 export function CreatorRateDialog({
   open,
   onOpenChange,
   onSuccess,
 }: CreatorRateDialogProps) {
-  const [creatorSearch, setCreatorSearch] = useState("");
+  const [creatorSearch] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -71,7 +85,7 @@ export function CreatorRateDialog({
     },
   });
 
-  const { data: creators = [] } = useQuery({
+  const { data: creators = [] } = useQuery<Creator[]>({
     queryKey: ["creators", creatorSearch],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -87,11 +101,11 @@ export function CreatorRateDialog({
         .eq("role", "creator");
 
       if (error) throw error;
-      return data as Creator[];
+      return data || [];
     },
   });
 
-  const { data: platforms = [] } = useQuery({
+  const { data: platforms = [] } = useQuery<Platform[]>({
     queryKey: ["platforms"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -101,11 +115,11 @@ export function CreatorRateDialog({
         .order("name");
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const { data: postTypes = [] } = useQuery({
+  const { data: postTypes = [] } = useQuery<PostType[]>({
     queryKey: ["postTypes", form.watch("platform_id")],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -116,9 +130,9 @@ export function CreatorRateDialog({
         .order("name");
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
-    enabled: !!form.watch("platform_id"),
+    enabled: Boolean(form.watch("platform_id")),
   });
 
   async function onSubmit(values: FormValues) {
