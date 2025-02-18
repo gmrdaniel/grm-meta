@@ -8,14 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Power } from "lucide-react";
+import { Plus, Edit, Power, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { PostTypeDialog } from "@/components/post-types/PostTypeDialog";
 import { SocialPlatformDialog } from "@/components/post-types/SocialPlatformDialog";
+import { CreatorRateDialog } from "@/components/post-types/CreatorRateDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
 import type { Database } from "@/integrations/supabase/types";
 
 type SocialPlatform = Database["public"]["Tables"]["social_platforms"]["Row"];
@@ -40,8 +42,12 @@ function groupPostTypesBySocialPlatform(postTypes: PostType[]) {
 export default function PostTypes() {
   const [postTypeDialogOpen, setPostTypeDialogOpen] = useState(false);
   const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
+  const [rateDialogOpen, setRateDialogOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState<PostType | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: postTypes = [], refetch: refetchPostTypes } = useQuery({
     queryKey: ["postTypes"],
@@ -75,6 +81,47 @@ export default function PostTypes() {
   });
 
   const groupedPostTypes = groupPostTypesBySocialPlatform(postTypes);
+
+  const { data: rates, refetch: refetchRates } = useQuery({
+    queryKey: ["creatorRates", page, searchTerm],
+    queryFn: async () => {
+      const query = supabase
+        .from("creator_rates")
+        .select(`
+          *,
+          profiles (
+            id,
+            personal_data (
+              first_name,
+              last_name,
+              instagram_username
+            )
+          ),
+          social_platforms (
+            name
+          ),
+          post_types (
+            name
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (searchTerm) {
+        query.or(`profiles.personal_data.first_name.ilike.%${searchTerm}%,profiles.personal_data.last_name.ilike.%${searchTerm}%,profiles.personal_data.instagram_username.ilike.%${searchTerm}%`);
+      }
+
+      const { data, error, count } = await query
+        .range((page - 1) * itemsPerPage, page * itemsPerPage - 1)
+        .select('*', { count: 'exact' });
+
+      if (error) throw error;
+
+      return {
+        rates: data,
+        totalPages: Math.ceil((count || 0) / itemsPerPage)
+      };
+    },
+  });
 
   async function handlePostTypeStatusToggle(postType: PostType) {
     try {
@@ -127,6 +174,7 @@ export default function PostTypes() {
           <TabsList>
             <TabsTrigger value="platforms">Redes Sociales</TabsTrigger>
             <TabsTrigger value="postTypes">Tipos de Publicación</TabsTrigger>
+            <TabsTrigger value="rates">Tarifas</TabsTrigger>
           </TabsList>
         </div>
 
@@ -250,6 +298,99 @@ export default function PostTypes() {
             </div>
           ))}
         </TabsContent>
+
+        <TabsContent value="rates">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Tarifas de Creadores</h2>
+              <Button onClick={() => setRateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Tarifa
+              </Button>
+            </div>
+
+            <div className="flex items-center space-x-2 mb-4">
+              <Search className="w-4 h-4 text-gray-500" />
+              <Input
+                placeholder="Buscar por nombre o usuario de Instagram..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                className="max-w-sm"
+              />
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Creador</TableHead>
+                  <TableHead>Red Social</TableHead>
+                  <TableHead>Tipo de Publicación</TableHead>
+                  <TableHead>Tarifa (USD)</TableHead>
+                  <TableHead>Fecha de Creación</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rates?.rates.map((rate) => (
+                  <TableRow key={rate.id}>
+                    <TableCell>
+                      {rate.profiles.personal_data?.first_name} {rate.profiles.personal_data?.last_name}
+                      {rate.profiles.personal_data?.instagram_username && (
+                        <span className="text-sm text-gray-500 block">
+                          @{rate.profiles.personal_data.instagram_username}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{rate.social_platforms.name}</TableCell>
+                    <TableCell>{rate.post_types.name}</TableCell>
+                    <TableCell>${rate.rate_usd}</TableCell>
+                    <TableCell>
+                      {new Date(rate.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Implementar edición de tarifa
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {rates?.totalPages > 1 && (
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                  disabled={page === 1}
+                >
+                  Anterior
+                </Button>
+                <span className="flex items-center px-3">
+                  Página {page} de {rates.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(prev => Math.min(rates.totalPages, prev + 1))}
+                  disabled={page === rates.totalPages}
+                >
+                  Siguiente
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       <PostTypeDialog
@@ -264,6 +405,15 @@ export default function PostTypes() {
         onOpenChange={setPlatformDialogOpen}
         platform={selectedPlatform}
         onSuccess={refetchPlatforms}
+      />
+
+      <CreatorRateDialog
+        open={rateDialogOpen}
+        onOpenChange={setRateDialogOpen}
+        onSuccess={() => {
+          refetchRates();
+          setRateDialogOpen(false);
+        }}
       />
     </div>
   );
