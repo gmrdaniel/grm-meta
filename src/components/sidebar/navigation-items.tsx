@@ -66,4 +66,10 @@ export const adminNavigationItems: NavigationItem[] = [
     shortLabel: "Post Types",
     to: "/admin/post-types",
   },
+  {
+    icon: <DollarSign size={24} />,
+    label: "Creator Rates",
+    shortLabel: "Rates",
+    to: "/admin/creator-rates",
+  },
 ];
