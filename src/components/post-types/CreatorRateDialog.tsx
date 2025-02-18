@@ -1,9 +1,16 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -12,38 +19,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Database } from "@/integrations/supabase/types";
 
 const formSchema = z.object({
-  creator_id: z.string().min(1, {
-    message: "Debes seleccionar un creador.",
-  }),
-  platform_id: z.string().min(1, {
-    message: "Debes seleccionar una plataforma.",
-  }),
-  post_type_id: z.string().min(1, {
-    message: "Debes seleccionar un tipo de publicación.",
-  }),
-  rate_usd: z.string().refine((value) => {
-    const num = Number(value);
-    return !isNaN(num) && num > 0;
-  }, {
-    message: "La tarifa debe ser un número mayor que cero.",
-  }),
+  creator_id: z.string().min(1, "Seleccione un creador"),
+  platform_id: z.string().min(1, "Seleccione una red social"),
+  post_type_id: z.string().min(1, "Seleccione un tipo de publicación"),
+  rate_usd: z.number().min(0, "La tarifa debe ser mayor o igual a 0"),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface CreatorRateDialogProps {
   open: boolean;
@@ -65,33 +59,37 @@ export function CreatorRateDialog({
   onOpenChange,
   onSuccess,
 }: CreatorRateDialogProps) {
-  const [creators, setCreators] = useState<Creator[]>([]);
+  const [creatorSearch, setCreatorSearch] = useState("");
 
-  useEffect(() => {
-    const fetchCreators = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select(`
-            id,
-            personal_data (
-              first_name,
-              last_name,
-              instagram_username
-            )
-          `)
-          .eq("role", "creator");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      creator_id: "",
+      platform_id: "",
+      post_type_id: "",
+      rate_usd: 0,
+    },
+  });
 
-        if (error) throw error;
-        setCreators(data as Creator[]);
-      } catch (error: any) {
-        toast.error("Error fetching creators");
-        console.error("Error:", error.message);
-      }
-    };
+  const { data: creators = [] } = useQuery({
+    queryKey: ["creators", creatorSearch],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          personal_data (
+            first_name,
+            last_name,
+            instagram_username
+          )
+        `)
+        .eq("role", "creator");
 
-    fetchCreators();
-  }, []);
+      if (error) throw error;
+      return data as Creator[];
+    },
+  });
 
   const { data: platforms = [] } = useQuery({
     queryKey: ["platforms"],
@@ -99,7 +97,8 @@ export function CreatorRateDialog({
       const { data, error } = await supabase
         .from("social_platforms")
         .select("*")
-        .order("created_at");
+        .eq("status", "active")
+        .order("name");
 
       if (error) throw error;
       return data;
@@ -107,29 +106,22 @@ export function CreatorRateDialog({
   });
 
   const { data: postTypes = [] } = useQuery({
-    queryKey: ["postTypes"],
+    queryKey: ["postTypes", form.watch("platform_id")],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("post_types")
         .select("*")
-        .order("created_at");
+        .eq("platform_id", form.watch("platform_id"))
+        .eq("status", "active")
+        .order("name");
 
       if (error) throw error;
       return data;
     },
+    enabled: !!form.watch("platform_id"),
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      creator_id: "",
-      platform_id: "",
-      post_type_id: "",
-      rate_usd: "",
-    },
-  });
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { data: existingRate, error: checkError } = await supabase
         .from("creator_rates")
@@ -145,7 +137,7 @@ export function CreatorRateDialog({
       if (existingRate && existingRate.length > 0) {
         const { error } = await supabase
           .from("creator_rates")
-          .update({ rate_usd: values.rate_usd })
+          .update({ rate_usd: Number(values.rate_usd) })
           .eq("id", existingRate[0].id);
 
         if (error) throw error;
@@ -156,7 +148,7 @@ export function CreatorRateDialog({
             creator_id: values.creator_id,
             platform_id: values.platform_id,
             post_type_id: values.post_type_id,
-            rate_usd: values.rate_usd,
+            rate_usd: Number(values.rate_usd),
           });
 
         if (error) throw error;
@@ -173,14 +165,11 @@ export function CreatorRateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nueva Tarifa de Creador</DialogTitle>
-          <DialogDescription>
-            Asigna una tarifa específica para un creador, plataforma y tipo de
-            publicación.
-          </DialogDescription>
+          <DialogTitle>Agregar Tarifa</DialogTitle>
         </DialogHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -189,10 +178,13 @@ export function CreatorRateDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Creador</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un creador" />
+                        <SelectValue placeholder="Seleccione un creador" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -200,6 +192,12 @@ export function CreatorRateDialog({
                         <SelectItem key={creator.id} value={creator.id}>
                           {creator.personal_data?.first_name}{" "}
                           {creator.personal_data?.last_name}
+                          {creator.personal_data?.instagram_username && (
+                            <span className="text-gray-500">
+                              {" "}
+                              (@{creator.personal_data.instagram_username})
+                            </span>
+                          )}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -214,15 +212,21 @@ export function CreatorRateDialog({
               name="platform_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Plataforma</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Red Social</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("post_type_id", "");
+                    }}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una plataforma" />
+                        <SelectValue placeholder="Seleccione una red social" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {platforms.map((platform: any) => (
+                      {platforms.map((platform) => (
                         <SelectItem key={platform.id} value={platform.id}>
                           {platform.name}
                         </SelectItem>
@@ -240,16 +244,20 @@ export function CreatorRateDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Publicación</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={!form.watch("platform_id")}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un tipo" />
+                        <SelectValue placeholder="Seleccione un tipo" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {postTypes.map((postType: any) => (
-                        <SelectItem key={postType.id} value={postType.id}>
-                          {postType.name}
+                      {postTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -266,15 +274,29 @@ export function CreatorRateDialog({
                 <FormItem>
                   <FormLabel>Tarifa (USD)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type="submit">Guardar Tarifa</Button>
-            </DialogFooter>
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">Guardar</Button>
+            </div>
           </form>
         </Form>
       </DialogContent>
