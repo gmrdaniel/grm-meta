@@ -29,8 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import type { CreatorBasicInfo, Platform, PostType, CreatorRate } from "@/types/services";
 
-// Simplified schema
 const formSchema = z.object({
   creator_id: z.string().min(1, "Seleccione un creador"),
   platform_id: z.string().min(1, "Seleccione una red social"),
@@ -38,34 +38,12 @@ const formSchema = z.object({
   rate_usd: z.number().min(0, "La tarifa debe ser mayor o igual a 0"),
 });
 
-// Simplified types
 type FormValues = z.infer<typeof formSchema>;
 
 interface CreatorRateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-}
-
-interface CreatorData {
-  first_name: string | null;
-  last_name: string | null;
-  instagram_username: string | null;
-}
-
-interface Creator {
-  id: string;
-  personal_data: CreatorData | null;
-}
-
-interface Platform {
-  id: string;
-  name: string;
-}
-
-interface PostType {
-  id: string;
-  name: string;
 }
 
 export function CreatorRateDialog({
@@ -85,7 +63,7 @@ export function CreatorRateDialog({
     },
   });
 
-  const { data: creators = [] } = useQuery<Creator[]>({
+  const { data: creators = [] } = useQuery<CreatorBasicInfo[]>({
     queryKey: ["creators", creatorSearch],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -110,7 +88,7 @@ export function CreatorRateDialog({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("social_platforms")
-        .select("*")
+        .select("id, name, status")
         .eq("status", "active")
         .order("name");
 
@@ -124,7 +102,7 @@ export function CreatorRateDialog({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("post_types")
-        .select("*")
+        .select("id, name, status, platform_id")
         .eq("platform_id", form.watch("platform_id"))
         .eq("status", "active")
         .order("name");
@@ -139,20 +117,21 @@ export function CreatorRateDialog({
     try {
       const { data: existingRate, error: checkError } = await supabase
         .from("creator_rates")
-        .select()
+        .select("id")
         .match({
           creator_id: values.creator_id,
           platform_id: values.platform_id,
           post_type_id: values.post_type_id,
-        });
+        })
+        .single();
 
-      if (checkError) throw checkError;
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
-      if (existingRate && existingRate.length > 0) {
+      if (existingRate?.id) {
         const { error } = await supabase
           .from("creator_rates")
-          .update({ rate_usd: Number(values.rate_usd) })
-          .eq("id", existingRate[0].id);
+          .update({ rate_usd: values.rate_usd })
+          .eq("id", existingRate.id);
 
         if (error) throw error;
       } else {
@@ -162,7 +141,7 @@ export function CreatorRateDialog({
             creator_id: values.creator_id,
             platform_id: values.platform_id,
             post_type_id: values.post_type_id,
-            rate_usd: Number(values.rate_usd),
+            rate_usd: values.rate_usd,
           });
 
         if (error) throw error;
