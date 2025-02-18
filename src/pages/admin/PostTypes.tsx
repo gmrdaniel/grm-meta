@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { PostTypeDialog } from "@/components/post-types/PostTypeDialog";
+import { SocialPlatformDialog } from "@/components/post-types/SocialPlatformDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
 type SocialPlatform = Database["public"]["Tables"]["social_platforms"]["Row"];
@@ -22,17 +25,14 @@ type PostType = Database["public"]["Tables"]["post_types"]["Row"] & {
 };
 
 export default function PostTypes() {
-  const [postTypes, setPostTypes] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [postTypeDialogOpen, setPostTypeDialogOpen] = useState(false);
+  const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState<PostType | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform | null>(null);
 
-  useEffect(() => {
-    fetchPostTypes();
-  }, []);
-
-  async function fetchPostTypes() {
-    try {
+  const { data: postTypes = [], refetch: refetchPostTypes } = useQuery({
+    queryKey: ["postTypes"],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("post_types")
         .select(`
@@ -44,16 +44,24 @@ export default function PostTypes() {
         .order("name");
 
       if (error) throw error;
-      setPostTypes(data);
-    } catch (error: any) {
-      toast.error("Error al cargar los tipos de publicación");
-      console.error("Error:", error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+      return data as PostType[];
+    },
+  });
 
-  async function handleStatusToggle(postType: PostType) {
+  const { data: platforms = [], refetch: refetchPlatforms } = useQuery({
+    queryKey: ["platforms"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("social_platforms")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      return data as SocialPlatform[];
+    },
+  });
+
+  async function handlePostTypeStatusToggle(postType: PostType) {
     try {
       const newStatus = postType.status === "active" ? "inactive" : "active";
       const { error } = await supabase
@@ -68,86 +76,176 @@ export default function PostTypes() {
           newStatus === "active" ? "activado" : "desactivado"
         } correctamente`
       );
-      fetchPostTypes();
+      refetchPostTypes();
     } catch (error: any) {
       toast.error("Error al actualizar el estado");
-      console.error("Error:", error.message);
+      console.error("Error:", error);
     }
   }
 
-  function handleEdit(postType: PostType) {
-    setSelectedPostType(postType);
-    setDialogOpen(true);
-  }
+  async function handlePlatformStatusToggle(platform: SocialPlatform) {
+    try {
+      const newStatus = platform.status === "active" ? "inactive" : "active";
+      const { error } = await supabase
+        .from("social_platforms")
+        .update({ status: newStatus })
+        .eq("id", platform.id);
 
-  function handleCreate() {
-    setSelectedPostType(null);
-    setDialogOpen(true);
+      if (error) throw error;
+
+      toast.success(
+        `Red social ${
+          newStatus === "active" ? "activada" : "desactivada"
+        } correctamente`
+      );
+      refetchPlatforms();
+    } catch (error: any) {
+      toast.error("Error al actualizar el estado");
+      console.error("Error:", error);
+    }
   }
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Tipos de Publicación</h1>
-        <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Tipo
-        </Button>
-      </div>
+      <Tabs defaultValue="platforms">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="platforms">Redes Sociales</TabsTrigger>
+            <TabsTrigger value="postTypes">Tipos de Publicación</TabsTrigger>
+          </TabsList>
+        </div>
 
-      {loading ? (
-        <div>Cargando...</div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Red Social</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {postTypes.map((postType) => (
-              <TableRow key={postType.id}>
-                <TableCell>{postType.name}</TableCell>
-                <TableCell>{postType.social_platforms.name}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={postType.status === "active" ? "default" : "secondary"}
-                  >
-                    {postType.status === "active" ? "Activo" : "Inactivo"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEdit(postType)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleStatusToggle(postType)}
-                    >
-                      <Power className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <TabsContent value="platforms">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Redes Sociales</h2>
+            <Button onClick={() => {
+              setSelectedPlatform(null);
+              setPlatformDialogOpen(true);
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Red Social
+            </Button>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Acciones</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+            </TableHeader>
+            <TableBody>
+              {platforms.map((platform) => (
+                <TableRow key={platform.id}>
+                  <TableCell>{platform.name}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={platform.status === "active" ? "default" : "secondary"}
+                    >
+                      {platform.status === "active" ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedPlatform(platform);
+                          setPlatformDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePlatformStatusToggle(platform)}
+                      >
+                        <Power className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+
+        <TabsContent value="postTypes">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Tipos de Publicación</h2>
+            <Button onClick={() => {
+              setSelectedPostType(null);
+              setPostTypeDialogOpen(true);
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Tipo
+            </Button>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Red Social</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {postTypes.map((postType) => (
+                <TableRow key={postType.id}>
+                  <TableCell>{postType.name}</TableCell>
+                  <TableCell>{postType.social_platforms.name}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={postType.status === "active" ? "default" : "secondary"}
+                    >
+                      {postType.status === "active" ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedPostType(postType);
+                          setPostTypeDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handlePostTypeStatusToggle(postType)}
+                      >
+                        <Power className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+      </Tabs>
 
       <PostTypeDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={postTypeDialogOpen}
+        onOpenChange={setPostTypeDialogOpen}
         postType={selectedPostType}
-        onSuccess={fetchPostTypes}
+        onSuccess={refetchPostTypes}
+      />
+
+      <SocialPlatformDialog
+        open={platformDialogOpen}
+        onOpenChange={setPlatformDialogOpen}
+        platform={selectedPlatform}
+        onSuccess={refetchPlatforms}
       />
     </div>
   );
