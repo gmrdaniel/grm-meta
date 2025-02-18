@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +23,20 @@ type PostType = Database["public"]["Tables"]["post_types"]["Row"] & {
   social_platforms: Pick<SocialPlatform, "name">;
 };
 
+function groupPostTypesBySocialPlatform(postTypes: PostType[]) {
+  const grouped: { [key: string]: PostType[] } = {};
+  
+  postTypes.forEach((postType) => {
+    const platformName = postType.social_platforms.name;
+    if (!grouped[platformName]) {
+      grouped[platformName] = [];
+    }
+    grouped[platformName].push(postType);
+  });
+  
+  return grouped;
+}
+
 export default function PostTypes() {
   const [postTypeDialogOpen, setPostTypeDialogOpen] = useState(false);
   const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
@@ -41,7 +54,7 @@ export default function PostTypes() {
             name
           )
         `)
-        .order("name");
+        .order("social_platforms(name)");
 
       if (error) throw error;
       return data as PostType[];
@@ -60,6 +73,8 @@ export default function PostTypes() {
       return data as SocialPlatform[];
     },
   });
+
+  const groupedPostTypes = groupPostTypesBySocialPlatform(postTypes);
 
   async function handlePostTypeStatusToggle(postType: PostType) {
     try {
@@ -185,52 +200,55 @@ export default function PostTypes() {
             </Button>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Red Social</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {postTypes.map((postType) => (
-                <TableRow key={postType.id}>
-                  <TableCell>{postType.name}</TableCell>
-                  <TableCell>{postType.social_platforms.name}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={postType.status === "active" ? "default" : "secondary"}
-                    >
-                      {postType.status === "active" ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedPostType(postType);
-                          setPostTypeDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handlePostTypeStatusToggle(postType)}
-                      >
-                        <Power className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {Object.entries(groupedPostTypes).map(([platformName, platformPostTypes]) => (
+            <div key={platformName} className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">{platformName}</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {platformPostTypes.map((postType) => (
+                    <TableRow key={postType.id}>
+                      <TableCell>{postType.name}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={postType.status === "active" ? "default" : "secondary"}
+                        >
+                          {postType.status === "active" ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedPostType(postType);
+                              setPostTypeDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handlePostTypeStatusToggle(postType)}
+                          >
+                            <Power className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ))}
         </TabsContent>
       </Tabs>
 
