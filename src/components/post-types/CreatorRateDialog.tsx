@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -79,7 +79,7 @@ export function CreatorRateDialog({
   const { data: creators = [] } = useQuery({
     queryKey: ["creators", creatorSearch],
     queryFn: async () => {
-      const query = supabase
+      let query = supabase
         .from("profiles")
         .select(`
           id,
@@ -92,7 +92,7 @@ export function CreatorRateDialog({
         .eq("role", "creator");
 
       if (creatorSearch) {
-        query.or(`personal_data.first_name.ilike.%${creatorSearch}%,personal_data.last_name.ilike.%${creatorSearch}%,personal_data.instagram_username.ilike.%${creatorSearch}%`);
+        query = query.filter(`personal_data->first_name->ilike.%${creatorSearch}%`);
       }
 
       const { data, error } = await query;
