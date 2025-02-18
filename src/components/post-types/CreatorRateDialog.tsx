@@ -36,27 +36,27 @@ interface CreatorRateDialogProps {
   onSuccess: () => void;
 }
 
-interface Creator {
+type Creator = {
   id: string;
-  personal_data?: {
+  personal_data: {
     first_name: string | null;
     last_name: string | null;
     instagram_username: string | null;
-  } | null;
-}
+  };
+};
 
-interface Platform {
+type Platform = {
   id: string;
   name: string;
-  status: string;
-}
+  status: "active" | "inactive";
+};
 
-interface PostType {
+type PostType = {
   id: string;
   name: string;
-  status: string;
+  status: "active" | "inactive";
   platform_id: string;
-}
+};
 
 const formSchema = z.object({
   creator_id: z.string().min(1, "Seleccione un creador"),
@@ -72,8 +72,6 @@ export function CreatorRateDialog({
   onOpenChange,
   onSuccess,
 }: CreatorRateDialogProps) {
-  const [creatorSearch] = useState("");
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -84,8 +82,8 @@ export function CreatorRateDialog({
     },
   });
 
-  const { data: creators = [] } = useQuery<Creator[]>({
-    queryKey: ["creators", creatorSearch],
+  const { data: creators = [] } = useQuery({
+    queryKey: ["creators"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
@@ -100,36 +98,38 @@ export function CreatorRateDialog({
         .eq("role", "creator");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Creator[];
     },
   });
 
-  const { data: platforms = [] } = useQuery<Platform[]>({
+  const { data: platforms = [] } = useQuery({
     queryKey: ["platforms"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("social_platforms")
-        .select("id, name, status")
+        .select("*")
         .eq("status", "active")
         .order("name");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Platform[];
     },
   });
 
-  const { data: postTypes = [] } = useQuery<PostType[]>({
+  const { data: postTypes = [] } = useQuery({
     queryKey: ["postTypes", form.watch("platform_id")],
     queryFn: async () => {
+      if (!form.watch("platform_id")) return [];
+      
       const { data, error } = await supabase
         .from("post_types")
-        .select("id, name, status, platform_id")
+        .select("*")
         .eq("platform_id", form.watch("platform_id"))
         .eq("status", "active")
         .order("name");
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as PostType[];
     },
     enabled: Boolean(form.watch("platform_id")),
   });
@@ -139,14 +139,12 @@ export function CreatorRateDialog({
       const { data: existingRate, error: checkError } = await supabase
         .from("creator_rates")
         .select("id")
-        .match({
-          creator_id: values.creator_id,
-          platform_id: values.platform_id,
-          post_type_id: values.post_type_id,
-        })
-        .single();
+        .eq("creator_id", values.creator_id)
+        .eq("platform_id", values.platform_id)
+        .eq("post_type_id", values.post_type_id)
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+      if (checkError) throw checkError;
 
       if (existingRate?.id) {
         const { error } = await supabase
@@ -158,12 +156,7 @@ export function CreatorRateDialog({
       } else {
         const { error } = await supabase
           .from("creator_rates")
-          .insert({
-            creator_id: values.creator_id,
-            platform_id: values.platform_id,
-            post_type_id: values.post_type_id,
-            rate_usd: values.rate_usd,
-          });
+          .insert(values);
 
         if (error) throw error;
       }
@@ -204,9 +197,9 @@ export function CreatorRateDialog({
                     <SelectContent>
                       {creators.map((creator) => (
                         <SelectItem key={creator.id} value={creator.id}>
-                          {creator.personal_data?.first_name}{" "}
-                          {creator.personal_data?.last_name}
-                          {creator.personal_data?.instagram_username && (
+                          {creator.personal_data.first_name}{" "}
+                          {creator.personal_data.last_name}
+                          {creator.personal_data.instagram_username && (
                             <span className="text-gray-500">
                               {" "}
                               (@{creator.personal_data.instagram_username})
