@@ -142,6 +142,8 @@ export default function CreatorDetail() {
           company_share,
           total_revenue,
           terms_accepted,
+          fixed_fee,
+          contract_duration,
           service:services (
             id,
             name,
@@ -155,13 +157,11 @@ export default function CreatorDetail() {
 
       if (error) throw error;
       
-      const typedServices = data?.map(service => ({
-        ...service,
+      const typedServices: CreatorService[] = data?.map(item => ({
+        ...item,
         service: {
-          ...service.service,
-          type: service.service.type as 'único' | 'recurrente' | 'contrato',
-          fixed_fee: service.service.fixed_fee,
-          contract_duration: service.service.contract_duration
+          ...item.service,
+          type: item.service.type as 'único' | 'recurrente' | 'contrato'
         }
       })) || [];
       
@@ -181,11 +181,9 @@ export default function CreatorDetail() {
 
       if (error) throw error;
       
-      const typedServices = data?.map(service => ({
+      const typedServices: Service[] = data?.map(service => ({
         ...service,
-        type: service.type as 'único' | 'recurrente' | 'contrato',
-        fixed_fee: service.fixed_fee,
-        contract_duration: service.contract_duration
+        type: service.type as 'único' | 'recurrente' | 'contrato'
       })) || [];
       
       setAvailableServices(typedServices);
