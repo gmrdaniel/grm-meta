@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -143,7 +142,7 @@ export default function PostTypes() {
                     <TableCell>{platform.name}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={platform.status === "active" ? "success" : "secondary"}
+                        variant={platform.status === "active" ? "default" : "secondary"}
                       >
                         {platform.status === "active" ? "Activo" : "Inactivo"}
                       </Badge>
@@ -202,7 +201,7 @@ export default function PostTypes() {
                         <TableCell>
                           <Badge
                             variant={
-                              postType.status === "active" ? "success" : "secondary"
+                              postType.status === "active" ? "default" : "secondary"
                             }
                           >
                             {postType.status === "active" ? "Activo" : "Inactivo"}
