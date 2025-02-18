@@ -36,13 +36,15 @@ interface CreatorRateDialogProps {
   onSuccess: () => void;
 }
 
+type PersonalData = {
+  first_name: string | null;
+  last_name: string | null;
+  instagram_username: string | null;
+};
+
 type Creator = {
   id: string;
-  personal_data: {
-    first_name: string | null;
-    last_name: string | null;
-    instagram_username: string | null;
-  };
+  personal_data: PersonalData;
 };
 
 type Platform = {
@@ -56,6 +58,16 @@ type PostType = {
   name: string;
   status: "active" | "inactive";
   platform_id: string;
+};
+
+type CreatorRate = {
+  created_at?: string;
+  creator_id: string;
+  id?: string;
+  platform_id: string;
+  post_type_id: string;
+  rate_usd: number;
+  updated_at?: string;
 };
 
 const formSchema = z.object({
@@ -89,7 +101,7 @@ export function CreatorRateDialog({
         .from("profiles")
         .select(`
           id,
-          personal_data (
+          personal_data!personal_data_profile_id_fkey (
             first_name,
             last_name,
             instagram_username
@@ -154,9 +166,16 @@ export function CreatorRateDialog({
 
         if (error) throw error;
       } else {
+        const newRate: CreatorRate = {
+          creator_id: values.creator_id,
+          platform_id: values.platform_id,
+          post_type_id: values.post_type_id,
+          rate_usd: values.rate_usd,
+        };
+
         const { error } = await supabase
           .from("creator_rates")
-          .insert(values);
+          .insert(newRate);
 
         if (error) throw error;
       }
