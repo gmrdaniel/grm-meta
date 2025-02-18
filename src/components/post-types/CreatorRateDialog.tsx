@@ -42,7 +42,7 @@ const formSchema = z.object({
   creator_id: z.string().min(1, "El creador es requerido"),
   platform_id: z.string().min(1, "La red social es requerida"),
   post_type_id: z.string().min(1, "El tipo de publicación es requerido"),
-  rate_usd: z.string().min(1, "La tarifa es requerida").transform(Number),
+  rate_usd: z.coerce.number().min(0, "La tarifa debe ser mayor o igual a 0"),
 });
 
 interface CreatorRateDialogProps {
@@ -50,6 +50,15 @@ interface CreatorRateDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
+
+type Creator = {
+  id: string;
+  personal_data: {
+    first_name: string | null;
+    last_name: string | null;
+    instagram_username: string | null;
+  } | null;
+};
 
 export function CreatorRateDialog({
   open,
@@ -63,7 +72,7 @@ export function CreatorRateDialog({
       creator_id: "",
       platform_id: "",
       post_type_id: "",
-      rate_usd: "",
+      rate_usd: 0,
     },
   });
 
@@ -88,7 +97,7 @@ export function CreatorRateDialog({
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as Creator[];
     },
   });
 
@@ -124,19 +133,44 @@ export function CreatorRateDialog({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { error } = await supabase.from("creator_rates").upsert({
-        creator_id: values.creator_id,
-        platform_id: values.platform_id,
-        post_type_id: values.post_type_id,
-        rate_usd: values.rate_usd,
-      }, {
-        onConflict: 'creator_id,platform_id,post_type_id',
-      });
+      const { data: existingRate, error: checkError } = await supabase
+        .from("creator_rates")
+        .select()
+        .match({
+          creator_id: values.creator_id,
+          platform_id: values.platform_id,
+          post_type_id: values.post_type_id,
+        });
 
-      if (error) throw error;
+      if (checkError) throw checkError;
+
+      if (existingRate && existingRate.length > 0) {
+        const { error } = await supabase
+          .from("creator_rates")
+          .update({ rate_usd: values.rate_usd })
+          .match({
+            creator_id: values.creator_id,
+            platform_id: values.platform_id,
+            post_type_id: values.post_type_id,
+          });
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("creator_rates")
+          .insert({
+            creator_id: values.creator_id,
+            platform_id: values.platform_id,
+            post_type_id: values.post_type_id,
+            rate_usd: values.rate_usd,
+          });
+
+        if (error) throw error;
+      }
 
       toast.success("Tarifa guardada correctamente");
       onSuccess();
+      onOpenChange(false);
     } catch (error: any) {
       toast.error("Error al guardar la tarifa");
       console.error("Error:", error);

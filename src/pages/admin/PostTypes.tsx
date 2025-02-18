@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,28 @@ import type { Database } from "@/integrations/supabase/types";
 type SocialPlatform = Database["public"]["Tables"]["social_platforms"]["Row"];
 type PostType = Database["public"]["Tables"]["post_types"]["Row"] & {
   social_platforms: Pick<SocialPlatform, "name">;
+};
+
+type CreatorRate = {
+  id: string;
+  creator_id: string;
+  platform_id: string;
+  post_type_id: string;
+  rate_usd: number;
+  created_at: string;
+  profiles: {
+    personal_data: {
+      first_name: string | null;
+      last_name: string | null;
+      instagram_username: string | null;
+    } | null;
+  };
+  social_platforms: {
+    name: string;
+  };
+  post_types: {
+    name: string;
+  };
 };
 
 function groupPostTypesBySocialPlatform(postTypes: PostType[]) {
@@ -85,39 +108,39 @@ export default function PostTypes() {
   const { data: rates, refetch: refetchRates } = useQuery({
     queryKey: ["creatorRates", page, searchTerm],
     queryFn: async () => {
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+
       const query = supabase
         .from("creator_rates")
         .select(`
           *,
-          profiles (
-            id,
+          profiles!creator_rates_creator_id_fkey (
             personal_data (
               first_name,
               last_name,
               instagram_username
             )
           ),
-          social_platforms (
+          social_platforms!creator_rates_platform_id_fkey (
             name
           ),
-          post_types (
+          post_types!creator_rates_post_type_id_fkey (
             name
           )
-        `)
-        .order("created_at", { ascending: false });
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false });
 
       if (searchTerm) {
         query.or(`profiles.personal_data.first_name.ilike.%${searchTerm}%,profiles.personal_data.last_name.ilike.%${searchTerm}%,profiles.personal_data.instagram_username.ilike.%${searchTerm}%`);
       }
 
-      const { data, error, count } = await query
-        .range((page - 1) * itemsPerPage, page * itemsPerPage - 1)
-        .select('*', { count: 'exact' });
+      const { data, error, count } = await query.range(from, to);
 
       if (error) throw error;
-
+      
       return {
-        rates: data,
+        rates: data as CreatorRate[],
         totalPages: Math.ceil((count || 0) / itemsPerPage)
       };
     },
