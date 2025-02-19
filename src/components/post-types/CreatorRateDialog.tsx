@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,39 +35,29 @@ interface CreatorRateDialogProps {
   onSuccess: () => void;
 }
 
-type PersonalData = {
+interface PersonalData {
   first_name: string | null;
   last_name: string | null;
   instagram_username: string | null;
-};
+}
 
-type Creator = {
+interface Creator {
   id: string;
   personal_data: PersonalData;
-};
+}
 
-type Platform = {
+interface Platform {
   id: string;
   name: string;
   status: "active" | "inactive";
-};
+}
 
-type PostType = {
+interface PostType {
   id: string;
   name: string;
   status: "active" | "inactive";
   platform_id: string;
-};
-
-type CreatorRate = {
-  created_at?: string;
-  creator_id: string;
-  id?: string;
-  platform_id: string;
-  post_type_id: string;
-  rate_usd: number;
-  updated_at?: string;
-};
+}
 
 const formSchema = z.object({
   creator_id: z.string().min(1, "Seleccione un creador"),
@@ -94,7 +83,7 @@ export function CreatorRateDialog({
     },
   });
 
-  const { data: creators = [] } = useQuery({
+  const { data: creators = [] } = useQuery<Creator[]>({
     queryKey: ["creators"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -110,11 +99,11 @@ export function CreatorRateDialog({
         .eq("role", "creator");
 
       if (error) throw error;
-      return (data || []) as Creator[];
+      return data || [];
     },
   });
 
-  const { data: platforms = [] } = useQuery({
+  const { data: platforms = [] } = useQuery<Platform[]>({
     queryKey: ["platforms"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -124,11 +113,11 @@ export function CreatorRateDialog({
         .order("name");
 
       if (error) throw error;
-      return (data || []) as Platform[];
+      return data || [];
     },
   });
 
-  const { data: postTypes = [] } = useQuery({
+  const { data: postTypes = [] } = useQuery<PostType[]>({
     queryKey: ["postTypes", form.watch("platform_id")],
     queryFn: async () => {
       if (!form.watch("platform_id")) return [];
@@ -141,7 +130,7 @@ export function CreatorRateDialog({
         .order("name");
 
       if (error) throw error;
-      return (data || []) as PostType[];
+      return data || [];
     },
     enabled: Boolean(form.watch("platform_id")),
   });
@@ -166,16 +155,14 @@ export function CreatorRateDialog({
 
         if (error) throw error;
       } else {
-        const newRate: CreatorRate = {
-          creator_id: values.creator_id,
-          platform_id: values.platform_id,
-          post_type_id: values.post_type_id,
-          rate_usd: values.rate_usd,
-        };
-
         const { error } = await supabase
           .from("creator_rates")
-          .insert(newRate);
+          .insert({
+            creator_id: values.creator_id,
+            platform_id: values.platform_id,
+            post_type_id: values.post_type_id,
+            rate_usd: values.rate_usd,
+          });
 
         if (error) throw error;
       }
