@@ -1,46 +1,95 @@
 
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Home } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ServicePaymentsHeaderProps {
   showRecurringOnly: boolean;
   setShowRecurringOnly: (value: boolean) => void;
+  selectedService: string;
+  setSelectedService: (value: string) => void;
+  selectedBrandStatus: string;
+  setSelectedBrandStatus: (value: string) => void;
+  selectedCreatorStatus: string;
+  setSelectedCreatorStatus: (value: string) => void;
 }
 
-export function ServicePaymentsHeader({ showRecurringOnly, setShowRecurringOnly }: ServicePaymentsHeaderProps) {
+export function ServicePaymentsHeader({
+  showRecurringOnly,
+  setShowRecurringOnly,
+  selectedService,
+  setSelectedService,
+  selectedBrandStatus,
+  setSelectedBrandStatus,
+  selectedCreatorStatus,
+  setSelectedCreatorStatus,
+}: ServicePaymentsHeaderProps) {
+  const { data: services } = useServices();
+
+  const paymentStatuses = ["all", "pending", "completed"];
+
   return (
-    <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/admin/dashboard">
-              <Home className="h-4 w-4" />
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Pagos de Servicios</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <Label>Servicio</Label>
+          <Select value={selectedService} onValueChange={setSelectedService}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar servicio" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los servicios</SelectItem>
+              {services?.map((service) => (
+                <SelectItem key={service.id} value={service.id}>
+                  {service.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pagos de Servicios</h1>
-        <p className="text-muted-foreground">
-          Gestiona los pagos de servicios de los creadores
-        </p>
-      </div>
+        <div className="flex-1">
+          <Label>Estado Pago Marca</Label>
+          <Select value={selectedBrandStatus} onValueChange={setSelectedBrandStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar estado" />
+            </SelectTrigger>
+            <SelectContent>
+              {paymentStatuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="recurring"
-          checked={showRecurringOnly}
-          onCheckedChange={setShowRecurringOnly}
-        />
-        <Label htmlFor="recurring">Show recurring only</Label>
+        <div className="flex-1">
+          <Label>Estado Pago Creador</Label>
+          <Select value={selectedCreatorStatus} onValueChange={setSelectedCreatorStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar estado" />
+            </SelectTrigger>
+            <SelectContent>
+              {paymentStatuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2 pt-6">
+          <Switch
+            id="recurring"
+            checked={showRecurringOnly}
+            onCheckedChange={setShowRecurringOnly}
+          />
+          <Label htmlFor="recurring">Solo pagos recurrentes</Label>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

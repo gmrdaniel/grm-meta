@@ -17,8 +17,18 @@ export default function ServicePayments() {
   const [showRecurringOnly, setShowRecurringOnly] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("list");
+  const [selectedService, setSelectedService] = useState("all");
+  const [selectedBrandStatus, setSelectedBrandStatus] = useState("all");
+  const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
 
-  const { data, isLoading } = useServicePayments(page, PAGE_SIZE, showRecurringOnly);
+  const { data, isLoading } = useServicePayments(
+    page, 
+    PAGE_SIZE, 
+    showRecurringOnly,
+    selectedService,
+    selectedBrandStatus,
+    selectedCreatorStatus
+  );
 
   const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
 
@@ -37,6 +47,12 @@ export default function ServicePayments() {
       <ServicePaymentsHeader 
         showRecurringOnly={showRecurringOnly}
         setShowRecurringOnly={setShowRecurringOnly}
+        selectedService={selectedService}
+        setSelectedService={setSelectedService}
+        selectedBrandStatus={selectedBrandStatus}
+        setSelectedBrandStatus={setSelectedBrandStatus}
+        selectedCreatorStatus={selectedCreatorStatus}
+        setSelectedCreatorStatus={setSelectedCreatorStatus}
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

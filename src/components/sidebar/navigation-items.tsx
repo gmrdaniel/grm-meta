@@ -60,4 +60,16 @@ export const adminNavigationItems: NavigationItem[] = [
     shortLabel: "Payments",
     to: "/admin/service-payments",
   },
+  {
+    icon: <Package size={24} />,
+    label: "Post Types",
+    shortLabel: "Post Types",
+    to: "/admin/post-types",
+  },
+  {
+    icon: <DollarSign size={24} />,
+    label: "Creator Rates",
+    shortLabel: "Rates",
+    to: "/admin/rates",
+  },
 ];

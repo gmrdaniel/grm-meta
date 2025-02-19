@@ -5,9 +5,8 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, UserPlus, Mail } from "lucide-react";
+import { Users, Mail } from "lucide-react";
 import { CreatorsTable } from "@/components/creators/CreatorsTable";
-import { AddCreatorForm } from "@/components/creators/AddCreatorForm";
 import { InviteCreatorForm } from "@/components/creators/InviteCreatorForm";
 
 interface Creator {
@@ -67,10 +66,6 @@ export default function Creators() {
                   <Users className="h-4 w-4" />
                   Creators List
                 </TabsTrigger>
-                <TabsTrigger value="add" className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Add New Creator
-                </TabsTrigger>
                 <TabsTrigger value="invite" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Invite Creator
@@ -79,10 +74,6 @@ export default function Creators() {
 
               <TabsContent value="list" className="mt-0">
                 <CreatorsTable creators={creators} />
-              </TabsContent>
-
-              <TabsContent value="add" className="mt-0">
-                <AddCreatorForm onCreatorAdded={fetchCreators} />
               </TabsContent>
 
               <TabsContent value="invite" className="mt-0">

@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,7 @@ import { ServicesCard } from "@/components/creator/ServicesCard";
 
 interface CreatorDetail {
   id: string;
+  email: string | null;
   created_at: string;
   personal_data?: {
     first_name: string | null;
@@ -46,7 +46,7 @@ interface Service {
   name: string;
   type: 'único' | 'recurrente' | 'contrato';
   description: string | null;
-  fixed_fee: number;
+  fixed_fee: number | null;
   contract_duration: number | null;
 }
 
@@ -59,6 +59,7 @@ interface CreatorService {
   monthly_fee: number | null;
   company_share: number | null;
   total_revenue: number | null;
+  terms_accepted: boolean;
   fixed_fee: number | null;
   contract_duration: number | null;
 }
@@ -80,6 +81,11 @@ export default function CreatorDetail() {
 
   async function fetchCreatorDetail() {
     try {
+      const { data: emailData, error: emailError } = await supabase
+        .rpc('get_user_email', { user_id: id });
+
+      if (emailError) throw emailError;
+
       const { data, error } = await supabase
         .from("profiles")
         .select(`
@@ -114,7 +120,7 @@ export default function CreatorDetail() {
         .single();
 
       if (error) throw error;
-      setCreator(data);
+      setCreator({ ...data, email: emailData });
     } catch (error: any) {
       toast.error("Error fetching creator details");
       console.error("Error:", error.message);
@@ -135,6 +141,7 @@ export default function CreatorDetail() {
           monthly_fee,
           company_share,
           total_revenue,
+          terms_accepted,
           fixed_fee,
           contract_duration,
           service:services (
@@ -150,11 +157,11 @@ export default function CreatorDetail() {
 
       if (error) throw error;
       
-      const typedServices = data?.map(service => ({
-        ...service,
+      const typedServices: CreatorService[] = data?.map(item => ({
+        ...item,
         service: {
-          ...service.service,
-          type: service.service.type as 'único' | 'recurrente' | 'contrato'
+          ...item.service,
+          type: item.service.type as 'único' | 'recurrente' | 'contrato'
         }
       })) || [];
       
@@ -174,7 +181,7 @@ export default function CreatorDetail() {
 
       if (error) throw error;
       
-      const typedServices = data?.map(service => ({
+      const typedServices: Service[] = data?.map(service => ({
         ...service,
         type: service.type as 'único' | 'recurrente' | 'contrato'
       })) || [];
@@ -267,6 +274,15 @@ export default function CreatorDetail() {
             </div>
 
             <div className="space-y-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-medium mb-4">Correo Electrónico</h3>
+                <input
+                  type="email"
+                  value={creator.email || ''}
+                  readOnly
+                  className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600"
+                />
+              </div>
               <PersonalInfoCard personalData={creator.personal_data} />
               <BankDetailsCard bankDetails={creator.bank_details} />
               <ServicesCard

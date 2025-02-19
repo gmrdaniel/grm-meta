@@ -9,12 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Instagram, User } from "lucide-react";
+import { Eye, Instagram, User, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Creator {
   id: string;
   created_at: string;
   role: string;
+  email?: string;
   personal_data?: {
     first_name: string | null;
     last_name: string | null;
@@ -27,6 +30,43 @@ interface CreatorsTableProps {
 }
 
 export function CreatorsTable({ creators }: CreatorsTableProps) {
+  const [creatorsWithEmail, setCreatorsWithEmail] = useState<Creator[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    fetchCreatorsEmails();
+  }, [creators]);
+
+  async function fetchCreatorsEmails() {
+    const creatorsWithEmailPromises = creators.map(async (creator) => {
+      try {
+        const { data: email } = await supabase
+          .rpc('get_user_email', { user_id: creator.id });
+        
+        return {
+          ...creator,
+          email: email
+        };
+      } catch (error) {
+        console.error("Error fetching email for creator:", error);
+        return {
+          ...creator,
+          email: "Error loading email"
+        };
+      }
+    });
+
+    const resolvedCreators = await Promise.all(creatorsWithEmailPromises);
+    setCreatorsWithEmail(resolvedCreators);
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(creatorsWithEmail.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCreators = creatorsWithEmail.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -43,13 +83,14 @@ export function CreatorsTable({ creators }: CreatorsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[250px]">Creator</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Instagram</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {creators.map((creator) => (
+            {currentCreators.map((creator) => (
               <TableRow key={creator.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -62,6 +103,12 @@ export function CreatorsTable({ creators }: CreatorsTableProps) {
                         {creator.personal_data?.last_name || ""}
                       </span>
                     </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <span>{creator.email || "Not available"}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -94,15 +141,38 @@ export function CreatorsTable({ creators }: CreatorsTableProps) {
                 </TableCell>
               </TableRow>
             ))}
-            {creators.length === 0 && (
+            {currentCreators.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   No creators found
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-end gap-2 mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </Button>
+        <span className="flex items-center px-3 text-sm">
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
