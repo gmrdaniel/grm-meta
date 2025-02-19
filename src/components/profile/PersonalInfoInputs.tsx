@@ -34,15 +34,10 @@ export const PersonalInfoInputs = ({
   CATEGORIES,
   GENDERS,
 }: PersonalInfoInputsProps) => {
-  // Debug logs para verificar los datos
-  console.log("Countries data:", COUNTRIES);
-  console.log("Categories data:", CATEGORIES);
-  console.log("Genders data:", GENDERS);
-
-  // Filtrar datos vacíos
-  const validCountries = COUNTRIES.filter(country => country.value && country.code);
-  const validCategories = CATEGORIES.filter(Boolean);
-  const validGenders = GENDERS.filter(gender => gender.value);
+  // Filtrar datos vacíos y validar arrays
+  const validCountries = COUNTRIES?.filter(country => country?.value && country?.code) ?? [];
+  const validCategories = CATEGORIES?.filter(Boolean) ?? [];
+  const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
 
   return (
     <div className="space-y-6">
@@ -52,18 +47,19 @@ export const PersonalInfoInputs = ({
           id="birth_date"
           name="birth_date"
           type="date"
-          value={formData.birth_date}
+          value={formData.birth_date || ''}
           onChange={handleInputChange}
+          className="w-full"
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="country_of_residence">País de Residencia</Label>
         <Select 
-          value={formData.country_of_residence || "default"} 
+          value={formData.country_of_residence || ''} 
           onValueChange={(value) => handleSelectChange("country_of_residence", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu país de residencia" />
           </SelectTrigger>
           <SelectContent>
@@ -81,9 +77,10 @@ export const PersonalInfoInputs = ({
         <Input
           id="state_of_residence"
           name="state_of_residence"
-          value={formData.state_of_residence}
+          value={formData.state_of_residence || ''}
           onChange={handleInputChange}
           placeholder="Ingresa tu estado de residencia"
+          className="w-full"
         />
       </div>
 
@@ -91,10 +88,10 @@ export const PersonalInfoInputs = ({
         <div className="space-y-2">
           <Label htmlFor="country_code">País (Código)</Label>
           <Select
-            value={formData.country_code || "default"}
+            value={formData.country_code || ''}
             onValueChange={(value) => handleSelectChange("country_code", value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecciona tu país" />
             </SelectTrigger>
             <SelectContent>
@@ -112,9 +109,10 @@ export const PersonalInfoInputs = ({
           <Input
             id="phone_number"
             name="phone_number"
-            value={formData.phone_number}
+            value={formData.phone_number || ''}
             onChange={handleInputChange}
             placeholder="Ingresa tu número de teléfono"
+            className="w-full"
           />
         </div>
       </div>
@@ -122,10 +120,10 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="category">Categoría</Label>
         <Select 
-          value={formData.category || "default"} 
+          value={formData.category || ''} 
           onValueChange={(value) => handleSelectChange("category", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -141,10 +139,10 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="gender">Género</Label>
         <Select 
-          value={formData.gender || "default"} 
+          value={formData.gender || ''} 
           onValueChange={(value) => handleSelectChange("gender", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu género" />
           </SelectTrigger>
           <SelectContent>
