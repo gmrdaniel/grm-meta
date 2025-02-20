@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,7 +65,7 @@ export default function CreatorRates() {
   });
   const itemsPerPage = 10;
 
-  const { data: platforms } = useQuery({
+  const { data: platforms = [] } = useQuery({
     queryKey: ["platforms"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -76,11 +75,11 @@ export default function CreatorRates() {
         .order("name");
 
       if (error) throw error;
-      return data;
+      return data?.filter(platform => platform.id && platform.name) || [];
     },
   });
 
-  const { data: postTypes } = useQuery({
+  const { data: postTypes = [] } = useQuery({
     queryKey: ["postTypes", filters.platform_id],
     queryFn: async () => {
       let query = supabase
@@ -95,7 +94,7 @@ export default function CreatorRates() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data?.filter(type => type.id && type.name) || [];
     },
     enabled: true,
   });
@@ -210,11 +209,13 @@ export default function CreatorRates() {
                         <SelectValue placeholder="Red Social" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas las redes</SelectItem>
-                        {platforms?.map((platform) => (
-                          <SelectItem key={platform.id} value={platform.id}>
-                            {platform.name}
-                          </SelectItem>
+                        <SelectItem value="all">Todas las redes</SelectItem>
+                        {platforms.map((platform) => (
+                          platform.id && platform.name ? (
+                            <SelectItem key={platform.id} value={platform.id}>
+                              {platform.name}
+                            </SelectItem>
+                          ) : null
                         ))}
                       </SelectContent>
                     </Select>
@@ -229,11 +230,13 @@ export default function CreatorRates() {
                         <SelectValue placeholder="Tipo de Publicación" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos los tipos</SelectItem>
-                        {postTypes?.map((type) => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
+                        <SelectItem value="all">Todos los tipos</SelectItem>
+                        {postTypes.map((type) => (
+                          type.id && type.name ? (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ) : null
                         ))}
                       </SelectContent>
                     </Select>

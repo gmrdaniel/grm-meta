@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -201,18 +200,23 @@ export function CreatorRateDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {creators.map((creator) => (
-                        <SelectItem key={creator.id} value={creator.id}>
-                          {creator.personal_data.first_name}{" "}
-                          {creator.personal_data.last_name}
-                          {creator.personal_data.instagram_username && (
-                            <span className="text-gray-500">
-                              {" "}
-                              (@{creator.personal_data.instagram_username})
-                            </span>
-                          )}
-                        </SelectItem>
-                      ))}
+                      {creators
+                        .filter(creator => 
+                          creator.id && 
+                          creator.personal_data?.first_name
+                        )
+                        .map((creator) => (
+                          <SelectItem key={creator.id} value={creator.id}>
+                            {creator.personal_data.first_name}{" "}
+                            {creator.personal_data.last_name}
+                            {creator.personal_data.instagram_username && (
+                              <span className="text-gray-500">
+                                {" "}
+                                (@{creator.personal_data.instagram_username})
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -239,11 +243,13 @@ export function CreatorRateDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {platforms.map((platform) => (
-                        <SelectItem key={platform.id} value={platform.id}>
-                          {platform.name}
-                        </SelectItem>
-                      ))}
+                      {platforms
+                        .filter(platform => platform.id && platform.name)
+                        .map((platform) => (
+                          <SelectItem key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -268,11 +274,13 @@ export function CreatorRateDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {postTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
+                      {postTypes
+                        .filter(type => type.id && type.name)
+                        .map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
