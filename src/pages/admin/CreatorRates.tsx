@@ -58,8 +58,8 @@ export default function CreatorRates() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
-    platform_id: "",
-    post_type_id: "",
+    platform_id: "all",
+    post_type_id: "all",
     min_rate: "",
     max_rate: "",
   });
@@ -88,7 +88,7 @@ export default function CreatorRates() {
         .eq("status", "active")
         .order("name");
 
-      if (filters.platform_id) {
+      if (filters.platform_id && filters.platform_id !== "all") {
         query = query.eq("platform_id", filters.platform_id);
       }
 
@@ -131,11 +131,11 @@ export default function CreatorRates() {
         query = query.textSearch('profiles.personal_data->first_name', `${searchTerm}:*`);
       }
 
-      if (filters.platform_id) {
+      if (filters.platform_id && filters.platform_id !== "all") {
         query = query.eq('platform_id', filters.platform_id);
       }
 
-      if (filters.post_type_id) {
+      if (filters.post_type_id && filters.post_type_id !== "all") {
         query = query.eq('post_type_id', filters.post_type_id);
       }
 
@@ -162,7 +162,7 @@ export default function CreatorRates() {
     setFilters(prev => {
       if (key === 'platform_id' && value !== prev.platform_id) {
         // Reset post type when platform changes
-        return { ...prev, [key]: value, post_type_id: '' };
+        return { ...prev, [key]: value, post_type_id: "all" };
       }
       return { ...prev, [key]: value };
     });
@@ -210,7 +210,7 @@ export default function CreatorRates() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todas las redes</SelectItem>
-                        {platforms.map((platform) => (
+                        {platforms?.map((platform) => (
                           platform.id && platform.name ? (
                             <SelectItem key={platform.id} value={platform.id}>
                               {platform.name}
@@ -231,7 +231,7 @@ export default function CreatorRates() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos los tipos</SelectItem>
-                        {postTypes.map((type) => (
+                        {postTypes?.map((type) => (
                           type.id && type.name ? (
                             <SelectItem key={type.id} value={type.id}>
                               {type.name}
