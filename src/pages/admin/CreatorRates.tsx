@@ -9,13 +9,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CreatorRateDialog } from "@/components/post-types/CreatorRateDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type CreatorRate = {
   id: string;
@@ -40,14 +47,61 @@ type CreatorRate = {
   };
 };
 
+type FilterState = {
+  platform_id: string;
+  post_type_id: string;
+  min_rate: string;
+  max_rate: string;
+};
+
 export default function CreatorRates() {
   const [rateDialogOpen, setRateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState<FilterState>({
+    platform_id: "",
+    post_type_id: "",
+    min_rate: "",
+    max_rate: "",
+  });
   const itemsPerPage = 10;
 
+  const { data: platforms } = useQuery({
+    queryKey: ["platforms"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("social_platforms")
+        .select("*")
+        .eq("status", "active")
+        .order("name");
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: postTypes } = useQuery({
+    queryKey: ["postTypes", filters.platform_id],
+    queryFn: async () => {
+      let query = supabase
+        .from("post_types")
+        .select("*")
+        .eq("status", "active")
+        .order("name");
+
+      if (filters.platform_id) {
+        query = query.eq("platform_id", filters.platform_id);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: true,
+  });
+
   const { data: rates, refetch: refetchRates } = useQuery({
-    queryKey: ["creatorRates", page, searchTerm],
+    queryKey: ["creatorRates", page, searchTerm, filters],
     queryFn: async () => {
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
@@ -78,6 +132,22 @@ export default function CreatorRates() {
         query = query.textSearch('profiles.personal_data->first_name', `${searchTerm}:*`);
       }
 
+      if (filters.platform_id) {
+        query = query.eq('platform_id', filters.platform_id);
+      }
+
+      if (filters.post_type_id) {
+        query = query.eq('post_type_id', filters.post_type_id);
+      }
+
+      if (filters.min_rate) {
+        query = query.gte('rate_usd', parseFloat(filters.min_rate));
+      }
+
+      if (filters.max_rate) {
+        query = query.lte('rate_usd', parseFloat(filters.max_rate));
+      }
+
       const { data, error, count } = await query;
 
       if (error) throw error;
@@ -88,6 +158,17 @@ export default function CreatorRates() {
       };
     },
   });
+
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    setFilters(prev => {
+      if (key === 'platform_id' && value !== prev.platform_id) {
+        // Reset post type when platform changes
+        return { ...prev, [key]: value, post_type_id: '' };
+      }
+      return { ...prev, [key]: value };
+    });
+    setPage(1); // Reset to first page when filters change
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -104,17 +185,78 @@ export default function CreatorRates() {
               </Button>
             </div>
 
-            <div className="flex items-center space-x-2 mb-4">
-              <Search className="w-4 h-4 text-gray-500" />
-              <Input
-                placeholder="Buscar por nombre o usuario de Instagram..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setPage(1);
-                }}
-                className="max-w-sm"
-              />
+            <div className="bg-white p-4 rounded-lg shadow space-y-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center space-x-2">
+                  <Search className="w-4 h-4 text-gray-500" />
+                  <Input
+                    placeholder="Buscar por nombre..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setPage(1);
+                    }}
+                    className="max-w-[200px]"
+                  />
+                </div>
+
+                <div className="flex gap-4 flex-1 flex-wrap">
+                  <div className="flex-1 min-w-[200px]">
+                    <Select
+                      value={filters.platform_id}
+                      onValueChange={(value) => handleFilterChange('platform_id', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Red Social" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todas las redes</SelectItem>
+                        {platforms?.map((platform) => (
+                          <SelectItem key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex-1 min-w-[200px]">
+                    <Select
+                      value={filters.post_type_id}
+                      onValueChange={(value) => handleFilterChange('post_type_id', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tipo de Publicación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos los tipos</SelectItem>
+                        {postTypes?.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex gap-2 flex-1 min-w-[200px]">
+                    <Input
+                      type="number"
+                      placeholder="Tarifa mínima"
+                      value={filters.min_rate}
+                      onChange={(e) => handleFilterChange('min_rate', e.target.value)}
+                      className="w-full"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Tarifa máxima"
+                      value={filters.max_rate}
+                      onChange={(e) => handleFilterChange('max_rate', e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Table>
