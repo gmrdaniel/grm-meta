@@ -50,7 +50,7 @@ export default function ServicePayments() {
     try {
       setIsGenerating(true);
       const { data, error } = await supabase
-        .rpc('generate_monthly_pending_payments');
+        .rpc('generate_monthly_pending_payments', {});
 
       if (error) throw error;
 
