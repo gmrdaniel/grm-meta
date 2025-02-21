@@ -11,8 +11,6 @@ import {
 
 interface PersonalInfoInputsProps {
   formData: {
-    first_name: string;
-    last_name: string;
     birth_date: string;
     country_of_residence: string;
     state_of_residence: string;
@@ -36,41 +34,13 @@ export const PersonalInfoInputs = ({
   CATEGORIES,
   GENDERS,
 }: PersonalInfoInputsProps) => {
-  // Debug logs para verificar los datos
-  console.log("Countries data:", COUNTRIES);
-  console.log("Categories data:", CATEGORIES);
-  console.log("Genders data:", GENDERS);
-
-  // Filtrar datos vacíos
-  const validCountries = COUNTRIES.filter(country => country.value && country.code);
-  const validCategories = CATEGORIES.filter(Boolean);
-  const validGenders = GENDERS.filter(gender => gender.value);
+  // Filtrar datos vacíos y validar arrays
+  const validCountries = COUNTRIES?.filter(country => country?.value && country?.code) ?? [];
+  const validCategories = CATEGORIES?.filter(Boolean) ?? [];
+  const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="first_name">Nombre</Label>
-          <Input
-            id="first_name"
-            name="first_name"
-            value={formData.first_name || ''}
-            onChange={handleInputChange}
-            placeholder="Ingresa tu nombre"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="last_name">Apellidos</Label>
-          <Input
-            id="last_name"
-            name="last_name"
-            value={formData.last_name || ''}
-            onChange={handleInputChange}
-            placeholder="Ingresa tus apellidos"
-          />
-        </div>
-      </div>
-
       <div className="space-y-2">
         <Label htmlFor="birth_date">Fecha de Nacimiento</Label>
         <Input
@@ -79,16 +49,17 @@ export const PersonalInfoInputs = ({
           type="date"
           value={formData.birth_date || ''}
           onChange={handleInputChange}
+          className="w-full"
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="country_of_residence">País de Residencia</Label>
         <Select 
-          value={formData.country_of_residence || undefined} 
+          value={formData.country_of_residence || ''} 
           onValueChange={(value) => handleSelectChange("country_of_residence", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu país de residencia" />
           </SelectTrigger>
           <SelectContent>
@@ -109,6 +80,7 @@ export const PersonalInfoInputs = ({
           value={formData.state_of_residence || ''}
           onChange={handleInputChange}
           placeholder="Ingresa tu estado de residencia"
+          className="w-full"
         />
       </div>
 
@@ -116,10 +88,10 @@ export const PersonalInfoInputs = ({
         <div className="space-y-2">
           <Label htmlFor="country_code">País (Código)</Label>
           <Select
-            value={formData.country_code || undefined}
+            value={formData.country_code || ''}
             onValueChange={(value) => handleSelectChange("country_code", value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecciona tu país" />
             </SelectTrigger>
             <SelectContent>
@@ -140,6 +112,7 @@ export const PersonalInfoInputs = ({
             value={formData.phone_number || ''}
             onChange={handleInputChange}
             placeholder="Ingresa tu número de teléfono"
+            className="w-full"
           />
         </div>
       </div>
@@ -147,10 +120,10 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="category">Categoría</Label>
         <Select 
-          value={formData.category || undefined}
+          value={formData.category || ''} 
           onValueChange={(value) => handleSelectChange("category", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -166,10 +139,10 @@ export const PersonalInfoInputs = ({
       <div className="space-y-2">
         <Label htmlFor="gender">Género</Label>
         <Select 
-          value={formData.gender || undefined}
+          value={formData.gender || ''} 
           onValueChange={(value) => handleSelectChange("gender", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu género" />
           </SelectTrigger>
           <SelectContent>

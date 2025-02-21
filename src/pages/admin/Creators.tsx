@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Mail } from "lucide-react";
+import { Users, Mail, Upload, History } from "lucide-react";
 import { CreatorsTable } from "@/components/creators/CreatorsTable";
 import { InviteCreatorForm } from "@/components/creators/InviteCreatorForm";
+import { BulkInviteCreators } from "@/components/creators/BulkInviteCreators";
+import { BulkInvitationsHistory } from "@/components/creators/bulk-invite/BulkInvitationsHistory";
 
 interface Creator {
   id: string;
@@ -70,6 +72,14 @@ export default function Creators() {
                   <Mail className="h-4 w-4" />
                   Invite Creator
                 </TabsTrigger>
+                <TabsTrigger value="bulk" className="flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  Invitación Masiva
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Historial de Invitaciones
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="list" className="mt-0">
@@ -78,6 +88,17 @@ export default function Creators() {
 
               <TabsContent value="invite" className="mt-0">
                 <InviteCreatorForm onInviteSent={fetchCreators} />
+              </TabsContent>
+
+              <TabsContent value="bulk" className="mt-0">
+                <div className="bg-white p-6 rounded-lg border">
+                  <h2 className="text-lg font-semibold mb-4">Invitación Masiva de Creadores</h2>
+                  <BulkInviteCreators />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-0">
+                <BulkInvitationsHistory />
               </TabsContent>
             </Tabs>
           </div>

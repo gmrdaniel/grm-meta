@@ -18,6 +18,7 @@ export const ProfilePhotoUpload = ({
   onPhotoUpdate,
 }: ProfilePhotoUploadProps) => {
   const [uploading, setUploading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(currentPhotoUrl);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -52,7 +53,19 @@ export const ProfilePhotoUpload = ({
         data: { publicUrl },
       } = supabase.storage.from("profile-photos").getPublicUrl(filePath);
 
+      setPhotoUrl(publicUrl);
       onPhotoUpdate(publicUrl);
+      
+      // Actualizar la foto en la base de datos
+      const { error: updateError } = await supabase
+        .from("personal_data")
+        .update({ profile_photo_url: publicUrl })
+        .eq("profile_id", userId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       toast.success("Foto de perfil actualizada exitosamente");
     } catch (error: any) {
       console.error("Error:", error);
@@ -65,7 +78,7 @@ export const ProfilePhotoUpload = ({
   return (
     <div className="flex flex-col items-center gap-4 mb-6">
       <Avatar className="w-32 h-32">
-        <AvatarImage src={currentPhotoUrl || ""} />
+        <AvatarImage src={photoUrl || ""} alt="Foto de perfil" />
         <AvatarFallback className="bg-primary/10">
           {userId.slice(0, 2).toUpperCase()}
         </AvatarFallback>

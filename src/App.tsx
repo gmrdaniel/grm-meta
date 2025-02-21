@@ -13,13 +13,13 @@ import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
 import PendingServices from "./pages/creator/PendingServices";
+import Campaigns from "./pages/creator/Campaigns";
 import Creators from "./pages/admin/Creators";
 import CreatorDetail from "./pages/admin/CreatorDetail";
 import Services from "./pages/admin/Services";
 import CreatorServices from "./pages/admin/CreatorServices";
 import ServicePayments from "./pages/admin/ServicePayments";
 import PostTypes from "./pages/admin/PostTypes";
-import CreatorRates from "./pages/admin/CreatorRates";
 
 const queryClient = new QueryClient();
 
@@ -91,14 +91,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/rates"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <CreatorRates />
-                </ProtectedRoute>
-              }
-            />
 
             {/* Creator routes */}
             <Route
@@ -130,6 +122,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["creator"]}>
                   <PendingServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/campaigns"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <Campaigns />
                 </ProtectedRoute>
               }
             />
