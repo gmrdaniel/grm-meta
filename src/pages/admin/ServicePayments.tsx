@@ -9,10 +9,10 @@ import { ServicePaymentsTable } from "@/components/service-payments/ServicePayme
 import { useServicePayments } from "@/hooks/useServicePayments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServicePaymentUpdateForm } from "@/components/payments/ServicePaymentUpdateForm";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -49,16 +49,16 @@ export default function ServicePayments() {
   const handleGenerateMonthlyPayments = async () => {
     try {
       setIsGenerating(true);
-      const { data, error } = await supabase
-        .rpc('generate_monthly_pending_payments', {});
+      const { data: result, error } = await supabase
+        .rpc('generate_monthly_pending_payments');
 
       if (error) throw error;
 
-      const paymentsGenerated = data || 0;
+      const paymentsGenerated = result || 0;
 
       toast({
         title: "Pagos generados con éxito",
-        description: `Se han generado ${paymentsGenerated} pagos pendientes para el mes actual.`,
+        description: `Se han generado ${paymentsGenerated} ${paymentsGenerated === 1 ? 'pago pendiente' : 'pagos pendientes'} para el mes actual.`,
       });
 
       // Actualizar la lista de pagos
@@ -92,8 +92,16 @@ export default function ServicePayments() {
           <Button
             onClick={handleGenerateMonthlyPayments}
             disabled={isGenerating}
+            className="min-w-[250px]"
           >
-            {isGenerating ? "Generando pagos..." : "Generar pagos pendientes del mes"}
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generando pagos...
+              </>
+            ) : (
+              "Generar pagos pendientes del mes"
+            )}
           </Button>
         </div>
       </div>
