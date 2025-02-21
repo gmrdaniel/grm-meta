@@ -1,1 +1,10 @@
+
 project_id = "ovyakbwetiwkmpqjdhme"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[functions.generate-monthly-payments]
+verify_jwt = true

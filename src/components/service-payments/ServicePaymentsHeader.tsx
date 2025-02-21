@@ -27,7 +27,7 @@ export function ServicePaymentsHeader({
 }: ServicePaymentsHeaderProps) {
   const { data: services } = useServices();
 
-  const paymentStatuses = ["all", "pending", "completed"];
+  const paymentStatuses = ["all", "pendiente", "pagado", "atrasado"];
 
   return (
     <div className="space-y-4">
@@ -58,7 +58,7 @@ export function ServicePaymentsHeader({
             <SelectContent>
               {paymentStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === 'all' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -74,7 +74,7 @@ export function ServicePaymentsHeader({
             <SelectContent>
               {paymentStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === 'all' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>

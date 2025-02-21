@@ -21,6 +21,9 @@ export function useServicePayments(
         .select(`
           *,
           creator_service:creator_services (
+            id,
+            monthly_fee,
+            company_share,
             profiles (
               personal_data (
                 first_name,
@@ -28,7 +31,8 @@ export function useServicePayments(
               )
             ),
             services (
-              name
+              name,
+              type
             )
           )
         `, { count: 'exact' })

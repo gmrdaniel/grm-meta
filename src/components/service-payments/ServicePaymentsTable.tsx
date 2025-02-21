@@ -13,10 +13,12 @@ interface ServicePaymentsTableProps {
 export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePaymentsTableProps) {
   const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'completed':
+      case 'pagado':
         return 'bg-green-500';
-      case 'pending':
+      case 'pendiente':
         return 'bg-yellow-500';
+      case 'atrasado':
+        return 'bg-red-500';
       default:
         return 'bg-gray-500';
     }

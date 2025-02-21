@@ -699,6 +699,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_monthly_pending_payments: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_user_email: {
         Args: {
           user_id: string
