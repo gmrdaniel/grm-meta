@@ -1,6 +1,7 @@
 
-import { createClient } from '@supabase/supabase-js';
-import { format, startOfMonth, setDate } from 'date-fns';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
+import { format } from 'https://esm.sh/date-fns@3.3.1'
+import { startOfMonth, setDate } from 'https://esm.sh/date-fns@3.3.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
