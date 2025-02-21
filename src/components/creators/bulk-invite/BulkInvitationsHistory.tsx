@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { CreatorServicesPagination } from "@/components/creator-services/CreatorServicesPagination";
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Copy, Check } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BulkInvitation {
   id: string;
@@ -26,12 +34,14 @@ interface BulkInvitationDetail {
   status: string;
   error_message: string | null;
   created_at: string;
+  invitation_link?: string;
 }
 
 export function BulkInvitationsHistory() {
   const [page, setPage] = useState(1);
   const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
   const [detailsPage, setDetailsPage] = useState(1);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const pageSize = 10;
 
   const { data: invitationsData, isLoading: isLoadingInvitations } = useQuery({
@@ -59,22 +69,61 @@ export function BulkInvitationsHistory() {
       if (!selectedInvitationId) return { details: [], total: 0 };
 
       const startRow = (detailsPage - 1) * pageSize;
-      const { data: details, error, count } = await supabase
+      
+      // Primero obtenemos los detalles de la invitación masiva
+      const { data: details, error: detailsError, count } = await supabase
         .from('bulk_creator_invitation_details')
         .select('*', { count: 'exact' })
         .eq('bulk_invitation_id', selectedInvitationId)
         .range(startRow, startRow + pageSize - 1)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (detailsError) throw detailsError;
+
+      // Luego obtenemos los links de invitación correspondientes
+      if (details && details.length > 0) {
+        const { data: invitations, error: invitationsError } = await supabase
+          .from('creator_invitations')
+          .select('email, token')
+          .in('email', details.map(d => d.email));
+
+        if (invitationsError) throw invitationsError;
+
+        // Combinamos los detalles con los links de invitación
+        const detailsWithLinks = details.map(detail => {
+          const invitation = invitations?.find(inv => inv.email === detail.email);
+          return {
+            ...detail,
+            invitation_link: invitation 
+              ? `${window.location.origin}/auth?invitation=${invitation.token}`
+              : undefined
+          };
+        });
+
+        return {
+          details: detailsWithLinks,
+          total: count || 0
+        };
+      }
 
       return {
-        details,
+        details: [],
         total: count || 0
       };
     },
     enabled: !!selectedInvitationId
   });
+
+  const handleCopyUrl = async (url: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      toast.success("URL copiada al portapapeles");
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      toast.error("Error al copiar URL");
+    }
+  };
 
   const totalInvitationsPages = Math.ceil((invitationsData?.total || 0) / pageSize);
   const totalDetailsPages = Math.ceil((detailsData?.total || 0) / pageSize);
@@ -157,12 +206,13 @@ export function BulkInvitationsHistory() {
                     <TableHead>Activo</TableHead>
                     <TableHead>Error</TableHead>
                     <TableHead>Fecha</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoadingDetails ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center">
+                      <TableCell colSpan={7} className="text-center">
                         Cargando detalles...
                       </TableCell>
                     </TableRow>
@@ -175,6 +225,30 @@ export function BulkInvitationsHistory() {
                       <TableCell>{detail.error_message || "-"}</TableCell>
                       <TableCell>
                         {format(new Date(detail.created_at), 'dd/MM/yyyy HH:mm')}
+                      </TableCell>
+                      <TableCell>
+                        {detail.invitation_link && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleCopyUrl(detail.invitation_link!, detail.id)}
+                                >
+                                  {copiedId === detail.id ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Copiar URL de invitación</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

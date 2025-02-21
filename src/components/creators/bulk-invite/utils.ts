@@ -44,6 +44,19 @@ export const processExcelFile = async (file: File, serviceId: string) => {
           throw new Error("No se encontraron filas válidas en el archivo");
         }
 
+        // Verificar correos duplicados en la base de datos
+        const emails = validRows.map((row: any) => row.Email);
+        const { data: existingInvitations } = await supabase
+          .from('creator_invitations')
+          .select('email')
+          .in('email', emails)
+          .eq('status', 'pending');
+
+        if (existingInvitations && existingInvitations.length > 0) {
+          const duplicateEmails = existingInvitations.map(inv => inv.email).join(', ');
+          throw new Error(`Los siguientes correos ya tienen invitaciones pendientes: ${duplicateEmails}`);
+        }
+
         const { data: bulkInvitation, error: invitationError } = await supabase
           .from('bulk_creator_invitations')
           .insert({
