@@ -9,6 +9,10 @@ import { ServicePaymentsTable } from "@/components/service-payments/ServicePayme
 import { useServicePayments } from "@/hooks/useServicePayments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServicePaymentUpdateForm } from "@/components/payments/ServicePaymentUpdateForm";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const PAGE_SIZE = 10;
 
@@ -20,8 +24,9 @@ export default function ServicePayments() {
   const [selectedService, setSelectedService] = useState("all");
   const [selectedBrandStatus, setSelectedBrandStatus] = useState("all");
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const { data, isLoading } = useServicePayments(
+  const { data, isLoading, refetch } = useServicePayments(
     page, 
     PAGE_SIZE, 
     showRecurringOnly,
@@ -29,8 +34,6 @@ export default function ServicePayments() {
     selectedBrandStatus,
     selectedCreatorStatus
   );
-
-  const totalPages = Math.ceil((data?.totalCount || 0) / PAGE_SIZE);
 
   const handlePaymentSelect = (payment: any) => {
     setSelectedPayment(payment);
@@ -42,18 +45,49 @@ export default function ServicePayments() {
     setActiveTab("list");
   };
 
+  const handleGenerateMonthlyPayments = async () => {
+    try {
+      setIsGenerating(true);
+      const { data, error } = await supabase.functions.invoke('generate-monthly-payments');
+      
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success('Pagos mensuales generados exitosamente');
+        refetch(); // Actualizar la lista de pagos
+      } else {
+        toast.error('Error al generar los pagos mensuales');
+      }
+    } catch (error: any) {
+      toast.error('Error al generar los pagos mensuales');
+      console.error('Error:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const content = (
     <div className="container mx-auto py-6 space-y-6">
-      <ServicePaymentsHeader 
-        showRecurringOnly={showRecurringOnly}
-        setShowRecurringOnly={setShowRecurringOnly}
-        selectedService={selectedService}
-        setSelectedService={setSelectedService}
-        selectedBrandStatus={selectedBrandStatus}
-        setSelectedBrandStatus={setSelectedBrandStatus}
-        selectedCreatorStatus={selectedCreatorStatus}
-        setSelectedCreatorStatus={setSelectedCreatorStatus}
-      />
+      <div className="flex justify-between items-center">
+        <ServicePaymentsHeader 
+          showRecurringOnly={showRecurringOnly}
+          setShowRecurringOnly={setShowRecurringOnly}
+          selectedService={selectedService}
+          setSelectedService={setSelectedService}
+          selectedBrandStatus={selectedBrandStatus}
+          setSelectedBrandStatus={setSelectedBrandStatus}
+          selectedCreatorStatus={selectedCreatorStatus}
+          setSelectedCreatorStatus={setSelectedCreatorStatus}
+        />
+        <Button
+          onClick={handleGenerateMonthlyPayments}
+          disabled={isGenerating}
+          className="ml-4"
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {isGenerating ? 'Generando...' : 'Generar Pagos Mensuales'}
+        </Button>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
@@ -73,7 +107,7 @@ export default function ServicePayments() {
               <div className="mt-4">
                 <CreatorServicesPagination
                   page={page}
-                  totalPages={totalPages}
+                  totalPages={Math.ceil((data.totalCount || 0) / PAGE_SIZE)}
                   setPage={setPage}
                 />
               </div>
