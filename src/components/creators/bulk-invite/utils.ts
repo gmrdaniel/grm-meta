@@ -8,9 +8,21 @@ export interface ProcessedRow {
   email: string;
   is_active: boolean;
   send_invitation: boolean;
+  service_id?: string;
 }
 
-export const processExcelFile = async (file: File) => {
+export const getDefaultService = async () => {
+  const { data: services, error } = await supabase
+    .from('services')
+    .select('id, name')
+    .eq('name', 'Contrato NO exclusivo')
+    .single();
+
+  if (error) throw error;
+  return services;
+};
+
+export const processExcelFile = async (file: File, serviceId: string) => {
   return new Promise<ProcessedRow[]>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -50,6 +62,7 @@ export const processExcelFile = async (file: File) => {
           email: row.Email,
           is_active: row.Activo === 'TRUE',
           send_invitation: row['Enviar Invitación'] === 'TRUE',
+          service_id: serviceId,
         }));
 
         resolve(details);
@@ -81,7 +94,7 @@ export const createInvitation = async (detail: ProcessedRow) => {
       .from('creator_invitations')
       .insert({
         email: detail.email,
-        service_id: null,
+        service_id: detail.service_id,
         status: 'pending'
       })
       .select('token')
