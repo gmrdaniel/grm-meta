@@ -77,7 +77,7 @@ export function BulkInviteCreators() {
         <DownloadTemplateButton />
 
         <div className="flex items-center gap-6">
-          <div className="">
+          <div className="w-72">
             <label className="text-sm font-medium text-gray-700">
               Servicio
             </label>
