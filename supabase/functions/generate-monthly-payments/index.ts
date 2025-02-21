@@ -60,9 +60,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    const currentMonth = startOfMonth(new Date());
-    const paymentDate = setDate(currentMonth, 10); // Establecer al día 10 del mes
-    const formattedMonth = format(currentMonth, 'yyyy-MM-dd');
+    // Usar la fecha actual para determinar el mes para el que generaremos los pagos
+    const currentDate = new Date();
+    const monthForPayments = startOfMonth(currentDate);
+    const paymentDate = setDate(monthForPayments, 10); // Siempre el día 10
+    const formattedMonth = format(monthForPayments, 'yyyy-MM-dd');
     const formattedPaymentDate = format(paymentDate, 'yyyy-MM-dd');
     const successfulPayments = [];
     const failedPayments = [];
@@ -86,7 +88,7 @@ Deno.serve(async (req) => {
         }
 
         if (existingPayment) {
-          console.log(`Payment already exists for service ${service.id} in ${format(currentMonth, 'MMMM yyyy')}`);
+          console.log(`Payment already exists for service ${service.id} in ${format(monthForPayments, 'MMMM yyyy')}`);
           continue;
         }
 
@@ -108,14 +110,14 @@ Deno.serve(async (req) => {
           .insert({
             creator_service_id: service.id,
             payment_month: formattedMonth,
-            payment_date: formattedPaymentDate, // Fecha establecida al día 10
+            payment_date: formattedPaymentDate, // Fecha fija al día 10
             total_amount: totalAmount,
             company_earning: companyEarning,
             creator_earning: creatorEarning,
             brand_payment_status: 'pending',
             creator_payment_status: 'pending',
             is_recurring: true,
-            payment_period: format(currentMonth, 'MMMM yyyy')
+            payment_period: format(monthForPayments, 'MMMM yyyy')
           });
 
         if (insertError) {
