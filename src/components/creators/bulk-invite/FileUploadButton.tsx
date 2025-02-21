@@ -8,7 +8,7 @@ export function FileUploadButton({
   isUploading,
   onFileSelect
 }: FileUploadButtonProps) {
-  return <div className="flex flex-col gap-2 py-[4px]">
+  return <div className="w-72">
       <label htmlFor="file-upload" className="text-sm font-medium text-gray-700 py-0">
         Subir archivo completado
       </label>

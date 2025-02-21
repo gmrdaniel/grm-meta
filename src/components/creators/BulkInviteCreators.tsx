@@ -77,7 +77,7 @@ export function BulkInviteCreators() {
         <DownloadTemplateButton />
 
         <div className="flex items-center gap-6">
-          <div className="w-72">
+          <div className="">
             <label className="text-sm font-medium text-gray-700">
               Servicio
             </label>
@@ -91,7 +91,7 @@ export function BulkInviteCreators() {
                   </SelectItem>)}
               </SelectContent>
             </Select>
-            <p className="text-gray-500 text-sm">Selecciona un servicio</p>
+            <p className="text-sm text-gray-500 py-[2px] my-0 px-[2px]">Selecciona un servicio</p>
             {isLoadingServices && <p className="text-sm text-gray-500 mt-1">Cargando servicios...</p>}
           </div>
 
