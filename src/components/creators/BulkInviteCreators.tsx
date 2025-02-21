@@ -91,7 +91,7 @@ export function BulkInviteCreators() {
                   </SelectItem>)}
               </SelectContent>
             </Select>
-            <p>Selecciona un servicio</p>
+            <p className="text-sm text-gray-500">Selecciona un servicio</p>
             {isLoadingServices && <p className="text-sm text-gray-500 mt-1">Cargando servicios...</p>}
           </div>
 
