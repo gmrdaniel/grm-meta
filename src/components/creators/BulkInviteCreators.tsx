@@ -76,9 +76,9 @@ export function BulkInviteCreators() {
       <div className="flex flex-col gap-4">
         <DownloadTemplateButton />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="w-72">
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700">
               Servicio
             </label>
             <Select value={selectedServiceId} onValueChange={setSelectedServiceId} disabled={isLoadingServices}>
@@ -91,7 +91,7 @@ export function BulkInviteCreators() {
                   </SelectItem>)}
               </SelectContent>
             </Select>
-            <p className="text-sm text-gray-500">Selecciona un servicio</p>
+            <p className="text-gray-500 text-sm">Selecciona un servicio</p>
             {isLoadingServices && <p className="text-sm text-gray-500 mt-1">Cargando servicios...</p>}
           </div>
 
