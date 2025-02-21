@@ -292,58 +292,6 @@ export type Database = {
           },
         ]
       }
-      creator_rates: {
-        Row: {
-          created_at: string
-          creator_id: string
-          id: string
-          platform_id: string
-          post_type_id: string
-          rate_usd: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          creator_id: string
-          id?: string
-          platform_id: string
-          post_type_id: string
-          rate_usd: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          creator_id?: string
-          id?: string
-          platform_id?: string
-          post_type_id?: string
-          rate_usd?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "creator_rates_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "creator_rates_platform_id_fkey"
-            columns: ["platform_id"]
-            isOneToOne: false
-            referencedRelation: "social_platforms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "creator_rates_post_type_id_fkey"
-            columns: ["post_type_id"]
-            isOneToOne: false
-            referencedRelation: "post_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       creator_services: {
         Row: {
           company_share: number | null
