@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -32,7 +33,10 @@ Deno.serve(async (req) => {
       .eq('status', 'activo')
       .filter('services.type', 'eq', 'recurrente');
 
-    if (servicesError) throw servicesError;
+    if (servicesError) {
+      console.error('Error fetching services:', servicesError);
+      throw servicesError;
+    }
 
     const currentMonth = startOfMonth(new Date());
     const successfulPayments = [];
@@ -42,12 +46,17 @@ Deno.serve(async (req) => {
     for (const service of recurringServices || []) {
       try {
         // Verificar si ya existe un pago para este mes
-        const { data: existingPayment } = await supabaseClient
+        const { data: existingPayment, error: existingPaymentError } = await supabaseClient
           .from('service_payments')
           .select('id')
           .eq('creator_service_id', service.id)
           .eq('payment_month', format(currentMonth, 'yyyy-MM-dd'))
           .single();
+
+        if (existingPaymentError && !existingPaymentError.message.includes('No rows found')) {
+          console.error('Error checking existing payment:', existingPaymentError);
+          throw existingPaymentError;
+        }
 
         if (existingPayment) {
           console.log(`Payment already exists for service ${service.id} in ${format(currentMonth, 'MMMM yyyy')}`);
@@ -76,7 +85,11 @@ Deno.serve(async (req) => {
             payment_period: format(currentMonth, 'MMMM yyyy')
           });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Error inserting payment:', insertError);
+          throw insertError;
+        }
+
         successfulPayments.push(service.id);
 
       } catch (error) {
