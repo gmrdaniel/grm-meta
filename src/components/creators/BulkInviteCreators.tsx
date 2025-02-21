@@ -106,19 +106,28 @@ export function BulkInviteCreators() {
 
           // Si se debe enviar invitación, crear una en creator_invitations
           let invitationLink = undefined;
+          console.log('Detail:', detail); // Añadir log para debugging
           if (detail.send_invitation) {
+            console.log('Creating invitation for:', detail.email); // Añadir log para debugging
             const { data: invitation, error: inviteError } = await supabase
               .from('creator_invitations')
               .insert({
                 email: detail.email,
-                service_id: null, // Se asignará más tarde cuando se implemente la selección de servicio
+                service_id: null,
                 status: 'pending'
               })
               .select('token')
               .single();
 
-            if (inviteError) throw inviteError;
-            invitationLink = `${window.location.origin}/auth?invitation=${invitation.token}`;
+            if (inviteError) {
+              console.error('Error creating invitation:', inviteError); // Añadir log para debugging
+              throw inviteError;
+            }
+
+            if (invitation) {
+              invitationLink = `${window.location.origin}/auth?invitation=${invitation.token}`;
+              console.log('Invitation link created:', invitationLink); // Añadir log para debugging
+            }
           }
 
           processedDetails.push({
