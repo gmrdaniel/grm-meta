@@ -8,20 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { List, Plus } from "lucide-react";
 import { ServicesTable } from "@/components/services/ServicesTable";
 import { ServiceForm } from "@/components/services/ServiceForm";
-
-interface Service {
-  id: string;
-  name: string;
-  description: string | null;
-  type: 'único' | 'recurrente' | 'contrato';
-  company_share_min: number;
-  company_share_max: number;
-  fixed_fee: number;
-  max_revenue: number | null;
-  contract_duration: number | null;
-  renewable: boolean;
-  terms_conditions: string | null;
-}
+import { Service } from "@/types/services";
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
@@ -49,7 +36,7 @@ export default function Services() {
       
       setServices(typedServices);
     } catch (error: any) {
-      toast.error("Error fetching services");
+      toast.error("Error al cargar los servicios");
       console.error("Error:", error.message);
     }
   }
@@ -64,14 +51,14 @@ export default function Services() {
           .eq("id", editingService.id);
 
         if (error) throw error;
-        toast.success("Service updated successfully");
+        toast.success("Servicio actualizado correctamente");
       } else {
         const { error } = await supabase
           .from("services")
           .insert(data);
 
         if (error) throw error;
-        toast.success("Service created successfully");
+        toast.success("Servicio creado correctamente");
       }
 
       setEditingService(null);
@@ -92,7 +79,7 @@ export default function Services() {
         .eq("id", id);
 
       if (error) throw error;
-      toast.success("Service deleted successfully");
+      toast.success("Servicio eliminado correctamente");
       fetchServices();
     } catch (error: any) {
       toast.error(error.message);
@@ -111,17 +98,17 @@ export default function Services() {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">Manage Services</h1>
+            <h1 className="text-2xl font-bold mb-6">Administrar Servicios</h1>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="mb-6">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <List className="h-4 w-4" />
-                  Services List
+                  Lista de Servicios
                 </TabsTrigger>
                 <TabsTrigger value="form" className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  {editingService ? "Edit Service" : "Add New Service"}
+                  {editingService ? "Editar Servicio" : "Añadir Nuevo Servicio"}
                 </TabsTrigger>
               </TabsList>
 
