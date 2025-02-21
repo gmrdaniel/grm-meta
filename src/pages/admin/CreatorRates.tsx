@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CreatorRateDialog } from "@/components/post-types/CreatorRateDialog";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CreatorRate = {
   id: string;
@@ -65,12 +67,12 @@ export default function CreatorRates() {
   });
   const itemsPerPage = 10;
 
-  const { data: platforms = [] } = useQuery({
+  const { data: platforms = [], isLoading: isLoadingPlatforms } = useQuery({
     queryKey: ["platforms"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("social_platforms")
-        .select("*")
+        .select("id, name")
         .eq("status", "active")
         .order("name");
 
@@ -79,12 +81,12 @@ export default function CreatorRates() {
     },
   });
 
-  const { data: postTypes = [] } = useQuery({
+  const { data: postTypes = [], isLoading: isLoadingPostTypes } = useQuery({
     queryKey: ["postTypes", filters.platform_id],
     queryFn: async () => {
       let query = supabase
         .from("post_types")
-        .select("*")
+        .select("id, name")
         .eq("status", "active")
         .order("name");
 
@@ -99,7 +101,7 @@ export default function CreatorRates() {
     enabled: true,
   });
 
-  const { data: rates, refetch: refetchRates } = useQuery({
+  const { data: rates, isLoading: isLoadingRates } = useQuery({
     queryKey: ["creatorRates", page, searchTerm, filters],
     queryFn: async () => {
       const from = (page - 1) * itemsPerPage;
@@ -108,7 +110,9 @@ export default function CreatorRates() {
       let query = supabase
         .from("creator_rates")
         .select(`
-          *,
+          id,
+          rate_usd,
+          created_at,
           profiles!creator_rates_creator_id_fkey (
             id,
             personal_data (
@@ -161,13 +165,43 @@ export default function CreatorRates() {
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => {
       if (key === 'platform_id' && value !== prev.platform_id) {
-        // Reset post type when platform changes
         return { ...prev, [key]: value, post_type_id: "all" };
       }
       return { ...prev, [key]: value };
     });
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
   };
+
+  if (isLoadingPlatforms || isLoadingPostTypes || isLoadingRates) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow space-y-4">
+                <div className="flex gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-10 flex-1" />
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -210,7 +244,7 @@ export default function CreatorRates() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todas las redes</SelectItem>
-                        {platforms?.map((platform) => (
+                        {platforms.map((platform) => (
                           platform.id && platform.name ? (
                             <SelectItem key={platform.id} value={platform.id}>
                               {platform.name}
@@ -231,7 +265,7 @@ export default function CreatorRates() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos los tipos</SelectItem>
-                        {postTypes?.map((type) => (
+                        {postTypes.map((type) => (
                           type.id && type.name ? (
                             <SelectItem key={type.id} value={type.id}>
                               {type.name}
@@ -321,7 +355,10 @@ export default function CreatorRates() {
             <CreatorRateDialog
               open={rateDialogOpen}
               onOpenChange={setRateDialogOpen}
-              onSuccess={refetchRates}
+              onSuccess={() => {
+                setRateDialogOpen(false);
+                refetchRates();
+              }}
             />
           </div>
         </main>
