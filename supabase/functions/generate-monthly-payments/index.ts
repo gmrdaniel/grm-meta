@@ -1,7 +1,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 import { format } from 'https://esm.sh/date-fns@3.3.1'
-import { startOfMonth, setDate } from 'https://esm.sh/date-fns@3.3.1'
+import { startOfMonth } from 'https://esm.sh/date-fns@3.3.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +20,8 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    console.log('Starting monthly payments generation...');
+
     // 1. Obtener servicios recurrentes activos
     const { data: recurringServices, error: servicesError } = await supabaseClient
       .from('creator_services')
@@ -27,34 +29,56 @@ Deno.serve(async (req) => {
         id,
         monthly_fee,
         company_share,
-        services (
-          type
+        profile_id,
+        services!inner (
+          id,
+          type,
+          name
         )
       `)
       .eq('status', 'activo')
-      .filter('services.type', 'eq', 'recurrente');
+      .eq('services.type', 'recurrente');
 
     if (servicesError) {
       console.error('Error fetching services:', servicesError);
       throw servicesError;
     }
 
+    console.log('Found recurring services:', recurringServices);
+
+    if (!recurringServices || recurringServices.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'No recurring services found to process',
+          results: { successful: [], failed: [] }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
     const currentMonth = startOfMonth(new Date());
+    const formattedMonth = format(currentMonth, 'yyyy-MM-dd');
     const successfulPayments = [];
     const failedPayments = [];
 
     // 2. Procesar cada servicio
-    for (const service of recurringServices || []) {
+    for (const service of recurringServices) {
       try {
+        console.log(`Processing service: ${service.services.name} (ID: ${service.id})`);
+
         // Verificar si ya existe un pago para este mes
         const { data: existingPayment, error: existingPaymentError } = await supabaseClient
           .from('service_payments')
           .select('id')
           .eq('creator_service_id', service.id)
-          .eq('payment_month', format(currentMonth, 'yyyy-MM-dd'))
-          .single();
+          .eq('payment_month', formattedMonth)
+          .maybeSingle();
 
-        if (existingPaymentError && !existingPaymentError.message.includes('No rows found')) {
+        if (existingPaymentError) {
           console.error('Error checking existing payment:', existingPaymentError);
           throw existingPaymentError;
         }
@@ -68,15 +92,21 @@ Deno.serve(async (req) => {
         const companyShare = service.company_share || 0;
         const companyEarning = (totalAmount * companyShare) / 100;
         const creatorEarning = totalAmount - companyEarning;
-        const paymentDate = setDate(currentMonth, 10);
+
+        console.log('Calculating payment:', {
+          totalAmount,
+          companyShare,
+          companyEarning,
+          creatorEarning
+        });
 
         // Crear el registro de pago
         const { error: insertError } = await supabaseClient
           .from('service_payments')
           .insert({
             creator_service_id: service.id,
-            payment_month: format(currentMonth, 'yyyy-MM-dd'),
-            payment_date: format(paymentDate, 'yyyy-MM-dd'),
+            payment_month: formattedMonth,
+            payment_date: formattedMonth, // Primer día del mes
             total_amount: totalAmount,
             company_earning: companyEarning,
             creator_earning: creatorEarning,
@@ -91,18 +121,25 @@ Deno.serve(async (req) => {
           throw insertError;
         }
 
-        successfulPayments.push(service.id);
+        console.log(`Successfully created payment for service ${service.id}`);
+        successfulPayments.push({
+          serviceId: service.id,
+          serviceName: service.services.name
+        });
 
       } catch (error) {
         console.error(`Error processing service ${service.id}:`, error);
-        failedPayments.push({ serviceId: service.id, error: error.message });
+        failedPayments.push({
+          serviceId: service.id,
+          error: error.message
+        });
       }
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Monthly payments generated',
+        message: `Processed ${recurringServices.length} services. Success: ${successfulPayments.length}, Failed: ${failedPayments.length}`,
         results: {
           successful: successfulPayments,
           failed: failedPayments
