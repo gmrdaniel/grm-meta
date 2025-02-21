@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { FileDown, Upload, ExternalLink } from "lucide-react";
+import { FileDown, Upload, ExternalLink, Loader2 } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InvitationDetail {
   id: string;
@@ -26,6 +27,8 @@ interface InvitationDetail {
 export function BulkInviteCreators() {
   const [isUploading, setIsUploading] = useState(false);
   const [invitationDetails, setInvitationDetails] = useState<InvitationDetail[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>("");
 
   const downloadTemplate = () => {
     const template = [
@@ -45,105 +48,116 @@ export function BulkInviteCreators() {
     if (!file) return;
 
     setIsUploading(true);
+    setError(null);
+    setProcessingStatus("Iniciando procesamiento del archivo...");
+
     try {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet);
+        try {
+          setProcessingStatus("Leyendo contenido del archivo...");
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet);
 
-        // Validar datos
-        const validRows = rows.filter((row: any) => {
-          const isValid = row.Nombre && row.Email && 
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.Email) &&
-            (row.Activo === 'TRUE' || row.Activo === 'FALSE');
-          return isValid;
-        });
+          setProcessingStatus("Validando datos...");
+          // Validar datos
+          const validRows = rows.filter((row: any) => {
+            const isValid = row.Nombre && row.Email && 
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.Email) &&
+              (row.Activo === 'TRUE' || row.Activo === 'FALSE');
+            return isValid;
+          });
 
-        if (validRows.length === 0) {
-          throw new Error("No se encontraron filas válidas en el archivo");
-        }
+          if (validRows.length === 0) {
+            throw new Error("No se encontraron filas válidas en el archivo");
+          }
 
-        // Crear registro de invitación masiva
-        const { data: bulkInvitation, error: invitationError } = await supabase
-          .from('bulk_creator_invitations')
-          .insert({
-            file_name: file.name,
-            total_rows: rows.length,
-            created_by: (await supabase.auth.getUser()).data.user?.id,
-          })
-          .select()
-          .single();
-
-        if (invitationError) throw invitationError;
-
-        // Insertar detalles y generar invitaciones
-        const details = validRows.map((row: any) => ({
-          bulk_invitation_id: bulkInvitation.id,
-          full_name: row.Nombre,
-          email: row.Email,
-          is_active: row.Activo === 'TRUE',
-          send_invitation: row['Enviar Invitación'] === 'TRUE',
-        }));
-
-        const processedDetails: InvitationDetail[] = [];
-
-        for (const detail of details) {
-          // Insertar detalle en la tabla
-          const { data: insertedDetail, error: detailError } = await supabase
-            .from('bulk_creator_invitation_details')
+          setProcessingStatus("Creando registro de invitación masiva...");
+          // Crear registro de invitación masiva
+          const { data: bulkInvitation, error: invitationError } = await supabase
+            .from('bulk_creator_invitations')
             .insert({
-              bulk_invitation_id: bulkInvitation.id,
-              full_name: detail.full_name,
-              email: detail.email,
-              is_active: detail.is_active,
+              file_name: file.name,
+              total_rows: rows.length,
+              created_by: (await supabase.auth.getUser()).data.user?.id,
             })
             .select()
             .single();
 
-          if (detailError) throw detailError;
+          if (invitationError) throw invitationError;
 
-          // Si se debe enviar invitación, crear una en creator_invitations
-          let invitationLink = undefined;
-          console.log('Detail:', detail); // Añadir log para debugging
-          if (detail.send_invitation) {
-            console.log('Creating invitation for:', detail.email); // Añadir log para debugging
-            const { data: invitation, error: inviteError } = await supabase
-              .from('creator_invitations')
+          setProcessingStatus("Procesando invitaciones...");
+          // Insertar detalles y generar invitaciones
+          const details = validRows.map((row: any) => ({
+            bulk_invitation_id: bulkInvitation.id,
+            full_name: row.Nombre,
+            email: row.Email,
+            is_active: row.Activo === 'TRUE',
+            send_invitation: row['Enviar Invitación'] === 'TRUE',
+          }));
+
+          const processedDetails: InvitationDetail[] = [];
+          let processedCount = 0;
+
+          for (const detail of details) {
+            processedCount++;
+            setProcessingStatus(`Procesando invitación ${processedCount} de ${details.length}...`);
+
+            // Insertar detalle en la tabla
+            const { data: insertedDetail, error: detailError } = await supabase
+              .from('bulk_creator_invitation_details')
               .insert({
+                bulk_invitation_id: bulkInvitation.id,
+                full_name: detail.full_name,
                 email: detail.email,
-                service_id: null,
-                status: 'pending'
+                is_active: detail.is_active,
               })
-              .select('token')
+              .select()
               .single();
 
-            if (inviteError) {
-              console.error('Error creating invitation:', inviteError); // Añadir log para debugging
-              throw inviteError;
+            if (detailError) throw detailError;
+
+            // Si se debe enviar invitación, crear una en creator_invitations
+            let invitationLink = undefined;
+            if (detail.send_invitation) {
+              const { data: invitation, error: inviteError } = await supabase
+                .from('creator_invitations')
+                .insert({
+                  email: detail.email,
+                  service_id: null,
+                  status: 'pending'
+                })
+                .select('token')
+                .single();
+
+              if (inviteError) throw inviteError;
+
+              if (invitation) {
+                invitationLink = `${window.location.origin}/auth?invitation=${invitation.token}`;
+              }
             }
 
-            if (invitation) {
-              invitationLink = `${window.location.origin}/auth?invitation=${invitation.token}`;
-              console.log('Invitation link created:', invitationLink); // Añadir log para debugging
-            }
+            processedDetails.push({
+              ...insertedDetail,
+              invitation_link: invitationLink
+            });
           }
 
-          processedDetails.push({
-            ...insertedDetail,
-            invitation_link: invitationLink
-          });
+          setInvitationDetails(processedDetails);
+          setProcessingStatus("");
+          toast.success(`Archivo procesado: ${validRows.length} registros válidos de ${rows.length} totales`);
+        } catch (error: any) {
+          setError(error.message || "Error al procesar el archivo");
+          toast.error("Error al procesar el archivo");
         }
-
-        setInvitationDetails(processedDetails);
-        toast.success(`Archivo procesado: ${validRows.length} registros válidos de ${rows.length} totales`);
       };
 
       reader.readAsArrayBuffer(file);
     } catch (error: any) {
-      toast.error(error.message);
-      console.error('Error:', error);
+      setError(error.message || "Error al leer el archivo");
+      toast.error("Error al leer el archivo");
     } finally {
       setIsUploading(false);
       event.target.value = '';
@@ -190,14 +204,33 @@ export function BulkInviteCreators() {
                 onChange={handleFileUpload}
                 disabled={isUploading}
               />
-              <Upload className="h-4 w-4 mr-2" />
-              {isUploading ? "Subiendo..." : "Seleccionar archivo"}
+              {isUploading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              {isUploading ? "Procesando..." : "Seleccionar archivo"}
             </Button>
           </div>
           <p className="text-sm text-gray-500">
             Formatos aceptados: .xlsx, .xls
           </p>
         </div>
+
+        {processingStatus && (
+          <div className="mt-2">
+            <div className="flex items-center gap-2 text-sm text-blue-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {processingStatus}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       {invitationDetails.length > 0 && (
