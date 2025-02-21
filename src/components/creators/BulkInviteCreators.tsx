@@ -2,18 +2,36 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { FileDown, Upload } from "lucide-react";
+import { FileDown, Upload, ExternalLink } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+interface InvitationDetail {
+  id: string;
+  full_name: string;
+  email: string;
+  is_active: boolean;
+  status: string;
+  invitation_link?: string;
+}
 
 export function BulkInviteCreators() {
   const [isUploading, setIsUploading] = useState(false);
+  const [invitationDetails, setInvitationDetails] = useState<InvitationDetail[]>([]);
 
   const downloadTemplate = () => {
     const template = [
-      ["Nombre", "Email", "Activo"],
-      ["Juan Pérez", "juan@ejemplo.com", "TRUE"],
-      ["María García", "maria@ejemplo.com", "TRUE"],
+      ["Nombre", "Email", "Activo", "Enviar Invitación"],
+      ["Juan Pérez", "juan@ejemplo.com", "TRUE", "TRUE"],
+      ["María García", "maria@ejemplo.com", "TRUE", "FALSE"],
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(template);
@@ -60,20 +78,56 @@ export function BulkInviteCreators() {
 
         if (invitationError) throw invitationError;
 
-        // Insertar detalles
+        // Insertar detalles y generar invitaciones
         const details = validRows.map((row: any) => ({
           bulk_invitation_id: bulkInvitation.id,
           full_name: row.Nombre,
           email: row.Email,
           is_active: row.Activo === 'TRUE',
+          send_invitation: row['Enviar Invitación'] === 'TRUE',
         }));
 
-        const { error: detailsError } = await supabase
-          .from('bulk_creator_invitation_details')
-          .insert(details);
+        const processedDetails: InvitationDetail[] = [];
 
-        if (detailsError) throw detailsError;
+        for (const detail of details) {
+          // Insertar detalle en la tabla
+          const { data: insertedDetail, error: detailError } = await supabase
+            .from('bulk_creator_invitation_details')
+            .insert({
+              bulk_invitation_id: bulkInvitation.id,
+              full_name: detail.full_name,
+              email: detail.email,
+              is_active: detail.is_active,
+            })
+            .select()
+            .single();
 
+          if (detailError) throw detailError;
+
+          // Si se debe enviar invitación, crear una en creator_invitations
+          let invitationLink = undefined;
+          if (detail.send_invitation) {
+            const { data: invitation, error: inviteError } = await supabase
+              .from('creator_invitations')
+              .insert({
+                email: detail.email,
+                service_id: null, // Se asignará más tarde cuando se implemente la selección de servicio
+                status: 'pending'
+              })
+              .select('token')
+              .single();
+
+            if (inviteError) throw inviteError;
+            invitationLink = `${window.location.origin}/auth?invitation=${invitation.token}`;
+          }
+
+          processedDetails.push({
+            ...insertedDetail,
+            invitation_link: invitationLink
+          });
+        }
+
+        setInvitationDetails(processedDetails);
         toast.success(`Archivo procesado: ${validRows.length} registros válidos de ${rows.length} totales`);
       };
 
@@ -85,6 +139,11 @@ export function BulkInviteCreators() {
       setIsUploading(false);
       event.target.value = '';
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Link copiado al portapapeles');
   };
 
   return (
@@ -131,6 +190,48 @@ export function BulkInviteCreators() {
           </p>
         </div>
       </div>
+
+      {invitationDetails.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-medium mb-4">Creadores Importados</h3>
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Link de Invitación</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitationDetails.map((detail) => (
+                  <TableRow key={detail.id}>
+                    <TableCell>{detail.full_name}</TableCell>
+                    <TableCell>{detail.email}</TableCell>
+                    <TableCell>{detail.is_active ? 'Activo' : 'Inactivo'}</TableCell>
+                    <TableCell>
+                      {detail.invitation_link ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => copyToClipboard(detail.invitation_link!)}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Copiar Link
+                        </Button>
+                      ) : (
+                        'No requiere invitación'
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
