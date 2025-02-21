@@ -81,6 +81,86 @@ export type Database = {
           },
         ]
       }
+      bulk_creator_invitation_details: {
+        Row: {
+          bulk_invitation_id: string | null
+          created_at: string
+          email: string
+          error_message: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bulk_invitation_id?: string | null
+          created_at?: string
+          email: string
+          error_message?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bulk_invitation_id?: string | null
+          created_at?: string
+          email?: string
+          error_message?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_creator_invitation_details_bulk_invitation_id_fkey"
+            columns: ["bulk_invitation_id"]
+            isOneToOne: false
+            referencedRelation: "bulk_creator_invitations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bulk_creator_invitations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          failed_rows: number
+          file_name: string
+          id: string
+          processed_rows: number
+          status: string
+          total_rows: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          failed_rows?: number
+          file_name: string
+          id?: string
+          processed_rows?: number
+          status?: string
+          total_rows?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          failed_rows?: number
+          file_name?: string
+          id?: string
+          processed_rows?: number
+          status?: string
+          total_rows?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           contract_status: string
