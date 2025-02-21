@@ -47,7 +47,6 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
   });
 
   useEffect(() => {
-    // Actualizar el creator_earning cuando cambie total_amount o company_earning
     const subscription = form.watch((value, { name }) => {
       if (name === "total_amount" || name === "company_earning") {
         const total = form.getValues("total_amount");
@@ -186,8 +185,9 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="completed">Completado</SelectItem>
+                    <SelectItem value="pendiente">Pendiente</SelectItem>
+                    <SelectItem value="pagado">Pagado</SelectItem>
+                    <SelectItem value="atrasado">Atrasado</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -207,8 +207,9 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="completed">Completado</SelectItem>
+                    <SelectItem value="pendiente">Pendiente</SelectItem>
+                    <SelectItem value="pagado">Pagado</SelectItem>
+                    <SelectItem value="atrasado">Atrasado</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
