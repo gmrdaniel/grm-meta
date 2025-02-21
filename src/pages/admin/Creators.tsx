@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Mail, Upload } from "lucide-react";
+import { Users, Mail, Upload, History } from "lucide-react";
 import { CreatorsTable } from "@/components/creators/CreatorsTable";
 import { InviteCreatorForm } from "@/components/creators/InviteCreatorForm";
 import { BulkInviteCreators } from "@/components/creators/BulkInviteCreators";
+import { BulkInvitationsHistory } from "@/components/creators/bulk-invite/BulkInvitationsHistory";
 
 interface Creator {
   id: string;
@@ -75,6 +76,10 @@ export default function Creators() {
                   <Upload className="h-4 w-4" />
                   Invitación Masiva
                 </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Historial de Invitaciones
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="list" className="mt-0">
@@ -90,6 +95,10 @@ export default function Creators() {
                   <h2 className="text-lg font-semibold mb-4">Invitación Masiva de Creadores</h2>
                   <BulkInviteCreators />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-0">
+                <BulkInvitationsHistory />
               </TabsContent>
             </Tabs>
           </div>
