@@ -7,7 +7,7 @@ import { ProcessingStatus } from "./bulk-invite/ProcessingStatus";
 import { CreatorsTable } from "./bulk-invite/CreatorsTable";
 import { processExcelFile, createInvitation, getDefaultService } from "./bulk-invite/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { useServices } from "@/hooks/useServices";
 import { Service } from "@/types/services";
 
 interface InvitationDetail {
@@ -24,40 +24,24 @@ export function BulkInviteCreators() {
   const [invitationDetails, setInvitationDetails] = useState<InvitationDetail[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [processingStatus, setProcessingStatus] = useState<string>("");
-  const [services, setServices] = useState<Service[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  
+  const { data: services = [], isLoading: isLoadingServices } = useServices();
 
   useEffect(() => {
-    const loadServices = async () => {
+    const setDefaultService = async () => {
       try {
-        // Cargar servicios
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('services')
-          .select('*')
-          .order('name');
-
-        if (servicesError) throw servicesError;
-        
-        // Asegurarnos de que los tipos sean válidos
-        const validServices = servicesData?.map(service => ({
-          ...service,
-          type: service.type as 'único' | 'recurrente' | 'contrato'
-        })) || [];
-
-        setServices(validServices);
-
-        // Obtener el servicio por defecto
         const defaultService = await getDefaultService();
         if (defaultService) {
           setSelectedServiceId(defaultService.id);
         }
       } catch (error) {
-        console.error('Error loading services:', error);
-        toast.error('Error al cargar los servicios');
+        console.error('Error setting default service:', error);
+        toast.error('Error al establecer el servicio por defecto');
       }
     };
 
-    loadServices();
+    setDefaultService();
   }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,6 +95,7 @@ export function BulkInviteCreators() {
             <Select
               value={selectedServiceId}
               onValueChange={setSelectedServiceId}
+              disabled={isLoadingServices}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar servicio" />
@@ -123,6 +108,9 @@ export function BulkInviteCreators() {
                 ))}
               </SelectContent>
             </Select>
+            {isLoadingServices && (
+              <p className="text-sm text-gray-500 mt-1">Cargando servicios...</p>
+            )}
           </div>
           <DownloadTemplateButton />
         </div>
