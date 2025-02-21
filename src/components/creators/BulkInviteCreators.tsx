@@ -37,7 +37,14 @@ export function BulkInviteCreators() {
           .order('name');
 
         if (servicesError) throw servicesError;
-        setServices(servicesData || []);
+        
+        // Asegurarnos de que los tipos sean válidos
+        const validServices = servicesData?.map(service => ({
+          ...service,
+          type: service.type as 'único' | 'recurrente' | 'contrato'
+        })) || [];
+
+        setServices(validServices);
 
         // Obtener el servicio por defecto
         const defaultService = await getDefaultService();
