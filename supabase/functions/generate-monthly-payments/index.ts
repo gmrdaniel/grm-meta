@@ -1,6 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
-import { format } from 'https://esm.sh/date-fns@3.3.1'
+import { format, setDate } from 'https://esm.sh/date-fns@3.3.1'
 import { startOfMonth } from 'https://esm.sh/date-fns@3.3.1'
 
 const corsHeaders = {
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'No recurring services found to process',
+          message: 'No hay servicios recurrentes activos para procesar',
           results: { successful: [], failed: [] }
         }),
         {
@@ -61,7 +61,9 @@ Deno.serve(async (req) => {
     }
 
     const currentMonth = startOfMonth(new Date());
+    const paymentDate = setDate(currentMonth, 10); // Establecer al día 10 del mes
     const formattedMonth = format(currentMonth, 'yyyy-MM-dd');
+    const formattedPaymentDate = format(paymentDate, 'yyyy-MM-dd');
     const successfulPayments = [];
     const failedPayments = [];
 
@@ -70,7 +72,7 @@ Deno.serve(async (req) => {
       try {
         console.log(`Processing service: ${service.services.name} (ID: ${service.id})`);
 
-        // Verificar si ya existe un pago para este mes
+        // Verificar si ya existe un pago para este mes y servicio
         const { data: existingPayment, error: existingPaymentError } = await supabaseClient
           .from('service_payments')
           .select('id')
@@ -106,7 +108,7 @@ Deno.serve(async (req) => {
           .insert({
             creator_service_id: service.id,
             payment_month: formattedMonth,
-            payment_date: formattedMonth, // Primer día del mes
+            payment_date: formattedPaymentDate, // Fecha establecida al día 10
             total_amount: totalAmount,
             company_earning: companyEarning,
             creator_earning: creatorEarning,
@@ -139,7 +141,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Processed ${recurringServices.length} services. Success: ${successfulPayments.length}, Failed: ${failedPayments.length}`,
+        message: `Procesados ${recurringServices.length} servicios. Exitosos: ${successfulPayments.length}, Fallidos: ${failedPayments.length}`,
         results: {
           successful: successfulPayments,
           failed: failedPayments
