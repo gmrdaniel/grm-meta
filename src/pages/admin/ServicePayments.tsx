@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const PAGE_SIZE = 10;
 
@@ -25,6 +26,7 @@ export default function ServicePayments() {
   const [selectedBrandStatus, setSelectedBrandStatus] = useState("all");
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useServicePayments(
     page, 
@@ -48,19 +50,26 @@ export default function ServicePayments() {
   const handleGenerateMonthlyPayments = async () => {
     try {
       setIsGenerating(true);
-      const { data, error } = await supabase.functions.invoke('generate-monthly-payments');
-      
-      if (error) throw error;
+      setError(null);
 
-      if (data.success) {
+      const { data: response, error: functionError } = await supabase.functions.invoke('generate-monthly-payments');
+      
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw new Error(functionError.message || 'Error al generar los pagos mensuales');
+      }
+
+      if (response?.success) {
         toast.success('Pagos mensuales generados exitosamente');
-        refetch(); // Actualizar la lista de pagos
+        refetch();
       } else {
-        toast.error('Error al generar los pagos mensuales');
+        throw new Error(response?.message || 'Error desconocido al generar los pagos');
       }
     } catch (error: any) {
-      toast.error('Error al generar los pagos mensuales');
-      console.error('Error:', error);
+      console.error('Error details:', error);
+      const errorMessage = error.message || 'Error al generar los pagos mensuales';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -68,25 +77,34 @@ export default function ServicePayments() {
 
   const content = (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <ServicePaymentsHeader 
-          showRecurringOnly={showRecurringOnly}
-          setShowRecurringOnly={setShowRecurringOnly}
-          selectedService={selectedService}
-          setSelectedService={setSelectedService}
-          selectedBrandStatus={selectedBrandStatus}
-          setSelectedBrandStatus={setSelectedBrandStatus}
-          selectedCreatorStatus={selectedCreatorStatus}
-          setSelectedCreatorStatus={setSelectedCreatorStatus}
-        />
-        <Button
-          onClick={handleGenerateMonthlyPayments}
-          disabled={isGenerating}
-          className="ml-4"
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {isGenerating ? 'Generando...' : 'Generar Pagos Mensuales'}
-        </Button>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <ServicePaymentsHeader 
+            showRecurringOnly={showRecurringOnly}
+            setShowRecurringOnly={setShowRecurringOnly}
+            selectedService={selectedService}
+            setSelectedService={setSelectedService}
+            selectedBrandStatus={selectedBrandStatus}
+            setSelectedBrandStatus={setSelectedBrandStatus}
+            selectedCreatorStatus={selectedCreatorStatus}
+            setSelectedCreatorStatus={setSelectedCreatorStatus}
+          />
+          <Button
+            onClick={handleGenerateMonthlyPayments}
+            disabled={isGenerating}
+            className="ml-4"
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {isGenerating ? 'Generando...' : 'Generar Pagos Mensuales'}
+          </Button>
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
