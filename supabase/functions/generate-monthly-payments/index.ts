@@ -1,6 +1,6 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { format, addMonths, startOfMonth } from 'https://esm.sh/date-fns@2.30.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
+import { format, startOfMonth } from 'https://esm.sh/date-fns@2.30.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,154 +8,131 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing environment variables.')
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey)
-    const currentDate = new Date()
+    console.log('Starting monthly payments generation...')
     
-    console.log('Fetching active recurring services...')
-
-    // Obtener servicios recurrentes activos
-    const { data: services, error: servicesError } = await supabase
+    // Get active recurring services
+    const { data: recurringServices, error: servicesError } = await supabaseClient
       .from('creator_services')
       .select(`
         *,
-        services (
-          name,
-          type
+        services!inner (
+          type,
+          name
         )
       `)
       .eq('status', 'activo')
       .eq('services.type', 'recurrente')
 
     if (servicesError) {
-      console.error('Error fetching services:', servicesError)
+      console.error('Error fetching recurring services:', servicesError)
       throw servicesError
     }
 
-    console.log(`Found ${services?.length || 0} active recurring services:`, services)
+    console.log(`Found ${recurringServices?.length || 0} active recurring services`)
 
-    if (!services || services.length === 0) {
+    if (!recurringServices?.length) {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'No active recurring services found' 
+          message: 'No active recurring services found',
+          paymentsCreated: 0 
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
         }
       )
     }
 
-    const createdPayments = []
-    const errors = []
+    const currentDate = new Date()
+    const paymentMonth = startOfMonth(currentDate)
+    let paymentsCreated = 0
 
-    for (const service of services) {
-      try {
-        console.log(`Processing service: ${service.id} (${service.services?.name})`)
-        
-        const paymentMonth = startOfMonth(currentDate)
-        
-        // Verificar si ya existe un pago para este mes
-        const { data: existingPayment, error: checkError } = await supabase
-          .from('service_payments')
-          .select('id')
-          .eq('creator_service_id', service.id)
-          .eq('payment_month', format(paymentMonth, 'yyyy-MM-dd'))
-          .maybeSingle()
+    for (const service of recurringServices) {
+      console.log(`Processing service: ${service.services.name} (ID: ${service.id})`)
 
-        if (checkError) {
-          console.error('Error checking existing payment:', checkError)
-          throw checkError
-        }
+      // Check if a payment already exists for this service and month
+      const { data: existingPayment, error: checkError } = await supabaseClient
+        .from('service_payments')
+        .select()
+        .eq('creator_service_id', service.id)
+        .eq('payment_month', paymentMonth.toISOString())
+        .maybeSingle()
 
-        if (existingPayment) {
-          console.log(`Payment already exists for service ${service.id} in ${format(paymentMonth, 'MMMM yyyy')}`)
-          continue
-        }
+      if (checkError) {
+        console.error('Error checking existing payment:', checkError)
+        continue
+      }
 
-        // Calcular fecha de pago (día 10 del mes)
-        const paymentDate = new Date(paymentMonth)
-        paymentDate.setDate(10)
+      if (existingPayment) {
+        console.log(`Payment already exists for service ${service.id} for month ${format(paymentMonth, 'MMMM yyyy')}`)
+        continue
+      }
 
-        const totalAmount = service.monthly_fee || 0
-        const companyShare = service.company_share || 0
-        const companyEarning = (totalAmount * companyShare) / 100
-        const creatorEarning = totalAmount - companyEarning
+      // Calculate payment date (10th of current month)
+      const paymentDate = new Date(paymentMonth)
+      paymentDate.setDate(10)
 
-        const paymentData = {
+      // Calculate earnings based on monthly fee and company share
+      const totalAmount = service.monthly_fee || 0
+      const companyShare = service.company_share || 0
+      const companyEarning = (totalAmount * companyShare) / 100
+      const creatorEarning = totalAmount - companyEarning
+
+      // Insert new payment record
+      const { error: insertError } = await supabaseClient
+        .from('service_payments')
+        .insert({
           creator_service_id: service.id,
-          payment_month: format(paymentMonth, 'yyyy-MM-dd'),
+          payment_month: paymentMonth.toISOString(),
           payment_date: paymentDate.toISOString(),
           total_amount: totalAmount,
           company_earning: companyEarning,
           creator_earning: creatorEarning,
           brand_payment_status: 'pendiente',
           creator_payment_status: 'pendiente',
-          is_recurring: true
-        }
+          is_recurring: true,
+          payment_period: format(paymentMonth, 'MMMM yyyy')
+        })
 
-        console.log('Creating payment with data:', paymentData)
-
-        const { data: newPayment, error: insertError } = await supabase
-          .from('service_payments')
-          .insert(paymentData)
-          .select()
-          .single()
-
-        if (insertError) {
-          console.error('Error creating payment:', insertError)
-          errors.push({ serviceId: service.id, error: insertError })
-          continue
-        }
-
-        console.log('Payment created successfully:', newPayment)
-        createdPayments.push(newPayment)
-
-      } catch (error) {
-        console.error(`Error processing service ${service.id}:`, error)
-        errors.push({ serviceId: service.id, error })
+      if (insertError) {
+        console.error('Error inserting payment:', insertError)
+        continue
       }
+
+      console.log(`Created payment for service ${service.id} for month ${format(paymentMonth, 'MMMM yyyy')}`)
+      paymentsCreated++
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Created ${createdPayments.length} payments`,
-        data: {
-          payments: createdPayments,
-          errors: errors
-        }
+      JSON.stringify({ 
+        success: true, 
+        message: `Successfully created ${paymentsCreated} payments`,
+        paymentsCreated 
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
       }
     )
 
   } catch (error) {
-    console.error('Fatal error:', error)
+    console.error('Error in generate-monthly-payments:', error)
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
-      }),
-      { 
+      JSON.stringify({ success: false, error: error.message }),
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 400,
       }
     )
   }
 })
-
