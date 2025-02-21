@@ -1,6 +1,6 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
-import { format, startOfMonth } from 'https://esm.sh/date-fns@2.30.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
+import { format } from 'https://esm.sh/date-fns@3.3.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +10,7 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -19,119 +19,85 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    console.log('Starting monthly payments generation...')
-    
-    // Get active recurring services
-    const { data: recurringServices, error: servicesError } = await supabaseClient
+    const now = new Date()
+    const currentMonth = format(now, "MM/yyyy")
+
+    // Obtener servicios recurrentes activos que no tienen pago para el mes actual
+    const { data: services, error: servicesError } = await supabaseClient
       .from('creator_services')
       .select(`
-        *,
-        services!inner (
-          type,
-          name
+        id,
+        monthly_fee,
+        company_share,
+        services (
+          type
         )
       `)
       .eq('status', 'activo')
       .eq('services.type', 'recurrente')
 
     if (servicesError) {
-      console.error('Error fetching recurring services:', servicesError)
       throw servicesError
     }
 
-    console.log(`Found ${recurringServices?.length || 0} active recurring services`)
+    console.log('Servicios encontrados:', services?.length)
 
-    if (!recurringServices?.length) {
+    if (!services || services.length === 0) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'No active recurring services found',
-          paymentsCreated: 0 
-        }),
+        JSON.stringify({ count: 0, message: 'No se encontraron servicios para generar pagos' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
         }
       )
     }
 
-    const currentDate = new Date()
-    const paymentMonth = startOfMonth(currentDate)
-    let paymentsCreated = 0
-
-    for (const service of recurringServices) {
-      console.log(`Processing service: ${service.services.name} (ID: ${service.id})`)
-
-      // Check if a payment already exists for this service and month
-      const { data: existingPayment, error: checkError } = await supabaseClient
-        .from('service_payments')
-        .select()
-        .eq('creator_service_id', service.id)
-        .eq('payment_month', paymentMonth.toISOString())
-        .maybeSingle()
-
-      if (checkError) {
-        console.error('Error checking existing payment:', checkError)
-        continue
-      }
-
-      if (existingPayment) {
-        console.log(`Payment already exists for service ${service.id} for month ${format(paymentMonth, 'MMMM yyyy')}`)
-        continue
-      }
-
-      // Calculate payment date (10th of current month)
-      const paymentDate = new Date(paymentMonth)
-      paymentDate.setDate(10)
-
-      // Calculate earnings based on monthly fee and company share
-      const totalAmount = service.monthly_fee || 0
-      const companyShare = service.company_share || 0
-      const companyEarning = (totalAmount * companyShare) / 100
-      const creatorEarning = totalAmount - companyEarning
-
-      // Insert new payment record
-      const { error: insertError } = await supabaseClient
-        .from('service_payments')
-        .insert({
+    // Insertar pagos pendientes
+    const { data: insertedPayments, error: insertError } = await supabaseClient
+      .from('service_payments')
+      .upsert(
+        services.map((service) => ({
           creator_service_id: service.id,
-          payment_month: paymentMonth.toISOString(),
-          payment_date: paymentDate.toISOString(),
-          total_amount: totalAmount,
-          company_earning: companyEarning,
-          creator_earning: creatorEarning,
+          payment_date: new Date(now.getFullYear(), now.getMonth(), 9),
           brand_payment_status: 'pendiente',
           creator_payment_status: 'pendiente',
           is_recurring: true,
-          payment_period: format(paymentMonth, 'MMMM yyyy')
-        })
+          payment_period: currentMonth,
+          payment_month: new Date(now.getFullYear(), now.getMonth(), 1),
+          total_amount: service.monthly_fee || 0,
+          company_earning: (service.monthly_fee || 0) * ((service.company_share || 0) / 100),
+          creator_earning: (service.monthly_fee || 0) * (1 - (service.company_share || 0) / 100)
+        })),
+        {
+          onConflict: 'creator_service_id,payment_month'
+        }
+      )
 
-      if (insertError) {
-        console.error('Error inserting payment:', insertError)
-        continue
-      }
-
-      console.log(`Created payment for service ${service.id} for month ${format(paymentMonth, 'MMMM yyyy')}`)
-      paymentsCreated++
+    if (insertError) {
+      console.error('Error al insertar pagos:', insertError)
+      throw insertError
     }
+
+    console.log('Pagos insertados:', insertedPayments?.length)
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: `Successfully created ${paymentsCreated} payments`,
-        paymentsCreated 
+        count: insertedPayments?.length || 0,
+        message: 'Pagos generados exitosamente' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       }
     )
 
   } catch (error) {
-    console.error('Error in generate-monthly-payments:', error)
+    console.error('Error:', error)
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     )
   }
