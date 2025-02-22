@@ -292,6 +292,54 @@ export type Database = {
           },
         ]
       }
+      creator_rates: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          post_type_id: string
+          profile_id: string
+          rate_usd: number
+          registered_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          post_type_id: string
+          profile_id: string
+          rate_usd: number
+          registered_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          post_type_id?: string
+          profile_id?: string
+          rate_usd?: number
+          registered_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_rates_post_type_id_fkey"
+            columns: ["post_type_id"]
+            isOneToOne: false
+            referencedRelation: "post_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_rates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_services: {
         Row: {
           company_share: number | null
