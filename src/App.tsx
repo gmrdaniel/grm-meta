@@ -10,7 +10,7 @@ import Services from "./pages/admin/Services";
 import CreatorServices from "./pages/admin/CreatorServices";
 import ServicePayments from "./pages/admin/ServicePayments";
 import PostTypes from "./pages/admin/PostTypes";
-import CreatorProfile from "./pages/creator/CreatorProfile";
+import CreatorProfile from "./pages/creator/Profile";
 import BankDetail from "./pages/creator/BankDetail";
 import PendingServices from "./pages/creator/PendingServices";
 import Campaigns from "./pages/creator/Campaigns";

@@ -26,6 +26,9 @@ interface CreatorRate {
   post_type_id: string;
   rate_usd: number;
   is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+  registered_at?: string;
   personal_data: {
     first_name: string;
     last_name: string;
@@ -50,7 +53,7 @@ export default function CreatorRates() {
         .from("creator_rates")
         .select(`
           *,
-          personal_data (
+          personal_data!creator_rates_profile_id_fkey (
             first_name,
             last_name
           ),
