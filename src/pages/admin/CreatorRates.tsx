@@ -20,22 +20,30 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { CreatorRateDialog } from "@/components/creator-rates/CreatorRateDialog";
 
+interface PersonalData {
+  first_name: string;
+  last_name: string;
+}
+
+interface SocialPlatform {
+  name: string;
+}
+
+interface PostType {
+  name: string;
+  social_platforms: SocialPlatform;
+}
+
 interface CreatorRate {
   id: string;
   profile_id: string;
   post_type_id: string;
   rate_usd: number;
   is_active: boolean;
-  personal_data: {
-    first_name: string;
-    last_name: string;
-  };
-  post_types: {
-    name: string;
-    social_platforms: {
-      name: string;
-    };
-  };
+  created_at: string;
+  updated_at: string;
+  personal_data?: PersonalData;
+  post_types: PostType;
 }
 
 export default function CreatorRates() {
@@ -43,7 +51,7 @@ export default function CreatorRates() {
   const [selectedRate, setSelectedRate] = useState<CreatorRate | null>(null);
   const { toast } = useToast();
 
-  const { data: rates, isLoading, refetch } = useQuery({
+  const { data: rates, isLoading, refetch } = useQuery<CreatorRate[]>({
     queryKey: ["creator-rates"],
     queryFn: async () => {
       const { data, error } = await supabase
