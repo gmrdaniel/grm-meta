@@ -21,8 +21,8 @@ import { Plus } from "lucide-react";
 import { CreatorRateDialog } from "@/components/creator-rates/CreatorRateDialog";
 
 interface PersonalData {
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 interface SocialPlatform {
@@ -42,7 +42,7 @@ interface CreatorRate {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  personal_data?: PersonalData;
+  personal_data: PersonalData | null;
   post_types: PostType;
 }
 
@@ -51,14 +51,14 @@ export default function CreatorRates() {
   const [selectedRate, setSelectedRate] = useState<CreatorRate | null>(null);
   const { toast } = useToast();
 
-  const { data: rates, isLoading, refetch } = useQuery<CreatorRate[]>({
+  const { data: rates, isLoading, refetch } = useQuery({
     queryKey: ["creator-rates"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("creator_rates")
         .select(`
           *,
-          personal_data (
+          personal_data:profiles!creator_rates_profile_id_fkey(
             first_name,
             last_name
           ),
