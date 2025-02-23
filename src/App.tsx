@@ -1,9 +1,10 @@
+
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import CreatorRates from "./pages/admin/CreatorRates";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import Dashboard from "./pages/admin/Dashboard";
 import Creators from "./pages/admin/Creators";
 import Services from "./pages/admin/Services";
 import CreatorServices from "./pages/admin/CreatorServices";
@@ -25,7 +26,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/dashboard",
-    element: <AdminDashboard />,
+    element: <Dashboard />,
   },
   {
     path: "/admin/creators",
