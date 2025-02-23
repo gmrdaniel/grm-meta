@@ -1,81 +1,145 @@
 
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import NotFound from "./pages/NotFound";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
-import Index from "./pages/Index";
-import CreatorRates from "./pages/admin/CreatorRates";
-import Dashboard from "./pages/admin/Dashboard";
+import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/Dashboard";
+import CreatorDashboard from "./pages/creator/Dashboard";
+import CreatorProfile from "./pages/creator/Profile";
+import CreatorBankDetail from "./pages/creator/BankDetail";
+import PendingServices from "./pages/creator/PendingServices";
+import Campaigns from "./pages/creator/Campaigns";
 import Creators from "./pages/admin/Creators";
+import CreatorDetail from "./pages/admin/CreatorDetail";
 import Services from "./pages/admin/Services";
 import CreatorServices from "./pages/admin/CreatorServices";
 import ServicePayments from "./pages/admin/ServicePayments";
 import PostTypes from "./pages/admin/PostTypes";
-import CreatorProfile from "./pages/creator/Profile";
-import BankDetail from "./pages/creator/BankDetail";
-import PendingServices from "./pages/creator/PendingServices";
-import Campaigns from "./pages/creator/Campaigns";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Index />,
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
-  {
-    path: "/admin/dashboard",
-    element: <Dashboard />,
-  },
-  {
-    path: "/admin/creators",
-    element: <Creators />,
-  },
-  {
-    path: "/admin/services",
-    element: <Services />,
-  },
-  {
-    path: "/admin/creator-services",
-    element: <CreatorServices />,
-  },
-  {
-    path: "/admin/service-payments",
-    element: <ServicePayments />,
-  },
-  {
-    path: "/admin/post-types",
-    element: <PostTypes />,
-  },
-  {
-    path: "/admin/rates",
-    element: <CreatorRates />,
-  },
-  {
-    path: "/creator/profile",
-    element: <CreatorProfile />,
-  },
-  {
-    path: "/creator/bankDetail",
-    element: <BankDetail />,
-  },
-  {
-    path: "/creator/pending-services",
-    element: <PendingServices />,
-  },
-  {
-    path: "/creator/campaigns",
-    element: <Campaigns />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
-]);
+const queryClient = new QueryClient();
 
-function App() {
-  return <RouterProvider router={router} />;
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Navigate to="/auth" replace />} />
+            <Route path="/auth" element={<Auth />} />
+            
+            {/* Admin routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/creators"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Creators />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/creators/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CreatorDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/services"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Services />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/creator-services"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CreatorServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/service-payments"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ServicePayments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/post-types"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <PostTypes />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Creator routes */}
+            <Route
+              path="/creator/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <CreatorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/profile"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <CreatorProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/bankDetail"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <CreatorBankDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/pending-services"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <PendingServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/creator/campaigns"
+              element={
+                <ProtectedRoute allowedRoles={["creator"]}>
+                  <Campaigns />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
