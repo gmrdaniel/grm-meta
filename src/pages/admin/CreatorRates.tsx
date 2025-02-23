@@ -58,13 +58,13 @@ export default function CreatorRates() {
         .from("creator_rates")
         .select(`
           *,
-          personal_data:profiles!creator_rates_profile_id_fkey(
+          personal_data:profiles(
             first_name,
             last_name
           ),
-          post_types (
+          post_types(
             name,
-            social_platforms (
+            social_platforms(
               name
             )
           )
