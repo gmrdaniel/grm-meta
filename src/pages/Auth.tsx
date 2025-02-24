@@ -23,7 +23,9 @@ export default function Auth() {
           email,
           password,
         });
+        
         if (authError) throw authError;
+        console.log("Auth successful:", authData);
 
         // Get user role from profiles table
         const { data: profileData, error: profileError } = await supabase
@@ -32,7 +34,12 @@ export default function Auth() {
           .eq('id', authData.user?.id)
           .single();
         
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Profile error:", profileError);
+          throw profileError;
+        }
+        
+        console.log("Profile data:", profileData);
 
         // Si es creator, verificar servicios pendientes
         if (profileData.role === 'creator') {
@@ -43,7 +50,12 @@ export default function Auth() {
             .eq("terms_accepted", false)
             .eq("status", "pendiente");
 
-          if (servicesError) throw servicesError;
+          if (servicesError) {
+            console.error("Services error:", servicesError);
+            throw servicesError;
+          }
+
+          console.log("Pending services count:", count);
 
           // Redireccionar según si hay servicios pendientes o no
           if (count && count > 0) {
@@ -53,6 +65,10 @@ export default function Auth() {
           }
         } else if (profileData.role === 'admin') {
           navigate('/admin/dashboard');
+        } else {
+          // Si el rol no es válido, mostrar error
+          console.error("Invalid role:", profileData.role);
+          throw new Error(`Invalid role: ${profileData.role}`);
         }
 
       } else {
@@ -64,7 +80,8 @@ export default function Auth() {
         toast.success("Check your email for the confirmation link!");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Auth error:", error);
+      toast.error(error.message || "An error occurred during authentication");
     } finally {
       setLoading(false);
     }

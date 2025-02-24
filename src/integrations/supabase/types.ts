@@ -292,6 +292,54 @@ export type Database = {
           },
         ]
       }
+      creator_rates: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          post_type_id: string
+          profile_id: string
+          rate_usd: number
+          registered_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          post_type_id: string
+          profile_id: string
+          rate_usd: number
+          registered_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          post_type_id?: string
+          profile_id?: string
+          rate_usd?: number
+          registered_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_rates_post_type_id_fkey"
+            columns: ["post_type_id"]
+            isOneToOne: false
+            referencedRelation: "post_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_rates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_services: {
         Row: {
           company_share: number | null
@@ -531,6 +579,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -540,6 +589,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email: string
           full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -549,11 +599,121 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      rate_import_details: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          email: string
+          error_message: string | null
+          id: string
+          import_id: string | null
+          is_active: boolean | null
+          platform_id: string | null
+          platform_name: string
+          post_type_id: string | null
+          post_type_name: string
+          rate_usd: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          email: string
+          error_message?: string | null
+          id?: string
+          import_id?: string | null
+          is_active?: boolean | null
+          platform_id?: string | null
+          platform_name: string
+          post_type_id?: string | null
+          post_type_name: string
+          rate_usd: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          email?: string
+          error_message?: string | null
+          id?: string
+          import_id?: string | null
+          is_active?: boolean | null
+          platform_id?: string | null
+          platform_name?: string
+          post_type_id?: string | null
+          post_type_name?: string
+          rate_usd?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_import_details_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "rate_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_import_details_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "social_platforms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_import_details_post_type_id_fkey"
+            columns: ["post_type_id"]
+            isOneToOne: false
+            referencedRelation: "post_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_imports: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          failed_rows: number | null
+          file_name: string
+          id: string
+          processed_rows: number | null
+          status: string | null
+          total_rows: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          failed_rows?: number | null
+          file_name: string
+          id?: string
+          processed_rows?: number | null
+          status?: string | null
+          total_rows?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          failed_rows?: number | null
+          file_name?: string
+          id?: string
+          processed_rows?: number | null
+          status?: string | null
+          total_rows?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -714,6 +874,10 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
+      }
+      update_profile_full_name: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
