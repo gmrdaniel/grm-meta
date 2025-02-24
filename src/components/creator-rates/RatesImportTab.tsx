@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FileUploadButton } from "@/components/creators/bulk-invite/FileUploadButton";
 import { RatesImportPreview } from "./components/RatesImportPreview";
+import { DownloadRatesTemplate } from "./components/DownloadRatesTemplate";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -66,10 +67,13 @@ export function RatesImportTab() {
         <p className="text-sm text-gray-500 mb-4">
           Sube un archivo Excel con las tarifas de los creadores. El archivo debe contener las columnas: email, platform, post_type, rate_usd, is_active.
         </p>
-        <FileUploadButton 
-          isUploading={isUploading} 
-          onFileSelect={handleFileSelect}
-        />
+        <div className="flex flex-col gap-4">
+          <DownloadRatesTemplate />
+          <FileUploadButton 
+            isUploading={isUploading} 
+            onFileSelect={handleFileSelect}
+          />
+        </div>
       </div>
 
       {importId && (
