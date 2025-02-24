@@ -43,7 +43,6 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [page, setPage] = useState(initialPage);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
-  const [shouldFetch, setShouldFetch] = useState(false);
 
   // Consulta para obtener las plataformas sociales
   const { data: platforms } = useQuery({
@@ -81,7 +80,7 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
 
   // Consulta principal para las tarifas con filtros
   const { data: rates, isLoading: ratesLoading } = useQuery({
-    queryKey: ["creator-rates", page, itemsPerPage, shouldFetch, selectedPlatform, selectedPostType, priceRange],
+    queryKey: ["creator-rates", page, itemsPerPage, selectedPlatform, selectedPostType, priceRange],
     queryFn: async () => {
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
@@ -107,11 +106,11 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
         .lte("rate_usd", priceRange[1])
         .order('created_at', { ascending: false });
 
-      if (selectedPostType) {
+      if (selectedPostType && selectedPostType !== 'todos') {
         query = query.eq("post_type_id", selectedPostType);
       }
 
-      if (selectedPlatform) {
+      if (selectedPlatform && selectedPlatform !== 'todas') {
         query = query.eq("post_types.platform_id", selectedPlatform);
       }
 
@@ -120,19 +119,14 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
       if (error) throw error;
       return { data, count };
     },
-    enabled: shouldFetch,
+    enabled: true,
   });
-
-  const handleSearch = () => {
-    setPage(1);
-    setShouldFetch(true);
-  };
 
   const handleReset = () => {
     setSelectedPlatform(undefined);
     setSelectedPostType(undefined);
     setPriceRange([0, 1000]);
-    setShouldFetch(false);
+    setPage(1);
   };
 
   const totalPages = rates?.count ? Math.ceil(rates.count / itemsPerPage) : 0;
@@ -230,14 +224,6 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
               >
                 <X className="h-4 w-4" />
                 Limpiar Filtros
-              </Button>
-              <Button 
-                size="sm"
-                onClick={handleSearch}
-                className="flex items-center gap-2"
-              >
-                <Search className="h-4 w-4" />
-                Buscar
               </Button>
             </div>
           </div>
