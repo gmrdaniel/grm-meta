@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 
 export default function Utilities() {
   const [isGeneratingPayments, setIsGeneratingPayments] = useState(false);
+  const [isUpdatingNames, setIsUpdatingNames] = useState(false);
 
   const handleGeneratePayments = async () => {
     try {
@@ -33,6 +34,30 @@ export default function Utilities() {
       });
     } finally {
       setIsGeneratingPayments(false);
+    }
+  };
+
+  const handleUpdateNames = async () => {
+    try {
+      setIsUpdatingNames(true);
+      const { error } = await supabase
+        .rpc('update_profile_full_name');
+
+      if (error) throw error;
+
+      toast({
+        title: "Nombres actualizados",
+        description: "Los nombres completos han sido actualizados correctamente.",
+      });
+    } catch (error) {
+      console.error('Error al actualizar nombres:', error);
+      toast({
+        variant: "destructive",
+        title: "Error al actualizar nombres",
+        description: "No se pudieron actualizar los nombres completos.",
+      });
+    } finally {
+      setIsUpdatingNames(false);
     }
   };
 
@@ -70,6 +95,31 @@ export default function Utilities() {
                   </Button>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Actualizar Nombres Completos</CardTitle>
+                  <CardDescription>
+                    Actualiza los nombres completos en la tabla de perfiles basado en nombres y apellidos.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={handleUpdateNames}
+                    disabled={isUpdatingNames}
+                    className="w-full"
+                  >
+                    {isUpdatingNames ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Actualizando...
+                      </>
+                    ) : (
+                      "Actualizar Nombres"
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </main>
@@ -77,4 +127,3 @@ export default function Utilities() {
     </div>
   );
 }
-
