@@ -766,6 +766,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_profile_full_name: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       payment_method: "bank_transfer" | "paypal"
