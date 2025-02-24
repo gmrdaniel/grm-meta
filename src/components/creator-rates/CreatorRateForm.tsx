@@ -105,7 +105,7 @@ export function CreatorRateForm({ selectedCreator, onSuccess }: CreatorRateFormP
 
       toast.success("Tarifa creada correctamente");
       form.reset();
-      onSuccess();
+      onSuccess(); // Ya no limpiará el creador seleccionado
     } catch (error) {
       console.error("Error:", error);
       toast.error("Error al guardar la tarifa");

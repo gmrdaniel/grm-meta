@@ -41,8 +41,7 @@ export function CreatorSearch({ onCreatorSelect, selectedCreator }: CreatorSearc
   });
 
   const handleSuccess = () => {
-    setSearchEmail("");
-    onCreatorSelect(null);
+    // Solo limpiar el formulario, manteniendo el creador seleccionado
   };
 
   return (
@@ -52,24 +51,26 @@ export function CreatorSearch({ onCreatorSelect, selectedCreator }: CreatorSearc
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
-          <div className="space-y-2">
-            <Label>Correo del Creador</Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por correo electrónico"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  className="pl-8"
-                />
+          {!selectedCreator && (
+            <div className="space-y-2">
+              <Label>Correo del Creador</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por correo electrónico"
+                    value={searchEmail}
+                    onChange={(e) => setSearchEmail(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {searchLoading && <div>Buscando...</div>}
 
-          {searchResults && searchResults.length > 0 && (
+          {!selectedCreator && searchResults && searchResults.length > 0 && (
             <div className="border rounded-md">
               {searchResults.map((creator) => (
                 <div
