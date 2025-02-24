@@ -1,12 +1,13 @@
 
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Search, DollarSign, Mail } from "lucide-react";
+import { Search, Mail } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { CreatorRateForm } from "./CreatorRateForm";
 
 interface Creator {
   id: string;
@@ -38,6 +39,11 @@ export function CreatorSearch({ onCreatorSelect, selectedCreator }: CreatorSearc
     },
     enabled: searchEmail.length > 0,
   });
+
+  const handleSuccess = () => {
+    setSearchEmail("");
+    onCreatorSelect(null);
+  };
 
   return (
     <Card>
@@ -99,12 +105,10 @@ export function CreatorSearch({ onCreatorSelect, selectedCreator }: CreatorSearc
             </div>
           )}
 
-          {selectedCreator && (
-            <Button className="w-full">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Nueva Tarifa de Creador
-            </Button>
-          )}
+          <CreatorRateForm 
+            selectedCreator={selectedCreator} 
+            onSuccess={handleSuccess}
+          />
         </div>
       </CardContent>
     </Card>
