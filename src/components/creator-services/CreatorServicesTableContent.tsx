@@ -4,11 +4,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Mail } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Creator {
   id: string;
+  email: string;
   personal_data: {
     first_name: string;
     last_name: string;
@@ -29,10 +28,6 @@ interface CreatorService {
   profiles: Creator;
 }
 
-interface CreatorServiceWithEmail extends CreatorService {
-  email?: string | null;
-}
-
 interface CreatorServicesTableContentProps {
   isLoading: boolean;
   creatorServices?: CreatorService[];
@@ -44,35 +39,6 @@ export function CreatorServicesTableContent({
   creatorServices = [],
   onServiceSelect,
 }: CreatorServicesTableContentProps) {
-  const [servicesWithEmail, setServicesWithEmail] = useState<CreatorServiceWithEmail[]>([]);
-
-  useEffect(() => {
-    fetchCreatorsEmails();
-  }, [creatorServices]);
-
-  async function fetchCreatorsEmails() {
-    const servicesWithEmailPromises = creatorServices.map(async (service) => {
-      try {
-        const { data: email } = await supabase
-          .rpc('get_user_email', { user_id: service.profiles.id });
-        
-        return {
-          ...service,
-          email: email
-        };
-      } catch (error) {
-        console.error("Error fetching email for creator:", error);
-        return {
-          ...service,
-          email: null
-        };
-      }
-    });
-
-    const resolvedServices = await Promise.all(servicesWithEmailPromises);
-    setServicesWithEmail(resolvedServices);
-  }
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -83,7 +49,7 @@ export function CreatorServicesTableContent({
     );
   }
 
-  if (!servicesWithEmail || servicesWithEmail.length === 0) {
+  if (!creatorServices || creatorServices.length === 0) {
     return (
       <div className="p-4 text-center text-muted-foreground">
         No hay servicios disponibles
@@ -105,7 +71,7 @@ export function CreatorServicesTableContent({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {servicesWithEmail.map((creatorService) => {
+        {creatorServices.map((creatorService) => {
           if (!creatorService) return null;
 
           return (
@@ -117,7 +83,7 @@ export function CreatorServicesTableContent({
               </TableCell>
               <TableCell className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-500" />
-                <span>{creatorService.email || "N/A"}</span>
+                <span>{creatorService.profiles.email || "N/A"}</span>
               </TableCell>
               <TableCell>{creatorService.services?.name ?? "N/A"}</TableCell>
               <TableCell>{creatorService.services?.type ?? "N/A"}</TableCell>
@@ -143,3 +109,4 @@ export function CreatorServicesTableContent({
     </Table>
   );
 }
+
