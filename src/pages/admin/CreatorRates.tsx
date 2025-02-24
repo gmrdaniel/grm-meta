@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RatesList } from "@/components/creator-rates/RatesList";
 import { CreatorSearch } from "@/components/creator-rates/CreatorSearch";
+import { RatesImportTab } from "@/components/creator-rates/RatesImportTab";
 
 interface Creator {
   id: string;
@@ -30,6 +31,7 @@ export default function CreatorRates() {
               <TabsList>
                 <TabsTrigger value="list">Lista de Tarifas</TabsTrigger>
                 <TabsTrigger value="add">Agregar Tarifa</TabsTrigger>
+                <TabsTrigger value="import">Importar Tarifas</TabsTrigger>
               </TabsList>
 
               <TabsContent value="list" className="space-y-4">
@@ -41,6 +43,10 @@ export default function CreatorRates() {
                   selectedCreator={selectedCreator}
                   onCreatorSelect={setSelectedCreator}
                 />
+              </TabsContent>
+
+              <TabsContent value="import">
+                <RatesImportTab />
               </TabsContent>
             </Tabs>
           </div>
