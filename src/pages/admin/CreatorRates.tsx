@@ -3,60 +3,55 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { CreatorRateDialog } from "@/components/creator-rates/CreatorRateDialog";
+import { Search, DollarSign, Mail } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
-interface CreatorProfile {
+interface Creator {
+  id: string;
+  email: string;
   full_name: string | null;
 }
 
-interface SocialPlatform {
-  name: string;
-}
-
-interface PostType {
-  name: string;
-  social_platforms: SocialPlatform;
-}
-
-interface CreatorRate {
+interface Rate {
   id: string;
-  profile_id: string;
-  post_type_id: string;
+  creator_profile: {
+    full_name: string;
+  };
+  post_types: {
+    name: string;
+    social_platforms: {
+      name: string;
+    };
+  };
   rate_usd: number;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  creator_profile: CreatorProfile | null;
-  post_types: PostType;
 }
 
 export default function CreatorRates() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRate, setSelectedRate] = useState<CreatorRate | null>(null);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
   const { toast } = useToast();
 
-  const { data: rates, isLoading, refetch } = useQuery({
-    queryKey: ["creator-rates"],
+  // Query para obtener las tarifas paginadas
+  const { data: rates, isLoading: ratesLoading } = useQuery({
+    queryKey: ["creator-rates", page],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+
+      const { data, error, count } = await supabase
         .from("creator_rates")
         .select(`
-          *,
+          id,
           creator_profile:profiles(
             full_name
           ),
@@ -65,60 +60,35 @@ export default function CreatorRates() {
             social_platforms(
               name
             )
-          )
-        `)
-        .order("created_at", { ascending: false });
+          ),
+          rate_usd,
+          is_active
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) throw error;
-      return data as CreatorRate[];
+      return { data, count };
     },
   });
 
-  const handleStatusChange = async (rate: CreatorRate) => {
-    try {
-      const { error } = await supabase
-        .from("creator_rates")
-        .update({ is_active: !rate.is_active })
-        .eq("id", rate.id);
+  // Query para buscar creators por email
+  const { data: searchResults, isLoading: searchLoading } = useQuery({
+    queryKey: ["search-creators", searchEmail],
+    queryFn: async () => {
+      if (!searchEmail) return [];
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .ilike("email", `%${searchEmail}%`)
+        .limit(5);
 
       if (error) throw error;
-
-      toast({
-        title: "Estado actualizado",
-        description: "La tarifa ha sido actualizada correctamente.",
-      });
-
-      refetch();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo actualizar el estado de la tarifa.",
-      });
-    }
-  };
-
-  const handleEditRate = (rate: CreatorRate) => {
-    setSelectedRate(rate);
-    setIsDialogOpen(true);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="container mx-auto">
-              <Skeleton className="h-8 w-1/4 mb-6" />
-              <Skeleton className="h-[400px] w-full" />
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
+      return data;
+    },
+    enabled: searchEmail.length > 0,
+  });
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -127,86 +97,139 @@ export default function CreatorRates() {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="container mx-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">Tarifas de Creadores</h1>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Tarifa
-              </Button>
-            </div>
+            <h1 className="text-2xl font-bold mb-6">Tarifas de Creadores</h1>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Lista de Tarifas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Creador</TableHead>
-                      <TableHead>Plataforma</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Tarifa (USD)</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rates?.map((rate) => (
-                      <TableRow key={rate.id}>
-                        <TableCell>
-                          {rate.creator_profile?.full_name}
-                        </TableCell>
-                        <TableCell>
-                          {rate.post_types?.social_platforms?.name}
-                        </TableCell>
-                        <TableCell>{rate.post_types?.name}</TableCell>
-                        <TableCell>${rate.rate_usd.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={rate.is_active ? "default" : "secondary"}
-                          >
-                            {rate.is_active ? "Activa" : "Inactiva"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditRate(rate)}
-                            >
-                              Editar
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStatusChange(rate)}
-                            >
-                              {rate.is_active ? "Desactivar" : "Activar"}
-                            </Button>
+            <Tabs defaultValue="list" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="list">Lista de Tarifas</TabsTrigger>
+                <TabsTrigger value="add">Agregar Tarifa</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="list" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tarifas Existentes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4">
+                      {ratesLoading ? (
+                        <div>Cargando tarifas...</div>
+                      ) : (
+                        <div className="rounded-md border">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b bg-muted/50">
+                                <th className="p-4 text-left">Creador</th>
+                                <th className="p-4 text-left">Plataforma</th>
+                                <th className="p-4 text-left">Tipo</th>
+                                <th className="p-4 text-left">Tarifa (USD)</th>
+                                <th className="p-4 text-left">Estado</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {rates?.data.map((rate) => (
+                                <tr key={rate.id} className="border-b">
+                                  <td className="p-4">
+                                    {rate.creator_profile?.full_name}
+                                  </td>
+                                  <td className="p-4">
+                                    {rate.post_types?.social_platforms?.name}
+                                  </td>
+                                  <td className="p-4">{rate.post_types?.name}</td>
+                                  <td className="p-4">${rate.rate_usd}</td>
+                                  <td className="p-4">
+                                    <Badge
+                                      variant={rate.is_active ? "default" : "secondary"}
+                                    >
+                                      {rate.is_active ? "Activa" : "Inactiva"}
+                                    </Badge>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                      {/* TODO: Agregar paginación */}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="add">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Buscar Creador</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6">
+                      <div className="space-y-2">
+                        <Label>Correo del Creador</Label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Buscar por correo electrónico"
+                              value={searchEmail}
+                              onChange={(e) => setSearchEmail(e.target.value)}
+                              className="pl-8"
+                            />
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                        </div>
+                      </div>
+
+                      {searchLoading && <div>Buscando...</div>}
+
+                      {searchResults && searchResults.length > 0 && (
+                        <div className="border rounded-md">
+                          {searchResults.map((creator) => (
+                            <div
+                              key={creator.id}
+                              className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-muted/50 cursor-pointer"
+                              onClick={() => setSelectedCreator(creator)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                <span>{creator.email}</span>
+                              </div>
+                              {creator.full_name && (
+                                <span className="text-sm text-muted-foreground">
+                                  {creator.full_name}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {selectedCreator && (
+                        <div className="flex justify-between items-center p-4 bg-muted rounded-md">
+                          <div>
+                            <p className="font-medium">Creador seleccionado:</p>
+                            <p className="text-sm text-muted-foreground">
+                              {selectedCreator.email}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => setSelectedCreator(null)}>
+                            Cambiar
+                          </Button>
+                        </div>
+                      )}
+
+                      {selectedCreator && (
+                        <Button className="w-full">
+                          <DollarSign className="h-4 w-4 mr-2" />
+                          Nueva Tarifa de Creador
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
-
-      <CreatorRateDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        rate={selectedRate}
-        onSuccess={() => {
-          refetch();
-          setIsDialogOpen(false);
-          setSelectedRate(null);
-        }}
-      />
     </div>
   );
 }
