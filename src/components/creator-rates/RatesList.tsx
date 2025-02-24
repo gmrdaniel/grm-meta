@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -39,8 +38,8 @@ interface RatesListProps {
 }
 
 export function RatesList({ page, itemsPerPage }: RatesListProps) {
-  const [selectedPlatform, setSelectedPlatform] = useState<string>("");
-  const [selectedPostType, setSelectedPostType] = useState<string>("");
+  const [selectedPlatform, setSelectedPlatform] = useState<string | undefined>(undefined);
+  const [selectedPostType, setSelectedPostType] = useState<string | undefined>(undefined);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
   // Consulta para obtener las plataformas sociales
@@ -121,8 +120,8 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
   });
 
   const handleReset = () => {
-    setSelectedPlatform("");
-    setSelectedPostType("");
+    setSelectedPlatform(undefined);
+    setSelectedPostType(undefined);
     setPriceRange([0, 1000]);
   };
 
@@ -146,7 +145,7 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
                     <SelectValue placeholder="Selecciona una red social" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="todas">Todas</SelectItem>
                     {platforms?.map((platform) => (
                       <SelectItem key={platform.id} value={platform.id}>
                         {platform.name}
@@ -164,7 +163,7 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
                     <SelectValue placeholder="Selecciona un tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     {postTypes?.map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         {type.name}
@@ -247,3 +246,4 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
     </Card>
   );
 }
+
