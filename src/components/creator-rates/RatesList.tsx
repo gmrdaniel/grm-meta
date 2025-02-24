@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 interface Rate {
   id: string;
@@ -37,10 +37,13 @@ interface RatesListProps {
   itemsPerPage: number;
 }
 
-export function RatesList({ page, itemsPerPage }: RatesListProps) {
+export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage }: RatesListProps) {
   const [selectedPlatform, setSelectedPlatform] = useState<string | undefined>(undefined);
   const [selectedPostType, setSelectedPostType] = useState<string | undefined>(undefined);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [page, setPage] = useState(initialPage);
+  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
+  const [shouldFetch, setShouldFetch] = useState(false);
 
   // Consulta para obtener las plataformas sociales
   const { data: platforms } = useQuery({
@@ -78,7 +81,7 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
 
   // Consulta principal para las tarifas con filtros
   const { data: rates, isLoading: ratesLoading } = useQuery({
-    queryKey: ["creator-rates", page, selectedPlatform, selectedPostType, priceRange],
+    queryKey: ["creator-rates", page, itemsPerPage, shouldFetch, selectedPlatform, selectedPostType, priceRange],
     queryFn: async () => {
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
@@ -117,15 +120,22 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
       if (error) throw error;
       return { data, count };
     },
+    enabled: shouldFetch,
   });
+
+  const handleSearch = () => {
+    setPage(1);
+    setShouldFetch(true);
+  };
 
   const handleReset = () => {
     setSelectedPlatform(undefined);
     setSelectedPostType(undefined);
     setPriceRange([0, 1000]);
+    setShouldFetch(false);
   };
 
-  if (ratesLoading) return <div>Cargando tarifas...</div>;
+  const totalPages = rates?.count ? Math.ceil(rates.count / itemsPerPage) : 0;
 
   return (
     <Card>
@@ -136,7 +146,7 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
         <div className="grid gap-6">
           {/* Filtros */}
           <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Filtro de Plataforma */}
               <div className="space-y-2">
                 <Label>Red Social</Label>
@@ -190,10 +200,28 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Selector de resultados por página */}
+              <div className="space-y-2">
+                <Label>Resultados por página</Label>
+                <Select 
+                  value={String(itemsPerPage)} 
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona cantidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Botón de Reset */}
-            <div className="flex justify-end">
+            {/* Botones de acción */}
+            <div className="flex justify-end gap-2">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -202,6 +230,14 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
               >
                 <X className="h-4 w-4" />
                 Limpiar Filtros
+              </Button>
+              <Button 
+                size="sm"
+                onClick={handleSearch}
+                className="flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                Buscar
               </Button>
             </div>
           </div>
@@ -241,9 +277,36 @@ export function RatesList({ page, itemsPerPage }: RatesListProps) {
               </tbody>
             </table>
           </div>
+
+          {/* Paginación */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              {rates?.count ? `Total: ${rates.count} resultados` : 'No hay resultados'}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
-
