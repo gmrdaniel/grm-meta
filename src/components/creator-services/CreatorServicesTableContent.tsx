@@ -7,7 +7,7 @@ import { DollarSign, Mail } from "lucide-react";
 
 interface Creator {
   id: string;
-  email: string;
+  email?: string; // Hacemos email opcional
   personal_data: {
     first_name: string;
     last_name: string;
@@ -83,7 +83,7 @@ export function CreatorServicesTableContent({
               </TableCell>
               <TableCell className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-500" />
-                <span>{creatorService.profiles.email || "N/A"}</span>
+                <span>{creatorService.profiles?.email || "N/A"}</span>
               </TableCell>
               <TableCell>{creatorService.services?.name ?? "N/A"}</TableCell>
               <TableCell>{creatorService.services?.type ?? "N/A"}</TableCell>
