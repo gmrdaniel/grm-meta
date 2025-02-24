@@ -51,8 +51,12 @@ export const useRatesData = (filters: FilterState) => {
         .from("creator_rates")
         .select(`
           id,
-          creator_profile:profiles(
-            full_name
+          creator_profile:profiles!creator_rates_profile_id_fkey(
+            full_name,
+            email,
+            personal_data(
+              instagram_username
+            )
           ),
           post_types(
             name,

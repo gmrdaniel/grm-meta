@@ -3,6 +3,10 @@ export interface Rate {
   id: string;
   creator_profile: {
     full_name: string;
+    email: string;
+    personal_data?: {
+      instagram_username: string | null;
+    }[];
   };
   post_types: {
     name: string;
