@@ -20,29 +20,22 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { CreatorRateDialog } from "@/components/creator-rates/CreatorRateDialog";
 
-interface CreatorProfile {
-  full_name: string | null;
-}
-
-interface SocialPlatform {
-  name: string;
-}
-
-interface PostType {
-  name: string;
-  social_platforms: SocialPlatform;
-}
-
 interface CreatorRate {
   id: string;
   profile_id: string;
   post_type_id: string;
   rate_usd: number;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  creator_profile: CreatorProfile | null;
-  post_types: PostType;
+  personal_data: {
+    first_name: string;
+    last_name: string;
+  };
+  post_types: {
+    name: string;
+    social_platforms: {
+      name: string;
+    };
+  };
 }
 
 export default function CreatorRates() {
@@ -57,12 +50,13 @@ export default function CreatorRates() {
         .from("creator_rates")
         .select(`
           *,
-          creator_profile:profiles(
-            full_name
+          personal_data (
+            first_name,
+            last_name
           ),
-          post_types(
+          post_types (
             name,
-            social_platforms(
+            social_platforms (
               name
             )
           )
@@ -155,7 +149,8 @@ export default function CreatorRates() {
                     {rates?.map((rate) => (
                       <TableRow key={rate.id}>
                         <TableCell>
-                          {rate.creator_profile?.full_name}
+                          {rate.personal_data?.first_name}{" "}
+                          {rate.personal_data?.last_name}
                         </TableCell>
                         <TableCell>
                           {rate.post_types?.social_platforms?.name}
