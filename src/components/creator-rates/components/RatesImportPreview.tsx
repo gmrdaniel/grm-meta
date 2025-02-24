@@ -25,25 +25,36 @@ export function RatesImportPreview({ importId }: RatesImportPreviewProps) {
 
   const handleConfirmImport = async () => {
     try {
-      // Update details with validated data
+      const validRows = details?.filter(d => !d.error_message) || [];
+      
+      if (validRows.length === 0) {
+        toast.error("No hay filas válidas para importar");
+        return;
+      }
+
       const { error } = await supabase
         .from('creator_rates')
         .insert(
-          details
-            ?.filter(d => !d.error_message)
-            .map(d => ({
-              profile_id: d.creator_id,
-              post_type_id: d.post_type_id,
-              rate_usd: d.rate_usd,
-              is_active: d.is_active
-            })) || []
+          validRows.map(d => ({
+            profile_id: d.creator_id,
+            post_type_id: d.post_type_id,
+            rate_usd: d.rate_usd,
+            is_active: d.is_active
+          }))
         );
 
       if (error) throw error;
+
+      // Update import status
+      await supabase
+        .from('rate_imports')
+        .update({ status: 'imported' })
+        .eq('id', importId);
+
       toast.success("Tarifas importadas correctamente");
     } catch (error: any) {
       console.error('Error importing rates:', error);
-      toast.error("Error al importar tarifas");
+      toast.error(error.message || "Error al importar tarifas");
     }
   };
 
@@ -51,13 +62,15 @@ export function RatesImportPreview({ importId }: RatesImportPreviewProps) {
     return <div>Cargando...</div>;
   }
 
+  const hasValidRows = details?.some(d => !d.error_message);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h4 className="text-lg font-medium">Vista Previa de Importación</h4>
         <Button 
           onClick={handleConfirmImport}
-          disabled={!details?.length || details.some(d => d.error_message)}
+          disabled={!hasValidRows}
         >
           Confirmar Importación
         </Button>

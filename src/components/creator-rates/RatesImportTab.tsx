@@ -35,20 +35,65 @@ export function RatesImportTab() {
       if (importError) throw importError;
 
       // Process each row
-      const importDetails = rows.map((row: any) => ({
-        import_id: importData.id,
-        email: row.email || '',
-        platform_name: row.platform || '',
-        post_type_name: row.post_type || '',
-        rate_usd: parseFloat(row.rate_usd) || 0,
-        is_active: row.is_active === 'true' || row.is_active === true
-      }));
+      const importPromises = rows.map(async (row: any) => {
+        // Buscar el creador por email
+        const { data: creatorData } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', row.email)
+          .single();
+
+        // Buscar la plataforma
+        const { data: platformData } = await supabase
+          .from('social_platforms')
+          .select('id')
+          .eq('name', row.platform)
+          .single();
+
+        // Si encontramos la plataforma, buscar el tipo de post
+        let postTypeData = null;
+        if (platformData) {
+          const { data } = await supabase
+            .from('post_types')
+            .select('id')
+            .eq('platform_id', platformData.id)
+            .eq('name', row.post_type)
+            .single();
+          postTypeData = data;
+        }
+
+        return {
+          import_id: importData.id,
+          email: row.email,
+          platform_name: row.platform,
+          post_type_name: row.post_type,
+          rate_usd: parseFloat(row.rate_usd) || 0,
+          is_active: row.is_active === 'true' || row.is_active === true,
+          creator_id: creatorData?.id,
+          platform_id: platformData?.id,
+          post_type_id: postTypeData?.id,
+          status: 'pending',
+          error_message: !creatorData ? 'Creator not found' :
+                        !platformData ? 'Platform not found' :
+                        !postTypeData ? 'Post type not found' : null
+        };
+      });
+
+      const importDetails = await Promise.all(importPromises);
 
       const { error: detailsError } = await supabase
         .from('rate_import_details')
         .insert(importDetails);
 
       if (detailsError) throw detailsError;
+
+      // Update import status
+      const { error: updateError } = await supabase
+        .from('rate_imports')
+        .update({ status: 'completed' })
+        .eq('id', importData.id);
+
+      if (updateError) throw updateError;
 
       setImportId(importData.id);
       toast.success("Archivo procesado correctamente");
