@@ -29,12 +29,12 @@ export function Filters({ filters, platforms, postTypes, onFilterChange, onReset
         {/* Platform Filter */}
         <div className="space-y-2">
           <Label>Red Social</Label>
-          <Select value={selectedPlatform} onValueChange={(value) => onFilterChange('selectedPlatform', value)}>
+          <Select value={selectedPlatform || "all"} onValueChange={(value) => onFilterChange('selectedPlatform', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Selecciona una red social" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todas">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               {platforms?.map((platform) => (
                 <SelectItem key={platform.id} value={platform.id}>
                   {platform.name}
@@ -47,12 +47,12 @@ export function Filters({ filters, platforms, postTypes, onFilterChange, onReset
         {/* Post Type Filter */}
         <div className="space-y-2">
           <Label>Tipo de Publicación</Label>
-          <Select value={selectedPostType} onValueChange={(value) => onFilterChange('selectedPostType', value)}>
+          <Select value={selectedPostType || "all"} onValueChange={(value) => onFilterChange('selectedPostType', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Selecciona un tipo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {postTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.name}
@@ -88,7 +88,7 @@ export function Filters({ filters, platforms, postTypes, onFilterChange, onReset
             onValueChange={(value) => onFilterChange('itemsPerPage', Number(value))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecciona cantidad" />
+              <SelectValue placeholder="Seleccione cantidad" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="10">10</SelectItem>
@@ -114,3 +114,4 @@ export function Filters({ filters, platforms, postTypes, onFilterChange, onReset
     </div>
   );
 }
+
