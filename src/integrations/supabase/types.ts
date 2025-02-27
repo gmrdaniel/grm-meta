@@ -9,6 +9,86 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action_type: Database["public"]["Enums"]["audit_action_type"]
+          admin_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          module: string
+          new_data: Json | null
+          previous_data: Json | null
+          record_id: string
+          reverted_at: string | null
+          reverted_by: string | null
+          revertible: boolean | null
+          table_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["audit_action_type"]
+          admin_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          module: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          record_id: string
+          reverted_at?: string | null
+          reverted_by?: string | null
+          revertible?: boolean | null
+          table_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["audit_action_type"]
+          admin_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          record_id?: string
+          reverted_at?: string | null
+          reverted_by?: string | null
+          revertible?: boolean | null
+          table_name?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_reverted_by_fkey"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_admin"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reverter"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_details: {
         Row: {
           bank_account_number: string | null
