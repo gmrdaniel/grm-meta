@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 const paymentSchema = z.object({
   total_amount: z.number().min(0),
@@ -32,6 +33,9 @@ interface ServicePaymentUpdateFormProps {
 }
 
 export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpdateFormProps) {
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -60,6 +64,20 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
 
   const onSubmit = async (values: PaymentFormValues) => {
     try {
+      // Guardar los datos anteriores para auditoria
+      const previousData = {
+        total_amount: payment.total_amount,
+        company_earning: payment.company_earning,
+        creator_earning: payment.creator_earning,
+        brand_payment_status: payment.brand_payment_status,
+        creator_payment_status: payment.creator_payment_status,
+        brand_payment_date: payment.brand_payment_date,
+        creator_payment_date: payment.creator_payment_date,
+        payment_receipt_url: payment.payment_receipt_url,
+        payment_month: payment.payment_month,
+        payment_period: payment.payment_period,
+      };
+
       let payment_receipt_url = payment.payment_receipt_url;
 
       if (values.payment_receipt) {
@@ -74,23 +92,41 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
         payment_receipt_url = uploadData.path;
       }
 
+      const newData = {
+        total_amount: values.total_amount,
+        company_earning: values.company_earning,
+        creator_earning: values.creator_earning,
+        brand_payment_status: values.brand_payment_status,
+        creator_payment_status: values.creator_payment_status,
+        brand_payment_date: values.brand_payment_date?.toISOString(),
+        creator_payment_date: values.creator_payment_date?.toISOString(),
+        payment_receipt_url,
+        payment_month: values.payment_month?.toISOString(),
+        payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
+      };
+
       const { error } = await supabase
         .from('service_payments')
-        .update({
-          total_amount: values.total_amount,
-          company_earning: values.company_earning,
-          creator_earning: values.creator_earning,
-          brand_payment_status: values.brand_payment_status,
-          creator_payment_status: values.creator_payment_status,
-          brand_payment_date: values.brand_payment_date?.toISOString(),
-          creator_payment_date: values.creator_payment_date?.toISOString(),
-          payment_receipt_url,
-          payment_month: values.payment_month?.toISOString(),
-          payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
-        })
+        .update(newData)
         .eq('id', payment.id);
 
       if (error) throw error;
+
+      // Registrar la acción en el log de auditoría
+      if (userId) {
+        await supabase.rpc('insert_audit_log', {
+          _admin_id: userId,
+          _action_type: 'payment',
+          _module: 'payments',
+          _table_name: 'service_payments',
+          _record_id: payment.id,
+          _previous_data: previousData,
+          _new_data: newData,
+          _revertible: true,
+          _ip_address: null,
+          _user_agent: navigator.userAgent
+        });
+      }
 
       toast.success("Pago actualizado exitosamente");
       onClose();

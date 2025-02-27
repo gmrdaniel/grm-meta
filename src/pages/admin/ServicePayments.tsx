@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const PAGE_SIZE = 10;
 
@@ -26,6 +27,8 @@ export default function ServicePayments() {
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
 
   const { data, isLoading, refetch } = useServicePayments(
     page, 
@@ -55,6 +58,21 @@ export default function ServicePayments() {
       if (error) throw error;
 
       const paymentsGenerated = result || 0;
+
+      // Registrar la acción en el log de auditoría
+      if (userId) {
+        await supabase.rpc('insert_audit_log', {
+          _admin_id: userId,
+          _action_type: 'operation',
+          _module: 'payments',
+          _table_name: 'service_payments',
+          _record_id: null,
+          _new_data: { payments_generated: paymentsGenerated },
+          _revertible: false,
+          _ip_address: null,
+          _user_agent: navigator.userAgent
+        });
+      }
 
       toast({
         title: "Pagos generados con éxito",
