@@ -6,7 +6,7 @@ export interface Rate {
     email: string;
     personal_data?: {
       instagram_username: string | null;
-    };
+    }[];
   };
   post_types: {
     name: string;
@@ -31,4 +31,3 @@ export interface FilterState {
   page: number;
   itemsPerPage: number;
 }
-

@@ -22,7 +22,6 @@ import ServicePayments from "./pages/admin/ServicePayments";
 import PostTypes from "./pages/admin/PostTypes";
 import CreatorRates from "./pages/admin/CreatorRates";
 import Utilities from "./pages/admin/Utilities";
-import AuditLogs from "./pages/admin/AuditLogs";
 
 const queryClient = new QueryClient();
 
@@ -99,14 +98,6 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <CreatorRates />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/audit-logs"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AuditLogs />
                 </ProtectedRoute>
               }
             />

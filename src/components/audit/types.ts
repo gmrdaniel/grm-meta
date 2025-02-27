@@ -1,11 +1,6 @@
 
 export type AuditActionType = 'create' | 'update' | 'delete' | 'status_change' | 'payment' | 'revert';
 
-export interface AdminProfile {
-  full_name: string | null;
-  email: string;
-}
-
 export interface AuditLog {
   id: string;
   admin_id: string;
@@ -21,8 +16,6 @@ export interface AuditLog {
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
-  admin: AdminProfile | null;
-  reverter: AdminProfile | null;
 }
 
 export interface AuditLogFilters {
@@ -34,4 +27,3 @@ export interface AuditLogFilters {
   page: number;
   itemsPerPage: number;
 }
-

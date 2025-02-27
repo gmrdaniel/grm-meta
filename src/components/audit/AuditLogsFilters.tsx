@@ -115,16 +115,16 @@ export function AuditLogsFilters({ filters, onFiltersChange }: AuditLogsFiltersP
         <div className="space-y-2">
           <label className="text-sm font-medium">Module</label>
           <Select
-            value={filters.module || "all"}
+            value={filters.module || ""}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, module: value === "all" ? undefined : value, page: 1 })
+              onFiltersChange({ ...filters, module: value || undefined, page: 1 })
             }
           >
             <SelectTrigger>
               <SelectValue placeholder="All modules" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All modules</SelectItem>
+              <SelectItem value="">All modules</SelectItem>
               {MODULES.map((module) => (
                 <SelectItem key={module} value={module}>
                   {module.charAt(0).toUpperCase() + module.slice(1)}
@@ -137,11 +137,11 @@ export function AuditLogsFilters({ filters, onFiltersChange }: AuditLogsFiltersP
         <div className="space-y-2">
           <label className="text-sm font-medium">Action Type</label>
           <Select
-            value={filters.actionType || "all"}
+            value={filters.actionType || ""}
             onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                actionType: value === "all" ? undefined : value as AuditActionType,
+                actionType: value as AuditActionType || undefined,
                 page: 1,
               })
             }
@@ -150,7 +150,7 @@ export function AuditLogsFilters({ filters, onFiltersChange }: AuditLogsFiltersP
               <SelectValue placeholder="All actions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All actions</SelectItem>
+              <SelectItem value="">All actions</SelectItem>
               {ACTION_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -193,4 +193,3 @@ export function AuditLogsFilters({ filters, onFiltersChange }: AuditLogsFiltersP
     </div>
   );
 }
-

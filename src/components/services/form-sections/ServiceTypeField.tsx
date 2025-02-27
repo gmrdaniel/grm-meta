@@ -22,14 +22,13 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Type</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value || "not_selected"}>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="not_selected">Seleccione un tipo</SelectItem>
               <SelectItem value="único">Único</SelectItem>
               <SelectItem value="recurrente">Recurrente</SelectItem>
               <SelectItem value="contrato">Contrato</SelectItem>
@@ -41,4 +40,3 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
     />
   );
 }
-
