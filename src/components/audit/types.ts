@@ -16,6 +16,15 @@ export interface AuditLog {
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
+  // Add the admin and reverter properties from the join
+  admin?: {
+    full_name: string | null;
+    email: string;
+  };
+  reverter?: {
+    full_name: string | null;
+    email: string;
+  };
 }
 
 export interface AuditLogFilters {
