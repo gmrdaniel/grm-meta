@@ -5,6 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { 
+  Alert,
+  AlertDescription 
+} from "@/components/ui/alert";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter 
+} from "@/components/ui/dialog";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -12,6 +24,10 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
+  const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoverySuccess, setRecoverySuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -87,6 +103,53 @@ export default function Auth() {
     }
   }
 
+  async function handlePasswordRecovery() {
+    if (!recoveryEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    setRecoveryLoading(true);
+    try {
+      // First check if the email belongs to a creator
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('email', recoveryEmail)
+        .single();
+      
+      if (profileError) {
+        console.error("Profile error:", profileError);
+        // If no profile found, we proceed with recovery as we don't want to expose which emails exist
+        // But we log for debugging purposes
+      }
+      
+      // Only proceed with recovery if the user is a creator or if profile not found (for security reasons)
+      if (!profileData || profileData.role === 'creator') {
+        const { error } = await supabase.auth.resetPasswordForEmail(recoveryEmail, {
+          redirectTo: window.location.origin + '/auth',
+        });
+        
+        if (error) throw error;
+        setRecoverySuccess(true);
+      } else {
+        // If it's not a creator role, show generic message for security
+        setRecoverySuccess(true);
+      }
+    } catch (error: any) {
+      console.error("Recovery error:", error);
+      toast.error("Error sending recovery email. Please try again.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  }
+
+  function closeRecoveryDialog() {
+    setIsRecoveryOpen(false);
+    setRecoveryEmail("");
+    setRecoverySuccess(false);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -128,11 +191,20 @@ export default function Auth() {
             </Button>
           </div>
           
-          <div className="text-center">
+          <div className="flex flex-col space-y-2 text-center text-sm">
+            {isLogin && (
+              <button
+                type="button"
+                onClick={() => setIsRecoveryOpen(true)}
+                className="text-blue-600 hover:text-blue-500"
+              >
+                Forgot your password?
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-blue-600 hover:text-blue-500"
             >
               {isLogin
                 ? "Don't have an account? Sign up"
@@ -141,6 +213,54 @@ export default function Auth() {
           </div>
         </form>
       </div>
+
+      {/* Password Recovery Dialog */}
+      <Dialog open={isRecoveryOpen} onOpenChange={setIsRecoveryOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Password Recovery</DialogTitle>
+            <DialogDescription>
+              Enter your email address to receive a password reset link.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {recoverySuccess ? (
+            <Alert className="mt-4">
+              <AlertDescription>
+                If an account exists with this email address, you will receive password reset instructions shortly.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="space-y-4 py-4">
+              <Input
+                type="email"
+                value={recoveryEmail}
+                onChange={(e) => setRecoveryEmail(e.target.value)}
+                placeholder="Email address"
+                disabled={recoveryLoading}
+              />
+            </div>
+          )}
+          
+          <DialogFooter>
+            {recoverySuccess ? (
+              <Button onClick={closeRecoveryDialog}>Close</Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={closeRecoveryDialog}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handlePasswordRecovery} 
+                  disabled={recoveryLoading || !recoveryEmail}
+                >
+                  {recoveryLoading ? "Sending..." : "Send Reset Link"}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
