@@ -16,6 +16,7 @@ export function SystemLogsCard() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
+      console.log("Fetching logs...");
       const { data, error } = await supabase
         .from("audit_logs")
         .select(`
@@ -26,13 +27,18 @@ export function SystemLogsCard() {
           table_name,
           record_id,
           reverted_at,
-          admin:profiles(full_name),
+          admin:profiles!audit_logs_admin_id_fkey(full_name),
           reverter:profiles!audit_logs_reverted_by_fkey(full_name)
         `)
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching logs:", error);
+        throw error;
+      }
+      
+      console.log("Logs fetched:", data);
       setLogs(data || []);
       setShowDetails(true);
     } catch (error) {
