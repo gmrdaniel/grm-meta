@@ -10,7 +10,7 @@ interface FormActionsProps {
 export function FormActions({ onClose, isSubmitting }: FormActionsProps) {
   return (
     <div className="flex justify-end space-x-4">
-      <Button variant="outline" type="button" onClick={onClose}>
+      <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting}>
         Cancelar
       </Button>
       <Button type="submit" disabled={isSubmitting}>

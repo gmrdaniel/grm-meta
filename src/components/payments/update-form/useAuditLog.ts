@@ -1,9 +1,6 @@
 
 import { useAuth } from "@/hooks/useAuth";
-
-// Accessing the Supabase URL and key from the client.ts constants
-const SUPABASE_URL = "https://ovyakbwetiwkmpqjdhme.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92eWFrYndldGl3a21wcWpkaG1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyMjkzMTksImV4cCI6MjA1NDgwNTMxOX0.2JIEJzWigGcyb46r7iK-H5PIwYK04SzWaKHb7ZZV2bw";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AuditLogData {
   recordId: string;
@@ -21,29 +18,63 @@ export function useAuditLog() {
   const createAuditLog = async (data: AuditLogData) => {
     if (!userId) {
       console.warn('No user ID available for audit logging');
-      return;
+      return false;
     }
 
     console.log('Creating audit log with user ID:', userId);
     console.log('Audit log data:', {
-      _admin_id: userId,
-      _action_type: data.actionType,
-      _module: data.module,
-      _table_name: data.tableName,
-      _record_id: data.recordId,
-      _previous_data: data.previousData,
-      _new_data: data.newData,
-      _revertible: true,
-      _user_agent: navigator.userAgent
+      admin_id: userId,
+      action_type: data.actionType,
+      module: data.module,
+      table_name: data.tableName,
+      record_id: data.recordId,
+      previous_data: data.previousData,
+      new_data: data.newData,
+      revertible: true,
+      user_agent: navigator.userAgent
     });
     
     try {
-      const rpcResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/insert_audit_log`, {
+      // Try using the supabase client directly
+      const { data: rpcResult, error } = await supabase.rpc('insert_audit_log', {
+        _admin_id: userId,
+        _action_type: data.actionType,
+        _module: data.module,
+        _table_name: data.tableName,
+        _record_id: data.recordId,
+        _previous_data: data.previousData,
+        _new_data: data.newData,
+        _revertible: true,
+        _ip_address: null,
+        _user_agent: navigator.userAgent
+      });
+
+      if (error) {
+        console.error('Error creating audit log via Supabase RPC:', error);
+        
+        // Fallback to direct fetch if Supabase client fails
+        return await fallbackDirectFetch(userId, data);
+      }
+      
+      console.log('Audit log created successfully via Supabase RPC:', rpcResult);
+      return true;
+    } catch (supabaseError) {
+      console.error('Supabase error creating audit log:', supabaseError);
+      
+      // Fallback to direct fetch if Supabase client throws
+      return await fallbackDirectFetch(userId, data);
+    }
+  };
+
+  // Fallback method using direct fetch
+  const fallbackDirectFetch = async (userId: string, data: AuditLogData) => {
+    try {
+      const rpcResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/insert_audit_log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
+          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${supabase.supabaseKey}`
         },
         body: JSON.stringify({
           _admin_id: userId,
