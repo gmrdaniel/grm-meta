@@ -1,5 +1,4 @@
 
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuditLogData {
@@ -12,16 +11,35 @@ export interface AuditLogData {
 }
 
 export function useAuditLog() {
-  const { user } = useAuth();
-  const userId = user?.id;
+  // Obtenemos el usuario directamente de la sesión actual
+  const getUserId = async () => {
+    try {
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        return null;
+      }
+      
+      const userId = sessionData?.session?.user?.id;
+      console.log('Current user ID from session:', userId);
+      return userId;
+    } catch (e) {
+      console.error('Exception getting user ID:', e);
+      return null;
+    }
+  };
 
   const createAuditLog = async (data: AuditLogData) => {
+    // Obtenemos el userId directamente de la sesión cuando se necesita
+    const userId = await getUserId();
+    
     if (!userId) {
-      console.warn('No user ID available for audit logging');
-      return false;
+      console.warn('No user ID available for audit logging, will log action without user ID');
+      // Continuar con el log pero sin usuario asociado
     }
 
-    console.log('Creating audit log with user ID:', userId);
+    console.log('Creating audit log with user ID:', userId || 'unavailable');
     console.log('Audit log data:', {
       admin_id: userId,
       action_type: data.actionType,
@@ -35,9 +53,9 @@ export function useAuditLog() {
     });
     
     try {
-      // Try using the supabase client directly
+      // Usar el RPC de Supabase
       const { data: rpcResult, error } = await supabase.rpc('insert_audit_log', {
-        _admin_id: userId,
+        _admin_id: userId || '00000000-0000-0000-0000-000000000000', // Usamos un UUID nulo si no hay usuario
         _action_type: data.actionType,
         _module: data.module,
         _table_name: data.tableName,
@@ -52,8 +70,8 @@ export function useAuditLog() {
       if (error) {
         console.error('Error creating audit log via Supabase RPC:', error);
         
-        // Fallback to direct fetch if Supabase client fails
-        return await fallbackDirectFetch(userId, data);
+        // Fallback a direct fetch si falla el cliente de Supabase
+        return await fallbackDirectFetch(userId || '00000000-0000-0000-0000-000000000000', data);
       }
       
       console.log('Audit log created successfully via Supabase RPC:', rpcResult);
@@ -61,12 +79,12 @@ export function useAuditLog() {
     } catch (supabaseError) {
       console.error('Supabase error creating audit log:', supabaseError);
       
-      // Fallback to direct fetch if Supabase client throws
-      return await fallbackDirectFetch(userId, data);
+      // Fallback a direct fetch si el cliente de Supabase lanza una excepción
+      return await fallbackDirectFetch(userId || '00000000-0000-0000-0000-000000000000', data);
     }
   };
 
-  // Fallback method using direct fetch
+  // Método de respaldo usando direct fetch
   const fallbackDirectFetch = async (userId: string, data: AuditLogData) => {
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL || 'https://ovyakbwetiwkmpqjdhme.supabase.co'}/rest/v1/rpc/insert_audit_log`;
@@ -110,5 +128,5 @@ export function useAuditLog() {
     }
   };
 
-  return { createAuditLog, userId };
+  return { createAuditLog };
 }

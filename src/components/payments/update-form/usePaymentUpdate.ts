@@ -17,7 +17,7 @@ export function usePaymentUpdate(payment: any, onClose: () => void) {
       console.log("Original payment data:", payment);
       console.log("Form values:", values);
       
-      // Save previous data for audit
+      // Guardar datos anteriores para auditoría
       const previousData = {
         id: payment.id,
         total_amount: payment.total_amount,
@@ -42,7 +42,7 @@ export function usePaymentUpdate(payment: any, onClose: () => void) {
         const fileExt = values.payment_receipt.name.split('.').pop();
         const fileName = `${payment.id}-${Date.now()}.${fileExt}`;
 
-        // Check if the storage bucket exists
+        // Verificar si el bucket de almacenamiento existe
         const { data: buckets } = await supabase.storage.listBuckets();
         const bucketExists = buckets?.some(bucket => bucket.name === 'payment_receipts');
         
@@ -90,7 +90,7 @@ export function usePaymentUpdate(payment: any, onClose: () => void) {
         updated_at: new Date().toISOString()
       };
 
-      // Update payment
+      // Actualizar pago
       console.log('Updating payment with data:', {
         total_amount: values.total_amount,
         company_earning: values.company_earning,
@@ -127,7 +127,7 @@ export function usePaymentUpdate(payment: any, onClose: () => void) {
 
       console.log('Payment updated successfully');
 
-      // Create audit log
+      // Crear log de auditoría
       console.log('Creating audit log with data:', {
         recordId: payment.id,
         previousData,

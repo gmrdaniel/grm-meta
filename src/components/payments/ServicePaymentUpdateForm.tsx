@@ -10,7 +10,7 @@ import { PaymentMonthField } from "./update-form/PaymentMonthField";
 import { FormActions } from "./update-form/FormActions";
 import { paymentSchema, PaymentFormValues } from "./update-form/PaymentFormSchema";
 import { usePaymentUpdate } from "./update-form/usePaymentUpdate";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServicePaymentUpdateFormProps {
   payment: any;
@@ -18,15 +18,16 @@ interface ServicePaymentUpdateFormProps {
 }
 
 export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpdateFormProps) {
-  const { user } = useAuth();
-  const userId = user?.id;
   const { handleSubmit, isSubmitting } = usePaymentUpdate(payment, onClose);
 
   useEffect(() => {
-    // Log userId on component mount to verify it's available
-    console.log('Current user ID:', userId);
-    console.log('Payment ID being edited:', payment.id);
-  }, [userId, payment.id]);
+    // Verificar sesión al cargar el componente
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      console.log('Current session when editing payment:', data.session?.user?.id);
+    };
+    checkSession();
+  }, []);
 
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
