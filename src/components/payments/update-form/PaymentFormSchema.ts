@@ -18,4 +18,4 @@ export type PaymentFormValues = z.infer<typeof paymentSchema>;
 // Define the expected values for audit logs
 export const AUDIT_MODULE = "payments";
 export const AUDIT_TABLE_NAME = "service_payments";
-export const AUDIT_ACTION_TYPE = "payment";
+export const AUDIT_ACTION_TYPE = "payment" as const;

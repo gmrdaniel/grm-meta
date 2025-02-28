@@ -8,7 +8,7 @@ export interface AuditLogData {
   newData: any;
   tableName: string;
   module: string;
-  actionType: string;
+  actionType: "payment" | "create" | "update" | "delete" | "status_change" | "revert";
 }
 
 export function useAuditLog() {
@@ -69,12 +69,15 @@ export function useAuditLog() {
   // Fallback method using direct fetch
   const fallbackDirectFetch = async (userId: string, data: AuditLogData) => {
     try {
-      const rpcResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/insert_audit_log`, {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL || 'https://ovyakbwetiwkmpqjdhme.supabase.co'}/rest/v1/rpc/insert_audit_log`;
+      const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92eWFrYndldGl3a21wcWpkaG1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyMjkzMTksImV4cCI6MjA1NDgwNTMxOX0.2JIEJzWigGcyb46r7iK-H5PIwYK04SzWaKHb7ZZV2bw';
+      
+      const rpcResponse = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': apiKey,
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           _admin_id: userId,
