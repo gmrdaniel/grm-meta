@@ -2,16 +2,18 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, ScrollText, RefreshCw } from "lucide-react";
+import { Database, ScrollText, RefreshCw, Undo2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "@/components/ui/use-toast";
 
 export function SystemLogsCard() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [reverting, setReverting] = useState<string | null>(null);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -27,6 +29,7 @@ export function SystemLogsCard() {
           table_name,
           record_id,
           reverted_at,
+          revertible,
           admin:profiles!audit_logs_admin_id_fkey(full_name),
           reverter:profiles!audit_logs_reverted_by_fkey(full_name)
         `)
@@ -43,8 +46,59 @@ export function SystemLogsCard() {
       setShowDetails(true);
     } catch (error) {
       console.error("Error fetching logs:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los logs del sistema",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const revertLog = async (logId: string) => {
+    try {
+      setReverting(logId);
+      
+      // Obtener el ID del usuario actual
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUserId = sessionData?.session?.user?.id;
+      
+      if (!currentUserId) {
+        throw new Error("No hay sesión de usuario activa");
+      }
+      
+      console.log("Intentando revertir log:", logId, "por usuario:", currentUserId);
+      
+      // Usar el RPC para revertir la acción
+      const { data, error } = await supabase.rpc('revert_audit_action', {
+        _audit_log_id: logId,
+        _admin_id: currentUserId
+      });
+      
+      if (error) {
+        console.error("Error al revertir la acción:", error);
+        throw error;
+      }
+      
+      console.log("Respuesta de revertir:", data);
+      
+      // Actualizar la lista de logs
+      await fetchLogs();
+      
+      toast({
+        title: "Acción revertida",
+        description: "La acción ha sido revertida correctamente",
+      });
+    } catch (error: any) {
+      console.error("Error revirtiendo log:", error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo revertir la acción",
+        variant: "destructive"
+      });
+    } finally {
+      setReverting(null);
     }
   };
 
@@ -142,6 +196,7 @@ export function SystemLogsCard() {
                   <TableHead>Acción</TableHead>
                   <TableHead>Administrador</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -174,7 +229,44 @@ export function SystemLogsCard() {
                         <span className="flex items-center text-xs text-green-700">
                           <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
                           Activo
+                          {log.revertible && (
+                            <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Reversible
+                            </span>
+                          )}
                         </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {log.revertible && !log.reverted_at && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="h-8 px-2 text-xs"
+                          onClick={() => revertLog(log.id)}
+                          disabled={!!reverting}
+                        >
+                          {reverting === log.id ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <>
+                              <Undo2 className="h-3 w-3 mr-1" />
+                              Revertir
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {!log.revertible && !log.reverted_at && (
+                        <div className="flex items-center text-xs text-gray-500">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          No reversible
+                        </div>
+                      )}
+                      {log.reverted_at && (
+                        <div className="flex items-center text-xs text-gray-500">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          Ya revertido
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
