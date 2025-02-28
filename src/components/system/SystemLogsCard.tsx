@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Database, ScrollText } from "lucide-react";
+import { Database, ScrollText, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -25,7 +25,9 @@ export function SystemLogsCard() {
           module,
           table_name,
           record_id,
-          admin:profiles!admin_id(full_name)
+          reverted_at,
+          admin:profiles(full_name),
+          reverter:profiles!audit_logs_reverted_by_fkey(full_name)
         `)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -60,7 +62,12 @@ export function SystemLogsCard() {
   };
 
   const getModuleIcon = (module: string) => {
-    return <Database className="w-4 h-4" />;
+    switch (module.toLowerCase()) {
+      case 'payment':
+        return <Database className="w-4 h-4" />;
+      default:
+        return <Database className="w-4 h-4" />;
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -81,7 +88,17 @@ export function SystemLogsCard() {
             onClick={fetchLogs} 
             disabled={loading}
           >
-            {loading ? 'Cargando...' : 'Actualizar logs'}
+            {loading ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Cargando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Actualizar logs
+              </>
+            )}
           </Button>
         </div>
         <CardDescription>
@@ -95,7 +112,14 @@ export function SystemLogsCard() {
               Los logs de sistema muestran un registro detallado de las acciones realizadas en la plataforma.
             </p>
             <Button onClick={fetchLogs} disabled={loading}>
-              {loading ? "Cargando..." : "Ver logs recientes"}
+              {loading ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Cargando...
+                </>
+              ) : (
+                "Ver logs recientes"
+              )}
             </Button>
           </div>
         ) : logs.length === 0 ? (
@@ -111,6 +135,7 @@ export function SystemLogsCard() {
                   <TableHead>Módulo</TableHead>
                   <TableHead>Acción</TableHead>
                   <TableHead>Administrador</TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -132,6 +157,19 @@ export function SystemLogsCard() {
                     </TableCell>
                     <TableCell>
                       {log.admin?.full_name || "Sistema"}
+                    </TableCell>
+                    <TableCell>
+                      {log.reverted_at ? (
+                        <span className="flex items-center text-xs text-red-700">
+                          <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+                          Revertido por {log.reverter?.full_name || "Sistema"}
+                        </span>
+                      ) : (
+                        <span className="flex items-center text-xs text-green-700">
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          Activo
+                        </span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
