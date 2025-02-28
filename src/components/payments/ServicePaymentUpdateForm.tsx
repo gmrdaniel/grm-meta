@@ -13,6 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
+// Accessing the Supabase URL and key from the client.ts constants
+const SUPABASE_URL = "https://ovyakbwetiwkmpqjdhme.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92eWFrYndldGl3a21wcWpkaG1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyMjkzMTksImV4cCI6MjA1NDgwNTMxOX0.2JIEJzWigGcyb46r7iK-H5PIwYK04SzWaKHb7ZZV2bw";
+
 const paymentSchema = z.object({
   total_amount: z.number().min(0),
   company_earning: z.number().min(0),
@@ -159,14 +163,14 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           _user_agent: navigator.userAgent
         });
         
-        // Using fetch directly to get more control and debugging information
+        // Using fetch directly but with the constant URL and key instead of protected properties
         try {
-          const rpcResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/insert_audit_log`, {
+          const rpcResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/insert_audit_log`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'apikey': supabase.supabaseKey,
-              'Authorization': `Bearer ${supabase.supabaseKey}`
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
             },
             body: JSON.stringify({
               _admin_id: userId,
