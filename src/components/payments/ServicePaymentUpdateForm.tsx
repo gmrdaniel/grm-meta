@@ -33,8 +33,8 @@ interface ServicePaymentUpdateFormProps {
 }
 
 export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpdateFormProps) {
-  const { session } = useAuth();
-  const userId = session?.user?.id;
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
@@ -84,6 +84,18 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
         const fileExt = values.payment_receipt.name.split('.').pop();
         const fileName = `${payment.id}-${Date.now()}.${fileExt}`;
 
+        // Check if the storage bucket exists, if not create it
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const bucketExists = buckets?.some(bucket => bucket.name === 'payment_receipts');
+        
+        if (!bucketExists) {
+          await supabase.storage.createBucket('payment_receipts', {
+            public: false,
+            allowedMimeTypes: ['application/pdf'],
+            fileSizeLimit: 10485760 // 10MB
+          });
+        }
+
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('payment_receipts')
           .upload(fileName, values.payment_receipt);
@@ -114,7 +126,8 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
 
       // Registrar la acción en el log de auditoría
       if (userId) {
-        await supabase.rpc('insert_audit_log', {
+        console.log('Creating audit log with user ID:', userId);
+        const { data: auditData, error: auditError } = await supabase.rpc('insert_audit_log', {
           _admin_id: userId,
           _action_type: 'payment',
           _module: 'payments',
@@ -126,13 +139,21 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           _ip_address: null,
           _user_agent: navigator.userAgent
         });
+        
+        if (auditError) {
+          console.error('Error creating audit log:', auditError);
+        } else {
+          console.log('Audit log created successfully:', auditData);
+        }
+      } else {
+        console.warn('No user ID available for audit logging');
       }
 
       toast.success("Pago actualizado exitosamente");
       onClose();
     } catch (error: any) {
+      console.error('Error al actualizar el pago:', error);
       toast.error("Error al actualizar el pago");
-      console.error('Error:', error);
     }
   };
 

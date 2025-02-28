@@ -27,8 +27,8 @@ export default function ServicePayments() {
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
-  const { session } = useAuth();
-  const userId = session?.user?.id;
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const { data, isLoading, refetch } = useServicePayments(
     page, 
@@ -63,7 +63,7 @@ export default function ServicePayments() {
       if (userId) {
         await supabase.rpc('insert_audit_log', {
           _admin_id: userId,
-          _action_type: 'operation',
+          _action_type: 'payment',
           _module: 'payments',
           _table_name: 'service_payments',
           _record_id: null,
