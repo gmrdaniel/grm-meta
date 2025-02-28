@@ -36,6 +36,12 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
   const { user } = useAuth();
   const userId = user?.id;
 
+  useEffect(() => {
+    // Log userId on component mount to verify it's available
+    console.log('Current user ID:', userId);
+    console.log('Payment ID being edited:', payment.id);
+  }, [userId, payment.id]);
+
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -64,6 +70,14 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
 
   const onSubmit = async (values: PaymentFormValues) => {
     try {
+      // Test direct database access
+      const { data: testData, error: testError } = await supabase
+        .from('audit_logs')
+        .select('id')
+        .limit(1);
+      
+      console.log('Database test query result:', { data: testData, error: testError });
+      
       // Guardar los datos anteriores para auditoria
       const previousData = {
         total_amount: payment.total_amount,
@@ -117,17 +131,23 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
         payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
       };
 
-      const { error } = await supabase
+      // Update payment
+      const { error: updateError } = await supabase
         .from('service_payments')
         .update(newData)
         .eq('id', payment.id);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Error updating payment:', updateError);
+        throw updateError;
+      }
 
-      // Registrar la acción en el log de auditoría
+      console.log('Payment updated successfully');
+
+      // Create audit log with more detailed error handling
       if (userId) {
-        console.log('Creating audit log with user ID:', userId);
-        const { data: auditData, error: auditError } = await supabase.rpc('insert_audit_log', {
+        console.log('Attempting to create audit log with user ID:', userId);
+        console.log('Audit log data:', {
           _admin_id: userId,
           _action_type: 'payment',
           _module: 'payments',
@@ -136,14 +156,43 @@ export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpd
           _previous_data: previousData,
           _new_data: newData,
           _revertible: true,
-          _ip_address: null,
           _user_agent: navigator.userAgent
         });
         
-        if (auditError) {
-          console.error('Error creating audit log:', auditError);
-        } else {
-          console.log('Audit log created successfully:', auditData);
+        // Using fetch directly to get more control and debugging information
+        try {
+          const rpcResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/insert_audit_log`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabase.supabaseKey,
+              'Authorization': `Bearer ${supabase.supabaseKey}`
+            },
+            body: JSON.stringify({
+              _admin_id: userId,
+              _action_type: 'payment',
+              _module: 'payments',
+              _table_name: 'service_payments',
+              _record_id: payment.id,
+              _previous_data: previousData,
+              _new_data: newData,
+              _revertible: true,
+              _ip_address: null,
+              _user_agent: navigator.userAgent
+            })
+          });
+          
+          const rpcResult = await rpcResponse.json();
+          console.log('Audit log direct fetch result:', rpcResult);
+          console.log('Audit log HTTP status:', rpcResponse.status);
+          
+          if (!rpcResponse.ok) {
+            console.error('Failed to create audit log via direct fetch:', rpcResult);
+          } else {
+            console.log('Audit log created successfully via direct fetch');
+          }
+        } catch (fetchError) {
+          console.error('Fetch error creating audit log:', fetchError);
         }
       } else {
         console.warn('No user ID available for audit logging');
