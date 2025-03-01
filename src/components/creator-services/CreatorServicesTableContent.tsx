@@ -7,13 +7,16 @@ import { DollarSign, Mail } from "lucide-react";
 
 interface CreatorService {
   id: string;
+  profile_id: string | null; 
+  service_id: string | null;
+  status: string;
+  created_at: string | null;
+  // Join fields from the query
   profile_full_name: string;
   personal_email: string;
   instagram_username: string | null;
   service_name: string;
   service_type: string;
-  status: string;
-  created_at: string;
 }
 
 interface CreatorServicesTableContentProps {
