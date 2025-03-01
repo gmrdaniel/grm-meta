@@ -30,7 +30,7 @@ export function useCreatorServices(
           status,
           created_at,
           profiles!creator_services_profile_id_fkey(full_name, email),
-          services!creator_services_service_id_fkey(name, type)
+          services!creator_services_service_id_fkey(id, name, type)
         `);
 
       // Apply filters
@@ -70,6 +70,8 @@ export function useCreatorServices(
         throw error;
       }
       
+      console.log("Raw data from query:", data);
+      
       // Now, we need to get instagram_username separately since there's no direct relation
       // We'll first get all profile_ids
       const profileIds = data.map(item => item.profile_id).filter(Boolean);
@@ -91,20 +93,25 @@ export function useCreatorServices(
       });
       
       // Transform the data to match the expected format
-      const transformedData = data.map(item => ({
-        id: item.id,
-        profile_id: item.profile_id,
-        service_id: item.service_id,
-        status: item.status,
-        created_at: item.created_at,
-        profile_full_name: item.profiles?.full_name || 'N/A',
-        personal_email: item.profiles?.email || 'N/A',
-        instagram_username: item.profile_id ? instagramMap.get(item.profile_id) || null : null,
-        service_name: item.services?.name || 'N/A',
-        service_type: item.services?.type || 'N/A'
-      }));
+      const transformedData = data.map(item => {
+        // Log each service to debug
+        console.log(`Service for item ${item.id}:`, item.services);
+        
+        return {
+          id: item.id,
+          profile_id: item.profile_id,
+          service_id: item.service_id,
+          status: item.status,
+          created_at: item.created_at,
+          profile_full_name: item.profiles?.full_name || 'N/A',
+          personal_email: item.profiles?.email || 'N/A',
+          instagram_username: item.profile_id ? instagramMap.get(item.profile_id) || null : null,
+          service_name: item.services?.name || 'Sin Nombre',
+          service_type: item.services?.type || 'N/A'
+        };
+      });
       
-      console.log("Fetched creator services:", transformedData);
+      console.log("Transformed creator services:", transformedData);
       
       return {
         creatorServices: transformedData,
