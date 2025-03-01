@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -126,8 +125,9 @@ export function useServicePayments(
         totalCount: count || 0
       };
     },
-    // Esto garantiza que el estado se limpie y se vuelva a cargar cuando cambien los filtros
+    // Reemplazamos keepPreviousData por placeholderData que es la opción
+    // compatible con la versión actual de TanStack Query
     refetchOnWindowFocus: false,
-    keepPreviousData: false,
+    placeholderData: (previousData) => previousData,
   });
 }
