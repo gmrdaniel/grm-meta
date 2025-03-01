@@ -72,6 +72,31 @@ export function useCreatorServices(
       
       console.log("Raw data from query:", data);
       
+      // Get all service IDs that returned null in the join
+      const nullServiceIds = data
+        .filter(item => item.services === null && item.service_id)
+        .map(item => item.service_id);
+        
+      console.log("Services that returned null:", nullServiceIds);
+      
+      // If we have any null services, fetch them separately
+      let serviceMap = new Map();
+      if (nullServiceIds.length > 0) {
+        const { data: missingServices, error: servicesError } = await supabase
+          .from('services')
+          .select('id, name, type')
+          .in('id', nullServiceIds);
+          
+        if (servicesError) {
+          console.error("Error fetching missing services:", servicesError);
+        } else if (missingServices) {
+          console.log("Found missing services:", missingServices);
+          missingServices.forEach(service => {
+            serviceMap.set(service.id, service);
+          });
+        }
+      }
+      
       // Now, we need to get instagram_username separately since there's no direct relation
       // We'll first get all profile_ids
       const profileIds = data.map(item => item.profile_id).filter(Boolean);
@@ -94,8 +119,25 @@ export function useCreatorServices(
       
       // Transform the data to match the expected format
       const transformedData = data.map(item => {
-        // Log each service to debug
-        console.log(`Service for item ${item.id}:`, item.services);
+        // If the services join returned null, try to get the service from our map
+        let serviceName = "Sin Nombre";
+        let serviceType = "N/A";
+        
+        if (item.services) {
+          serviceName = item.services.name || "Sin Nombre";
+          serviceType = item.services.type || "N/A";
+        } else if (item.service_id && serviceMap.has(item.service_id)) {
+          const service = serviceMap.get(item.service_id);
+          serviceName = service.name || "Sin Nombre";
+          serviceType = service.type || "N/A";
+        }
+        
+        // Log each item to debug
+        console.log(`Processing item ${item.id}:`, {
+          service_id: item.service_id,
+          service_data: item.services || serviceMap.get(item.service_id) || "Not found",
+          resulting_name: serviceName
+        });
         
         return {
           id: item.id,
@@ -106,8 +148,8 @@ export function useCreatorServices(
           profile_full_name: item.profiles?.full_name || 'N/A',
           personal_email: item.profiles?.email || 'N/A',
           instagram_username: item.profile_id ? instagramMap.get(item.profile_id) || null : null,
-          service_name: item.services?.name || 'Sin Nombre',
-          service_type: item.services?.type || 'N/A'
+          service_name: serviceName,
+          service_type: serviceType
         };
       });
       
