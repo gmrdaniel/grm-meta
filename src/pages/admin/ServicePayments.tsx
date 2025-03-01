@@ -18,10 +18,8 @@ const PAGE_SIZE = 10;
 
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
-  const [showRecurringOnly, setShowRecurringOnly] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("list");
-  const [selectedService, setSelectedService] = useState("all");
   const [selectedBrandStatus, setSelectedBrandStatus] = useState("all");
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -32,8 +30,6 @@ export default function ServicePayments() {
   const { data, isLoading, refetch } = useServicePayments(
     page, 
     PAGE_SIZE, 
-    showRecurringOnly,
-    selectedService,
     selectedBrandStatus,
     selectedCreatorStatus
   );
@@ -49,12 +45,6 @@ export default function ServicePayments() {
     refetch();
   };
 
-  const handleServiceFilterChange = (newServiceId: string) => {
-    console.log("Changing service filter to:", newServiceId);
-    setPage(1); 
-    setSelectedService(newServiceId);
-  };
-
   const handleBrandStatusChange = (newStatus: string) => {
     setPage(1);
     setSelectedBrandStatus(newStatus);
@@ -63,11 +53,6 @@ export default function ServicePayments() {
   const handleCreatorStatusChange = (newStatus: string) => {
     setPage(1);
     setSelectedCreatorStatus(newStatus);
-  };
-
-  const handleRecurringFilterChange = (showRecurring: boolean) => {
-    setPage(1);
-    setShowRecurringOnly(showRecurring);
   };
 
   const handleGenerateMonthlyPayments = async () => {
@@ -117,10 +102,6 @@ export default function ServicePayments() {
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <ServicePaymentsHeader 
-            showRecurringOnly={showRecurringOnly}
-            setShowRecurringOnly={handleRecurringFilterChange}
-            selectedService={selectedService}
-            setSelectedService={handleServiceFilterChange}
             selectedBrandStatus={selectedBrandStatus}
             setSelectedBrandStatus={handleBrandStatusChange}
             selectedCreatorStatus={selectedCreatorStatus}

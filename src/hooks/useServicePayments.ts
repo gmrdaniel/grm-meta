@@ -4,13 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 export function useServicePayments(
   page: number, 
   pageSize: number, 
-  showRecurringOnly: boolean,
-  selectedService: string,
   brandStatus: string,
   creatorStatus: string
 ) {
   return useQuery({
-    queryKey: ['service-payments', page, showRecurringOnly, selectedService, brandStatus, creatorStatus],
+    queryKey: ['service-payments', page, brandStatus, creatorStatus],
     queryFn: async () => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
@@ -18,8 +16,6 @@ export function useServicePayments(
       console.log("Filter params:", { 
         page, 
         pageSize, 
-        showRecurringOnly, 
-        selectedService,
         brandStatus,
         creatorStatus,
         from,
@@ -65,20 +61,6 @@ export function useServicePayments(
         `, { count: 'exact' })
         .order('payment_date', { ascending: false });
 
-      // Solo aplicamos el filtro de pagos recurrentes si showRecurringOnly es true
-      if (showRecurringOnly) {
-        query = query.eq('is_recurring', true);
-      }
-
-      // Filtro de servicio - Asegurarnos de que solo se aplique si es diferente de "all"
-      if (selectedService && selectedService !== 'all') {
-        console.log(`Applying service filter with ID: "${selectedService}"`);
-        
-        // Este es el punto crítico - Usamos una sintaxis más específica para estar seguros
-        // que estamos filtrando correctamente por el service_id en la relación creator_service
-        query = query.eq('creator_service.service_id', selectedService);
-      }
-
       if (brandStatus !== 'all') {
         query = query.eq('brand_payment_status', brandStatus);
       }
@@ -92,8 +74,6 @@ export function useServicePayments(
 
       // Log para mostrar la consulta que se va a ejecutar (lo más cercano posible)
       console.log("Query filters:", {
-        recurring: showRecurringOnly ? "true" : "not filtered",
-        service: selectedService !== 'all' ? selectedService : "not filtered",
         brandStatus: brandStatus !== 'all' ? brandStatus : "not filtered",
         creatorStatus: creatorStatus !== 'all' ? creatorStatus : "not filtered",
       });
@@ -112,10 +92,6 @@ export function useServicePayments(
       if (payments && payments.length > 0) {
         // Log para verificar el contenido del primer pago
         console.log("First payment:", payments[0]);
-        
-        // Verificar específicamente el service_id de los resultados
-        const serviceIds = payments.map(p => p.creator_service?.service_id || 'unknown');
-        console.log("Service IDs in results:", serviceIds);
       } else {
         console.log("No payments found with the current filters");
       }

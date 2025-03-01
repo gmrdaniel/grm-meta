@@ -8,15 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useServices } from "@/hooks/useServices";
 
 interface ServicePaymentsHeaderProps {
-  showRecurringOnly: boolean;
-  setShowRecurringOnly: (value: boolean) => void;
-  selectedService: string;
-  setSelectedService: (value: string) => void;
   selectedBrandStatus: string;
   setSelectedBrandStatus: (value: string) => void;
   selectedCreatorStatus: string;
@@ -24,25 +17,11 @@ interface ServicePaymentsHeaderProps {
 }
 
 export function ServicePaymentsHeader({
-  showRecurringOnly,
-  setShowRecurringOnly,
-  selectedService,
-  setSelectedService,
   selectedBrandStatus,
   setSelectedBrandStatus,
   selectedCreatorStatus,
   setSelectedCreatorStatus,
 }: ServicePaymentsHeaderProps) {
-  const { data: services, isLoading } = useServices();
-
-  // Parsear y filtrar los servicios para asegurarnos de que son válidos
-  const validServices = services?.filter(service => 
-    service && typeof service.id === 'string' && typeof service.name === 'string'
-  ) || [];
-
-  console.log("Servicios disponibles para el filtro:", validServices);
-  console.log("Servicio actualmente seleccionado:", selectedService);
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -52,43 +31,9 @@ export function ServicePaymentsHeader({
             Administra todos los pagos de servicios de la plataforma
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="recurring-filter"
-            checked={showRecurringOnly}
-            onCheckedChange={(value) => {
-              console.log("Cambiando filtro de recurrentes a:", value);
-              setShowRecurringOnly(value);
-            }}
-          />
-          <Label htmlFor="recurring-filter">Solo pagos recurrentes</Label>
-        </div>
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <div className="w-full md:w-auto md:flex-1">
-          <Select 
-            value={selectedService} 
-            disabled={isLoading}
-            onValueChange={(value) => {
-              console.log("Seleccionando servicio:", value);
-              setSelectedService(value);
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Filtrar por servicio" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los servicios</SelectItem>
-              {validServices.map((service) => (
-                <SelectItem key={service.id} value={service.id}>
-                  {service.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="w-full md:w-auto md:flex-1">
           <Select 
             value={selectedBrandStatus} 
