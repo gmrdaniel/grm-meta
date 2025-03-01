@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +23,7 @@ import PostTypes from "./pages/admin/PostTypes";
 import CreatorRates from "./pages/admin/CreatorRates";
 import Utilities from "./pages/admin/Utilities";
 import AuditLogs from "@/pages/admin/AuditLogs";
+import Catalogs from "@/pages/admin/Catalogs";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <CreatorDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/catalogs"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <Catalogs />
                   </ProtectedRoute>
                 }
               />
