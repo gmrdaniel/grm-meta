@@ -19,18 +19,33 @@ export function useServicePayments(
       let query = supabase
         .from('service_payments')
         .select(`
-          *,
+          id,
+          payment_date,
+          payment_month,
+          payment_period,
+          brand_payment_date,
+          creator_payment_date,
+          total_amount,
+          company_earning,
+          creator_earning,
+          brand_payment_status,
+          creator_payment_status,
+          is_recurring,
+          payment_receipt_url,
           creator_service:creator_services (
             id,
             monthly_fee,
             company_share,
-            profiles (
+            profile:profiles (
+              id,
+              full_name,
               personal_data (
                 first_name,
                 last_name
               )
             ),
-            services (
+            service:services (
+              id,
               name,
               type
             )
@@ -44,7 +59,7 @@ export function useServicePayments(
       }
 
       if (selectedService !== 'all') {
-        query = query.eq('creator_service.service_id', selectedService);
+        query = query.eq('creator_service.service.id', selectedService);
       }
 
       if (brandStatus !== 'all') {
@@ -57,7 +72,14 @@ export function useServicePayments(
 
       const { data: payments, error, count } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching payments:", error);
+        throw error;
+      }
+
+      // Log para depuración
+      console.log("Payments data:", payments);
+      
       return {
         payments,
         totalCount: count || 0

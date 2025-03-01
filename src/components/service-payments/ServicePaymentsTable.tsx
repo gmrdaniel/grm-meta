@@ -46,17 +46,18 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
               <TableCell>
                 {payment.creator_payment_date
                   ? format(new Date(payment.creator_payment_date), "MMMM yyyy")
-                  : "N/A"}
+                  : payment.payment_period || "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_service?.services?.name ?? "N/A"}
+                {payment.creator_service?.service?.name || "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_service?.profiles?.personal_data
-                  ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}`
-                  : "N/A"}
+                {payment.creator_service?.profile?.full_name || 
+                  (payment.creator_service?.profile?.personal_data 
+                    ? `${payment.creator_service.profile.personal_data.first_name || ''} ${payment.creator_service.profile.personal_data.last_name || ''}`.trim()
+                    : "N/A")}
               </TableCell>
-              <TableCell>${payment.company_earning}</TableCell>
+              <TableCell>${payment.company_earning || 0}</TableCell>
               <TableCell>
                 <Badge className={getStatusBadgeColor(payment.brand_payment_status)}>
                   {payment.brand_payment_status}
@@ -67,7 +68,7 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
                   ? format(new Date(payment.brand_payment_date), "dd/MM/yyyy")
                   : "N/A"}
               </TableCell>
-              <TableCell>${payment.creator_earning}</TableCell>
+              <TableCell>${payment.creator_earning || 0}</TableCell>
               <TableCell>
                 <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
                   {payment.creator_payment_status}
