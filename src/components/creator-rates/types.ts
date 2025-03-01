@@ -28,6 +28,7 @@ export interface RatesListProps {
 export interface FilterState {
   selectedPlatform?: string;
   selectedPostType?: string;
+  selectedCountry?: string;
   priceRange: [number, number];
   page: number;
   itemsPerPage: number;

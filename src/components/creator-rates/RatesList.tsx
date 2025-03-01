@@ -11,12 +11,13 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
   const [filters, setFilters] = useState<FilterState>({
     selectedPlatform: undefined,
     selectedPostType: undefined,
+    selectedCountry: undefined,
     priceRange: [0, 1000],
     page: initialPage,
     itemsPerPage: initialItemsPerPage
   });
 
-  const { platforms, postTypes, rates, ratesLoading } = useRatesData(filters);
+  const { platforms, postTypes, countries, rates, ratesLoading } = useRatesData(filters);
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     setFilters(prev => ({
@@ -30,6 +31,7 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
     setFilters({
       selectedPlatform: undefined,
       selectedPostType: undefined,
+      selectedCountry: undefined,
       priceRange: [0, 1000],
       page: 1,
       itemsPerPage: initialItemsPerPage
@@ -49,6 +51,7 @@ export function RatesList({ page: initialPage, itemsPerPage: initialItemsPerPage
             filters={filters}
             platforms={platforms}
             postTypes={postTypes}
+            countries={countries}
             onFilterChange={handleFilterChange}
             onReset={handleReset}
           />
