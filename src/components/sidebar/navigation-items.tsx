@@ -49,12 +49,6 @@ export const adminNavigationItems: NavigationItem[] = [
     to: "/admin/catalogs",
   },
   {
-    icon: <Package size={24} />,
-    label: "Services",
-    shortLabel: "Services",
-    to: "/admin/services",
-  },
-  {
     icon: <Inbox size={24} />,
     label: "Creator Services",
     shortLabel: "Creator Services",
