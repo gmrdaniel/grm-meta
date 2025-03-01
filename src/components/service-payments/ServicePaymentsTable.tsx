@@ -88,14 +88,6 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
       return payment.payment_period;
     }
     
-    if (payment.creator_payment_date) {
-      try {
-        return format(new Date(payment.creator_payment_date), "MMMM yyyy");
-      } catch (e) {
-        console.error("Error formatting payment period:", e);
-      }
-    }
-    
     if (payment.payment_month) {
       try {
         return format(new Date(payment.payment_month), "MMMM yyyy");
@@ -104,8 +96,46 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
       }
     }
     
+    if (payment.creator_payment_date) {
+      try {
+        return format(new Date(payment.creator_payment_date), "MMMM yyyy");
+      } catch (e) {
+        console.error("Error formatting payment period:", e);
+      }
+    }
+    
     return "N/A";
   };
+
+  // Verificar si no hay pagos disponibles
+  if (!Array.isArray(payments) || payments.length === 0) {
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mes de Pago Creador</TableHead>
+              <TableHead>Servicio</TableHead>
+              <TableHead>Creador</TableHead>
+              <TableHead>Ganancia Empresa</TableHead>
+              <TableHead>Estado Pago Marca</TableHead>
+              <TableHead>Fecha Pago Marca</TableHead>
+              <TableHead>Ganancia Creador</TableHead>
+              <TableHead>Estado Pago Creador</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-4">
+                No se encontraron pagos con los filtros seleccionados
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">
@@ -124,43 +154,35 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments && payments.length > 0 ? (
-            payments.map((payment: any) => (
-              <TableRow key={payment.id}>
-                <TableCell>{formatPaymentPeriod(payment)}</TableCell>
-                <TableCell>{getServiceName(payment)}</TableCell>
-                <TableCell>{getCreatorName(payment)}</TableCell>
-                <TableCell>${payment.company_earning || 0}</TableCell>
-                <TableCell>
-                  <Badge className={getStatusBadgeColor(payment.brand_payment_status)}>
-                    {payment.brand_payment_status || "N/A"}
-                  </Badge>
-                </TableCell>
-                <TableCell>{formatDate(payment.brand_payment_date)}</TableCell>
-                <TableCell>${payment.creator_earning || 0}</TableCell>
-                <TableCell>
-                  <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
-                    {payment.creator_payment_status || "N/A"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => onPaymentSelect(payment)}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={9} className="text-center py-4">
-                No se encontraron pagos con los filtros seleccionados
+          {payments.map((payment: any) => (
+            <TableRow key={payment.id}>
+              <TableCell>{formatPaymentPeriod(payment)}</TableCell>
+              <TableCell>{getServiceName(payment)}</TableCell>
+              <TableCell>{getCreatorName(payment)}</TableCell>
+              <TableCell>${payment.company_earning || 0}</TableCell>
+              <TableCell>
+                <Badge className={getStatusBadgeColor(payment.brand_payment_status)}>
+                  {payment.brand_payment_status || "N/A"}
+                </Badge>
+              </TableCell>
+              <TableCell>{formatDate(payment.brand_payment_date)}</TableCell>
+              <TableCell>${payment.creator_earning || 0}</TableCell>
+              <TableCell>
+                <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
+                  {payment.creator_payment_status || "N/A"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => onPaymentSelect(payment)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

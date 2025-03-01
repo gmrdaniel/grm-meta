@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -19,7 +18,7 @@ const PAGE_SIZE = 10;
 
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
-  const [showRecurringOnly, setShowRecurringOnly] = useState(false); // Cambiado a false por defecto
+  const [showRecurringOnly, setShowRecurringOnly] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("list");
   const [selectedService, setSelectedService] = useState("all");
@@ -47,6 +46,28 @@ export default function ServicePayments() {
   const handleEditClose = () => {
     setSelectedPayment(null);
     setActiveTab("list");
+    refetch();
+  };
+
+  const handleServiceFilterChange = (newServiceId: string) => {
+    console.log("Changing service filter to:", newServiceId);
+    setPage(1); 
+    setSelectedService(newServiceId);
+  };
+
+  const handleBrandStatusChange = (newStatus: string) => {
+    setPage(1);
+    setSelectedBrandStatus(newStatus);
+  };
+
+  const handleCreatorStatusChange = (newStatus: string) => {
+    setPage(1);
+    setSelectedCreatorStatus(newStatus);
+  };
+
+  const handleRecurringFilterChange = (showRecurring: boolean) => {
+    setPage(1);
+    setShowRecurringOnly(showRecurring);
   };
 
   const handleGenerateMonthlyPayments = async () => {
@@ -59,7 +80,6 @@ export default function ServicePayments() {
 
       const paymentsGenerated = result || 0;
 
-      // Registrar la acción en el log de auditoría
       if (userId) {
         await supabase.rpc('insert_audit_log', {
           _admin_id: userId,
@@ -79,7 +99,6 @@ export default function ServicePayments() {
         description: `Se han generado ${paymentsGenerated} ${paymentsGenerated === 1 ? 'pago pendiente' : 'pagos pendientes'} para el mes actual.`,
       });
 
-      // Actualizar la lista de pagos
       refetch();
     } catch (error) {
       console.error('Error al generar pagos:', error);
@@ -99,13 +118,13 @@ export default function ServicePayments() {
         <div className="flex justify-between items-center">
           <ServicePaymentsHeader 
             showRecurringOnly={showRecurringOnly}
-            setShowRecurringOnly={setShowRecurringOnly}
+            setShowRecurringOnly={handleRecurringFilterChange}
             selectedService={selectedService}
-            setSelectedService={setSelectedService}
+            setSelectedService={handleServiceFilterChange}
             selectedBrandStatus={selectedBrandStatus}
-            setSelectedBrandStatus={setSelectedBrandStatus}
+            setSelectedBrandStatus={handleBrandStatusChange}
             selectedCreatorStatus={selectedCreatorStatus}
-            setSelectedCreatorStatus={setSelectedCreatorStatus}
+            setSelectedCreatorStatus={handleCreatorStatusChange}
           />
           <Button
             onClick={handleGenerateMonthlyPayments}
@@ -133,10 +152,14 @@ export default function ServicePayments() {
         </TabsList>
 
         <TabsContent value="list" className="mt-6">
-          {data?.payments && (
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-[400px] w-full" />
+            </div>
+          ) : data ? (
             <>
               <ServicePaymentsTable 
-                payments={data.payments} 
+                payments={data.payments || []} 
                 onPaymentSelect={handlePaymentSelect}
               />
               <div className="mt-4">
@@ -147,6 +170,10 @@ export default function ServicePayments() {
                 />
               </div>
             </>
+          ) : (
+            <div className="text-center py-8">
+              Error al cargar los datos. Por favor, inténtalo de nuevo.
+            </div>
           )}
         </TabsContent>
 
@@ -162,7 +189,7 @@ export default function ServicePayments() {
     </div>
   );
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className="flex h-screen bg-gray-50">
         <Sidebar />

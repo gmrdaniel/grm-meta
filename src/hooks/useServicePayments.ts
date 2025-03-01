@@ -64,8 +64,7 @@ export function useServicePayments(
             )
           )
         `, { count: 'exact' })
-        .order('payment_date', { ascending: false })
-        .range(from, to);
+        .order('payment_date', { ascending: false });
 
       // Solo aplicamos el filtro de pagos recurrentes si showRecurringOnly es true
       if (showRecurringOnly) {
@@ -76,8 +75,8 @@ export function useServicePayments(
       if (selectedService && selectedService !== 'all') {
         console.log(`Applying service filter with ID: "${selectedService}"`);
         
-        // Este es el punto crítico - tenemos que filtrar por el service_id en la relación
-        // La sintaxis correcta es "table_name.column" para filtros de relaciones
+        // Este es el punto crítico - Usamos una sintaxis más específica para estar seguros
+        // que estamos filtrando correctamente por el service_id en la relación creator_service
         query = query.eq('creator_service.service_id', selectedService);
       }
 
@@ -88,6 +87,9 @@ export function useServicePayments(
       if (creatorStatus !== 'all') {
         query = query.eq('creator_payment_status', creatorStatus);
       }
+
+      // Finalmente aplicamos el rango para la paginación
+      query = query.range(from, to);
 
       // Log para mostrar la consulta que se va a ejecutar (lo más cercano posible)
       console.log("Query filters:", {
@@ -107,18 +109,25 @@ export function useServicePayments(
       // Log para depuración
       console.log("Payments data count:", payments?.length || 0);
       console.log("Total count from API:", count);
-      console.log("First few payments:", payments?.slice(0, 2));
       
-      // Verificar específicamente el service_id de los resultados
       if (payments && payments.length > 0) {
+        // Log para verificar el contenido del primer pago
+        console.log("First payment:", payments[0]);
+        
+        // Verificar específicamente el service_id de los resultados
         const serviceIds = payments.map(p => p.creator_service?.service_id || 'unknown');
         console.log("Service IDs in results:", serviceIds);
+      } else {
+        console.log("No payments found with the current filters");
       }
       
       return {
-        payments,
+        payments: payments || [],
         totalCount: count || 0
       };
     },
+    // Esto garantiza que el estado se limpie y se vuelva a cargar cuando cambien los filtros
+    refetchOnWindowFocus: false,
+    keepPreviousData: false,
   });
 }
