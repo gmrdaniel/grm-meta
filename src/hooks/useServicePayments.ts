@@ -16,7 +16,7 @@ export function useServicePayments(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      // Build query with explicit JOINs
+      // Build query with explicit SQL-like JOINs
       let query = supabase
         .from('service_payments')
         .select(`
@@ -31,14 +31,14 @@ export function useServicePayments(
           creator_payment_status,
           is_recurring,
           creator_service_id,
-          creator_services!creator_service_id (
+          creator_services (
             id as creator_service_id,
             profile_id,
-            profiles!profile_id (
+            profiles (
               full_name
             ),
             service_id,
-            services!service_id (
+            services (
               name as service_name,
               type as service_type
             )

@@ -49,10 +49,10 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
                   : payment.payment_period || "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_service?.service?.service_name ?? "N/A"}
+                {payment.creator_services?.services?.service_name ?? "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_service?.profile?.full_name ?? "N/A"}
+                {payment.creator_services?.profiles?.full_name ?? "N/A"}
               </TableCell>
               <TableCell>${payment.company_earning}</TableCell>
               <TableCell>
