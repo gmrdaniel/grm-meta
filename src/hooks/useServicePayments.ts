@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -54,6 +53,7 @@ export function useServicePayments(
         .order('payment_date', { ascending: false })
         .range(from, to);
 
+      // Solo aplicamos el filtro de pagos recurrentes si showRecurringOnly es true
       if (showRecurringOnly) {
         query = query.eq('is_recurring', true);
       }

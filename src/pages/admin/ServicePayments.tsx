@@ -19,7 +19,7 @@ const PAGE_SIZE = 10;
 
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
-  const [showRecurringOnly, setShowRecurringOnly] = useState(true);
+  const [showRecurringOnly, setShowRecurringOnly] = useState(false); // Cambiado a false por defecto
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("list");
   const [selectedService, setSelectedService] = useState("all");
