@@ -29,9 +29,7 @@ export function useCreatorServices(
           service_id,
           status,
           created_at,
-          profiles!creator_services_profile_id_fkey(full_name),
-          profiles!creator_services_profile_id_fkey(email),
-          personal_data!personal_data_profile_id_fkey(instagram_username),
+          profiles!creator_services_profile_id_fkey(full_name, email),
           services!creator_services_service_id_fkey(name, type)
         `);
 
@@ -72,6 +70,26 @@ export function useCreatorServices(
         throw error;
       }
       
+      // Now, we need to get instagram_username separately since there's no direct relation
+      // We'll first get all profile_ids
+      const profileIds = data.map(item => item.profile_id).filter(Boolean);
+      
+      // Then fetch the corresponding instagram usernames
+      const { data: personalData, error: personalDataError } = await supabase
+        .from('personal_data')
+        .select('profile_id, instagram_username')
+        .in('profile_id', profileIds);
+        
+      if (personalDataError) {
+        console.error("Error fetching personal data:", personalDataError);
+      }
+      
+      // Create a map for quick lookup
+      const instagramMap = new Map();
+      personalData?.forEach(item => {
+        instagramMap.set(item.profile_id, item.instagram_username);
+      });
+      
       // Transform the data to match the expected format
       const transformedData = data.map(item => ({
         id: item.id,
@@ -81,7 +99,7 @@ export function useCreatorServices(
         created_at: item.created_at,
         profile_full_name: item.profiles?.full_name || 'N/A',
         personal_email: item.profiles?.email || 'N/A',
-        instagram_username: item.personal_data?.instagram_username || null,
+        instagram_username: item.profile_id ? instagramMap.get(item.profile_id) || null : null,
         service_name: item.services?.name || 'N/A',
         service_type: item.services?.type || 'N/A'
       }));
