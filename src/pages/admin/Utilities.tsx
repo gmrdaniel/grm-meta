@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { SystemLogsCard } from "@/components/system/SystemLogsCard";
 
 export default function Utilities() {
   const [isGeneratingPayments, setIsGeneratingPayments] = useState(false);
@@ -70,7 +71,7 @@ export default function Utilities() {
           <div className="container mx-auto py-6">
             <h1 className="text-2xl font-bold mb-6">Utilidades del Sistema</h1>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Generar Pagos Mensuales</CardTitle>
@@ -120,6 +121,10 @@ export default function Utilities() {
                   </Button>
                 </CardContent>
               </Card>
+            </div>
+            
+            <div className="mb-6">
+              <SystemLogsCard />
             </div>
           </div>
         </main>

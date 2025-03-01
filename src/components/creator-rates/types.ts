@@ -6,7 +6,7 @@ export interface Rate {
     email: string;
     personal_data?: {
       instagram_username: string | null;
-    }[];
+    }; // Changed from array to single object
   };
   post_types: {
     name: string;

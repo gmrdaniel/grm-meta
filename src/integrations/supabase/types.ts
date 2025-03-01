@@ -9,6 +9,86 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action_type: Database["public"]["Enums"]["audit_action_type"]
+          admin_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          module: string
+          new_data: Json | null
+          previous_data: Json | null
+          record_id: string
+          reverted_at: string | null
+          reverted_by: string | null
+          revertible: boolean | null
+          table_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["audit_action_type"]
+          admin_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          module: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          record_id: string
+          reverted_at?: string | null
+          reverted_by?: string | null
+          revertible?: boolean | null
+          table_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["audit_action_type"]
+          admin_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          record_id?: string
+          reverted_at?: string | null
+          reverted_by?: string | null
+          revertible?: boolean | null
+          table_name?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_reverted_by_fkey"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_admin"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reverter"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_details: {
         Row: {
           bank_account_number: string | null
@@ -869,9 +949,31 @@ export type Database = {
         }
         Returns: string
       }
+      insert_audit_log: {
+        Args: {
+          _admin_id: string
+          _action_type: Database["public"]["Enums"]["audit_action_type"]
+          _module: string
+          _table_name: string
+          _record_id: string
+          _previous_data?: Json
+          _new_data?: Json
+          _revertible?: boolean
+          _ip_address?: string
+          _user_agent?: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: {
           user_id: string
+        }
+        Returns: boolean
+      }
+      revert_audit_action: {
+        Args: {
+          _audit_log_id: string
+          _admin_id: string
         }
         Returns: boolean
       }
@@ -881,6 +983,13 @@ export type Database = {
       }
     }
     Enums: {
+      audit_action_type:
+        | "create"
+        | "update"
+        | "delete"
+        | "status_change"
+        | "payment"
+        | "revert"
       payment_method: "bank_transfer" | "paypal"
       status_type: "active" | "inactive"
       user_role: "admin" | "creator"

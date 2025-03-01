@@ -20,76 +20,143 @@ export function useCreatorServices(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      // Build the query with joins
       let query = supabase
-        .from("creator_services")
-        .select(
-          `
+        .from('creator_services')
+        .select(`
           id,
+          profile_id,
+          service_id,
           status,
           created_at,
-          updated_at,
-          service_id,
-          services!creator_services_service_id_fkey (
-            id,
-            name,
-            type
-          ),
-          profiles!creator_services_profile_id_fkey (
-            id,
-            personal_data (
-              first_name,
-              last_name
-            )
-          )
-        `,
-          { count: "exact" }
-        )
-        .order("created_at", { ascending: false });
+          profiles!creator_services_profile_id_fkey(full_name, email),
+          services!creator_services_service_id_fkey(id, name, type)
+        `);
 
-      // Por defecto, solo mostrar activos a menos que showAll sea true
-      if (!showAll) {
-        query = query.eq("status", "activo");
-        console.log("Filtering only active creator services");
-      }
-
-      // Filtrar por servicios recurrentes si showRecurring es true
-      if (showRecurring) {
-        query = query.eq("services.type", "recurrente");
-        console.log("Filtering only recurring services");
-      }
-
+      // Apply filters
       if (selectedServiceId && selectedServiceId !== "all") {
-        query = query.eq("service_id", selectedServiceId);
+        query = query.eq('service_id', selectedServiceId);
       }
-
+      
+      if (!showAll) {
+        query = query.eq('status', 'activo');
+      }
+      
+      if (showRecurring) {
+        query = query.eq('services.type', 'recurrente');
+      }
+      
       if (searchTerm) {
-        query = query.textSearch(
-          "profiles.personal_data.first_name",
-          searchTerm,
-          {
-            type: "websearch",
-            config: "english",
-          }
-        );
+        query = query.ilike('profiles.full_name', `%${searchTerm}%`);
       }
 
-      // Aplicar paginación después de todos los filtros
-      query = query.range(from, to);
+      // Get the count of matching rows
+      const { count, error: countError } = await supabase
+        .from('creator_services')
+        .select('id', { count: 'exact', head: true });
+        
+      if (countError) {
+        console.error("Error counting creator services:", countError);
+        throw countError;
+      }
 
-      const { data, count, error } = await query;
+      // Execute the query with pagination and ordering
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) {
         console.error("Error fetching creator services:", error);
         throw error;
       }
-
-      console.log("Fetched creator services:", data);
-      console.log("Total count:", count);
-      console.log("Status filter applied:", !showAll);
-      console.log("Recurring filter applied:", showRecurring);
-
+      
+      console.log("Raw data from query:", data);
+      
+      // Get all service IDs that returned null in the join
+      const nullServiceIds = data
+        .filter(item => item.services === null && item.service_id)
+        .map(item => item.service_id);
+        
+      console.log("Services that returned null:", nullServiceIds);
+      
+      // If we have any null services, fetch them separately
+      let serviceMap = new Map();
+      if (nullServiceIds.length > 0) {
+        const { data: missingServices, error: servicesError } = await supabase
+          .from('services')
+          .select('id, name, type')
+          .in('id', nullServiceIds);
+          
+        if (servicesError) {
+          console.error("Error fetching missing services:", servicesError);
+        } else if (missingServices) {
+          console.log("Found missing services:", missingServices);
+          missingServices.forEach(service => {
+            serviceMap.set(service.id, service);
+          });
+        }
+      }
+      
+      // Now, we need to get instagram_username separately since there's no direct relation
+      // We'll first get all profile_ids
+      const profileIds = data.map(item => item.profile_id).filter(Boolean);
+      
+      // Then fetch the corresponding instagram usernames
+      const { data: personalData, error: personalDataError } = await supabase
+        .from('personal_data')
+        .select('profile_id, instagram_username')
+        .in('profile_id', profileIds);
+        
+      if (personalDataError) {
+        console.error("Error fetching personal data:", personalDataError);
+      }
+      
+      // Create a map for quick lookup
+      const instagramMap = new Map();
+      personalData?.forEach(item => {
+        instagramMap.set(item.profile_id, item.instagram_username);
+      });
+      
+      // Transform the data to match the expected format
+      const transformedData = data.map(item => {
+        // If the services join returned null, try to get the service from our map
+        let serviceName = "Sin Nombre";
+        let serviceType = "N/A";
+        
+        if (item.services) {
+          serviceName = item.services.name || "Sin Nombre";
+          serviceType = item.services.type || "N/A";
+        } else if (item.service_id && serviceMap.has(item.service_id)) {
+          const service = serviceMap.get(item.service_id);
+          serviceName = service.name || "Sin Nombre";
+          serviceType = service.type || "N/A";
+        }
+        
+        // Log each item to debug
+        console.log(`Processing item ${item.id}:`, {
+          service_id: item.service_id,
+          service_data: item.services || serviceMap.get(item.service_id) || "Not found",
+          resulting_name: serviceName
+        });
+        
+        return {
+          id: item.id,
+          profile_id: item.profile_id,
+          service_id: item.service_id,
+          status: item.status,
+          created_at: item.created_at,
+          profile_full_name: item.profiles?.full_name || 'N/A',
+          personal_email: item.profiles?.email || 'N/A',
+          instagram_username: item.profile_id ? instagramMap.get(item.profile_id) || null : null,
+          service_name: serviceName,
+          service_type: serviceType
+        };
+      });
+      
+      console.log("Transformed creator services:", transformedData);
+      
       return {
-        creatorServices: data,
+        creatorServices: transformedData,
         total: count || 0,
       };
     },

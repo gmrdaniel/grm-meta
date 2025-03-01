@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -13,25 +12,24 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const PAGE_SIZE = 10;
 
 export default function ServicePayments() {
   const [page, setPage] = useState(1);
-  const [showRecurringOnly, setShowRecurringOnly] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("list");
-  const [selectedService, setSelectedService] = useState("all");
   const [selectedBrandStatus, setSelectedBrandStatus] = useState("all");
   const [selectedCreatorStatus, setSelectedCreatorStatus] = useState("all");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const { data, isLoading, refetch } = useServicePayments(
     page, 
     PAGE_SIZE, 
-    showRecurringOnly,
-    selectedService,
     selectedBrandStatus,
     selectedCreatorStatus
   );
@@ -44,6 +42,17 @@ export default function ServicePayments() {
   const handleEditClose = () => {
     setSelectedPayment(null);
     setActiveTab("list");
+    refetch();
+  };
+
+  const handleBrandStatusChange = (newStatus: string) => {
+    setPage(1);
+    setSelectedBrandStatus(newStatus);
+  };
+
+  const handleCreatorStatusChange = (newStatus: string) => {
+    setPage(1);
+    setSelectedCreatorStatus(newStatus);
   };
 
   const handleGenerateMonthlyPayments = async () => {
@@ -56,12 +65,25 @@ export default function ServicePayments() {
 
       const paymentsGenerated = result || 0;
 
+      if (userId) {
+        await supabase.rpc('insert_audit_log', {
+          _admin_id: userId,
+          _action_type: 'payment',
+          _module: 'payments',
+          _table_name: 'service_payments',
+          _record_id: null,
+          _new_data: { payments_generated: paymentsGenerated },
+          _revertible: false,
+          _ip_address: null,
+          _user_agent: navigator.userAgent
+        });
+      }
+
       toast({
         title: "Pagos generados con éxito",
         description: `Se han generado ${paymentsGenerated} ${paymentsGenerated === 1 ? 'pago pendiente' : 'pagos pendientes'} para el mes actual.`,
       });
 
-      // Actualizar la lista de pagos
       refetch();
     } catch (error) {
       console.error('Error al generar pagos:', error);
@@ -80,14 +102,10 @@ export default function ServicePayments() {
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <ServicePaymentsHeader 
-            showRecurringOnly={showRecurringOnly}
-            setShowRecurringOnly={setShowRecurringOnly}
-            selectedService={selectedService}
-            setSelectedService={setSelectedService}
             selectedBrandStatus={selectedBrandStatus}
-            setSelectedBrandStatus={setSelectedBrandStatus}
+            setSelectedBrandStatus={handleBrandStatusChange}
             selectedCreatorStatus={selectedCreatorStatus}
-            setSelectedCreatorStatus={setSelectedCreatorStatus}
+            setSelectedCreatorStatus={handleCreatorStatusChange}
           />
           <Button
             onClick={handleGenerateMonthlyPayments}
@@ -115,10 +133,14 @@ export default function ServicePayments() {
         </TabsList>
 
         <TabsContent value="list" className="mt-6">
-          {data?.payments && (
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-[400px] w-full" />
+            </div>
+          ) : data ? (
             <>
               <ServicePaymentsTable 
-                payments={data.payments} 
+                payments={data.payments || []} 
                 onPaymentSelect={handlePaymentSelect}
               />
               <div className="mt-4">
@@ -129,6 +151,10 @@ export default function ServicePayments() {
                 />
               </div>
             </>
+          ) : (
+            <div className="text-center py-8">
+              Error al cargar los datos. Por favor, inténtalo de nuevo.
+            </div>
           )}
         </TabsContent>
 
@@ -144,7 +170,7 @@ export default function ServicePayments() {
     </div>
   );
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className="flex h-screen bg-gray-50">
         <Sidebar />
