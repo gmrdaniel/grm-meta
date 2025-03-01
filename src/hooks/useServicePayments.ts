@@ -16,6 +16,7 @@ export function useServicePayments(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      // Build query with explicit JOINs
       let query = supabase
         .from('service_payments')
         .select(`
@@ -29,12 +30,15 @@ export function useServicePayments(
           brand_payment_status,
           creator_payment_status,
           is_recurring,
-          creator_service:creator_services (
+          creator_service_id,
+          creator_services!creator_service_id (
             id as creator_service_id,
-            profile:profiles (
+            profile_id,
+            profiles!profile_id (
               full_name
             ),
-            service:services (
+            service_id,
+            services!service_id (
               name as service_name,
               type as service_type
             )
@@ -49,7 +53,7 @@ export function useServicePayments(
 
       if (selectedService !== 'all') {
         // Using foreignTable syntax to filter on the joined table
-        query = query.eq('creator_service.service_id', selectedService);
+        query = query.eq('creator_services.service_id', selectedService);
       }
 
       if (brandStatus !== 'all') {
