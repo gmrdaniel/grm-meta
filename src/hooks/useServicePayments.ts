@@ -11,49 +11,40 @@ export function useServicePayments(
   creatorStatus: string
 ) {
   return useQuery({
-    queryKey: ['service-payments', page, pageSize, showRecurringOnly, selectedService, brandStatus, creatorStatus],
+    queryKey: ['service-payments', page, showRecurringOnly, selectedService, brandStatus, creatorStatus],
     queryFn: async () => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      // Build query with explicit SQL-like JOINs
       let query = supabase
         .from('service_payments')
         .select(`
-          id as payment_id,
-          payment_date,
-          payment_month,
-          payment_period,
-          total_amount,
-          company_earning,
-          creator_earning,
-          brand_payment_status,
-          creator_payment_status,
-          is_recurring,
-          creator_service_id,
-          creator_services (
-            id as creator_service_id,
-            profile_id,
+          *,
+          creator_service:creator_services (
+            id,
+            monthly_fee,
+            company_share,
             profiles (
-              full_name
+              personal_data (
+                first_name,
+                last_name
+              )
             ),
-            service_id,
             services (
-              name as service_name,
-              type as service_type
+              name,
+              type
             )
           )
         `, { count: 'exact' })
-        .order('payment_date', { ascending: false });
+        .order('payment_date', { ascending: false })
+        .range(from, to);
 
-      // Apply filters
       if (showRecurringOnly) {
         query = query.eq('is_recurring', true);
       }
 
       if (selectedService !== 'all') {
-        // Using foreignTable syntax to filter on the joined table
-        query = query.eq('creator_services.service_id', selectedService);
+        query = query.eq('creator_service.service_id', selectedService);
       }
 
       if (brandStatus !== 'all') {
@@ -64,18 +55,9 @@ export function useServicePayments(
         query = query.eq('creator_payment_status', creatorStatus);
       }
 
-      // Apply pagination after filters
-      query = query.range(from, to);
-
-      console.log('Service payments query:', query);
       const { data: payments, error, count } = await query;
 
-      if (error) {
-        console.error('Error fetching service payments:', error);
-        throw error;
-      }
-
-      console.log('Fetched payments:', payments);
+      if (error) throw error;
       return {
         payments,
         totalCount: count || 0

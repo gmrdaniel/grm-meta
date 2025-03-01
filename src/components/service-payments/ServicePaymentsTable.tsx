@@ -29,7 +29,7 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Mes de Pago</TableHead>
+            <TableHead>Mes de Pago Creador</TableHead>
             <TableHead>Servicio</TableHead>
             <TableHead>Creador</TableHead>
             <TableHead>Ganancia Empresa</TableHead>
@@ -42,17 +42,19 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
         </TableHeader>
         <TableBody>
           {payments.map((payment: any) => (
-            <TableRow key={payment.payment_id}>
+            <TableRow key={payment.id}>
               <TableCell>
-                {payment.payment_month
-                  ? format(new Date(payment.payment_month), "MMMM yyyy")
-                  : payment.payment_period || "N/A"}
+                {payment.creator_payment_date
+                  ? format(new Date(payment.creator_payment_date), "MMMM yyyy")
+                  : "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_services?.services?.service_name ?? "N/A"}
+                {payment.creator_service?.services?.name ?? "N/A"}
               </TableCell>
               <TableCell>
-                {payment.creator_services?.profiles?.full_name ?? "N/A"}
+                {payment.creator_service?.profiles?.personal_data
+                  ? `${payment.creator_service.profiles.personal_data.first_name} ${payment.creator_service.profiles.personal_data.last_name}`
+                  : "N/A"}
               </TableCell>
               <TableCell>${payment.company_earning}</TableCell>
               <TableCell>
