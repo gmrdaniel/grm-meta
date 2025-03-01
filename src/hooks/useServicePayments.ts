@@ -29,12 +29,12 @@ export function useServicePayments(
           brand_payment_status,
           creator_payment_status,
           is_recurring,
-          creator_service:creator_services!creator_service_id (
+          creator_service:creator_services (
             id as creator_service_id,
-            profile:profiles!profile_id (
+            profile:profiles (
               full_name
             ),
-            service:services!service_id (
+            service:services (
               name as service_name,
               type as service_type
             )
