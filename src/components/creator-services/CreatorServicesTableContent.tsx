@@ -5,27 +5,15 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Mail } from "lucide-react";
 
-interface Creator {
-  id: string;
-  email?: string; // Hacemos email opcional
-  personal_data: {
-    first_name: string;
-    last_name: string;
-  } | null;
-}
-
-interface Service {
-  id: string;
-  name: string;
-  type: string;
-}
-
 interface CreatorService {
   id: string;
+  profile_full_name: string;
+  personal_email: string;
+  instagram_username: string | null;
+  service_name: string;
+  service_type: string;
   status: string;
   created_at: string;
-  services: Service | null;
-  profiles: Creator;
 }
 
 interface CreatorServicesTableContentProps {
@@ -63,10 +51,10 @@ export function CreatorServicesTableContent({
         <TableRow>
           <TableHead>Creator</TableHead>
           <TableHead>Email</TableHead>
+          <TableHead>Instagram</TableHead>
           <TableHead>Service</TableHead>
           <TableHead>Type</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Created At</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -77,22 +65,16 @@ export function CreatorServicesTableContent({
           return (
             <TableRow key={creatorService.id}>
               <TableCell>
-                {creatorService.profiles?.personal_data
-                  ? `${creatorService.profiles.personal_data.first_name} ${creatorService.profiles.personal_data.last_name}`
-                  : "N/A"}
+                {creatorService.profile_full_name || "N/A"}
               </TableCell>
               <TableCell className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-500" />
-                <span>{creatorService.profiles?.email || "N/A"}</span>
+                <span>{creatorService.personal_email || "N/A"}</span>
               </TableCell>
-              <TableCell>{creatorService.services?.name ?? "N/A"}</TableCell>
-              <TableCell>{creatorService.services?.type ?? "N/A"}</TableCell>
-              <TableCell>{creatorService.status ?? "N/A"}</TableCell>
-              <TableCell>
-                {creatorService.created_at
-                  ? format(new Date(creatorService.created_at), "dd/MM/yyyy")
-                  : "N/A"}
-              </TableCell>
+              <TableCell>{creatorService.instagram_username || "N/A"}</TableCell>
+              <TableCell>{creatorService.service_name || "N/A"}</TableCell>
+              <TableCell>{creatorService.service_type || "N/A"}</TableCell>
+              <TableCell>{creatorService.status || "N/A"}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"
@@ -109,4 +91,3 @@ export function CreatorServicesTableContent({
     </Table>
   );
 }
-

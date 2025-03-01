@@ -20,78 +20,100 @@ export function useCreatorServices(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
-        .from("creator_services")
-        .select(
-          `
-          id,
-          status,
-          created_at,
-          updated_at,
-          service_id,
-          services!creator_services_service_id_fkey (
-            id,
-            name,
-            type
-          ),
-          profiles!creator_services_profile_id_fkey (
-            id,
-            personal_data (
-              first_name,
-              last_name
-            )
-          )
-        `,
-          { count: "exact" }
-        )
-        .order("created_at", { ascending: false });
+      // Using a custom query to fetch creator services
+      let query = supabase.rpc('list_creator_services');
 
-      // Por defecto, solo mostrar activos a menos que showAll sea true
-      if (!showAll) {
-        query = query.eq("status", "activo");
-        console.log("Filtering only active creator services");
-      }
-
-      // Filtrar por servicios recurrentes si showRecurring es true
-      if (showRecurring) {
-        query = query.eq("services.type", "recurrente");
-        console.log("Filtering only recurring services");
-      }
-
+      // Apply filters
+      let filters = [];
+      let values = {};
+      
+      // Filter by service ID if provided
       if (selectedServiceId && selectedServiceId !== "all") {
-        query = query.eq("service_id", selectedServiceId);
+        filters.push("service_id = :service_id");
+        values.service_id = selectedServiceId;
       }
-
+      
+      // Filter by status if showAll is false
+      if (!showAll) {
+        filters.push("status = :status");
+        values.status = 'activo';
+      }
+      
+      // Filter by service type if showRecurring is true
+      if (showRecurring) {
+        filters.push("service_type = :service_type");
+        values.service_type = 'recurrente';
+      }
+      
+      // Add search filter if provided
       if (searchTerm) {
-        query = query.textSearch(
-          "profiles.personal_data.first_name",
-          searchTerm,
-          {
-            type: "websearch",
-            config: "english",
-          }
-        );
+        filters.push("profile_full_name ILIKE :search_term");
+        values.search_term = `%${searchTerm}%`;
       }
+      
+      // Build the final filter query
+      if (filters.length > 0) {
+        const filterQuery = filters.join(' AND ');
+        
+        // Execute the count query with filters
+        const { count, error: countError } = await supabase
+          .from('creator_services')
+          .select('id', { count: 'exact', head: true })
+          .or(filters.join(','), values);
+          
+        if (countError) {
+          console.error("Error counting creator services:", countError);
+          throw countError;
+        }
+        
+        // Execute the main query with filters and pagination
+        const { data, error } = await supabase
+          .from('creator_services_view')
+          .select('*')
+          .or(filters.join(','), values)
+          .order('created_at', { ascending: false })
+          .range(from, to);
 
-      // Aplicar paginación después de todos los filtros
-      query = query.range(from, to);
+        if (error) {
+          console.error("Error fetching creator services:", error);
+          throw error;
+        }
+        
+        console.log("Fetched creator services:", data);
+        
+        return {
+          creatorServices: data,
+          total: count || 0,
+        };
+      } else {
+        // No filters, just apply pagination
+        const { count, error: countError } = await supabase
+          .from('creator_services')
+          .select('id', { count: 'exact', head: true });
+          
+        if (countError) {
+          console.error("Error counting creator services:", countError);
+          throw countError;
+        }
+        
+        const { data, error } = await supabase
+          .from('creator_services_view')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(from, to);
 
-      const { data, count, error } = await query;
-
-      if (error) {
-        console.error("Error fetching creator services:", error);
-        throw error;
+        if (error) {
+          console.error("Error fetching creator services:", error);
+          throw error;
+        }
+        
+        console.log("Fetched creator services:", data);
+        
+        return {
+          creatorServices: data,
+          total: count || 0,
+        };
       }
-
-      console.log("Fetched creator services:", data);
-      console.log("Total count:", count);
-      console.log("Status filter applied:", !showAll);
-      console.log("Recurring filter applied:", showRecurring);
-
-      return {
-        creatorServices: data,
-        total: count || 0,
-      };
     },
   });
 }
