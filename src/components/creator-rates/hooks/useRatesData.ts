@@ -55,7 +55,8 @@ export const useRatesData = (filters: FilterState) => {
             full_name,
             email,
             personal_data(
-              instagram_username
+              instagram_username,
+              country_of_residence
             )
           ),
           post_types(
