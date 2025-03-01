@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,10 +32,12 @@ export function useServicePayments(
           creator_payment_status,
           is_recurring,
           payment_receipt_url,
+          creator_service_id,
           creator_service:creator_services (
             id,
             monthly_fee,
             company_share,
+            service_id,
             profile:profiles (
               id,
               full_name,
@@ -58,8 +61,10 @@ export function useServicePayments(
         query = query.eq('is_recurring', true);
       }
 
+      // Corregimos el filtro de servicio
       if (selectedService !== 'all') {
-        query = query.eq('creator_service.service.id', selectedService);
+        // Buscamos por service_id en la relación creator_service -> service
+        query = query.eq('creator_service.service_id', selectedService);
       }
 
       if (brandStatus !== 'all') {
@@ -79,6 +84,8 @@ export function useServicePayments(
 
       // Log para depuración
       console.log("Payments data:", payments);
+      console.log("Selected service:", selectedService);
+      console.log("Filter applied:", selectedService !== 'all' ? `creator_service.service_id = ${selectedService}` : 'No service filter');
       
       return {
         payments,
