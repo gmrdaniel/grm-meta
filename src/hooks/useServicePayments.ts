@@ -16,6 +16,17 @@ export function useServicePayments(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      console.log("Filter params:", { 
+        page, 
+        pageSize, 
+        showRecurringOnly, 
+        selectedService,
+        brandStatus,
+        creatorStatus,
+        from,
+        to
+      });
+
       let query = supabase
         .from('service_payments')
         .select(`
@@ -61,9 +72,12 @@ export function useServicePayments(
         query = query.eq('is_recurring', true);
       }
 
-      // Corregimos el filtro de servicio
-      if (selectedService !== 'all') {
-        // Buscamos por service_id en la relación creator_service -> service
+      // Filtro de servicio - Asegurarnos de que solo se aplique si es diferente de "all"
+      if (selectedService && selectedService !== 'all') {
+        console.log(`Applying service filter with ID: "${selectedService}"`);
+        
+        // Este es el punto crítico - tenemos que filtrar por el service_id en la relación
+        // La sintaxis correcta es "table_name.column" para filtros de relaciones
         query = query.eq('creator_service.service_id', selectedService);
       }
 
@@ -75,6 +89,14 @@ export function useServicePayments(
         query = query.eq('creator_payment_status', creatorStatus);
       }
 
+      // Log para mostrar la consulta que se va a ejecutar (lo más cercano posible)
+      console.log("Query filters:", {
+        recurring: showRecurringOnly ? "true" : "not filtered",
+        service: selectedService !== 'all' ? selectedService : "not filtered",
+        brandStatus: brandStatus !== 'all' ? brandStatus : "not filtered",
+        creatorStatus: creatorStatus !== 'all' ? creatorStatus : "not filtered",
+      });
+
       const { data: payments, error, count } = await query;
 
       if (error) {
@@ -83,9 +105,15 @@ export function useServicePayments(
       }
 
       // Log para depuración
-      console.log("Payments data:", payments);
-      console.log("Selected service:", selectedService);
-      console.log("Filter applied:", selectedService !== 'all' ? `creator_service.service_id = ${selectedService}` : 'No service filter');
+      console.log("Payments data count:", payments?.length || 0);
+      console.log("Total count from API:", count);
+      console.log("First few payments:", payments?.slice(0, 2));
+      
+      // Verificar específicamente el service_id de los resultados
+      if (payments && payments.length > 0) {
+        const serviceIds = payments.map(p => p.creator_service?.service_id || 'unknown');
+        console.log("Service IDs in results:", serviceIds);
+      }
       
       return {
         payments,

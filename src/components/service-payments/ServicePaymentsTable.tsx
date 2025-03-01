@@ -12,7 +12,7 @@ interface ServicePaymentsTableProps {
 
 export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePaymentsTableProps) {
   const getStatusBadgeColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'pagado':
         return 'bg-green-500';
       case 'pendiente':
@@ -26,24 +26,49 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
 
   // Función auxiliar para obtener el nombre del servicio de manera segura
   const getServiceName = (payment: any) => {
-    return payment.creator_service?.service?.name || "N/A";
+    try {
+      // Primero intentamos con la ruta larga anidada
+      if (payment.creator_service?.service?.name) {
+        return payment.creator_service.service.name;
+      }
+      
+      // Si no está disponible, buscamos en otra posible ubicación
+      if (payment.creator_service?.service_id) {
+        return `ID: ${payment.creator_service.service_id}`;
+      }
+      
+      return "N/A";
+    } catch (e) {
+      console.error("Error getting service name:", e, payment);
+      return "Error";
+    }
   };
 
   // Función auxiliar para obtener el nombre del creador de manera segura
   const getCreatorName = (payment: any) => {
-    if (payment.creator_service?.profile?.full_name) {
-      return payment.creator_service.profile.full_name;
-    }
-    
-    if (payment.creator_service?.profile?.personal_data) {
-      const firstName = payment.creator_service.profile.personal_data.first_name || '';
-      const lastName = payment.creator_service.profile.personal_data.last_name || '';
-      if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim();
+    try {
+      if (payment.creator_service?.profile?.full_name) {
+        return payment.creator_service.profile.full_name;
       }
+      
+      if (payment.creator_service?.profile?.personal_data) {
+        const firstName = payment.creator_service.profile.personal_data.first_name || '';
+        const lastName = payment.creator_service.profile.personal_data.last_name || '';
+        if (firstName || lastName) {
+          return `${firstName} ${lastName}`.trim();
+        }
+      }
+      
+      // Si hay profile_id pero no nombre, mostramos el ID
+      if (payment.creator_service?.profile?.id) {
+        return `ID: ${payment.creator_service.profile.id}`;
+      }
+      
+      return "N/A";
+    } catch (e) {
+      console.error("Error getting creator name:", e, payment);
+      return "Error";
     }
-    
-    return "N/A";
   };
 
   // Función auxiliar para formatear fechas de manera segura
@@ -52,13 +77,17 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
     try {
       return format(new Date(dateString), "dd/MM/yyyy");
     } catch (e) {
-      console.error("Error formatting date:", e);
-      return "N/A";
+      console.error("Error formatting date:", e, dateString);
+      return "Fecha inválida";
     }
   };
 
   // Función auxiliar para formatear el período de pago
   const formatPaymentPeriod = (payment: any) => {
+    if (payment.payment_period) {
+      return payment.payment_period;
+    }
+    
     if (payment.creator_payment_date) {
       try {
         return format(new Date(payment.creator_payment_date), "MMMM yyyy");
@@ -66,7 +95,16 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
         console.error("Error formatting payment period:", e);
       }
     }
-    return payment.payment_period || "N/A";
+    
+    if (payment.payment_month) {
+      try {
+        return format(new Date(payment.payment_month), "MMMM yyyy");
+      } catch (e) {
+        console.error("Error formatting payment month:", e);
+      }
+    }
+    
+    return "N/A";
   };
 
   return (
@@ -86,7 +124,7 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments.length > 0 ? (
+          {payments && payments.length > 0 ? (
             payments.map((payment: any) => (
               <TableRow key={payment.id}>
                 <TableCell>{formatPaymentPeriod(payment)}</TableCell>
@@ -95,14 +133,14 @@ export function ServicePaymentsTable({ payments, onPaymentSelect }: ServicePayme
                 <TableCell>${payment.company_earning || 0}</TableCell>
                 <TableCell>
                   <Badge className={getStatusBadgeColor(payment.brand_payment_status)}>
-                    {payment.brand_payment_status}
+                    {payment.brand_payment_status || "N/A"}
                   </Badge>
                 </TableCell>
                 <TableCell>{formatDate(payment.brand_payment_date)}</TableCell>
                 <TableCell>${payment.creator_earning || 0}</TableCell>
                 <TableCell>
                   <Badge className={getStatusBadgeColor(payment.creator_payment_status)}>
-                    {payment.creator_payment_status}
+                    {payment.creator_payment_status || "N/A"}
                   </Badge>
                 </TableCell>
                 <TableCell>
