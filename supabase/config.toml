@@ -8,3 +8,4 @@ schemas = ["public", "storage"]
 
 [functions.generate-monthly-payments]
 verify_jwt = true
+
