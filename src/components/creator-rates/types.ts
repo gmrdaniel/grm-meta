@@ -6,7 +6,8 @@ export interface Rate {
     email: string;
     personal_data?: {
       instagram_username: string | null;
-    }; // Changed from array to single object
+      country_of_residence: string | null;
+    }; 
   };
   post_types: {
     name: string;
@@ -27,6 +28,7 @@ export interface RatesListProps {
 export interface FilterState {
   selectedPlatform?: string;
   selectedPostType?: string;
+  selectedCountry?: string;
   priceRange: [number, number];
   page: number;
   itemsPerPage: number;

@@ -16,16 +16,17 @@ interface FiltersProps {
   filters: FilterState;
   platforms?: { id: string; name: string; }[];
   postTypes?: { id: string; name: string; }[];
+  countries?: { name: string; value: string; }[];
   onFilterChange: (key: keyof FilterState, value: any) => void;
   onReset: () => void;
 }
 
-export function Filters({ filters, platforms, postTypes, onFilterChange, onReset }: FiltersProps) {
-  const { selectedPlatform, selectedPostType, priceRange, itemsPerPage } = filters;
+export function Filters({ filters, platforms, postTypes, countries, onFilterChange, onReset }: FiltersProps) {
+  const { selectedPlatform, selectedPostType, selectedCountry, priceRange, itemsPerPage } = filters;
 
   return (
     <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Platform Filter */}
         <div className="space-y-2">
           <Label>Red Social</Label>
@@ -56,6 +57,24 @@ export function Filters({ filters, platforms, postTypes, onFilterChange, onReset
               {postTypes?.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Country Filter */}
+        <div className="space-y-2">
+          <Label>País</Label>
+          <Select value={selectedCountry} onValueChange={(value) => onFilterChange('selectedCountry', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un país" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {countries?.map((country) => (
+                <SelectItem key={country.value} value={country.value}>
+                  {country.name}
                 </SelectItem>
               ))}
             </SelectContent>

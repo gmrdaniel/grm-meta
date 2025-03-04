@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Package, Inbox, DollarSign, Terminal, FileText } from "lucide-react";
+import { LayoutDashboard, UserCircle, Wallet, Package, Inbox, DollarSign, Terminal, Database, BadgeDollarSign } from "lucide-react";
 import { NavigationItem } from "./types";
 
 export const creatorNavigationItems: NavigationItem[] = [
@@ -43,10 +43,10 @@ export const adminNavigationItems: NavigationItem[] = [
     to: "/admin/creators",
   },
   {
-    icon: <Package size={24} />,
-    label: "Services",
-    shortLabel: "Services",
-    to: "/admin/services",
+    icon: <Database size={24} />,
+    label: "Catálogos",
+    shortLabel: "Catálogos",
+    to: "/admin/catalogs",
   },
   {
     icon: <Inbox size={24} />,
@@ -61,22 +61,10 @@ export const adminNavigationItems: NavigationItem[] = [
     to: "/admin/service-payments",
   },
   {
-    icon: <Package size={24} />,
-    label: "Post Types",
-    shortLabel: "Post Types",
-    to: "/admin/post-types",
-  },
-  {
-    icon: <DollarSign size={24} />,
+    icon: <BadgeDollarSign size={24} />,
     label: "Creator Rates",
     shortLabel: "Rates",
     to: "/admin/rates",
-  },
-  {
-    icon: <FileText size={24} />,
-    label: "Audit Logs",
-    shortLabel: "Logs",
-    to: "/admin/audit-logs",
   },
   {
     icon: <Terminal size={24} />,
