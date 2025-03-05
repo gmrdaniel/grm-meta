@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -69,7 +70,7 @@ export default function ServicePayments() {
       if (userId) {
         await supabase.rpc('insert_audit_log', {
           _admin_id: userId,
-          _action_type: 'payment',
+          _action_type: 'payment' as AuditActionType,
           _module: 'payments',
           _table_name: 'service_payments',
           _record_id: null,

@@ -1,162 +1,106 @@
 
 import { useState } from "react";
-import { PaymentFormValues, AUDIT_MODULE, AUDIT_TABLE_NAME, AUDIT_ACTION_TYPE } from "./PaymentFormSchema";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { PaymentFormValues } from "./PaymentFormSchema";
 import { useAuditLog } from "./useAuditLog";
 
-export function usePaymentUpdate(payment: any, onClose: () => void) {
+export function usePaymentUpdate(
+  payment: any, 
+  onClose: () => void,
+  onUpdate?: (paymentId: string, previousData: any, updatedPayment: any) => Promise<void>
+) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createAuditLog } = useAuditLog();
+  const { toast } = useToast();
+  const { logPaymentUpdate } = useAuditLog();
 
   const handleSubmit = async (values: PaymentFormValues) => {
     setIsSubmitting(true);
     try {
-      console.log("Starting payment update process");
-      console.log("Original payment data:", payment);
-      console.log("Form values:", values);
+      console.log("Updating payment:", payment.id, values);
       
-      // Guardar datos anteriores para auditoría
-      const previousData = {
-        id: payment.id,
-        total_amount: payment.total_amount,
-        company_earning: payment.company_earning,
-        creator_earning: payment.creator_earning,
-        brand_payment_status: payment.brand_payment_status,
-        creator_payment_status: payment.creator_payment_status,
-        brand_payment_date: payment.brand_payment_date,
-        creator_payment_date: payment.creator_payment_date,
-        payment_receipt_url: payment.payment_receipt_url,
-        payment_month: payment.payment_month,
-        payment_period: payment.payment_period,
-        creator_service_id: payment.creator_service_id,
-        is_recurring: payment.is_recurring,
-        created_at: payment.created_at,
-        updated_at: payment.updated_at
-      };
-
       let payment_receipt_url = payment.payment_receipt_url;
 
-      if (values.payment_receipt) {
+      // Si hay un nuevo archivo, subir a storage
+      if (values.payment_receipt instanceof File) {
         const fileExt = values.payment_receipt.name.split('.').pop();
         const fileName = `${payment.id}-${Date.now()}.${fileExt}`;
 
-        // Verificar si el bucket de almacenamiento existe
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const bucketExists = buckets?.some(bucket => bucket.name === 'payment_receipts');
-        
-        console.log('Storage buckets:', buckets);
-        console.log('payment_receipts bucket exists:', bucketExists);
-        
-        if (!bucketExists) {
-          console.log('Creating payment_receipts bucket');
-          await supabase.storage.createBucket('payment_receipts', {
-            public: false,
-            allowedMimeTypes: ['application/pdf'],
-            fileSizeLimit: 10485760 // 10MB
-          });
-        }
-
-        console.log('Uploading payment receipt:', fileName);
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('payment_receipts')
           .upload(fileName, values.payment_receipt);
 
         if (uploadError) {
-          console.error('Error uploading payment receipt:', uploadError);
-          throw uploadError;
+          throw new Error(`Error uploading payment receipt: ${uploadError.message}`);
         }
-        
-        console.log('Upload successful:', uploadData);
+
         payment_receipt_url = uploadData.path;
       }
 
-      const newData = {
-        id: payment.id,
+      // Construir el objeto de actualización
+      const updateData = {
         total_amount: values.total_amount,
         company_earning: values.company_earning,
         creator_earning: values.creator_earning,
         brand_payment_status: values.brand_payment_status,
         creator_payment_status: values.creator_payment_status,
-        brand_payment_date: values.brand_payment_date?.toISOString(),
-        creator_payment_date: values.creator_payment_date?.toISOString(),
         payment_receipt_url,
-        payment_month: values.payment_month?.toISOString(),
-        payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
-        creator_service_id: payment.creator_service_id,
-        is_recurring: payment.is_recurring,
-        created_at: payment.created_at,
-        updated_at: new Date().toISOString()
+        brand_payment_date: values.brand_payment_date ? values.brand_payment_date.toISOString() : null,
+        creator_payment_date: values.creator_payment_date ? values.creator_payment_date.toISOString() : null,
+        payment_month: values.payment_month ? values.payment_month.toISOString() : null,
       };
 
-      // Actualizar pago
-      console.log('Updating payment with data:', {
-        total_amount: values.total_amount,
-        company_earning: values.company_earning,
-        creator_earning: values.creator_earning,
-        brand_payment_status: values.brand_payment_status,
-        creator_payment_status: values.creator_payment_status,
-        brand_payment_date: values.brand_payment_date?.toISOString(),
-        creator_payment_date: values.creator_payment_date?.toISOString(),
-        payment_receipt_url,
-        payment_month: values.payment_month?.toISOString(),
-        payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
-      });
-      
+      // Guardar el estado anterior para el registro de auditoría
+      const previousData = {
+        total_amount: payment.total_amount,
+        company_earning: payment.company_earning,
+        creator_earning: payment.creator_earning,
+        brand_payment_status: payment.brand_payment_status,
+        creator_payment_status: payment.creator_payment_status,
+        payment_receipt_url: payment.payment_receipt_url,
+        brand_payment_date: payment.brand_payment_date,
+        creator_payment_date: payment.creator_payment_date,
+        payment_month: payment.payment_month
+      };
+
+      // Actualizar el pago
       const { error: updateError } = await supabase
-        .from(AUDIT_TABLE_NAME)
-        .update({
-          total_amount: values.total_amount,
-          company_earning: values.company_earning,
-          creator_earning: values.creator_earning,
-          brand_payment_status: values.brand_payment_status,
-          creator_payment_status: values.creator_payment_status,
-          brand_payment_date: values.brand_payment_date?.toISOString(),
-          creator_payment_date: values.creator_payment_date?.toISOString(),
-          payment_receipt_url,
-          payment_month: values.payment_month?.toISOString(),
-          payment_period: values.payment_month ? format(values.payment_month, 'MMMM yyyy') : null,
-        })
+        .from('service_payments')
+        .update(updateData)
         .eq('id', payment.id);
 
       if (updateError) {
-        console.error('Error updating payment:', updateError);
-        throw updateError;
+        throw new Error(`Error updating payment: ${updateError.message}`);
       }
 
-      console.log('Payment updated successfully');
-
-      // Crear log de auditoría
-      console.log('Creating audit log with data:', {
-        recordId: payment.id,
-        previousData,
-        newData,
-        tableName: AUDIT_TABLE_NAME,
-        module: AUDIT_MODULE,
-        actionType: AUDIT_ACTION_TYPE
-      });
+      // Registrar el cambio en el log de auditoría
+      await logPaymentUpdate(payment.id, previousData, updateData);
       
-      const logCreated = await createAuditLog({
-        recordId: payment.id,
-        previousData,
-        newData,
-        tableName: AUDIT_TABLE_NAME,
-        module: AUDIT_MODULE,
-        actionType: AUDIT_ACTION_TYPE
-      });
-      
-      console.log('Audit log creation result:', logCreated);
+      // Si hay una función onUpdate proporcionada, llamarla
+      if (onUpdate) {
+        await onUpdate(payment.id, previousData, updateData);
+      }
 
-      toast.success("Pago actualizado exitosamente");
+      toast({
+        title: "Payment updated",
+        description: "The payment has been updated successfully.",
+      });
+
       onClose();
-    } catch (error: any) {
-      console.error('Error al actualizar el pago:', error);
-      toast.error("Error al actualizar el pago: " + error.message);
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return { handleSubmit, isSubmitting };
+  return {
+    handleSubmit,
+    isSubmitting,
+  };
 }
