@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import type { AuditActionType } from '@/components/audit/types';
 
 export interface AuditLogData {
   recordId: string;
@@ -10,7 +10,7 @@ export interface AuditLogData {
   actionType: "payment" | "create" | "update" | "delete" | "status_change" | "revert";
 }
 
-export function useAuditLog() {
+export const useAuditLog = () => {
   // Obtenemos el usuario directamente de la sesión actual
   const getUserId = async () => {
     try {
@@ -128,5 +128,30 @@ export function useAuditLog() {
     }
   };
 
-  return { createAuditLog };
+  const logPaymentUpdate = async (
+    paymentId: string,
+    previousData: any,
+    newData: any,
+    revertible: boolean = true
+  ) => {
+    try {
+      const user = await getUserId();
+      await supabase.rpc('insert_audit_log', {
+        _admin_id: user?.id,
+        _action_type: 'payment' as AuditActionType,
+        _module: 'payments',
+        _table_name: 'service_payments',
+        _record_id: paymentId,
+        _previous_data: previousData,
+        _new_data: newData,
+        _revertible: revertible,
+        _ip_address: null,
+        _user_agent: null,
+      });
+    } catch (error) {
+      console.error('Error logging payment update:', error);
+    }
+  };
+
+  return { createAuditLog, logPaymentUpdate };
 }

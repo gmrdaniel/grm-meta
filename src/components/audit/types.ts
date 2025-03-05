@@ -1,5 +1,4 @@
-
-export type AuditActionType = 'create' | 'update' | 'delete' | 'status_change' | 'payment' | 'revert';
+export type AuditActionType = 'create' | 'update' | 'delete' | 'revert' | 'payment' | 'status_change';
 
 export interface AuditLog {
   id: string;

@@ -12,33 +12,33 @@ import { BankDetailsCard } from "@/components/creator/BankDetailsCard";
 import { ServicesCard } from "@/components/creator/ServicesCard";
 
 interface CreatorDetail {
+  email: string;
   id: string;
-  email: string | null;
   created_at: string;
-  personal_data?: {
-    first_name: string | null;
-    last_name: string | null;
-    instagram_username: string | null;
-    birth_date: string | null;
-    country_of_residence: string | null;
-    state_of_residence: string | null;
-    phone_number: string | null;
-    gender: string | null;
-    category: string | null;
+  personal_data: {
+    first_name: string;
+    last_name: string;
+    instagram_username: string;
+    birth_date: string;
+    country_of_residence: string;
+    state_of_residence: string;
+    phone_number: string;
+    gender: string;
+    category: string;
   };
-  bank_details?: {
+  bank_details: {
     beneficiary_name: string;
     payment_method: "bank_transfer" | "paypal";
     country: string;
-    bank_account_number: string | null;
-    iban: string | null;
-    swift_bic: string | null;
-    bank_name: string | null;
-    bank_address: string | null;
-    routing_number: string | null;
-    clabe: string | null;
-    paypal_email: string | null;
-  };
+    bank_account_number: string;
+    iban: string;
+    swift_bic: string;
+    bank_name: string;
+    bank_address: string;
+    routing_number: string;
+    clabe: string;
+    paypal_email: string;
+  } | null;
 }
 
 interface Service {
@@ -65,7 +65,7 @@ interface CreatorService {
 }
 
 export default function CreatorDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id: creatorId } = useParams<{ id: string }>();
   const [creator, setCreator] = useState<CreatorDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatorServices, setCreatorServices] = useState<CreatorService[]>([]);
@@ -74,60 +74,74 @@ export default function CreatorDetail() {
   const [addingService, setAddingService] = useState(false);
 
   useEffect(() => {
-    fetchCreatorDetail();
+    const fetchCreatorDetails = async () => {
+      try {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            email,
+            id,
+            created_at,
+            personal_data (
+              first_name,
+              last_name,
+              instagram_username,
+              birth_date,
+              country_of_residence,
+              state_of_residence,
+              phone_number,
+              gender,
+              category
+            ),
+            bank_details (
+              beneficiary_name,
+              payment_method,
+              country,
+              bank_account_number,
+              iban,
+              swift_bic,
+              bank_name,
+              bank_address,
+              routing_number,
+              clabe,
+              paypal_email
+            )
+          `)
+          .eq('id', creatorId)
+          .single();
+
+        if (error) throw error;
+        
+        // Modificar cómo se maneja bank_details
+        if (data) {
+          const creatorData = {
+            ...data,
+            bank_details: data.bank_details && data.bank_details.length > 0 
+              ? data.bank_details[0] 
+              : null
+          };
+          
+          setCreator(creatorData);
+        }
+        
+      } catch (error) {
+        console.error('Error fetching creator details:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudieron cargar los detalles del creador.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCreatorDetails();
     fetchCreatorServices();
     fetchAvailableServices();
-  }, [id]);
-
-  async function fetchCreatorDetail() {
-    try {
-      const { data: emailData, error: emailError } = await supabase
-        .rpc('get_user_email', { user_id: id });
-
-      if (emailError) throw emailError;
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          created_at,
-          personal_data (
-            first_name,
-            last_name,
-            instagram_username,
-            birth_date,
-            country_of_residence,
-            state_of_residence,
-            phone_number,
-            gender,
-            category
-          ),
-          bank_details (
-            beneficiary_name,
-            payment_method,
-            country,
-            bank_account_number,
-            iban,
-            swift_bic,
-            bank_name,
-            bank_address,
-            routing_number,
-            clabe,
-            paypal_email
-          )
-        `)
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-      setCreator({ ...data, email: emailData });
-    } catch (error: any) {
-      toast.error("Error fetching creator details");
-      console.error("Error:", error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [creatorId]);
 
   async function fetchCreatorServices() {
     try {

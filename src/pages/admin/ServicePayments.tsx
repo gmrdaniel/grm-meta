@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import type { AuditActionType } from '@/components/audit/types';
 
 const PAGE_SIZE = 10;
 
@@ -97,6 +98,34 @@ export default function ServicePayments() {
     }
   };
 
+  const handleUpdatePayment = async (
+    paymentId: string,
+    previousData: any,
+    updatedPayment: any
+  ) => {
+    try {
+      await supabase.rpc('insert_audit_log', {
+        _admin_id: user?.id,
+        _action_type: 'payment' as AuditActionType,
+        _module: 'payments',
+        _table_name: 'service_payments',
+        _record_id: paymentId,
+        _previous_data: previousData,
+        _new_data: updatedPayment,
+        _revertible: true,
+        _ip_address: null,
+        _user_agent: null,
+      });
+    } catch (error) {
+      console.error('Error al actualizar pago:', error);
+      toast({
+        variant: "destructive",
+        title: "Error al actualizar pago",
+        description: "No se pudo actualizar el pago. Por favor, inténtalo de nuevo.",
+      });
+    }
+  };
+
   const content = (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col gap-4">
@@ -163,6 +192,7 @@ export default function ServicePayments() {
             <ServicePaymentUpdateForm
               payment={selectedPayment}
               onClose={handleEditClose}
+              onUpdate={handleUpdatePayment}
             />
           )}
         </TabsContent>

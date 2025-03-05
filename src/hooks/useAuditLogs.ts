@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { AuditLogFilters } from "@/components/audit/types";
+import type { AuditLogFilters, AuditActionType } from "@/components/audit/types";
 
-export function useAuditLogs(filters: AuditLogFilters) {
+export const useAuditLogs = (filters?: AuditLogFilters) => {
   return useQuery({
     queryKey: ["audit-logs", filters],
     queryFn: async () => {
@@ -15,7 +14,7 @@ export function useAuditLogs(filters: AuditLogFilters) {
         search,
         page,
         itemsPerPage
-      } = filters;
+      } = filters || {};
 
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
@@ -56,6 +55,10 @@ export function useAuditLogs(filters: AuditLogFilters) {
         query = query.or(`record_id.ilike.%${search}%,module.ilike.%${search}%`);
       }
 
+      if (filters?.action) {
+        query = query.eq('action_type', filters.action as AuditActionType);
+      }
+
       const { data: logs, error, count } = await query;
 
       if (error) throw error;
@@ -66,4 +69,4 @@ export function useAuditLogs(filters: AuditLogFilters) {
       };
     },
   });
-}
+};
