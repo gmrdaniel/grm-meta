@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       audit_logs: {
         Row: {
-          action_type: Database["public"]["Enums"]["audit_action_type"]
+          action_type: Database["public"]["Enums"]["action_type"]
           admin_id: string
           created_at: string
           id: string
@@ -27,7 +27,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
-          action_type: Database["public"]["Enums"]["audit_action_type"]
+          action_type: Database["public"]["Enums"]["action_type"]
           admin_id: string
           created_at?: string
           id?: string
@@ -43,7 +43,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
-          action_type?: Database["public"]["Enums"]["audit_action_type"]
+          action_type?: Database["public"]["Enums"]["action_type"]
           admin_id?: string
           created_at?: string
           id?: string
@@ -155,7 +155,7 @@ export type Database = {
           {
             foreignKeyName: "bank_details_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -952,7 +952,7 @@ export type Database = {
       insert_audit_log: {
         Args: {
           _admin_id: string
-          _action_type: Database["public"]["Enums"]["audit_action_type"]
+          _action_type: Database["public"]["Enums"]["action_type"]
           _module: string
           _table_name: string
           _record_id: string
@@ -983,13 +983,7 @@ export type Database = {
       }
     }
     Enums: {
-      audit_action_type:
-        | "create"
-        | "update"
-        | "delete"
-        | "status_change"
-        | "payment"
-        | "revert"
+      action_type: "create" | "update" | "delete" | "revert"
       payment_method: "bank_transfer" | "paypal"
       status_type: "active" | "inactive"
       user_role: "admin" | "creator"
