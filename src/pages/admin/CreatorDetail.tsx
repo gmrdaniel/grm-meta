@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,11 +129,7 @@ export default function CreatorDetail() {
         
       } catch (error) {
         console.error('Error fetching creator details:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "No se pudieron cargar los detalles del creador.",
-        });
+        toast.error("No se pudieron cargar los detalles del creador.");
       } finally {
         setLoading(false);
       }
@@ -167,7 +164,7 @@ export default function CreatorDetail() {
             contract_duration
           )
         `)
-        .eq("profile_id", id);
+        .eq("profile_id", creatorId);
 
       if (error) throw error;
       
@@ -224,7 +221,7 @@ export default function CreatorDetail() {
       const { data: serviceData, error: serviceError } = await supabase
         .from("creator_services")
         .insert({
-          profile_id: id,
+          profile_id: creatorId,
           service_id: selectedServiceId,
           status: 'pendiente',
           terms_accepted: false,
@@ -244,7 +241,7 @@ export default function CreatorDetail() {
       const { error: notificationError } = await supabase
         .from("notifications")
         .insert({
-          profile_id: id,
+          profile_id: creatorId,
           type: "new_service",
           message: `Se ha asignado un nuevo servicio: ${serviceData.service.name}. Por favor, revisa los términos y condiciones.`,
           status: "unread"

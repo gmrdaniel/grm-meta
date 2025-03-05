@@ -19,22 +19,14 @@ export default function Auth() {
     
     try {
       setLoading(true);
-      console.log("Intentando iniciar sesión con:", { email });
-      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        console.error("Error de inicio de sesión:", error);
-        throw error;
-      }
-      
-      console.log("Inicio de sesión exitoso, redirigiendo...");
+      if (error) throw error;
       navigate("/");
     } catch (error: any) {
-      console.error("Error completo:", error);
       toast({
         variant: "destructive",
         title: "Error de inicio de sesión",
@@ -47,7 +39,6 @@ export default function Auth() {
 
   // Redireccionar si ya está autenticado
   if (user) {
-    console.log("Usuario ya autenticado, redirigiendo a /");
     return <Navigate to="/" />;
   }
 

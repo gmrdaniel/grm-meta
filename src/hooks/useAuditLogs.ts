@@ -1,66 +1,72 @@
-
-// Asumimos que este archivo existe y necesita ser actualizado
-// para trabajar correctamente con el tipo AuditActionType
-// Ya que no tenemos el archivo completo, hacemos las correcciones
-// necesarias en las líneas de error mencionadas
-
-import { supabase } from "@/integrations/supabase/client";
-import { AuditLog, AuditLogFilters, AuditActionType } from "@/components/audit/types";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { AuditLogFilters, AuditActionType } from "@/components/audit/types";
 
-// Función para obtener los logs de auditoría
-export const useAuditLogs = (filters: AuditLogFilters) => {
+export const useAuditLogs = (filters?: AuditLogFilters) => {
   return useQuery({
-    queryKey: ['audit-logs', filters],
+    queryKey: ["audit-logs", filters],
     queryFn: async () => {
-      // Calculamos los índices para la paginación
-      const from = (filters.page - 1) * filters.itemsPerPage;
-      const to = from + filters.itemsPerPage - 1;
+      const {
+        module,
+        actionType,
+        startDate,
+        endDate,
+        search,
+        page,
+        itemsPerPage
+      } = filters || {};
 
-      // Iniciamos la consulta base
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+
       let query = supabase
-        .from('audit_logs')
+        .from("audit_logs")
         .select(`
           *,
-          admin:admin_id(email, full_name),
-          reverter:reverted_by(email, full_name)
+          admin:profiles!admin_id(
+            full_name,
+            email
+          ),
+          reverter:profiles!reverted_by(
+            full_name,
+            email
+          )
         `, { count: 'exact' })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
-      // Aplicamos los filtros si están presentes
-      if (filters.module) {
-        query = query.eq('module', filters.module);
+      if (module) {
+        query = query.eq('module', module);
       }
 
-      if (filters.actionType) {
-        query = query.eq('action_type', filters.actionType);
+      if (actionType) {
+        query = query.eq('action_type', actionType);
       }
 
-      if (filters.startDate && filters.endDate) {
-        const startStr = filters.startDate.toISOString();
-        const endStr = filters.endDate.toISOString();
-        query = query.gte('created_at', startStr).lte('created_at', endStr);
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
       }
 
-      if (filters.search) {
-        query = query.or(`record_id.ilike.%${filters.search}%,module.ilike.%${filters.search}%`);
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
       }
 
-      // Aplicamos la paginación
-      query = query.range(from, to);
-
-      // Ejecutamos la consulta
-      const { data, error, count } = await query;
-
-      if (error) {
-        throw error;
+      if (search) {
+        query = query.or(`record_id.ilike.%${search}%,module.ilike.%${search}%`);
       }
+
+      if (filters?.action) {
+        query = query.eq('action_type', filters.action as AuditActionType);
+      }
+
+      const { data: logs, error, count } = await query;
+
+      if (error) throw error;
 
       return {
-        logs: data as AuditLog[],
-        count: count || 0
+        logs,
+        totalCount: count || 0
       };
     },
-    placeholderData: (previousData) => previousData,
   });
 };

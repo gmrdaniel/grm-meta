@@ -984,13 +984,6 @@ export type Database = {
     }
     Enums: {
       action_type: "create" | "update" | "delete" | "revert"
-      audit_action_type:
-        | "create"
-        | "update"
-        | "delete"
-        | "status_change"
-        | "payment"
-        | "revert"
       payment_method: "bank_transfer" | "paypal"
       status_type: "active" | "inactive"
       user_role: "admin" | "creator"
