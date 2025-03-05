@@ -22,13 +22,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
+        console.log("Obteniendo sesión actual...");
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
+          console.error('Error obteniendo sesión:', error);
           throw error;
         }
+        console.log("Sesión obtenida:", session?.user?.email || "No hay sesión");
         setSession(session);
       } catch (error) {
-        console.error('Error fetching session:', error);
+        console.error('Error fetchSession:', error);
       } finally {
         setLoading(false);
       }
@@ -39,6 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Cambio de estado de autenticación:", _event, session?.user?.email || "No hay sesión");
       setSession(session);
     });
 

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { AuditActionType } from '@/components/audit/types';
 
@@ -7,7 +8,7 @@ export interface AuditLogData {
   newData: any;
   tableName: string;
   module: string;
-  actionType: "payment" | "create" | "update" | "delete" | "status_change" | "revert";
+  actionType: AuditActionType;
 }
 
 export const useAuditLog = () => {
@@ -135,9 +136,9 @@ export const useAuditLog = () => {
     revertible: boolean = true
   ) => {
     try {
-      const user = await getUserId();
+      const userId = await getUserId();
       await supabase.rpc('insert_audit_log', {
-        _admin_id: user?.id,
+        _admin_id: userId,
         _action_type: 'payment' as AuditActionType,
         _module: 'payments',
         _table_name: 'service_payments',
