@@ -24,8 +24,27 @@ const { url: SUPABASE_URL, key: SUPABASE_PUBLISHABLE_KEY } =
   SUPABASE_CONFIG[ENV === 'production' ? 'production' : 'development'];
 
 console.log(`Using Supabase environment: ${ENV}`);
+console.log(`Connecting to Supabase URL: ${SUPABASE_URL}`);
+console.log(`Using environment variables: VITE_APP_ENV=${import.meta.env.VITE_APP_ENV || 'not set'}`);
+console.log(`Using project ID from config.toml: ${import.meta.env.VITE_SUPABASE_PROJECT_ID || 'not set'}`);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Test connection function - can be called from anywhere to verify connection
+export const testSupabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase.from('profiles').select('id').limit(1);
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+      return { success: false, error };
+    }
+    console.log('Supabase connection successful:', data);
+    return { success: true, data };
+  } catch (err) {
+    console.error('Supabase connection test exception:', err);
+    return { success: false, error: err };
+  }
+};
