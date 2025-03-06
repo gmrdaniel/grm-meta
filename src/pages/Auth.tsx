@@ -152,12 +152,12 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Logo in the top-right corner */}
-      <div className="absolute top-4 right-4">
+      {/* Centered logo at the top */}
+      <div className="flex justify-center mt-4">
         <img
           src="/lovable-uploads/9e1be316-e2d0-4ebe-863a-e7062b2e9a78.png"
           alt="LA NETA Logo"
-          className="h-24 w-auto object-contain"
+          className="h-20 w-auto object-contain" /* Reduced from h-24 to h-20 (approximately 80%) */
         />
       </div>
 
