@@ -1,6 +1,6 @@
 
 import { Bell, User, LogOut } from "lucide-react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth"; // Updated import path
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";

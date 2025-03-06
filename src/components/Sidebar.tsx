@@ -4,7 +4,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth"; // Updated import path
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavItem } from "./sidebar/NavItem";
