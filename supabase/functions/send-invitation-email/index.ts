@@ -22,10 +22,22 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email, invitationUrl }: InvitationEmailRequest = await req.json();
+    
+    // Determine the environment from request headers or env variables
+    const isProduction = req.headers.get("x-environment") === "production" ||
+                         Deno.env.get("ENVIRONMENT") === "production";
+    
+    // Choose recipient email based on environment
+    const recipientEmail = isProduction 
+      ? "onboarding@laneta.com" 
+      : "onboarding@resend.dev";
+    
+    console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
+    console.log(`Sending invitation email to: ${recipientEmail} (original: ${email})`);
 
     const emailResponse = await resend.emails.send({
       from: "Lovable <onboarding@resend.dev>",
-      to: [email],
+      to: [recipientEmail],
       subject: "Invitación para unirte como creador",
       html: `
         <h1>¡Has sido invitado!</h1>
@@ -35,6 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
         </a>
         <p>Este enlace es único y personal. No lo compartas con nadie.</p>
         <p>Si no esperabas esta invitación, puedes ignorar este correo.</p>
+        ${!isProduction ? `<p><strong>Nota de desarrollo:</strong> Este correo estaba originalmente destinado a: ${email}</p>` : ''}
       `,
     });
 
