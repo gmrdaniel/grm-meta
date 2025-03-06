@@ -20,10 +20,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // This function will fetch the session on initial load
     const fetchSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
+          console.error('Error fetching session:', error);
           throw error;
         }
         setSession(session);
@@ -36,14 +38,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     fetchSession();
 
+    // This sets up a subscription to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', _event, session?.user?.email);
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  console.log('AuthProvider state:', { session, user: session?.user, loading });
 
   return (
     <AuthContext.Provider value={{ 

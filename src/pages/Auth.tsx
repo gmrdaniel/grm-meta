@@ -1,10 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Alert,
   AlertDescription 
@@ -20,7 +20,8 @@ import {
 
 export default function Auth() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { session, loading } = useAuth();
+  const [authLoading, setAuthLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
@@ -29,9 +30,43 @@ export default function Auth() {
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
 
+  useEffect(() => {
+    if (session && !loading) {
+      console.log("User already logged in, redirecting");
+      const checkUserRole = async () => {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user?.id)
+            .single();
+          
+          if (profileError) {
+            console.error("Profile error:", profileError);
+            throw profileError;
+          }
+          
+          console.log("Profile data:", profileData);
+
+          if (profileData.role === 'creator') {
+            navigate('/creator/dashboard');
+          } else if (profileData.role === 'admin') {
+            navigate('/admin/dashboard');
+          } else {
+            console.error("Invalid role:", profileData.role);
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+        }
+      };
+      
+      checkUserRole();
+    }
+  }, [session, loading, navigate]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
+    setAuthLoading(true);
     
     try {
       if (isLogin) {
@@ -43,7 +78,6 @@ export default function Auth() {
         if (authError) throw authError;
         console.log("Auth successful:", authData);
 
-        // Get user role from profiles table
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('role')
@@ -57,7 +91,6 @@ export default function Auth() {
         
         console.log("Profile data:", profileData);
 
-        // Si es creator, verificar servicios pendientes
         if (profileData.role === 'creator') {
           const { count, error: servicesError } = await supabase
             .from("creator_services")
@@ -73,7 +106,6 @@ export default function Auth() {
 
           console.log("Pending services count:", count);
 
-          // Redireccionar según si hay servicios pendientes o no
           if (count && count > 0) {
             navigate('/creator/pending-services');
           } else {
@@ -82,7 +114,6 @@ export default function Auth() {
         } else if (profileData.role === 'admin') {
           navigate('/admin/dashboard');
         } else {
-          // Si el rol no es válido, mostrar error
           console.error("Invalid role:", profileData.role);
           throw new Error(`Invalid role: ${profileData.role}`);
         }
@@ -99,7 +130,7 @@ export default function Auth() {
       console.error("Auth error:", error);
       toast.error(error.message || "An error occurred during authentication");
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   }
 
@@ -111,7 +142,6 @@ export default function Auth() {
 
     setRecoveryLoading(true);
     try {
-      // First check if the email belongs to a creator
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -120,11 +150,8 @@ export default function Auth() {
       
       if (profileError) {
         console.error("Profile error:", profileError);
-        // If no profile found, we proceed with recovery as we don't want to expose which emails exist
-        // But we log for debugging purposes
       }
       
-      // Only proceed with recovery if the user is a creator or if profile not found (for security reasons)
       if (!profileData || profileData.role === 'creator') {
         const { error } = await supabase.auth.resetPasswordForEmail(recoveryEmail, {
           redirectTo: window.location.origin + '/auth',
@@ -133,7 +160,6 @@ export default function Auth() {
         if (error) throw error;
         setRecoverySuccess(true);
       } else {
-        // If it's not a creator role, show generic message for security
         setRecoverySuccess(true);
       }
     } catch (error: any) {
@@ -150,18 +176,24 @@ export default function Auth() {
     setRecoverySuccess(false);
   }
 
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Centered logo at the top */}
       <div className="flex justify-center mt-4">
         <img
           src="/lovable-uploads/9e1be316-e2d0-4ebe-863a-e7062b2e9a78.png"
           alt="LA NETA Logo"
-          className="h-20 w-auto object-contain" /* Reduced from h-24 to h-20 (approximately 80%) */
+          className="h-20 w-auto object-contain"
         />
       </div>
 
-      {/* Main content */}
       <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
@@ -196,9 +228,9 @@ export default function Auth() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={authLoading}
               >
-                {loading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
+                {authLoading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
               </Button>
             </div>
 
@@ -226,12 +258,10 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="py-4 text-center text-gray-500 text-sm">
         © 2025 LA NETA from Global Media Review
       </div>
 
-      {/* Password Recovery Dialog */}
       <Dialog open={isRecoveryOpen} onOpenChange={setIsRecoveryOpen}>
         <DialogContent>
           <DialogHeader>
