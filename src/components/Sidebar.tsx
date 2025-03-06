@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Menu, X, LogOut, Home, Users, Settings, ListChecks, Database, LayoutDashboard, FileText, DollarSign, Boxes, BarChart, Clock, KeyRound, ClipboardList } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,8 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavItem } from "./sidebar/NavItem";
 import { MobileSidebar } from "./sidebar/MobileSidebar";
-import { getSidebarItems } from "./sidebar/navigation-items";
-import type { NavigationItem } from "./sidebar/types";
+import { adminNavigationItems, creatorNavigationItems } from "./sidebar/navigation-items";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(false);
@@ -18,7 +18,6 @@ export function Sidebar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const role = isAdminRoute ? "admin" : "creator";
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -29,12 +28,7 @@ export function Sidebar() {
     }
   };
 
-  const navigationItems: NavigationItem[] = getSidebarItems(role).map(item => ({
-    icon: item.icon,
-    label: item.title,
-    to: item.href,
-    disabled: item.disabled
-  }));
+  const navigationItems = isAdminRoute ? adminNavigationItems : creatorNavigationItems;
 
   if (!isAdminRoute && isMobile) {
     return (

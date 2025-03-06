@@ -499,45 +499,6 @@ export type Database = {
           },
         ]
       }
-      db_migrations: {
-        Row: {
-          applied_at: string | null
-          applied_by: string | null
-          description: string | null
-          environment: string
-          id: number
-          is_applied: boolean | null
-          migration_name: string
-          sql_commands: string
-          updated_at: string | null
-          version: string | null
-        }
-        Insert: {
-          applied_at?: string | null
-          applied_by?: string | null
-          description?: string | null
-          environment: string
-          id?: number
-          is_applied?: boolean | null
-          migration_name: string
-          sql_commands: string
-          updated_at?: string | null
-          version?: string | null
-        }
-        Update: {
-          applied_at?: string | null
-          applied_by?: string | null
-          description?: string | null
-          environment?: string
-          id?: number
-          is_applied?: boolean | null
-          migration_name?: string
-          sql_commands?: string
-          updated_at?: string | null
-          version?: string | null
-        }
-        Relationships: []
-      }
       notifications: {
         Row: {
           created_at: string
@@ -1008,16 +969,6 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
-      }
-      record_db_migration: {
-        Args: {
-          _migration_name: string
-          _description: string
-          _sql_commands: string
-          _environment: string
-          _version?: string
-        }
-        Returns: string
       }
       revert_audit_action: {
         Args: {

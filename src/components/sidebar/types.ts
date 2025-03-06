@@ -4,9 +4,8 @@ import { LucideIcon } from "lucide-react";
 export interface NavigationItem {
   icon: React.ReactNode;
   label: string;
-  shortLabel?: string;
+  shortLabel: string;
   to: string;
-  disabled?: boolean;
 }
 
 export interface NavItemProps {
@@ -15,5 +14,4 @@ export interface NavItemProps {
   to: string;
   active?: boolean;
   expanded: boolean;
-  disabled?: boolean;
 }
