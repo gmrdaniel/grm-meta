@@ -13,7 +13,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{success?: boolean, message: string}>({ message: "Checking connection..." });
-  const { user } = useAuth();
+  const { user, session, authError } = useAuth();
 
   useEffect(() => {
     // Verificar la conexión a Supabase al cargar
@@ -21,19 +21,37 @@ export default function Auth() {
       try {
         console.log("Verifying Supabase connection...");
         const result = await testSupabaseConnection();
-        if (result.success) {
-          setConnectionStatus({ success: true, message: "Conexión a Supabase OK" });
-        } else {
-          setConnectionStatus({ success: false, message: "Error de conexión a Supabase" });
+        setConnectionStatus({ 
+          success: result.success, 
+          message: result.message 
+        });
+        
+        if (!result.success) {
+          console.error("Connection failed:", result.message);
         }
       } catch (err) {
         console.error("Error testing connection:", err);
-        setConnectionStatus({ success: false, message: "Error al comprobar la conexión" });
+        setConnectionStatus({ 
+          success: false, 
+          message: `Error al comprobar la conexión: ${err instanceof Error ? err.message : String(err)}` 
+        });
       }
     };
     
     checkConnection();
   }, []);
+
+  // Display auth errors from the useAuth hook
+  useEffect(() => {
+    if (authError) {
+      console.error("Auth error from hook:", authError);
+      toast({
+        variant: "destructive",
+        title: "Error de autenticación",
+        description: authError.message || "Ocurrió un error durante la autenticación",
+      });
+    }
+  }, [authError]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,9 +147,11 @@ export default function Auth() {
             </Button>
           </form>
           
-          {/* Información de ambiente */}
+          {/* Debug information */}
           <div className="mt-4 text-xs text-center text-gray-500">
-            Ambiente: {import.meta.env.VITE_APP_ENV || 'development'}
+            <p>Ambiente: {import.meta.env.VITE_APP_ENV || 'development'}</p>
+            <p>Session: {session ? "Active" : "None"}</p>
+            <p>Auth Status: {loading ? "Loading" : user ? "Authenticated" : "Not authenticated"}</p>
           </div>
         </div>
       </div>

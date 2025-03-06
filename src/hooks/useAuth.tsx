@@ -46,11 +46,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     fetchSession();
 
+    // Setup auth state change listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log('Auth state changed:', _event, session ? `User ID: ${session.user.id}` : 'No session');
       setSession(session);
+      // Reset error when auth state changes
+      if (session) setAuthError(null);
     });
 
     return () => subscription.unsubscribe();

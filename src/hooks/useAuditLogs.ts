@@ -1,72 +1,88 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { AuditLogFilters, AuditActionType } from "@/components/audit/types";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-export const useAuditLogs = (filters?: AuditLogFilters) => {
-  return useQuery({
-    queryKey: ["audit-logs", filters],
-    queryFn: async () => {
-      const {
-        module,
-        actionType,
-        startDate,
-        endDate,
-        search,
-        page,
-        itemsPerPage
-      } = filters || {};
+interface AuditLog {
+  id: string;
+  created_at: string;
+  user_id: string;
+  action_type: string;
+  table_name: string;
+  record_id: string;
+  old_values: any;
+  new_values: any;
+}
 
-      const from = (page - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
+interface AuditLogFilters {
+  action_type?: string;
+  table_name?: string;
+  user_id?: string;
+}
 
-      let query = supabase
-        .from("audit_logs")
-        .select(`
-          *,
-          admin:profiles!admin_id(
-            full_name,
-            email
-          ),
-          reverter:profiles!reverted_by(
-            full_name,
-            email
-          )
-        `, { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, to);
+const filterByAction = (filter: AuditLogFilters) => {
+  const query = supabase
+    .from('audit_logs')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-      if (module) {
-        query = query.eq('module', module);
+  if (filter.action_type) {
+    query.eq('action_type', filter.action_type);
+  }
+
+  return query;
+};
+
+const filterByTable = (query: any, filter: AuditLogFilters) => {
+  if (filter.table_name) {
+    query.eq('table_name', filter.table_name);
+  }
+  return query;
+};
+
+const filterByUser = (query: any, filter: AuditLogFilters) => {
+  if (filter.user_id) {
+    query.eq('user_id', filter.user_id);
+  }
+  return query;
+};
+
+export const useAuditLogs = (filters: AuditLogFilters) => {
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        let query = supabase
+          .from('audit_logs')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        query = filterByAction(filters);
+        query = filterByTable(query, filters);
+        query = filterByUser(query, filters);
+
+        const { data, error } = await query;
+
+        if (error) {
+          setError(error);
+          console.error("Error fetching audit logs:", error);
+        } else {
+          setAuditLogs(data || []);
+        }
+      } catch (err: any) {
+        setError(err);
+        console.error("Unexpected error fetching audit logs:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (actionType) {
-        query = query.eq('action_type', actionType);
-      }
+    fetchAuditLogs();
+  }, [filters]);
 
-      if (startDate) {
-        query = query.gte('created_at', startDate.toISOString());
-      }
-
-      if (endDate) {
-        query = query.lte('created_at', endDate.toISOString());
-      }
-
-      if (search) {
-        query = query.or(`record_id.ilike.%${search}%,module.ilike.%${search}%`);
-      }
-
-      if (filters?.action) {
-        query = query.eq('action_type', filters.action as AuditActionType);
-      }
-
-      const { data: logs, error, count } = await query;
-
-      if (error) throw error;
-
-      return {
-        logs,
-        totalCount: count || 0
-      };
-    },
-  });
+  return { auditLogs, loading, error };
 };

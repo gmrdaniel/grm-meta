@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,11 +114,12 @@ export default function CreatorDetail() {
 
         if (error) throw error;
         
-        // Modificar cómo se maneja bank_details
+        const hasBankDetails = data.bank_details && Object.keys(data.bank_details).length > 0;
+        
         if (data) {
           const creatorData = {
             ...data,
-            bank_details: data.bank_details && data.bank_details.length > 0 
+            bank_details: hasBankDetails 
               ? data.bank_details[0] 
               : null
           };
