@@ -151,67 +151,84 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isLogin ? "Sign in to your account" : "Create your account"}
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <Input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <Input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                minLength={6}
-              />
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Logo in the top-right corner */}
+      <div className="absolute top-4 right-4">
+        <img
+          src="/lovable-uploads/15012b70-aa4e-4950-b985-f3dc21b231b5.png"
+          alt="LA NETA Logo"
+          className="h-16 w-auto"
+        />
+      </div>
 
+      {/* Main content */}
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
           <div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
-            </Button>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              {isLogin ? "Sign in to your account" : "Create your account"}
+            </h2>
           </div>
-          
-          <div className="flex flex-col space-y-2 text-center text-sm">
-            {isLogin && (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="rounded-md shadow-sm space-y-4">
+              <div>
+                <Input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                />
+              </div>
+              <div>
+                <Input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
+              </Button>
+            </div>
+
+            <div className="flex flex-col space-y-2 text-center text-sm">
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setIsRecoveryOpen(true)}
+                  className="text-blue-600 hover:text-blue-500"
+                >
+                  Forgot your password?
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setIsRecoveryOpen(true)}
+                onClick={() => setIsLogin(!isLogin)}
                 className="text-blue-600 hover:text-blue-500"
               >
-                Forgot your password?
+                {isLogin
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:text-blue-500"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="py-4 text-center text-gray-500 text-sm">
+        © 2025 LA NETA from Global Media Review
       </div>
 
       {/* Password Recovery Dialog */}
