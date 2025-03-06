@@ -14,8 +14,8 @@ const SUPABASE_CONFIG = {
   },
   development: {
     // Replace these with your development Supabase project credentials
-    url: import.meta.env.VITE_SUPABASE_DEV_URL || "https://icyajoecmxqjgyuhpqaa.supabase.co",
-    key: import.meta.env.VITE_SUPABASE_DEV_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljeWFqb2VjbXhxamd5dWhwcWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTkwMjAsImV4cCI6MjA1Njc5NTAyMH0._QpqRVEtP3_eUQTaHTsQVylRO0iTFGbYdrs_89WljP8"
+    url: import.meta.env.SUPABASE_DEV_URL || "https://icyajoecmxqjgyuhpqaa.supabase.co",
+    key: import.meta.env.SUPABASE_DEV_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljeWFqb2VjbXhxamd5dWhwcWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTkwMjAsImV4cCI6MjA1Njc5NTAyMH0._QpqRVEtP3_eUQTaHTsQVylRO0iTFGbYdrs_89WljP8"
   }
 };
 
