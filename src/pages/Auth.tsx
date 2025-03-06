@@ -28,66 +28,6 @@ export default function Auth() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [recoverySuccess, setRecoverySuccess] = useState(false);
-  const { user } = useAuth();
-
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (user) {
-      // Check the user's role and redirect accordingly
-      checkUserRoleAndRedirect();
-    }
-  }, [user]);
-
-  // Function to check user role and redirect accordingly
-  async function checkUserRoleAndRedirect() {
-    try {
-      if (!user) return;
-      
-      // Get user role from profiles table
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      
-      if (profileError) {
-        console.error("Profile error in redirect check:", profileError);
-        throw profileError;
-      }
-      
-      console.log("Profile data for redirect:", profileData);
-
-      // Redirect based on role
-      if (profileData.role === 'creator') {
-        const { count, error: servicesError } = await supabase
-          .from("creator_services")
-          .select("*", { count: 'exact', head: true })
-          .eq("profile_id", user.id)
-          .eq("terms_accepted", false)
-          .eq("status", "pendiente");
-
-        if (servicesError) {
-          console.error("Services error in redirect check:", servicesError);
-          throw servicesError;
-        }
-
-        console.log("Pending services count for redirect:", count);
-
-        // Redirect based on pending services
-        if (count && count > 0) {
-          navigate('/creator/pending-services');
-        } else {
-          navigate('/creator/dashboard');
-        }
-      } else if (profileData.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        console.error("Invalid role for redirect:", profileData.role);
-      }
-    } catch (error: any) {
-      console.error("Error checking user role for redirect:", error);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -17,36 +17,29 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get the initial session
-    async function getInitialSession() {
+    const fetchSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error('Error getting session:', error);
+          throw error;
         }
-        
         setSession(session);
-        setUser(session?.user || null);
       } catch (error) {
-        console.error('Unexpected error fetching session:', error);
+        console.error('Error fetching session:', error);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    getInitialSession();
+    fetchSession();
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event, session?.user?.id);
       setSession(session);
-      setUser(session?.user || null);
     });
 
     return () => subscription.unsubscribe();
@@ -55,7 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={{ 
       session, 
-      user,
+      user: session?.user || null,
       loading 
     }}>
       {children}
