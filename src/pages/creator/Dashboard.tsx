@@ -6,7 +6,7 @@ import { StatsCard } from "@/components/StatsCard";
 import { Button } from "@/components/ui/button";
 import { Image, Star, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";

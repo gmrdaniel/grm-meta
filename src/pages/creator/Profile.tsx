@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { PersonalInfoInputs } from "@/components/profile/PersonalInfoInputs";
 import { SocialMediaInputs } from "@/components/profile/SocialMediaInputs";
 import { ProfilePhotoUpload } from "@/components/profile/ProfilePhotoUpload";
