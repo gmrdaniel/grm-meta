@@ -6,16 +6,19 @@ import type { Database } from './types';
 // Environment configuration
 const ENV = import.meta.env.VITE_APP_ENV || 'development';
 
+// Default Supabase URLs and keys for the Lovable environment
+const DEFAULT_SUPABASE_URL = "https://icyajoecmxqjgyuhpqaa.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljeWFqb2VjbXhxamd5dWhwcWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTkwMjAsImV4cCI6MjA1Njc5NTAyMH0._QpqRVEtP3_eUQTaHTsQVylRO0iTFGbYdrs_89WljP8";
+
 // Supabase configuration by environment
 const SUPABASE_CONFIG = {
   production: {
-    url: "https://ovyakbwetiwkmpqjdhme.supabase.co",
-    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92eWFrYndldGl3a21wcWpkaG1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyMjkzMTksImV4cCI6MjA1NDgwNTMxOX0.2JIEJzWigGcyb46r7iK-H5PIwYK04SzWaKHb7ZZV2bw"
+    url: import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL,
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
   },
   development: {
-    // Replace these with your development/staging Supabase project credentials
-    url: import.meta.env.VITE_SUPABASE_URL || "https://rbxnfzieayzwjursprgx.supabase.co",
-    key: import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieG5memllYXl6d2p1cnNwcmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDkzODQsImV4cCI6MjA1NjUyNTM4NH0.NbniNSVDvK7etyZFnDTCU2Z133C1_hsGzG7NFaQ84M8"
+    url: import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL,
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
   }
 };
 
@@ -24,8 +27,7 @@ const { url: SUPABASE_URL, key: SUPABASE_PUBLISHABLE_KEY } =
   SUPABASE_CONFIG[ENV === 'production' ? 'production' : 'development'];
 
 console.log(`Using Supabase environment: ${ENV}`);
+console.log(`Supabase URL: ${SUPABASE_URL.split('//')[1].split('.')[0]}...`); // Log partial URL for debugging without exposing full URL
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
+// Create and export the supabase client
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

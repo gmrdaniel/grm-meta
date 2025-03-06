@@ -154,10 +154,10 @@ export default function Auth() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Logo in the top-right corner */}
       <div className="absolute top-4 right-4">
-        <img 
-          src="/lovable-uploads/15012b70-aa4e-4950-b985-f3dc21b231b5.png" 
-          alt="LA NETA Logo" 
-          className="h-16 w-auto"
+        <img
+          src="public/lovable-uploads/6cef44a1-6b2a-41d4-b1d1-33f0ed6f88e0.png"
+          alt="LA NETA Logo"
+          className="h-24 w-auto object-contain"
         />
       </div>
 
@@ -201,7 +201,7 @@ export default function Auth() {
                 {loading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
               </Button>
             </div>
-            
+
             <div className="flex flex-col space-y-2 text-center text-sm">
               {isLogin && (
                 <button

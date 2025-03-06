@@ -9,3 +9,6 @@ schemas = ["public", "storage"]
 [functions.generate-monthly-payments]
 verify_jwt = true
 
+[functions.send-invitation-email]
+verify_jwt = false
+
