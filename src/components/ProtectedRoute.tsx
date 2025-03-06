@@ -14,34 +14,39 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const { user, loading } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
+  const [roleChecked, setRoleChecked] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    async function getUserRole() {
-      if (!user) {
-        setRoleLoading(false);
-        return;
-      }
+    // Solo ejecutar esta verificación una vez para cada usuario
+    if (user && !roleChecked) {
+      const getUserRole = async () => {
+        try {
+          setRoleLoading(true);
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
 
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+          if (error) throw error;
+          setUserRole(data.role);
+        } catch (error: any) {
+          console.error("Error fetching user role:", error.message);
+          toast.error("Error al obtener el rol del usuario");
+        } finally {
+          setRoleLoading(false);
+          setRoleChecked(true);
+        }
+      };
 
-        if (error) throw error;
-        setUserRole(data.role);
-      } catch (error: any) {
-        toast.error("Error fetching user role");
-        console.error("Error:", error.message);
-      } finally {
-        setRoleLoading(false);
-      }
+      getUserRole();
+    } else if (!user && !loading) {
+      // Si no hay usuario y ya terminó la carga, marcar como verificado
+      setRoleLoading(false);
+      setRoleChecked(true);
     }
-
-    getUserRole();
-  }, [user]);
+  }, [user, loading, roleChecked]);
 
   if (loading || roleLoading) {
     return (

@@ -11,9 +11,17 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+// Bandera para evitar llamadas simultáneas repetidas
+let isTestingConnection = false;
+
 // Function to test connection to Supabase
 export const testSupabaseConnection = async () => {
+  if (isTestingConnection) {
+    return { success: true, message: "Ya se está ejecutando una prueba de conexión" };
+  }
+  
   try {
+    isTestingConnection = true;
     console.log("Testing Supabase connection...");
     console.log("SUPABASE_URL:", SUPABASE_URL);
     
@@ -36,5 +44,7 @@ export const testSupabaseConnection = async () => {
       success: false, 
       message: `Error inesperado de conexión: ${err instanceof Error ? err.message : String(err)}` 
     };
+  } finally {
+    isTestingConnection = false;
   }
 };

@@ -21,8 +21,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<Error | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    if (initialized) return;
+
     const fetchSession = async () => {
       try {
         console.log('Fetching auth session...');
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAuthError(error);
       } finally {
         setLoading(false);
+        setInitialized(true);
       }
     };
 
@@ -57,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialized]);
 
   return (
     <AuthContext.Provider value={{ 
