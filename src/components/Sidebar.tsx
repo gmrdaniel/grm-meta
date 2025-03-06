@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Home, Users, Settings, ListChecks, Database, LayoutDashboard, FileText, DollarSign, Boxes, BarChart, Clock, KeyRound, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,7 +9,7 @@ import { toast } from "sonner";
 import { NavItem } from "./sidebar/NavItem";
 import { MobileSidebar } from "./sidebar/MobileSidebar";
 import { getSidebarItems } from "./sidebar/navigation-items";
-import { type SidebarItem } from "./sidebar/navigation-items";
+import type { NavigationItem } from "./sidebar/types";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(false);
@@ -30,7 +29,7 @@ export function Sidebar() {
     }
   };
 
-  const navigationItems: SidebarItem[] = getSidebarItems(role).map(item => ({
+  const navigationItems: NavigationItem[] = getSidebarItems(role).map(item => ({
     icon: item.icon,
     label: item.title,
     to: item.href,
