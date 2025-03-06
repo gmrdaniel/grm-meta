@@ -1,7 +1,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -14,39 +14,34 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const { user, loading } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  const [roleChecked, setRoleChecked] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // Solo ejecutar esta verificación una vez para cada usuario
-    if (user && !roleChecked) {
-      const getUserRole = async () => {
-        try {
-          setRoleLoading(true);
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", user.id)
-            .single();
+    async function getUserRole() {
+      if (!user) {
+        setRoleLoading(false);
+        return;
+      }
 
-          if (error) throw error;
-          setUserRole(data.role);
-        } catch (error: any) {
-          console.error("Error fetching user role:", error.message);
-          toast.error("Error al obtener el rol del usuario");
-        } finally {
-          setRoleLoading(false);
-          setRoleChecked(true);
-        }
-      };
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
 
-      getUserRole();
-    } else if (!user && !loading) {
-      // Si no hay usuario y ya terminó la carga, marcar como verificado
-      setRoleLoading(false);
-      setRoleChecked(true);
+        if (error) throw error;
+        setUserRole(data.role);
+      } catch (error: any) {
+        toast.error("Error fetching user role");
+        console.error("Error:", error.message);
+      } finally {
+        setRoleLoading(false);
+      }
     }
-  }, [user, loading, roleChecked]);
+
+    getUserRole();
+  }, [user]);
 
   if (loading || roleLoading) {
     return (

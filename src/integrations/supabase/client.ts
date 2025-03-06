@@ -3,48 +3,29 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://icyajoecmxqjgyuhpqaa.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljeWFqb2VjbXhxamd5dWhwcWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMTkwMjAsImV4cCI6MjA1Njc5NTAyMH0._QpqRVEtP3_eUQTaHTsQVylRO0iTFGbYdrs_89WljP8";
+// Environment configuration
+const ENV = import.meta.env.VITE_APP_ENV || 'development';
+
+// Supabase configuration by environment
+const SUPABASE_CONFIG = {
+  production: {
+    url: "https://ovyakbwetiwkmpqjdhme.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92eWFrYndldGl3a21wcWpkaG1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyMjkzMTksImV4cCI6MjA1NDgwNTMxOX0.2JIEJzWigGcyb46r7iK-H5PIwYK04SzWaKHb7ZZV2bw"
+  },
+  development: {
+    // Replace these with your development/staging Supabase project credentials
+    url: import.meta.env.VITE_SUPABASE_URL || "https://rbxnfzieayzwjursprgx.supabase.co",
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJieG5memllYXl6d2p1cnNwcmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDkzODQsImV4cCI6MjA1NjUyNTM4NH0.NbniNSVDvK7etyZFnDTCU2Z133C1_hsGzG7NFaQ84M8"
+  }
+};
+
+// Select configuration based on environment
+const { url: SUPABASE_URL, key: SUPABASE_PUBLISHABLE_KEY } = 
+  SUPABASE_CONFIG[ENV === 'production' ? 'production' : 'development'];
+
+console.log(`Using Supabase environment: ${ENV}`);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-// Bandera para evitar llamadas simultáneas repetidas
-let isTestingConnection = false;
-
-// Function to test connection to Supabase
-export const testSupabaseConnection = async () => {
-  if (isTestingConnection) {
-    return { success: true, message: "Ya se está ejecutando una prueba de conexión" };
-  }
-  
-  try {
-    isTestingConnection = true;
-    console.log("Testing Supabase connection...");
-    console.log("SUPABASE_URL:", SUPABASE_URL);
-    
-    // Try to get a small amount of data to verify connection
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(1);
-    
-    if (error) {
-      console.error("Supabase connection test failed:", error);
-      return { success: false, message: `Error de conexión: ${error.message}` };
-    }
-    
-    console.log("Supabase connection successful:", data);
-    return { success: true, message: "Conexión a Supabase establecida correctamente" };
-  } catch (err) {
-    console.error("Exception during Supabase connection test:", err);
-    return { 
-      success: false, 
-      message: `Error inesperado de conexión: ${err instanceof Error ? err.message : String(err)}` 
-    };
-  } finally {
-    isTestingConnection = false;
-  }
-};

@@ -24,7 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { email, invitationUrl }: InvitationEmailRequest = await req.json();
 
     const emailResponse = await resend.emails.send({
-      from: "La Neta <onboarding@laneta.com>",
+      from: "Lovable <onboarding@resend.dev>",
       to: [email],
       subject: "Invitación para unirte como creador",
       html: `

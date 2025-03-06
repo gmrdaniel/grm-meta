@@ -15,11 +15,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface ServicePaymentUpdateFormProps {
   payment: any;
   onClose: () => void;
-  onUpdate?: (paymentId: string, previousData: any, updatedPayment: any) => Promise<void>;
 }
 
-export function ServicePaymentUpdateForm({ payment, onClose, onUpdate }: ServicePaymentUpdateFormProps) {
-  const { handleSubmit, isSubmitting } = usePaymentUpdate(payment, onClose, onUpdate);
+export function ServicePaymentUpdateForm({ payment, onClose }: ServicePaymentUpdateFormProps) {
+  const { handleSubmit, isSubmitting } = usePaymentUpdate(payment, onClose);
 
   useEffect(() => {
     // Verificar sesión al cargar el componente
