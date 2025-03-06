@@ -155,7 +155,7 @@ export default function Auth() {
       {/* Logo in the top-right corner */}
       <div className="absolute top-4 right-4">
         <img
-          src="public/lovable-uploads/6cef44a1-6b2a-41d4-b1d1-33f0ed6f88e0.png"
+          src="/lovable-uploads/9e1be316-e2d0-4ebe-863a-e7062b2e9a78.png"
           alt="LA NETA Logo"
           className="h-24 w-auto object-contain"
         />
