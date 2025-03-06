@@ -157,7 +157,7 @@ export default function Auth() {
         <img
           src="/lovable-uploads/15012b70-aa4e-4950-b985-f3dc21b231b5.png"
           alt="LA NETA Logo"
-          className="h-16 w-auto"
+          className="h-24 w-auto object-contain"
         />
       </div>
 
