@@ -1,9 +1,10 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Routes, Route } from "react-router-dom";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Admin pages
 import Dashboard from "@/pages/admin/Dashboard";
@@ -17,12 +18,12 @@ import ServicePayments from "@/pages/admin/ServicePayments";
 import PostTypes from "@/pages/admin/PostTypes";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import Utilities from "@/pages/admin/Utilities";
-import DbMigrations from "@/pages/admin/DbMigrations"; // Add this import
+import DbMigrations from "@/pages/admin/DbMigrations";
 
 // Creator pages
 import CreatorDashboard from "@/pages/creator/Dashboard";
 import CreatorProfile from "@/pages/creator/Profile";
-import CreatorServices from "@/pages/creator/Services";
+import CreatorServicesPage from "@/pages/creator/Services";
 import CreatorBankDetail from "@/pages/creator/BankDetail";
 import CreatorCampaigns from "@/pages/creator/Campaigns";
 import PendingServices from "@/pages/creator/PendingServices";
@@ -37,7 +38,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
 
         {/* Protected Admin Routes */}
-        <Route path="/admin" element={<ProtectedRoute allowedRole="admin" />}>
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="creators" element={<Creators />} />
@@ -50,15 +51,14 @@ function App() {
           <Route path="post-types" element={<PostTypes />} />
           <Route path="audit-logs" element={<AuditLogs />} />
           <Route path="utilities" element={<Utilities />} />
-          {/* Add the Database Migrations route */}
           <Route path="db-migrations" element={<DbMigrations />} />
         </Route>
 
         {/* Creator Routes */}
-        <Route path="/creator" element={<ProtectedRoute allowedRole="creator" />}>
+        <Route path="/creator" element={<ProtectedRoute allowedRoles={["creator"]} />}>
           <Route path="dashboard" element={<CreatorDashboard />} />
           <Route path="profile" element={<CreatorProfile />} />
-          <Route path="services" element={<CreatorServices />} />
+          <Route path="services" element={<CreatorServicesPage />} />
           <Route path="bank-detail" element={<CreatorBankDetail />} />
           <Route path="campaigns" element={<CreatorCampaigns />} />
           <Route path="pending-services" element={<PendingServices />} />

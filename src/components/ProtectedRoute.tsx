@@ -1,13 +1,13 @@
 
 import { ReactNode, useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type ProtectedRouteProps = {
-  children: ReactNode;
   allowedRoles: string[];
+  children?: ReactNode;
 };
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
@@ -68,5 +68,5 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  return children ? <>{children}</> : <Outlet />;
 }

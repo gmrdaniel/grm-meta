@@ -9,7 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavItem } from "./sidebar/NavItem";
 import { MobileSidebar } from "./sidebar/MobileSidebar";
-import { adminNavigationItems, creatorNavigationItems } from "./sidebar/navigation-items";
+import { getSidebarItems } from "./sidebar/navigation-items";
+import { type SidebarItem } from "./sidebar/navigation-items";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(false);
@@ -18,6 +19,7 @@ export function Sidebar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const role = isAdminRoute ? "admin" : "creator";
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -28,7 +30,12 @@ export function Sidebar() {
     }
   };
 
-  const navigationItems = isAdminRoute ? adminNavigationItems : creatorNavigationItems;
+  const navigationItems: SidebarItem[] = getSidebarItems(role).map(item => ({
+    icon: item.icon,
+    label: item.title,
+    to: item.href,
+    disabled: item.disabled
+  }));
 
   if (!isAdminRoute && isMobile) {
     return (
