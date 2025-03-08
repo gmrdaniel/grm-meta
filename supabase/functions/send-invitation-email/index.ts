@@ -8,7 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface InvitationEmailRequest {
@@ -17,48 +16,12 @@ interface InvitationEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Received request:", req.method);
-  
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    console.log("Handling OPTIONS request");
-    return new Response(null, { 
-      status: 204, 
-      headers: corsHeaders 
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("Parsing request body");
-    const body = await req.text();
-    console.log("Request body:", body);
-    
-    let data: InvitationEmailRequest;
-    try {
-      data = JSON.parse(body);
-    } catch (e) {
-      console.error("Error parsing JSON:", e);
-      return new Response(
-        JSON.stringify({ error: "Invalid JSON in request body" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-    
-    const { email, invitationUrl } = data;
-    
-    if (!email || !invitationUrl) {
-      console.error("Missing required fields:", { email, invitationUrl });
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: email or invitationUrl" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
+    const { email, invitationUrl }: InvitationEmailRequest = await req.json();
     
     // Determine the environment from request headers or env variables
     const isProduction = req.headers.get("x-environment") === "production" ||
@@ -66,14 +29,14 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Choose recipient email based on environment
     const recipientEmail = isProduction 
-      ? email  // Use actual email in production
-      : "onboarding@resend.dev"; // Use test email in development
+      ? "onboarding@laneta.com" 
+      : "onboarding@resend.dev";
     
     console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
     console.log(`Sending invitation email to: ${recipientEmail} (original: ${email})`);
 
     const emailResponse = await resend.emails.send({
-      from: "Laneta <onboarding@resend.dev>",
+      from: "Lovable <onboarding@resend.dev>",
       to: [recipientEmail],
       subject: "Invitación para unirte como creador",
       html: `
@@ -87,8 +50,6 @@ const handler = async (req: Request): Promise<Response> => {
         ${!isProduction ? `<p><strong>Nota de desarrollo:</strong> Este correo estaba originalmente destinado a: ${email}</p>` : ''}
       `,
     });
-
-    console.log("Email sending response:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

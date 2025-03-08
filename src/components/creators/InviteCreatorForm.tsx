@@ -75,29 +75,18 @@ export function InviteCreatorForm({ onInviteSent }: InviteCreatorFormProps) {
       const inviteUrl = `${window.location.origin}/auth?invitation=${invitation.token}`;
       setInvitationUrl(inviteUrl);
 
-      console.log("Sending invitation email to:", values.email);
-      console.log("Invitation URL:", inviteUrl);
+      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
+        body: {
+          email: values.email,
+          invitationUrl: inviteUrl,
+        },
+      });
 
-      try {
-        const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
-          body: {
-            email: values.email,
-            invitationUrl: inviteUrl,
-          },
-        });
-
-        if (emailError) {
-          console.error("Email sending error:", emailError);
-          throw new Error(`Error sending email: ${emailError.message}`);
-        }
-        
-        toast.success("Invitation sent successfully");
-        form.reset();
-        onInviteSent();
-      } catch (emailError: any) {
-        console.error("Error sending invitation email:", emailError);
-        toast.error(`Error sending email: ${emailError.message}`);
-      }
+      if (emailError) throw emailError;
+      
+      toast.success("Invitation sent successfully");
+      form.reset();
+      onInviteSent();
     } catch (error: any) {
       console.error("Error creating invitation:", error);
       toast.error(error.message);
