@@ -79,14 +79,20 @@ export function InvitationsTable() {
     try {
       const inviteUrl = `${window.location.origin}/auth?invitation=${invitation.token}`;
       
+      console.log("Resending invitation email to:", invitation.email);
+      console.log("Invitation URL:", inviteUrl);
+      
       const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
-        body: {
+        body: JSON.stringify({
           email: invitation.email,
           invitationUrl: inviteUrl,
-        },
+        }),
       });
 
-      if (emailError) throw emailError;
+      if (emailError) {
+        console.error("Error resending invitation:", emailError);
+        throw new Error(`Error resending invitation: ${emailError.message}`);
+      }
       
       toast.success(`Invitation resent to ${invitation.email}`);
     } catch (error: any) {
