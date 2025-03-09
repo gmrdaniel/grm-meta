@@ -13,6 +13,8 @@ interface PersonalData {
   country_code: string | null;
   gender: string | null;
   category_id: string | null;
+  profile_photo_url: string | null;
+  primary_social_network: string | null;
   // Add the category relation
   categories?: {
     id: string;
@@ -28,6 +30,14 @@ interface PersonalInfoCardProps {
 export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
   // Debug log to see what's in the personal data
   console.log("PersonalInfoCard - personalData:", personalData);
+  
+  // Function to format the primary social network display
+  const formatSocialNetwork = (network: string | null) => {
+    if (!network) return "Not set";
+    
+    // Capitalize first letter
+    return network.charAt(0).toUpperCase() + network.slice(1);
+  };
   
   return (
     <Card>
@@ -74,6 +84,10 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
           <div>
             <dt className="font-medium text-gray-500">Category</dt>
             <dd>{personalData?.categories?.name || "Not set"}</dd>
+          </div>
+          <div>
+            <dt className="font-medium text-gray-500">Primary Social Network</dt>
+            <dd>{formatSocialNetwork(personalData?.primary_social_network)}</dd>
           </div>
         </dl>
       </CardContent>

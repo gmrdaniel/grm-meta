@@ -51,6 +51,7 @@ export default function CreatorProfile() {
     category_id: "",
     gender: "",
     profile_photo_url: "",
+    primary_social_network: "",
   });
 
   useEffect(() => {
@@ -77,9 +78,10 @@ export default function CreatorProfile() {
       }
 
       if (data) {
-        // Log the retrieved data to see if profile_photo_url is present
+        // Log the retrieved data
         console.log("Retrieved personal data:", data);
         console.log("Profile photo URL:", data.profile_photo_url);
+        console.log("Primary social network:", data.primary_social_network);
         
         setFormData({
           first_name: data.first_name || "",
@@ -100,6 +102,7 @@ export default function CreatorProfile() {
           category_id: data.category_id || "",
           gender: data.gender || "",
           profile_photo_url: data.profile_photo_url || "",
+          primary_social_network: data.primary_social_network || "",
         });
       }
     } catch (error) {
@@ -153,9 +156,16 @@ export default function CreatorProfile() {
       ...prev,
       [name]: value,
       // This special handling is only for country_code, not for category_id
-      ...(name === "country_code" && {
+      ...(name === "country_of_residence" && {
         country_code: COUNTRIES.find((c) => c.value === value)?.code || "",
       }),
+    }));
+  };
+
+  const handleRadioChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      primary_social_network: value,
     }));
   };
 
@@ -228,6 +238,7 @@ export default function CreatorProfile() {
               <SocialMediaInputs
                 formData={formData}
                 handleInputChange={handleInputChange}
+                handleRadioChange={handleRadioChange}
               />
 
               <Button type="submit" disabled={loading}>
