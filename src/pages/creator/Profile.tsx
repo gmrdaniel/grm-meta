@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -9,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PersonalInfoInputs } from "@/components/profile/PersonalInfoInputs";
 import { SocialMediaInputs } from "@/components/profile/SocialMediaInputs";
 import { ProfilePhotoUpload } from "@/components/profile/ProfilePhotoUpload";
+import { useCategories } from "@/hooks/useCategories";
 
 const COUNTRIES = [
   { label: "México", value: "Mexico", code: "+52" },
@@ -18,23 +18,6 @@ const COUNTRIES = [
   { label: "Chile", value: "Chile", code: "+56" },
   { label: "Perú", value: "Peru", code: "+51" },
   { label: "Estados Unidos", value: "EU", code: "+1" },
-];
-
-const CATEGORIES = [
-  "Moda y Belleza",
-  "Fitness y Salud",
-  "Tecnología",
-  "Viajes",
-  "Gastronomía",
-  "Gaming",
-  "Educación",
-  "Finanzas y Negocios",
-  "Entretenimiento",
-  "Arte y Diseño",
-  "Lifestyle",
-  "mama",
-  "papa",
-  "niños",
 ];
 
 const GENDERS = [
@@ -47,6 +30,7 @@ const GENDERS = [
 export default function CreatorProfile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -63,9 +47,10 @@ export default function CreatorProfile() {
     youtube_followers: "",
     pinterest_username: "",
     pinterest_followers: "",
-    category: "",
+    category_id: "",
     gender: "",
     profile_photo_url: "",
+    primary_social_network: "",
   });
 
   useEffect(() => {
@@ -78,7 +63,7 @@ export default function CreatorProfile() {
     try {
       const { data, error } = await supabase
         .from("personal_data")
-        .select("*")
+        .select("*, categories:category_id(id, name)")
         .eq("profile_id", user?.id)
         .single();
 
@@ -92,6 +77,10 @@ export default function CreatorProfile() {
       }
 
       if (data) {
+        console.log("Retrieved personal data:", data);
+        console.log("Profile photo URL:", data.profile_photo_url);
+        console.log("Primary social network:", data.primary_social_network);
+        
         setFormData({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
@@ -108,9 +97,10 @@ export default function CreatorProfile() {
           youtube_followers: data.youtube_followers?.toString() || "",
           pinterest_username: data.pinterest_username || "",
           pinterest_followers: data.pinterest_followers?.toString() || "",
-          category: data.category || "",
+          category_id: data.category_id || "",
           gender: data.gender || "",
           profile_photo_url: data.profile_photo_url || "",
+          primary_social_network: data.primary_social_network || "",
         });
       }
     } catch (error) {
@@ -124,16 +114,23 @@ export default function CreatorProfile() {
     setLoading(true);
 
     try {
+      const submissionData = {
+        ...formData,
+        instagram_followers: parseInt(formData.instagram_followers) || 0,
+        tiktok_followers: parseInt(formData.tiktok_followers) || 0,
+        youtube_followers: parseInt(formData.youtube_followers) || 0,
+        pinterest_followers: parseInt(formData.pinterest_followers) || 0,
+        primary_social_network: formData.primary_social_network || null
+      };
+
+      console.log("Submitting data:", submissionData);
+
       const { error } = await supabase
         .from("personal_data")
         .upsert(
           {
             profile_id: user?.id,
-            ...formData,
-            instagram_followers: parseInt(formData.instagram_followers) || 0,
-            tiktok_followers: parseInt(formData.tiktok_followers) || 0,
-            youtube_followers: parseInt(formData.youtube_followers) || 0,
-            pinterest_followers: parseInt(formData.pinterest_followers) || 0,
+            ...submissionData,
           },
           {
             onConflict: "profile_id",
@@ -163,13 +160,21 @@ export default function CreatorProfile() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "country_code" && {
+      ...(name === "country_of_residence" && {
         country_code: COUNTRIES.find((c) => c.value === value)?.code || "",
       }),
     }));
   };
 
+  const handleRadioChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      primary_social_network: value,
+    }));
+  };
+
   const handlePhotoUpdate = (url: string) => {
+    console.log("Photo updated with URL:", url);
     setFormData((prev) => ({
       ...prev,
       profile_photo_url: url,
@@ -229,13 +234,15 @@ export default function CreatorProfile() {
                 handleInputChange={handleInputChange}
                 handleSelectChange={handleSelectChange}
                 COUNTRIES={COUNTRIES}
-                CATEGORIES={CATEGORIES}
                 GENDERS={GENDERS}
+                categories={categories}
+                categoriesLoading={categoriesLoading}
               />
 
               <SocialMediaInputs
                 formData={formData}
                 handleInputChange={handleInputChange}
+                handleRadioChange={handleRadioChange}
               />
 
               <Button type="submit" disabled={loading}>

@@ -9,6 +9,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface Category {
+  id: string;
+  name: string;
+  status: string;
+}
+
 interface PersonalInfoInputsProps {
   formData: {
     birth_date: string;
@@ -16,14 +22,15 @@ interface PersonalInfoInputsProps {
     state_of_residence: string;
     country_code: string;
     phone_number: string;
-    category: string;
+    category_id: string;
     gender: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   COUNTRIES: Array<{ label: string; value: string; code: string }>;
-  CATEGORIES: string[];
   GENDERS: Array<{ label: string; value: string }>;
+  categories: Category[];
+  categoriesLoading: boolean;
 }
 
 export const PersonalInfoInputs = ({
@@ -31,13 +38,18 @@ export const PersonalInfoInputs = ({
   handleInputChange,
   handleSelectChange,
   COUNTRIES,
-  CATEGORIES,
   GENDERS,
+  categories,
+  categoriesLoading,
 }: PersonalInfoInputsProps) => {
   // Filtrar datos vacíos y validar arrays
   const validCountries = COUNTRIES?.filter(country => country?.value && country?.code) ?? [];
-  const validCategories = CATEGORIES?.filter(Boolean) ?? [];
   const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
+  const validCategories = categories?.filter(category => category?.id && category?.name) ?? [];
+
+  // Log for debugging
+  console.log("Categories in PersonalInfoInputs:", validCategories);
+  console.log("Selected category_id:", formData.category_id);
 
   return (
     <div className="space-y-6">
@@ -118,20 +130,24 @@ export const PersonalInfoInputs = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Categoría</Label>
+        <Label htmlFor="category_id">Categoría</Label>
         <Select 
-          value={formData.category || ''} 
-          onValueChange={(value) => handleSelectChange("category", value)}
+          value={formData.category_id || ''} 
+          onValueChange={(value) => handleSelectChange("category_id", value)}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
-            {validCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
+            {categoriesLoading ? (
+              <SelectItem value="loading" disabled>Cargando categorías...</SelectItem>
+            ) : (
+              validCategories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>

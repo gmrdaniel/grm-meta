@@ -241,6 +241,30 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["status_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           contract_status: string
@@ -579,7 +603,7 @@ export type Database = {
       personal_data: {
         Row: {
           birth_date: string | null
-          category: string | null
+          category_id: string | null
           country_code: string | null
           country_of_residence: string | null
           created_at: string
@@ -589,9 +613,11 @@ export type Database = {
           instagram_followers: number | null
           instagram_username: string | null
           last_name: string | null
+          old_category: string | null
           phone_number: string | null
           pinterest_followers: number | null
           pinterest_username: string | null
+          primary_social_network: string | null
           profile_id: string
           profile_photo_url: string | null
           state_of_residence: string | null
@@ -603,7 +629,7 @@ export type Database = {
         }
         Insert: {
           birth_date?: string | null
-          category?: string | null
+          category_id?: string | null
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
@@ -613,9 +639,11 @@ export type Database = {
           instagram_followers?: number | null
           instagram_username?: string | null
           last_name?: string | null
+          old_category?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
+          primary_social_network?: string | null
           profile_id: string
           profile_photo_url?: string | null
           state_of_residence?: string | null
@@ -627,7 +655,7 @@ export type Database = {
         }
         Update: {
           birth_date?: string | null
-          category?: string | null
+          category_id?: string | null
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
@@ -637,9 +665,11 @@ export type Database = {
           instagram_followers?: number | null
           instagram_username?: string | null
           last_name?: string | null
+          old_category?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
+          primary_social_network?: string | null
           profile_id?: string
           profile_photo_url?: string | null
           state_of_residence?: string | null
@@ -650,6 +680,13 @@ export type Database = {
           youtube_username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "personal_data_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "personal_data_profile_id_fkey"
             columns: ["profile_id"]

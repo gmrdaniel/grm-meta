@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,13 @@ export const ProfilePhotoUpload = ({
   onPhotoUpdate,
 }: ProfilePhotoUploadProps) => {
   const [uploading, setUploading] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState(currentPhotoUrl);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  
+  // Set photo URL when component mounts or when currentPhotoUrl changes
+  useEffect(() => {
+    console.log("Current photo URL in ProfilePhotoUpload:", currentPhotoUrl);
+    setPhotoUrl(currentPhotoUrl);
+  }, [currentPhotoUrl]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -53,6 +59,7 @@ export const ProfilePhotoUpload = ({
         data: { publicUrl },
       } = supabase.storage.from("profile-photos").getPublicUrl(filePath);
 
+      console.log("New photo URL:", publicUrl);
       setPhotoUrl(publicUrl);
       onPhotoUpdate(publicUrl);
       
@@ -78,10 +85,13 @@ export const ProfilePhotoUpload = ({
   return (
     <div className="flex flex-col items-center gap-4 mb-6">
       <Avatar className="w-32 h-32">
-        <AvatarImage src={photoUrl || ""} alt="Foto de perfil" />
-        <AvatarFallback className="bg-primary/10">
-          {userId.slice(0, 2).toUpperCase()}
-        </AvatarFallback>
+        {photoUrl ? (
+          <AvatarImage src={photoUrl} alt="Foto de perfil" />
+        ) : (
+          <AvatarFallback className="bg-primary/10">
+            {userId.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        )}
       </Avatar>
 
       <div className="relative">
