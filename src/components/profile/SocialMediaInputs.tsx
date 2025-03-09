@@ -24,6 +24,8 @@ export const SocialMediaInputs = ({
   handleInputChange,
   handleRadioChange,
 }: SocialMediaInputsProps) => {
+  console.log("SocialMediaInputs - primary_social_network:", formData.primary_social_network);
+  
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Redes Sociales</h2>

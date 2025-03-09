@@ -38,6 +38,7 @@ interface PersonalInfoCardProps {
 export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
   // Debug log to see what's in the personal data
   console.log("PersonalInfoCard - personalData:", personalData);
+  console.log("Primary social network:", personalData?.primary_social_network);
   
   // Get all social networks with their usernames and followers
   const socialNetworks = [
