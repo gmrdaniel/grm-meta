@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PersonalInfoInputs } from "@/components/profile/PersonalInfoInputs";
 import { SocialMediaInputs } from "@/components/profile/SocialMediaInputs";
 import { ProfilePhotoUpload } from "@/components/profile/ProfilePhotoUpload";
+import { useCategories } from "@/hooks/useCategories";
 
 const COUNTRIES = [
   { label: "México", value: "Mexico", code: "+52" },
@@ -30,6 +31,7 @@ const GENDERS = [
 export default function CreatorProfile() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -214,6 +216,8 @@ export default function CreatorProfile() {
                 handleSelectChange={handleSelectChange}
                 COUNTRIES={COUNTRIES}
                 GENDERS={GENDERS}
+                categories={categories}
+                categoriesLoading={categoriesLoading}
               />
 
               <SocialMediaInputs

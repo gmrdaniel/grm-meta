@@ -1,5 +1,4 @@
 
-import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Category {
   id: string;
@@ -31,6 +29,8 @@ interface PersonalInfoInputsProps {
   handleSelectChange: (name: string, value: string) => void;
   COUNTRIES: Array<{ label: string; value: string; code: string }>;
   GENDERS: Array<{ label: string; value: string }>;
+  categories: Category[];
+  categoriesLoading: boolean;
 }
 
 export const PersonalInfoInputs = ({
@@ -39,42 +39,13 @@ export const PersonalInfoInputs = ({
   handleSelectChange,
   COUNTRIES,
   GENDERS,
+  categories,
+  categoriesLoading,
 }: PersonalInfoInputsProps) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch categories from the database
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from("categories")
-          .select("*")
-          .eq("status", "active")
-          .order("name");
-
-        if (error) {
-          console.error("Error fetching categories:", error);
-          return;
-        }
-
-        if (data) {
-          setCategories(data);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
   // Filtrar datos vacíos y validar arrays
   const validCountries = COUNTRIES?.filter(country => country?.value && country?.code) ?? [];
   const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
+  const validCategories = categories?.filter(category => category?.id && category?.name) ?? [];
 
   return (
     <div className="space-y-6">
@@ -164,10 +135,10 @@ export const PersonalInfoInputs = ({
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
-            {loading ? (
+            {categoriesLoading ? (
               <SelectItem value="loading" disabled>Cargando categorías...</SelectItem>
             ) : (
-              categories.map((category) => (
+              validCategories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
                 </SelectItem>
