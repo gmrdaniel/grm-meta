@@ -1,8 +1,6 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 interface SocialMediaInputsProps {
   formData: {
     instagram_username: string;
@@ -18,28 +16,21 @@ interface SocialMediaInputsProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRadioChange: (value: string) => void;
 }
-
 export const SocialMediaInputs = ({
   formData,
   handleInputChange,
-  handleRadioChange,
+  handleRadioChange
 }: SocialMediaInputsProps) => {
   console.log("SocialMediaInputs - primary_social_network:", formData.primary_social_network);
-  
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <h2 className="text-lg font-semibold">Redes Sociales</h2>
       <div className="mb-2">
         <Label className="mb-2 block">Red Social Principal</Label>
       </div>
       
-      <RadioGroup 
-        value={formData.primary_social_network} 
-        onValueChange={handleRadioChange}
-        className="flex flex-col space-y-4"
-      >
+      <RadioGroup value={formData.primary_social_network} onValueChange={handleRadioChange} className="flex flex-col space-y-4">
         {/* Instagram Row */}
-        <div className="grid grid-cols-12 gap-4 items-center">
+        <div className="grid grid-cols-12 gap-3 items-center">
           <div className="col-span-2">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="instagram" id="instagram" disabled={!formData.instagram_username} />
@@ -49,23 +40,10 @@ export const SocialMediaInputs = ({
             </div>
           </div>
           <div className="col-span-5">
-            <Input
-              id="instagram_username"
-              name="instagram_username"
-              value={formData.instagram_username}
-              onChange={handleInputChange}
-              placeholder="@usuario"
-            />
+            <Input id="instagram_username" name="instagram_username" value={formData.instagram_username} onChange={handleInputChange} placeholder="@usuario" />
           </div>
           <div className="col-span-5">
-            <Input
-              id="instagram_followers"
-              name="instagram_followers"
-              type="number"
-              value={formData.instagram_followers}
-              onChange={handleInputChange}
-              placeholder="0"
-            />
+            <Input id="instagram_followers" name="instagram_followers" type="number" value={formData.instagram_followers} onChange={handleInputChange} placeholder="0" />
           </div>
         </div>
 
@@ -80,23 +58,10 @@ export const SocialMediaInputs = ({
             </div>
           </div>
           <div className="col-span-5">
-            <Input
-              id="tiktok_username"
-              name="tiktok_username"
-              value={formData.tiktok_username}
-              onChange={handleInputChange}
-              placeholder="@usuario"
-            />
+            <Input id="tiktok_username" name="tiktok_username" value={formData.tiktok_username} onChange={handleInputChange} placeholder="@usuario" />
           </div>
           <div className="col-span-5">
-            <Input
-              id="tiktok_followers"
-              name="tiktok_followers"
-              type="number"
-              value={formData.tiktok_followers}
-              onChange={handleInputChange}
-              placeholder="0"
-            />
+            <Input id="tiktok_followers" name="tiktok_followers" type="number" value={formData.tiktok_followers} onChange={handleInputChange} placeholder="0" />
           </div>
         </div>
 
@@ -111,23 +76,10 @@ export const SocialMediaInputs = ({
             </div>
           </div>
           <div className="col-span-5">
-            <Input
-              id="youtube_username"
-              name="youtube_username"
-              value={formData.youtube_username}
-              onChange={handleInputChange}
-              placeholder="@usuario"
-            />
+            <Input id="youtube_username" name="youtube_username" value={formData.youtube_username} onChange={handleInputChange} placeholder="@usuario" />
           </div>
           <div className="col-span-5">
-            <Input
-              id="youtube_followers"
-              name="youtube_followers"
-              type="number"
-              value={formData.youtube_followers}
-              onChange={handleInputChange}
-              placeholder="0"
-            />
+            <Input id="youtube_followers" name="youtube_followers" type="number" value={formData.youtube_followers} onChange={handleInputChange} placeholder="0" />
           </div>
         </div>
 
@@ -142,26 +94,12 @@ export const SocialMediaInputs = ({
             </div>
           </div>
           <div className="col-span-5">
-            <Input
-              id="pinterest_username"
-              name="pinterest_username"
-              value={formData.pinterest_username}
-              onChange={handleInputChange}
-              placeholder="@usuario"
-            />
+            <Input id="pinterest_username" name="pinterest_username" value={formData.pinterest_username} onChange={handleInputChange} placeholder="@usuario" />
           </div>
           <div className="col-span-5">
-            <Input
-              id="pinterest_followers"
-              name="pinterest_followers"
-              type="number"
-              value={formData.pinterest_followers}
-              onChange={handleInputChange}
-              placeholder="0"
-            />
+            <Input id="pinterest_followers" name="pinterest_followers" type="number" value={formData.pinterest_followers} onChange={handleInputChange} placeholder="0" />
           </div>
         </div>
       </RadioGroup>
-    </div>
-  );
-}
+    </div>;
+};
