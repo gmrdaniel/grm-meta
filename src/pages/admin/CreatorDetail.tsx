@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +25,13 @@ interface CreatorDetail {
     state_of_residence: string | null;
     phone_number: string | null;
     gender: string | null;
-    category: string | null;
+    category_id: string | null;
+    // Add the category relation
+    categories?: {
+      id: string;
+      name: string;
+      status: string;
+    } | null;
   };
   bank_details?: {
     beneficiary_name: string;
@@ -100,7 +107,8 @@ export default function CreatorDetail() {
             state_of_residence,
             phone_number,
             gender,
-            category
+            category_id,
+            categories(id, name, status)
           ),
           bank_details (
             beneficiary_name,
@@ -120,7 +128,28 @@ export default function CreatorDetail() {
         .single();
 
       if (error) throw error;
-      setCreator({ ...data, email: emailData });
+
+      // Make sure data is properly structured before setting it as state
+      if (data) {
+        const personalData = data.personal_data || {
+          first_name: null,
+          last_name: null,
+          instagram_username: null,
+          birth_date: null,
+          country_of_residence: null,
+          state_of_residence: null,
+          phone_number: null,
+          gender: null,
+          category_id: null,
+          categories: null
+        };
+
+        setCreator({ 
+          ...data, 
+          email: emailData,
+          personal_data: personalData
+        });
+      }
     } catch (error: any) {
       toast.error("Error fetching creator details");
       console.error("Error:", error.message);
