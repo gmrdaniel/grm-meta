@@ -11,6 +11,13 @@ export interface CreatorDetail {
     first_name: string | null;
     last_name: string | null;
     instagram_username: string | null;
+    instagram_followers: number | null;
+    tiktok_username: string | null;
+    tiktok_followers: number | null;
+    youtube_username: string | null;
+    youtube_followers: number | null;
+    pinterest_username: string | null;
+    pinterest_followers: number | null;
     birth_date: string | null;
     country_of_residence: string | null;
     state_of_residence: string | null;
@@ -67,6 +74,13 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
             first_name,
             last_name,
             instagram_username,
+            instagram_followers,
+            tiktok_username,
+            tiktok_followers,
+            youtube_username,
+            youtube_followers,
+            pinterest_username,
+            pinterest_followers,
             birth_date,
             country_of_residence,
             state_of_residence,
@@ -108,6 +122,13 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
           first_name: null,
           last_name: null,
           instagram_username: null,
+          instagram_followers: null,
+          tiktok_username: null,
+          tiktok_followers: null,
+          youtube_username: null,
+          youtube_followers: null,
+          pinterest_username: null,
+          pinterest_followers: null,
           birth_date: null,
           country_of_residence: null,
           state_of_residence: null,

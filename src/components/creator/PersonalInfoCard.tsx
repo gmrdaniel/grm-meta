@@ -39,51 +39,7 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
   // Debug log to see what's in the personal data
   console.log("PersonalInfoCard - personalData:", personalData);
   
-  // Function to format the primary social network display
-  const formatSocialNetwork = (network: string | null) => {
-    if (!network) return "Not set";
-    
-    // Capitalize first letter
-    return network.charAt(0).toUpperCase() + network.slice(1);
-  };
-
-  // Function to get the number of followers for each network
-  const getFollowers = (network: string | null) => {
-    if (!network || !personalData) return "0";
-    
-    switch (network) {
-      case "instagram":
-        return personalData.instagram_followers?.toLocaleString() || "0";
-      case "tiktok":
-        return personalData.tiktok_followers?.toLocaleString() || "0";
-      case "youtube":
-        return personalData.youtube_followers?.toLocaleString() || "0";
-      case "pinterest":
-        return personalData.pinterest_followers?.toLocaleString() || "0";
-      default:
-        return "0";
-    }
-  };
-
-  // Function to get the username for each network
-  const getUsername = (network: string | null) => {
-    if (!network || !personalData) return "Not set";
-    
-    switch (network) {
-      case "instagram":
-        return personalData.instagram_username || "Not set";
-      case "tiktok":
-        return personalData.tiktok_username || "Not set";
-      case "youtube":
-        return personalData.youtube_username || "Not set";
-      case "pinterest":
-        return personalData.pinterest_username || "Not set";
-      default:
-        return "Not set";
-    }
-  };
-  
-  // Get all social networks with their usernames
+  // Get all social networks with their usernames and followers
   const socialNetworks = [
     { name: "instagram", label: "Instagram", username: personalData?.instagram_username, followers: personalData?.instagram_followers },
     { name: "tiktok", label: "TikTok", username: personalData?.tiktok_username, followers: personalData?.tiktok_followers },
@@ -141,7 +97,7 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Primary Network</TableHead>
+                  <TableHead>Network</TableHead>
                   <TableHead>Username</TableHead>
                   <TableHead>Followers</TableHead>
                 </TableRow>

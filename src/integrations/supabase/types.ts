@@ -617,6 +617,7 @@ export type Database = {
           phone_number: string | null
           pinterest_followers: number | null
           pinterest_username: string | null
+          primary_social_network: string | null
           profile_id: string
           profile_photo_url: string | null
           state_of_residence: string | null
@@ -642,6 +643,7 @@ export type Database = {
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
+          primary_social_network?: string | null
           profile_id: string
           profile_photo_url?: string | null
           state_of_residence?: string | null
@@ -667,6 +669,7 @@ export type Database = {
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
+          primary_social_network?: string | null
           profile_id?: string
           profile_photo_url?: string | null
           state_of_residence?: string | null
