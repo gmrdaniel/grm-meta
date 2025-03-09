@@ -70,7 +70,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
             phone_number,
             gender,
             category_id,
-            categories(id, name, status)
+            categories (id, name, status)
           ),
           bank_details (
             beneficiary_name,
@@ -90,6 +90,9 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
         .single();
 
       if (error) throw error;
+
+      // Log received data for debugging
+      console.log("Creator detail data:", data);
 
       // Make sure data is properly structured before setting it as state
       if (data) {

@@ -47,6 +47,10 @@ export const PersonalInfoInputs = ({
   const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
   const validCategories = categories?.filter(category => category?.id && category?.name) ?? [];
 
+  // Log for debugging
+  console.log("Categories in PersonalInfoInputs:", validCategories);
+  console.log("Selected category_id:", formData.category_id);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">

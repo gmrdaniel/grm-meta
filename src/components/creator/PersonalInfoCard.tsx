@@ -25,6 +25,9 @@ interface PersonalInfoCardProps {
 }
 
 export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
+  // Debug log to see what's in the personal data
+  console.log("PersonalInfoCard - personalData:", personalData);
+  
   return (
     <Card>
       <CardHeader>

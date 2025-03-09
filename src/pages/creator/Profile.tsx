@@ -77,6 +77,9 @@ export default function CreatorProfile() {
       }
 
       if (data) {
+        // Log the retrieved data to see if category_id is present
+        console.log("Retrieved personal data:", data);
+        
         setFormData({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
