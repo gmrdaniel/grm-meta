@@ -122,10 +122,17 @@ export function CategoriesTable({
         <Pagination className="justify-center">
           <PaginationContent>
             <PaginationItem>
-              <PaginationPrevious
-                onClick={() => onPageChange(Math.max(page - 1, 0))}
-                disabled={page === 0}
-              />
+              {page === 0 ? (
+                <PaginationPrevious 
+                  onClick={() => {}} 
+                  aria-disabled="true"
+                  className="opacity-50 pointer-events-none"
+                />
+              ) : (
+                <PaginationPrevious
+                  onClick={() => onPageChange(Math.max(page - 1, 0))}
+                />
+              )}
             </PaginationItem>
             {Array.from({ length: pageCount }).map((_, index) => (
               <PaginationItem key={index}>
@@ -138,10 +145,17 @@ export function CategoriesTable({
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationNext
-                onClick={() => onPageChange(Math.min(page + 1, pageCount - 1))}
-                disabled={page === pageCount - 1}
-              />
+              {page === pageCount - 1 ? (
+                <PaginationNext 
+                  onClick={() => {}} 
+                  aria-disabled="true"
+                  className="opacity-50 pointer-events-none"
+                />
+              ) : (
+                <PaginationNext
+                  onClick={() => onPageChange(Math.min(page + 1, pageCount - 1))}
+                />
+              )}
             </PaginationItem>
           </PaginationContent>
         </Pagination>
