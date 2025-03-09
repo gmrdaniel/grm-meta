@@ -15,9 +15,10 @@ export interface CreatorDetail {
     country_of_residence: string | null;
     state_of_residence: string | null;
     phone_number: string | null;
-    country_code: string | null; // Ensure country_code is included
+    country_code: string | null;
     gender: string | null;
     category_id: string | null;
+    profile_photo_url: string | null; // Add profile_photo_url field
     categories?: {
       id: string;
       name: string;
@@ -72,6 +73,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
             country_code,
             gender,
             category_id,
+            profile_photo_url,
             categories (id, name, status)
           ),
           bank_details (
@@ -95,6 +97,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
 
       // Log received data for debugging
       console.log("Creator detail data:", data);
+      console.log("Profile photo URL:", data?.personal_data?.profile_photo_url);
 
       // Make sure data is properly structured before setting it as state
       if (data) {
@@ -109,6 +112,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
           country_code: null,
           gender: null,
           category_id: null,
+          profile_photo_url: null,
           categories: null
         };
 

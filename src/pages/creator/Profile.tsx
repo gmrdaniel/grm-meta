@@ -77,8 +77,9 @@ export default function CreatorProfile() {
       }
 
       if (data) {
-        // Log the retrieved data to see if category_id is present
+        // Log the retrieved data to see if profile_photo_url is present
         console.log("Retrieved personal data:", data);
+        console.log("Profile photo URL:", data.profile_photo_url);
         
         setFormData({
           first_name: data.first_name || "",
@@ -159,6 +160,7 @@ export default function CreatorProfile() {
   };
 
   const handlePhotoUpdate = (url: string) => {
+    console.log("Photo updated with URL:", url);
     setFormData((prev) => ({
       ...prev,
       profile_photo_url: url,
