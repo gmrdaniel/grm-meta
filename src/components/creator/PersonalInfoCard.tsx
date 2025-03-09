@@ -10,6 +10,7 @@ interface PersonalData {
   country_of_residence: string | null;
   state_of_residence: string | null;
   phone_number: string | null;
+  country_code: string | null;
   gender: string | null;
   category_id: string | null;
   // Add the category relation
@@ -64,7 +65,7 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
           </div>
           <div>
             <dt className="font-medium text-gray-500">Phone Number</dt>
-            <dd>{personalData?.phone_number || "Not set"}</dd>
+            <dd>{personalData?.country_code ? `${personalData.country_code} ${personalData.phone_number || ""}` : (personalData?.phone_number || "Not set")}</dd>
           </div>
           <div>
             <dt className="font-medium text-gray-500">Gender</dt>

@@ -15,6 +15,7 @@ export interface CreatorDetail {
     country_of_residence: string | null;
     state_of_residence: string | null;
     phone_number: string | null;
+    country_code: string | null; // Ensure country_code is included
     gender: string | null;
     category_id: string | null;
     categories?: {
@@ -68,6 +69,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
             country_of_residence,
             state_of_residence,
             phone_number,
+            country_code,
             gender,
             category_id,
             categories (id, name, status)
@@ -104,6 +106,7 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
           country_of_residence: null,
           state_of_residence: null,
           phone_number: null,
+          country_code: null,
           gender: null,
           category_id: null,
           categories: null
