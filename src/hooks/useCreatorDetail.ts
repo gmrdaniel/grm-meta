@@ -20,13 +20,6 @@ export interface CreatorDetail {
     category_id: string | null;
     profile_photo_url: string | null;
     primary_social_network: string | null;
-    instagram_followers: number | null;
-    tiktok_username: string | null;
-    tiktok_followers: number | null;
-    youtube_username: string | null;
-    youtube_followers: number | null;
-    pinterest_username: string | null;
-    pinterest_followers: number | null;
     categories?: {
       id: string;
       name: string;
@@ -83,13 +76,6 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
             category_id,
             profile_photo_url,
             primary_social_network,
-            instagram_followers,
-            tiktok_username,
-            tiktok_followers,
-            youtube_username,
-            youtube_followers,
-            pinterest_username,
-            pinterest_followers,
             categories (id, name, status)
           ),
           bank_details (
@@ -115,12 +101,6 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
       console.log("Creator detail data:", data);
       console.log("Profile photo URL:", data?.personal_data?.profile_photo_url);
       console.log("Primary social network:", data?.personal_data?.primary_social_network);
-      console.log("Social media followers data:", {
-        instagram: data?.personal_data?.instagram_followers,
-        tiktok: data?.personal_data?.tiktok_followers,
-        youtube: data?.personal_data?.youtube_followers,
-        pinterest: data?.personal_data?.pinterest_followers
-      });
 
       // Make sure data is properly structured before setting it as state
       if (data) {
@@ -137,13 +117,6 @@ export const useCreatorDetail = (creatorId: string | undefined) => {
           category_id: null,
           profile_photo_url: null,
           primary_social_network: null,
-          instagram_followers: null,
-          tiktok_username: null,
-          tiktok_followers: null,
-          youtube_username: null,
-          youtube_followers: null,
-          pinterest_username: null,
-          pinterest_followers: null,
           categories: null
         };
 
