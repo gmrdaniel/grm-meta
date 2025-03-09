@@ -24,6 +24,7 @@ import CreatorRates from "./pages/admin/CreatorRates";
 import Utilities from "./pages/admin/Utilities";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import Catalogs from "@/pages/admin/Catalogs";
+import Categories from "@/pages/admin/Categories";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <Catalogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/categories"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <Categories />
                   </ProtectedRoute>
                 }
               />

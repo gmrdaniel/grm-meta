@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Network } from "lucide-react";
+import { Settings, Network, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Catalogs = () => {
@@ -45,6 +45,32 @@ const Catalogs = () => {
                       onClick={() => navigate('/admin/services')}
                     >
                       Ir a Servicios
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                {/* Categorías Card */}
+                <Card className="hover:shadow-md transition-shadow border border-gray-200">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg">Categorías</CardTitle>
+                      <Tag className="text-gray-500 h-5 w-5" />
+                    </div>
+                    <CardDescription>
+                      Administra las categorías de creadores
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <p className="text-sm text-gray-500">
+                      Gestiona las categorías para clasificar a los creadores.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full mt-2" 
+                      onClick={() => navigate('/admin/categories')}
+                    >
+                      Ir a Categorías
                     </Button>
                   </CardFooter>
                 </Card>
