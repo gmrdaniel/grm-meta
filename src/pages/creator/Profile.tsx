@@ -20,23 +20,6 @@ const COUNTRIES = [
   { label: "Estados Unidos", value: "EU", code: "+1" },
 ];
 
-const CATEGORIES = [
-  "Moda y Belleza",
-  "Fitness y Salud",
-  "Tecnología",
-  "Viajes",
-  "Gastronomía",
-  "Gaming",
-  "Educación",
-  "Finanzas y Negocios",
-  "Entretenimiento",
-  "Arte y Diseño",
-  "Lifestyle",
-  "mama",
-  "papa",
-  "niños",
-];
-
 const GENDERS = [
   { label: "Masculino", value: "Masculino" },
   { label: "Femenino", value: "Femenino" },
@@ -63,7 +46,7 @@ export default function CreatorProfile() {
     youtube_followers: "",
     pinterest_username: "",
     pinterest_followers: "",
-    category: "",
+    category_id: "",
     gender: "",
     profile_photo_url: "",
   });
@@ -78,7 +61,7 @@ export default function CreatorProfile() {
     try {
       const { data, error } = await supabase
         .from("personal_data")
-        .select("*")
+        .select("*, categories:category_id(id, name)")
         .eq("profile_id", user?.id)
         .single();
 
@@ -108,7 +91,7 @@ export default function CreatorProfile() {
           youtube_followers: data.youtube_followers?.toString() || "",
           pinterest_username: data.pinterest_username || "",
           pinterest_followers: data.pinterest_followers?.toString() || "",
-          category: data.category || "",
+          category_id: data.category_id || "",
           gender: data.gender || "",
           profile_photo_url: data.profile_photo_url || "",
         });
@@ -163,6 +146,7 @@ export default function CreatorProfile() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      // This special handling is only for country_code, not for category_id
       ...(name === "country_code" && {
         country_code: COUNTRIES.find((c) => c.value === value)?.code || "",
       }),
@@ -229,7 +213,6 @@ export default function CreatorProfile() {
                 handleInputChange={handleInputChange}
                 handleSelectChange={handleSelectChange}
                 COUNTRIES={COUNTRIES}
-                CATEGORIES={CATEGORIES}
                 GENDERS={GENDERS}
               />
 

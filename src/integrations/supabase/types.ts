@@ -603,7 +603,7 @@ export type Database = {
       personal_data: {
         Row: {
           birth_date: string | null
-          category: string | null
+          category_id: string | null
           country_code: string | null
           country_of_residence: string | null
           created_at: string
@@ -613,6 +613,7 @@ export type Database = {
           instagram_followers: number | null
           instagram_username: string | null
           last_name: string | null
+          old_category: string | null
           phone_number: string | null
           pinterest_followers: number | null
           pinterest_username: string | null
@@ -627,7 +628,7 @@ export type Database = {
         }
         Insert: {
           birth_date?: string | null
-          category?: string | null
+          category_id?: string | null
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
@@ -637,6 +638,7 @@ export type Database = {
           instagram_followers?: number | null
           instagram_username?: string | null
           last_name?: string | null
+          old_category?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
@@ -651,7 +653,7 @@ export type Database = {
         }
         Update: {
           birth_date?: string | null
-          category?: string | null
+          category_id?: string | null
           country_code?: string | null
           country_of_residence?: string | null
           created_at?: string
@@ -661,6 +663,7 @@ export type Database = {
           instagram_followers?: number | null
           instagram_username?: string | null
           last_name?: string | null
+          old_category?: string | null
           phone_number?: string | null
           pinterest_followers?: number | null
           pinterest_username?: string | null
@@ -674,6 +677,13 @@ export type Database = {
           youtube_username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "personal_data_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "personal_data_profile_id_fkey"
             columns: ["profile_id"]

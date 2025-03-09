@@ -11,7 +11,13 @@ interface PersonalData {
   state_of_residence: string | null;
   phone_number: string | null;
   gender: string | null;
-  category: string | null;
+  category_id: string | null;
+  // Add the category relation
+  categories?: {
+    id: string;
+    name: string;
+    status: string;
+  } | null;
 }
 
 interface PersonalInfoCardProps {
@@ -63,7 +69,7 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
           </div>
           <div>
             <dt className="font-medium text-gray-500">Category</dt>
-            <dd>{personalData?.category || "Not set"}</dd>
+            <dd>{personalData?.categories?.name || "Not set"}</dd>
           </div>
         </dl>
       </CardContent>

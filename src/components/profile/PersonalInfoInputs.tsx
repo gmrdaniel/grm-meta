@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -8,6 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Category {
+  id: string;
+  name: string;
+  status: string;
+}
 
 interface PersonalInfoInputsProps {
   formData: {
@@ -16,13 +24,12 @@ interface PersonalInfoInputsProps {
     state_of_residence: string;
     country_code: string;
     phone_number: string;
-    category: string;
+    category_id: string;
     gender: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   COUNTRIES: Array<{ label: string; value: string; code: string }>;
-  CATEGORIES: string[];
   GENDERS: Array<{ label: string; value: string }>;
 }
 
@@ -31,12 +38,42 @@ export const PersonalInfoInputs = ({
   handleInputChange,
   handleSelectChange,
   COUNTRIES,
-  CATEGORIES,
   GENDERS,
 }: PersonalInfoInputsProps) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch categories from the database
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .eq("status", "active")
+          .order("name");
+
+        if (error) {
+          console.error("Error fetching categories:", error);
+          return;
+        }
+
+        if (data) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   // Filtrar datos vacíos y validar arrays
   const validCountries = COUNTRIES?.filter(country => country?.value && country?.code) ?? [];
-  const validCategories = CATEGORIES?.filter(Boolean) ?? [];
   const validGenders = GENDERS?.filter(gender => gender?.value) ?? [];
 
   return (
@@ -118,20 +155,24 @@ export const PersonalInfoInputs = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category">Categoría</Label>
+        <Label htmlFor="category_id">Categoría</Label>
         <Select 
-          value={formData.category || ''} 
-          onValueChange={(value) => handleSelectChange("category", value)}
+          value={formData.category_id || ''} 
+          onValueChange={(value) => handleSelectChange("category_id", value)}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona tu categoría" />
           </SelectTrigger>
           <SelectContent>
-            {validCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
+            {loading ? (
+              <SelectItem value="loading" disabled>Cargando categorías...</SelectItem>
+            ) : (
+              categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>
