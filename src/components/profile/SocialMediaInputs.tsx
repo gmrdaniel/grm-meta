@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -28,7 +29,11 @@ export const SocialMediaInputs = ({
         <Label className="mb-2 block">Red Social Principal</Label>
       </div>
       
-      <RadioGroup value={formData.primary_social_network} onValueChange={handleRadioChange} className="flex flex-col space-y-4">
+      <RadioGroup 
+        value={formData.primary_social_network || ""}
+        onValueChange={handleRadioChange} 
+        className="flex flex-col space-y-4"
+      >
         {/* Instagram Row */}
         <div className="grid grid-cols-12 gap-3 items-center">
           <div className="col-span-2">

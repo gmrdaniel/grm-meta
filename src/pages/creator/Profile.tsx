@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -78,7 +77,6 @@ export default function CreatorProfile() {
       }
 
       if (data) {
-        // Log the retrieved data
         console.log("Retrieved personal data:", data);
         console.log("Profile photo URL:", data.profile_photo_url);
         console.log("Primary social network:", data.primary_social_network);
@@ -116,16 +114,23 @@ export default function CreatorProfile() {
     setLoading(true);
 
     try {
+      const submissionData = {
+        ...formData,
+        instagram_followers: parseInt(formData.instagram_followers) || 0,
+        tiktok_followers: parseInt(formData.tiktok_followers) || 0,
+        youtube_followers: parseInt(formData.youtube_followers) || 0,
+        pinterest_followers: parseInt(formData.pinterest_followers) || 0,
+        primary_social_network: formData.primary_social_network || null
+      };
+
+      console.log("Submitting data:", submissionData);
+
       const { error } = await supabase
         .from("personal_data")
         .upsert(
           {
             profile_id: user?.id,
-            ...formData,
-            instagram_followers: parseInt(formData.instagram_followers) || 0,
-            tiktok_followers: parseInt(formData.tiktok_followers) || 0,
-            youtube_followers: parseInt(formData.youtube_followers) || 0,
-            pinterest_followers: parseInt(formData.pinterest_followers) || 0,
+            ...submissionData,
           },
           {
             onConflict: "profile_id",
@@ -155,7 +160,6 @@ export default function CreatorProfile() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      // This special handling is only for country_code, not for category_id
       ...(name === "country_of_residence" && {
         country_code: COUNTRIES.find((c) => c.value === value)?.code || "",
       }),
