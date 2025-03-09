@@ -15,6 +15,13 @@ interface PersonalData {
   category_id: string | null;
   profile_photo_url: string | null;
   primary_social_network: string | null;
+  instagram_followers: number | null;
+  tiktok_username: string | null;
+  tiktok_followers: number | null;
+  youtube_username: string | null;
+  youtube_followers: number | null;
+  pinterest_username: string | null;
+  pinterest_followers: number | null;
   // Add the category relation
   categories?: {
     id: string;
@@ -38,6 +45,34 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
     // Capitalize first letter
     return network.charAt(0).toUpperCase() + network.slice(1);
   };
+
+  // Get network data based on available information
+  const socialNetworks = [
+    {
+      name: "Instagram",
+      username: personalData?.instagram_username,
+      followers: personalData?.instagram_followers,
+      isPrimary: personalData?.primary_social_network === "instagram"
+    },
+    {
+      name: "TikTok",
+      username: personalData?.tiktok_username,
+      followers: personalData?.tiktok_followers,
+      isPrimary: personalData?.primary_social_network === "tiktok"
+    },
+    {
+      name: "YouTube",
+      username: personalData?.youtube_username,
+      followers: personalData?.youtube_followers,
+      isPrimary: personalData?.primary_social_network === "youtube"
+    },
+    {
+      name: "Pinterest",
+      username: personalData?.pinterest_username,
+      followers: personalData?.pinterest_followers,
+      isPrimary: personalData?.primary_social_network === "pinterest"
+    }
+  ].filter(network => network.username); // Only show networks with usernames
   
   return (
     <Card>
@@ -56,10 +91,6 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
           <div>
             <dt className="font-medium text-gray-500">Last Name</dt>
             <dd>{personalData?.last_name || "Not set"}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-gray-500">Instagram Username</dt>
-            <dd>{personalData?.instagram_username || "Not set"}</dd>
           </div>
           <div>
             <dt className="font-medium text-gray-500">Birth Date</dt>
@@ -85,11 +116,44 @@ export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
             <dt className="font-medium text-gray-500">Category</dt>
             <dd>{personalData?.categories?.name || "Not set"}</dd>
           </div>
-          <div>
-            <dt className="font-medium text-gray-500">Primary Social Network</dt>
-            <dd>{formatSocialNetwork(personalData?.primary_social_network)}</dd>
-          </div>
         </dl>
+
+        {socialNetworks.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-medium mb-3">Social Networks</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Network</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Followers</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {socialNetworks.map((network, index) => (
+                    <tr key={index}>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {network.name} 
+                          {network.isPrimary && (
+                            <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Primary</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {network.username || "Not set"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {network.followers ? network.followers.toLocaleString() : "0"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
