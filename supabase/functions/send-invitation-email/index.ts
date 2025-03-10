@@ -29,14 +29,14 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Choose recipient email based on environment
     const recipientEmail = isProduction 
-      ? "onboarding@laneta.com" 
+      ? "onboarding@crm.laneta.com"
       : "onboarding@resend.dev";
     
     console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
     console.log(`Sending invitation email to: ${recipientEmail} (original: ${email})`);
 
     const emailResponse = await resend.emails.send({
-      from: "Team La Neta <onboarding@laneta.com>",
+      from: "Team La Neta <onboarding@crm.laneta.com>",
       to: [recipientEmail],
       subject: "Invitación para unirte como creador",
       html: `
