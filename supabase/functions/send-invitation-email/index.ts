@@ -26,17 +26,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Determine the environment from request headers or env variables
     const isProduction = req.headers.get("x-environment") === "production" ||
                          Deno.env.get("ENVIRONMENT") === "production";
-    
+
     // Choose recipient email based on environment
-    const recipientEmail = isProduction 
-      ? "onboarding@crm.laneta.com"
-      : "onboarding@crm.laneta.com";
-    
+    const recipientEmail = isProduction
+      ? "onboarding@laneta.com"
+      : "onboarding@resend.dev";
+
     console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
     console.log(`Sending invitation email to: ${recipientEmail} (original: ${email})`);
 
     const emailResponse = await resend.emails.send({
-      from: "Team La Neta <onboarding@crm.laneta.com>",
+      from: "Team La Neta <onboarding@laneta.com>",
       to: [recipientEmail],
       subject: "Invitación para unirte como creador",
       html: `
