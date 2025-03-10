@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Choose recipient email based on environment
     const recipientEmail = isProduction 
       ? "onboarding@crm.laneta.com"
-      : "onboarding@resend.dev";
+      : "onboarding@crm.laneta.com";
     
     console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
     console.log(`Sending invitation email to: ${recipientEmail} (original: ${email})`);
