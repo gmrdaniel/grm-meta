@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Folder, FolderOpen } from "lucide-react";
+import { LayoutDashboard, UserCircle, Wallet, Folder, FolderOpen, Users } from "lucide-react";
 import { NavigationItem } from "./types";
 
 export const creatorNavigationItems: NavigationItem[] = [
@@ -29,5 +29,11 @@ export const adminNavigationItems: NavigationItem[] = [
     label: "Proyectos",
     shortLabel: "Proyectos",
     to: "/admin/projects",
+  },
+  {
+    icon: <Users size={24} />,
+    label: "Inventario",
+    shortLabel: "Inventario",
+    to: "/admin/inventory",
   },
 ];

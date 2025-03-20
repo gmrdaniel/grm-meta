@@ -10,7 +10,8 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/projects";
-import AdminProjectDetail from "./pages/admin/projects/[id]"; // Import the project detail page
+import AdminProjectDetail from "./pages/admin/projects/[id]";
+import AdminInventory from "./pages/admin/inventory";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 
@@ -50,6 +51,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminProjectDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/inventory"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminInventory />
                   </ProtectedRoute>
                 }
               />

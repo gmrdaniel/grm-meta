@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      inventario_creadores: {
+        Row: {
+          apellido: string
+          correo: string
+          estatus: string | null
+          fecha_creacion: string | null
+          id: string
+          lada_telefono: string | null
+          nombre: string
+          page_facebook: string | null
+          telefono: string | null
+          usuario_pinterest: string | null
+          usuario_tiktok: string | null
+        }
+        Insert: {
+          apellido: string
+          correo: string
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre: string
+          page_facebook?: string | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+        }
+        Update: {
+          apellido?: string
+          correo?: string
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre?: string
+          page_facebook?: string | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
