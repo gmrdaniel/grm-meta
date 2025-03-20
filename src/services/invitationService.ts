@@ -1,5 +1,6 @@
+
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
-import { CreatorInvitation } from "@/types/invitation";
+import { CreatorInvitation, CreateInvitationData } from "@/types/invitation";
 
 /**
  * Fetch an invitation by its code
@@ -70,5 +71,77 @@ export const fetchInvitationByCode = async (code: string): Promise<CreatorInvita
   } catch (error) {
     console.error('Error in fetchInvitationByCode:', error);
     throw error;
+  }
+};
+
+/**
+ * Fetch all invitations
+ */
+export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
+  const { data, error } = await supabase
+    .from('creator_invitations')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching invitations:', error);
+    throw new Error(error.message);
+  }
+  
+  return data as CreatorInvitation[];
+};
+
+/**
+ * Create a new invitation
+ */
+export const createInvitation = async (invitation: CreateInvitationData): Promise<CreatorInvitation> => {
+  const { data, error } = await supabase
+    .from('creator_invitations')
+    .insert(invitation)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating invitation:', error);
+    throw new Error(error.message);
+  }
+  
+  return data as CreatorInvitation;
+};
+
+/**
+ * Update invitation status
+ */
+export const updateInvitationStatus = async (
+  id: string, 
+  status: CreatorInvitation['status']
+): Promise<CreatorInvitation> => {
+  const { data, error } = await supabase
+    .from('creator_invitations')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating invitation status:', error);
+    throw new Error(error.message);
+  }
+  
+  return data as CreatorInvitation;
+};
+
+/**
+ * Delete an invitation
+ */
+export const deleteInvitation = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('creator_invitations')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting invitation:', error);
+    throw new Error(error.message);
   }
 };

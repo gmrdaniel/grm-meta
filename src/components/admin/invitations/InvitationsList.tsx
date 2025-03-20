@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchInvitations, updateInvitationStatus, deleteInvitation } from "@/services/invitationService";
@@ -126,7 +125,7 @@ const InvitationsList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invitations.map((invitation) => (
+          {invitations.map((invitation: CreatorInvitation) => (
             <TableRow key={invitation.id}>
               <TableCell className="font-medium">{invitation.full_name}</TableCell>
               <TableCell>{invitation.email}</TableCell>
@@ -184,7 +183,6 @@ const InvitationsList = () => {
                     </>
                   )}
 
-                  {/* Reset status button - only shown for non-pending invitations */}
                   {invitation.status !== "pending" && (
                     <Button
                       variant="ghost"
