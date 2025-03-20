@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchInvitations, updateInvitationStatus, deleteInvitation } from "@/services/invitationService";
-import { Check, Copy, MailCheck, Trash2, X } from "lucide-react";
+import { Check, Copy, MailCheck, RefreshCw, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -80,6 +80,10 @@ const InvitationsList = () => {
     navigator.clipboard.writeText(code)
       .then(() => toast.success("Invitation code copied to clipboard"))
       .catch(() => toast.error("Failed to copy invitation code"));
+  };
+
+  const resetInvitationStatus = (id: string) => {
+    handleStatusChange(id, "pending");
   };
 
   const getStatusBadge = (status: string) => {
@@ -178,6 +182,19 @@ const InvitationsList = () => {
                         <X size={16} />
                       </Button>
                     </>
+                  )}
+
+                  {/* Reset status button - only shown for non-pending invitations */}
+                  {invitation.status !== "pending" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => resetInvitationStatus(invitation.id)}
+                      className="text-blue-600"
+                      title="Reset to pending"
+                    >
+                      <RefreshCw size={16} />
+                    </Button>
                   )}
                   
                   <AlertDialog open={selectedInvitation === invitation.id} onOpenChange={(open) => !open && setSelectedInvitation(null)}>
