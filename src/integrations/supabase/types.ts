@@ -204,7 +204,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_table_definition: {
+        Args: {
+          table_name: string
+        }
+        Returns: string
+      }
+      update_stages_order: {
+        Args: {
+          stages_data: Json[]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       user_role: "admin" | "creator"

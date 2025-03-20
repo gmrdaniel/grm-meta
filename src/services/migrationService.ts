@@ -19,7 +19,9 @@ export const generateMigrationScripts = async (): Promise<{ tableName: string; s
     
     // Generate create table scripts for each table
     for (const tableName of tables) {
-      const { data, error } = await supabase.rpc('get_table_definition', { table_name: tableName });
+      const { data, error } = await supabase.rpc('get_table_definition', { 
+        table_name: tableName 
+      });
       
       if (error) {
         console.error(`Error fetching definition for table ${tableName}:`, error);
