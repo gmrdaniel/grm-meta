@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { fetchInvitationByCode } from "@/services/invitationService";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -47,22 +48,21 @@ const MetaWelcomePage = () => {
         const invitationData = await fetchInvitationByCode(id);
         console.log('MetaWelcomePage - Service function result:', invitationData);
         
-        // Method 3: Try raw SQL query if needed
+        // Method 3: Try using our custom RPC function
         if (!invitationData && !directData?.length) {
-          console.log('MetaWelcomePage - Trying raw SQL query as last resort');
-          const { data: rawData, error: rawError } = await supabase.rpc('find_invitation_by_code', { 
-            code_param: id 
-          });
+          console.log('MetaWelcomePage - Trying custom RPC function');
+          const { data: rpcData, error: rpcError } = await findInvitationByCode(id);
           
-          console.log('MetaWelcomePage - Raw SQL query result:', { data: rawData, error: rawError });
+          console.log('MetaWelcomePage - Custom RPC function result:', { data: rpcData, error: rpcError });
           
-          if (rawData && rawData.length > 0) {
-            console.log('MetaWelcomePage - Found invitation with raw SQL');
-            setInvitation(rawData[0]);
+          if (rpcData && rpcData.length > 0) {
+            console.log('MetaWelcomePage - Found invitation with custom RPC function');
+            const foundInvitation = rpcData[0] as unknown as CreatorInvitation;
+            setInvitation(foundInvitation);
             setFormData({
-              fullName: rawData[0].full_name,
-              email: rawData[0].email,
-              socialMediaHandle: rawData[0].social_media_handle || '',
+              fullName: foundInvitation.full_name || '',
+              email: foundInvitation.email || '',
+              socialMediaHandle: foundInvitation.social_media_handle || '',
               termsAccepted: false
             });
             setLoading(false);
@@ -71,13 +71,13 @@ const MetaWelcomePage = () => {
         }
 
         // Use the results from service function or direct query
-        const foundInvitation = invitationData || (directData?.length ? directData[0] : null);
+        const foundInvitation = invitationData || (directData?.length ? directData[0] as CreatorInvitation : null);
         
         if (foundInvitation) {
           setInvitation(foundInvitation);
           setFormData({
-            fullName: foundInvitation.full_name,
-            email: foundInvitation.email,
+            fullName: foundInvitation.full_name || '',
+            email: foundInvitation.email || '',
             socialMediaHandle: foundInvitation.social_media_handle || '',
             termsAccepted: false
           });

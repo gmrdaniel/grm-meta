@@ -260,6 +260,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_invitation_by_code: {
+        Args: {
+          code_param: string
+        }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          invitation_code: string
+          invitation_type: string
+          invitation_url: string
+          project_id: string | null
+          social_media_handle: string | null
+          social_media_type: string | null
+          status: string
+          updated_at: string
+        }[]
+      }
       get_table_definition: {
         Args: {
           table_name: string
