@@ -12,8 +12,10 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/projects";
 import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
+import AdminInvitations from "./pages/admin/invitations";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
+import InvitationPage from "./pages/invite/[url]/[id]";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,9 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Public routes */}
+              <Route path="/invite/:url/:id" element={<InvitationPage />} />
               
               {/* Admin routes */}
               <Route
@@ -59,6 +64,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminInventory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/invitations"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminInvitations />
                   </ProtectedRoute>
                 }
               />

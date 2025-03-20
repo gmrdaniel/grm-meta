@@ -1,45 +1,38 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Folder, FolderOpen, Users, Database } from "lucide-react";
-import { NavigationItem } from "./types";
+import { Home, Package, PenSquare, User, Users, Mail } from "lucide-react";
 
-export const creatorNavigationItems: NavigationItem[] = [
+export const adminNavigationItems = [
   {
-    icon: <UserCircle size={24} />,
-    label: "Perfil",
-    shortLabel: "Perfil",
-    to: "/creator/profile",
-  },
-  {
-    icon: <Wallet size={24} />,
-    label: "Datos Bancarios",
-    shortLabel: "Banco",
-    to: "/creator/bankDetail",
-  },
-];
-
-export const adminNavigationItems: NavigationItem[] = [
-  {
-    icon: <LayoutDashboard size={24} />,
     label: "Dashboard",
-    shortLabel: "Dashboard",
+    icon: Home,
     to: "/admin/dashboard",
   },
   {
-    icon: <FolderOpen size={24} />,
-    label: "Proyectos",
-    shortLabel: "Proyectos",
+    label: "Projects",
+    icon: PenSquare,
     to: "/admin/projects",
   },
   {
-    icon: <Users size={24} />,
-    label: "Inventario",
-    shortLabel: "Inventario",
+    label: "Inventory",
+    icon: Package,
     to: "/admin/inventory",
   },
   {
-    icon: <Database size={24} />,
-    label: "Migraciones",
-    shortLabel: "Migraciones",
-    to: "/admin/migrations",
+    label: "Invitations",
+    icon: Mail,
+    to: "/admin/invitations",
+  }
+];
+
+export const creatorNavigationItems = [
+  {
+    label: "Dashboard",
+    icon: Home,
+    to: "/creator/dashboard",
   },
+  {
+    label: "Profile",
+    icon: User,
+    to: "/creator/profile",
+  }
 ];

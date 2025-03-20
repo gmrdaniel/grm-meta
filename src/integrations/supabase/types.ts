@@ -9,6 +9,56 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      creator_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          invitation_type: string
+          invitation_url: string
+          project_id: string | null
+          social_media_handle: string | null
+          social_media_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          invitation_type: string
+          invitation_url: string
+          project_id?: string | null
+          social_media_handle?: string | null
+          social_media_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          invitation_type?: string
+          invitation_url?: string
+          project_id?: string | null
+          social_media_handle?: string | null
+          social_media_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventario_creadores: {
         Row: {
           apellido: string

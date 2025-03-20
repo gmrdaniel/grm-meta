@@ -13,6 +13,7 @@ const corsHeaders = {
 interface InvitationEmailRequest {
   email: string;
   invitationUrl: string;
+  name?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -21,7 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, invitationUrl }: InvitationEmailRequest = await req.json();
+    const { email, invitationUrl, name }: InvitationEmailRequest = await req.json();
     
     // Determine the environment from request headers or env variables
     const isProduction = req.headers.get("x-environment") === "production" ||
@@ -29,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Choose recipient email based on environment
     const recipientEmail = isProduction
-      ? "onboarding@laneta.com"
+      ? email
       : "onboarding@resend.dev";
 
     console.log(`Environment: ${isProduction ? 'production' : 'development'}`);
@@ -41,6 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
       subject: "Invitación para unirte como creador",
       html: `
         <h1>¡Has sido invitado!</h1>
+        <p>${name ? `Hola ${name},` : 'Hola,'}</p>
         <p>Te han invitado a unirte como creador. Para completar tu registro, haz clic en el siguiente enlace:</p>
         <a href="${invitationUrl}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">
           Completar registro
