@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
+import { createProject, updateProject } from "@/services/projectService";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
@@ -38,22 +39,19 @@ export function ProjectForm({ onSuccess, defaultValues, projectId }: ProjectForm
     try {
       setLoading(true);
       
-      // Since we can't access Supabase tables, mock the create/update operation
-      console.log(isEditing ? "Updating project:" : "Creating project:", {
-        ...values,
-        id: projectId || crypto.randomUUID()
-      });
+      if (isEditing && projectId) {
+        await updateProject(projectId, values);
+        toast.success("Proyecto actualizado correctamente");
+      } else {
+        await createProject(values);
+        toast.success("Proyecto creado correctamente");
+      }
       
-      // Mock API delay
-      setTimeout(() => {
-        toast.success(isEditing ? "Proyecto actualizado correctamente" : "Proyecto creado correctamente");
-        form.reset();
-        onSuccess();
-        setLoading(false);
-      }, 1000);
-      
+      form.reset();
+      onSuccess();
     } catch (error: any) {
       toast.error(`Error al ${isEditing ? "actualizar" : "crear"} proyecto: ${error.message}`);
+    } finally {
       setLoading(false);
     }
   };

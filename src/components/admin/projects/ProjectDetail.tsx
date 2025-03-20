@@ -9,15 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
+import { updateProject } from "@/services/projectService";
 
 interface ProjectDetailProps {
   project: Project;
+  onProjectUpdated?: () => void;
 }
 
-export function ProjectDetail({ project }: ProjectDetailProps) {
+export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [projectName, setProjectName] = useState(project.name);
-  const [projectStatus, setProjectStatus] = useState(project.status);
+  const [projectStatus, setProjectStatus] = useState<Project["status"]>(project.status);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("stages");
   const [reload, setReload] = useState(0);
@@ -26,22 +28,19 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     try {
       setLoading(true);
       
-      // Since we can't access the Supabase database yet, we'll just mock the update
-      console.log("Updating project:", {
-        id: project.id,
+      await updateProject(project.id, {
         name: projectName,
         status: projectStatus
       });
       
-      // Mock API delay
-      setTimeout(() => {
-        toast.success("Proyecto actualizado correctamente");
-        setIsEditing(false);
-        setLoading(false);
-      }, 1000);
-      
+      toast.success("Proyecto actualizado correctamente");
+      setIsEditing(false);
+      if (onProjectUpdated) {
+        onProjectUpdated();
+      }
     } catch (error: any) {
       toast.error(`Error al actualizar proyecto: ${error.message}`);
+    } finally {
       setLoading(false);
     }
   };

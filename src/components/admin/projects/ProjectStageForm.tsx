@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/projectService";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
@@ -50,24 +51,34 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
     try {
       setLoading(true);
       
-      // For now, we'll just mock the saving process
-      // In a real implementation, we would insert/update in the project_stages table
-      console.log("Saving stage:", {
-        ...values,
-        project_id: projectId,
-        id: stageId || crypto.randomUUID(),
-        order_index: defaultValues?.order_index || 1
-      });
+      // Get next order index if creating new stage
+      let orderIndex = defaultValues?.order_index || 1;
       
-      setTimeout(() => {
-        toast.success(isEditing ? "Etapa actualizada correctamente" : "Etapa creada correctamente");
-        form.reset();
-        onSuccess();
-        setLoading(false);
-      }, 1000);
+      if (!isEditing) {
+        const stages = await fetchProjectStages(projectId);
+        orderIndex = stages.length > 0 ? Math.max(...stages.map(s => s.order_index)) + 1 : 1;
+      }
       
+      if (isEditing && stageId) {
+        await updateProjectStage(stageId, {
+          ...values,
+          project_id: projectId
+        });
+        toast.success("Etapa actualizada correctamente");
+      } else {
+        await createProjectStage({
+          ...values,
+          project_id: projectId,
+          order_index: orderIndex
+        });
+        toast.success("Etapa creada correctamente");
+      }
+      
+      form.reset();
+      onSuccess();
     } catch (error: any) {
       toast.error(`Error al ${isEditing ? "actualizar" : "crear"} etapa: ${error.message}`);
+    } finally {
       setLoading(false);
     }
   };

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,56 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchProjects } from "@/services/projectService";
+import { useQuery } from "@tanstack/react-query";
 
 export function ProjectsList() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  
+  const { data: projects, isLoading, error } = useQuery({
+    queryKey: ['projects'],
+    queryFn: fetchProjects
+  });
+  
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        
-        // Mock data for now
-        const mockProjects: Project[] = [
-          {
-            id: "1",
-            name: "Marketing Campaign",
-            status: "active",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            stage_count: 3 // Add the stage_count property
-          },
-          {
-            id: "2",
-            name: "Product Launch",
-            status: "draft",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            stage_count: 2 // Add the stage_count property
-          },
-          {
-            id: "3",
-            name: "Customer Onboarding Flow",
-            status: "pending",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            stage_count: 4 // Add the stage_count property
-          }
-        ];
-        
-        setProjects(mockProjects);
-      } catch (error: any) {
-        toast.error(`Error al cargar proyectos: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
+    if (error) {
+      toast.error(`Error al cargar proyectos: ${(error as Error).message}`);
+    }
+  }, [error]);
   
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -88,7 +55,7 @@ export function ProjectsList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
                   <div className="flex justify-center">
@@ -96,14 +63,14 @@ export function ProjectsList() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : projects.length === 0 ? (
+            ) : projects?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
                   No hay proyectos creados aún
                 </TableCell>
               </TableRow>
             ) : (
-              projects.map((project) => (
+              projects?.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{getStatusBadge(project.status)}</TableCell>
@@ -119,7 +86,11 @@ export function ProjectsList() {
                       >
                         <Eye size={16} />
                       </Button>
-                      <Button size="sm" variant="ghost">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => navigate(`/admin/projects/${project.id}?edit=true`)}
+                      >
                         <Edit size={16} />
                       </Button>
                     </div>
