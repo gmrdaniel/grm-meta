@@ -16,14 +16,9 @@ import PendingServices from "./pages/creator/PendingServices";
 import Campaigns from "./pages/creator/Campaigns";
 import Creators from "./pages/admin/Creators";
 import CreatorDetail from "./pages/admin/CreatorDetail";
-import Services from "./pages/admin/Services";
-import CreatorServices from "./pages/admin/CreatorServices";
-import ServicePayments from "./pages/admin/ServicePayments";
-import PostTypes from "./pages/admin/PostTypes";
 import CreatorRates from "./pages/admin/CreatorRates";
 import Utilities from "./pages/admin/Utilities";
 import AuditLogs from "@/pages/admin/AuditLogs";
-import Categories from "@/pages/admin/Categories";
 
 const queryClient = new QueryClient();
 
@@ -61,46 +56,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <CreatorDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/categories"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <Categories />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/services"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <Services />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/creator-services"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <CreatorServices />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/service-payments"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <ServicePayments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/post-types"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <PostTypes />
                   </ProtectedRoute>
                 }
               />
