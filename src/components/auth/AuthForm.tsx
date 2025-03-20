@@ -48,25 +48,7 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
         console.log("Profile data:", profileData);
 
         if (profileData.role === 'creator') {
-          const { count, error: servicesError } = await supabase
-            .from("creator_services")
-            .select("*", { count: 'exact', head: true })
-            .eq("profile_id", authData.user?.id)
-            .eq("terms_accepted", false)
-            .eq("status", "pendiente");
-
-          if (servicesError) {
-            console.error("Services error:", servicesError);
-            throw servicesError;
-          }
-
-          console.log("Pending services count:", count);
-
-          if (count && count > 0) {
-            navigate('/creator/pending-services');
-          } else {
-            navigate('/creator/dashboard');
-          }
+          navigate('/creator/dashboard');
         } else if (profileData.role === 'admin') {
           navigate('/admin/dashboard');
         } else {

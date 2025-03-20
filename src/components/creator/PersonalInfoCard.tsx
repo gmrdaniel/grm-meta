@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PersonalData {
   first_name: string | null;
@@ -33,20 +34,55 @@ interface PersonalData {
 
 interface PersonalInfoCardProps {
   personalData?: PersonalData;
+  isLoading?: boolean; // Make isLoading optional
 }
 
-export function PersonalInfoCard({ personalData }: PersonalInfoCardProps) {
+export function PersonalInfoCard({ personalData, isLoading = false }: PersonalInfoCardProps) {
   // Debug log to see what's in the personal data
   console.log("PersonalInfoCard - personalData:", personalData);
   console.log("Primary social network:", personalData?.primary_social_network);
   
   // Get all social networks with their usernames and followers
-  const socialNetworks = [
+  const socialNetworks = !isLoading && personalData ? [
     { name: "instagram", label: "Instagram", username: personalData?.instagram_username, followers: personalData?.instagram_followers },
     { name: "tiktok", label: "TikTok", username: personalData?.tiktok_username, followers: personalData?.tiktok_followers },
     { name: "youtube", label: "YouTube", username: personalData?.youtube_username, followers: personalData?.youtube_followers },
     { name: "pinterest", label: "Pinterest", username: personalData?.pinterest_username, followers: personalData?.pinterest_followers }
-  ].filter(network => network.username);
+  ].filter(network => network.username) : [];
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Personal Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i}>
+                  <dt className="font-medium text-gray-500">
+                    <Skeleton className="h-4 w-24" />
+                  </dt>
+                  <dd>
+                    <Skeleton className="h-6 w-32 mt-1" />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            
+            <div>
+              <h3 className="text-lg font-medium mb-2">Social Networks</h3>
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card>

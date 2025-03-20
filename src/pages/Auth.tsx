@@ -6,6 +6,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthContainer } from "@/components/auth/AuthContainer";
 import { PasswordRecoveryDialog } from "@/components/auth/PasswordRecoveryDialog";
 import { LoadingSpinner } from "@/components/auth/LoadingSpinner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -74,6 +75,3 @@ export default function Auth() {
     </>
   );
 }
-
-// Need to import supabase for the useEffect
-import { supabase } from "@/integrations/supabase/client";

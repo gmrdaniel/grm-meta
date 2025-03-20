@@ -63,11 +63,11 @@ export const ProfilePhotoUpload = ({
       setPhotoUrl(publicUrl);
       onPhotoUpdate(publicUrl);
       
-      // Actualizar la foto en la base de datos
+      // Update the photo in the profiles table instead of personal_data
       const { error: updateError } = await supabase
-        .from("personal_data")
+        .from("profiles")
         .update({ profile_photo_url: publicUrl })
-        .eq("profile_id", userId);
+        .eq("id", userId);
 
       if (updateError) {
         throw updateError;
