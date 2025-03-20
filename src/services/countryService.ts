@@ -1,25 +1,22 @@
 
-import { supabase } from "@/integrations/supabase/client";
-
-export type Country = {
+export interface Country {
   id: string;
   code: string;
   name_es: string;
   name_en: string;
   active: boolean;
-};
+}
 
-export const getActiveCountries = async (): Promise<Country[]> => {
-  const { data, error } = await supabase
-    .from('country')
-    .select('*')
-    .eq('active', true)
-    .order('display_order');
+const countries: Country[] = [
+  { id: "1", code: "US", name_es: "Estados Unidos", name_en: "United States", active: true },
+  { id: "2", code: "ES", name_es: "España", name_en: "Spain", active: true },
+  { id: "3", code: "MX", name_es: "México", name_en: "Mexico", active: true },
+  { id: "4", code: "AR", name_es: "Argentina", name_en: "Argentina", active: true },
+  { id: "5", code: "CO", name_es: "Colombia", name_en: "Colombia", active: true },
+  { id: "6", code: "PE", name_es: "Perú", name_en: "Peru", active: true },
+  { id: "7", code: "CL", name_es: "Chile", name_en: "Chile", active: true },
+];
 
-  if (error) {
-    console.error('Error fetching countries:', error);
-    throw error;
-  }
-
-  return data || [];
+export const getCountries = async (): Promise<Country[]> => {
+  return countries;
 };

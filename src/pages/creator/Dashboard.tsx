@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { StatsCard } from "@/components/StatsCard";
@@ -7,38 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Image, Star, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 export default function CreatorDashboard() {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [hasPendingServices, setHasPendingServices] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      checkPendingServices();
-    }
-  }, [user]);
-
-  async function checkPendingServices() {
-    try {
-      const { count, error } = await supabase
-        .from("creator_services")
-        .select("*", { count: 'exact', head: true })
-        .eq("profile_id", user?.id)
-        .eq("terms_accepted", false)
-        .eq("status", "pendiente");
-
-      if (error) throw error;
-      setHasPendingServices(count ? count > 0 : false);
-    } catch (error: any) {
-      console.error("Error checking pending services:", error);
-    }
-  }
 
   return (
     <div className="flex h-screen bg-gray-50/50">
@@ -52,14 +27,6 @@ export default function CreatorDashboard() {
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-semibold text-gray-800">Creator Dashboard</h1>
-              {hasPendingServices && (
-                <Button 
-                  onClick={() => navigate("/creator/pending-services")}
-                  variant="outline"
-                >
-                  View Pending Services
-                </Button>
-              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
