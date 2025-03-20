@@ -53,6 +53,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        facebook: {
+          light: "#1877F2",
+          DEFAULT: "#1877F2", 
+          dark: "#166FE5"
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
