@@ -30,11 +30,16 @@ const InvitationPage = () => {
           .from('creator_invitations')
           .select('*, projects:project_id(*)')
           .eq('invitation_code', id)
-          .single();
+          .maybeSingle();
 
         if (invitationError) {
           console.error('Error fetching invitation by code:', invitationError);
           throw invitationError;
+        }
+
+        if (!invitationData) {
+          console.error('No invitation found with code:', id);
+          throw new Error("Invitation not found");
         }
 
         console.log('InvitationPage - Invitation data:', invitationData);
@@ -45,11 +50,16 @@ const InvitationPage = () => {
           .select('*')
           .eq('url', url)
           .eq('project_id', invitationData.project_id)
-          .single();
+          .maybeSingle();
 
         if (stageError) {
           console.error('Error fetching stage:', stageError);
           throw new Error("Invalid invitation URL");
+        }
+
+        if (!stageData) {
+          console.error('No matching stage found for URL:', url);
+          throw new Error("Invalid stage URL");
         }
 
         console.log('InvitationPage - Stage data:', stageData);

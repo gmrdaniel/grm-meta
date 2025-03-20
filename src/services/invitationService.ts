@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData } from "@/types/invitation";
 import { fetchProjectStages } from "./projectService";
@@ -42,19 +41,19 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
 /**
  * Fetch a specific invitation by invitation code
  */
-export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation> => {
+export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation | null> => {
   const { data, error } = await supabase
     .from('creator_invitations')
     .select('*')
     .eq('invitation_code', code)
-    .single();
+    .maybeSingle();
   
   if (error) {
     console.error('Error fetching invitation by code:', error);
     throw new Error(error.message);
   }
   
-  return data as CreatorInvitation;
+  return data as CreatorInvitation | null;
 };
 
 /**

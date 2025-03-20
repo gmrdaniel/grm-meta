@@ -34,7 +34,7 @@ const MetaWelcomePage = () => {
       try {
         setLoading(true);
         
-        // Fetch invitation by code instead of ID
+        // Fetch invitation by code
         const invitationData = await fetchInvitationByCode(id);
 
         // Add log to validate the invitation data
@@ -55,6 +55,10 @@ const MetaWelcomePage = () => {
             email: invitationData.email,
             socialMediaHandle: invitationData.social_media_handle || '',
           });
+        } else {
+          // Handle case when no invitation is found
+          console.error('MetaWelcomePage - No invitation found with code:', id);
+          setError('Invitation not found');
         }
       } catch (err: any) {
         console.error('Error fetching invitation by code:', err);
