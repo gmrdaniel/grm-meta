@@ -9,22 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      notifications: {
         Row: {
           created_at: string
           id: string
-          role: Database["public"]["Enums"]["user_role"]
+          message: string
+          profile_id: string
+          status: string
+          type: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          id: string
-          role: Database["public"]["Enums"]["user_role"]
+          id?: string
+          message: string
+          profile_id: string
+          status?: string
+          type: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          message?: string
+          profile_id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          profile_photo_url: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          profile_photo_url?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          profile_photo_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
