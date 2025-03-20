@@ -5,14 +5,14 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { ProjectDetail } from "@/components/admin/projects/ProjectDetail";
-import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Project } from "@/types/project";
 
 export default function AdminProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,15 +22,16 @@ export default function AdminProjectDetail() {
       try {
         setLoading(true);
         
-        const { data, error } = await supabase
-          .from("projects")
-          .select("*")
-          .eq("id", id)
-          .single();
-
-        if (error) throw error;
+        // Mock data
+        const mockProject: Project = {
+          id: id,
+          name: "Sample Project",
+          status: "active",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
         
-        setProject(data);
+        setProject(mockProject);
       } catch (error: any) {
         toast.error(`Error al cargar el proyecto: ${error.message}`);
       } finally {

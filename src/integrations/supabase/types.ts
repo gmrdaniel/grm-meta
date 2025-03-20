@@ -80,6 +80,83 @@ export type Database = {
         }
         Relationships: []
       }
+      project_stages: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_index: number
+          project_id: string
+          response_negative: string | null
+          response_positive: string | null
+          responsible: string
+          slug: string
+          updated_at: string
+          url: string
+          view: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_index: number
+          project_id: string
+          response_negative?: string | null
+          response_positive?: string | null
+          responsible: string
+          slug: string
+          updated_at?: string
+          url: string
+          view: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number
+          project_id?: string
+          response_negative?: string | null
+          response_positive?: string | null
+          responsible?: string
+          slug?: string
+          updated_at?: string
+          url?: string
+          view?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

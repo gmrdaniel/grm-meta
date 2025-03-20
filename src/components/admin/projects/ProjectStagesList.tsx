@@ -5,21 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-
-interface ProjectStage {
-  id: string;
-  project_id: string;
-  name: string;
-  url: string;
-  view: string;
-  responsible: "system" | "creator";
-  next_positive_view?: string;
-  next_negative_view?: string;
-  order: number;
-  created_at: string;
-  updated_at: string;
-}
+import { ProjectStage } from "@/types/project";
 
 interface ProjectStagesListProps {
   projectId: string;
@@ -29,7 +15,6 @@ interface ProjectStagesListProps {
 export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectStagesListProps) {
   const [stages, setStages] = useState<ProjectStage[]>([]);
   const [loading, setLoading] = useState(true);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchStages = async () => {
@@ -43,12 +28,13 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
             id: "1",
             project_id: projectId,
             name: "Solicitud",
+            slug: "solicitud",
             url: "/projects/request",
             view: "RequestView",
             responsible: "creator",
-            next_positive_view: "ReviewView",
-            next_negative_view: undefined,
-            order: 1,
+            response_positive: "ReviewView",
+            response_negative: undefined,
+            order_index: 1,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           },
@@ -56,12 +42,13 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
             id: "2",
             project_id: projectId,
             name: "Revisión",
+            slug: "revision",
             url: "/projects/review",
             view: "ReviewView",
             responsible: "system",
-            next_positive_view: "ApprovalView",
-            next_negative_view: "RejectionView",
-            order: 2,
+            response_positive: "ApprovalView",
+            response_negative: "RejectionView",
+            order_index: 2,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           },
@@ -69,18 +56,19 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
             id: "3",
             project_id: projectId,
             name: "Aprobación",
+            slug: "aprobacion",
             url: "/projects/approval",
             view: "ApprovalView",
             responsible: "system",
-            next_positive_view: "ImplementationView",
-            next_negative_view: "RejectionView",
-            order: 3,
+            response_positive: "ImplementationView",
+            response_negative: "RejectionView",
+            order_index: 3,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }
         ];
         
-        setStages(mockStages.sort((a, b) => a.order - b.order));
+        setStages(mockStages.sort((a, b) => a.order_index - b.order_index));
       } catch (error: any) {
         toast.error(`Error al cargar etapas: ${error.message}`);
       } finally {
@@ -101,19 +89,19 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
       if (direction === 'up' && stageIndex > 0) {
         // Swap with previous
         const temp = newStages[stageIndex - 1];
-        newStages[stageIndex - 1] = { ...newStages[stageIndex], order: newStages[stageIndex].order - 1 };
-        newStages[stageIndex] = { ...temp, order: temp.order + 1 };
+        newStages[stageIndex - 1] = { ...newStages[stageIndex], order_index: newStages[stageIndex].order_index - 1 };
+        newStages[stageIndex] = { ...temp, order_index: temp.order_index + 1 };
       } else if (direction === 'down' && stageIndex < stages.length - 1) {
         // Swap with next
         const temp = newStages[stageIndex + 1];
-        newStages[stageIndex + 1] = { ...newStages[stageIndex], order: newStages[stageIndex].order + 1 };
-        newStages[stageIndex] = { ...temp, order: temp.order - 1 };
+        newStages[stageIndex + 1] = { ...newStages[stageIndex], order_index: newStages[stageIndex].order_index + 1 };
+        newStages[stageIndex] = { ...temp, order_index: temp.order_index - 1 };
       } else {
         return; // Can't move further
       }
       
       // Sort by order
-      newStages.sort((a, b) => a.order - b.order);
+      newStages.sort((a, b) => a.order_index - b.order_index);
       setStages(newStages);
       
       // This would update the order in the database in a real implementation
@@ -135,7 +123,7 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
       // Re-calculate order
       const orderedStages = newStages.map((stage, index) => ({
         ...stage,
-        order: index + 1
+        order_index: index + 1
       }));
       
       setStages(orderedStages);
@@ -182,22 +170,23 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
             ) : (
               stages.map((stage) => (
                 <TableRow key={stage.id}>
-                  <TableCell>{stage.order}</TableCell>
+                  <TableCell>{stage.order_index}</TableCell>
                   <TableCell className="font-medium">{stage.name}</TableCell>
                   <TableCell className="text-sm">{stage.url}</TableCell>
                   <TableCell>{stage.view}</TableCell>
                   <TableCell>
-                    {stage.responsible === "system" ? "Sistema" : "Creador"}
+                    {stage.responsible === "system" ? "Sistema" : 
+                     stage.responsible === "creator" ? "Creador" : "Admin"}
                   </TableCell>
-                  <TableCell>{stage.next_positive_view || '-'}</TableCell>
-                  <TableCell>{stage.next_negative_view || '-'}</TableCell>
+                  <TableCell>{stage.response_positive || '-'}</TableCell>
+                  <TableCell>{stage.response_negative || '-'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
                         size="sm" 
                         variant="ghost" 
                         onClick={() => handleMoveStage(stage.id, 'up')}
-                        disabled={stage.order === 1}
+                        disabled={stage.order_index === 1}
                       >
                         <ArrowUp size={16} />
                       </Button>
@@ -205,7 +194,7 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
                         size="sm" 
                         variant="ghost" 
                         onClick={() => handleMoveStage(stage.id, 'down')}
-                        disabled={stage.order === stages.length}
+                        disabled={stage.order_index === stages.length}
                       >
                         <ArrowDown size={16} />
                       </Button>

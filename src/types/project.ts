@@ -11,12 +11,13 @@ export interface ProjectStage {
   id: string;
   project_id: string;
   name: string;
+  slug: string;
   url: string;
   view: string;
-  responsible: "system" | "creator";
-  next_positive_view?: string;
-  next_negative_view?: string;
-  order: number;
+  responsible: "system" | "creator" | "admin";
+  response_positive?: string;
+  response_negative?: string;
+  order_index: number;
   created_at: string;
   updated_at: string;
 }

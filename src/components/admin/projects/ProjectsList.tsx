@@ -6,17 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Edit } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface Project {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  stage_count?: number;
-}
+import { Project } from "@/types/project";
 
 export function ProjectsList() {
   const navigate = useNavigate();
@@ -28,30 +19,36 @@ export function ProjectsList() {
       try {
         setLoading(true);
         
-        // Get projects
-        const { data: projectsData, error: projectsError } = await supabase
-          .from("projects")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (projectsError) throw projectsError;
+        // Mock data for now
+        const mockProjects: Project[] = [
+          {
+            id: "1",
+            name: "Marketing Campaign",
+            status: "active",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: "2",
+            name: "Product Launch",
+            status: "draft",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          },
+          {
+            id: "3",
+            name: "Customer Onboarding Flow",
+            status: "pending",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ];
         
-        // Get stage counts for each project
-        const projectsWithStageCounts = await Promise.all(
-          projectsData.map(async (project) => {
-            const { count, error } = await supabase
-              .from("project_stages")
-              .select("*", { count: 'exact', head: true })
-              .eq("project_id", project.id);
-              
-            if (error) throw error;
-            
-            return {
-              ...project,
-              stage_count: count || 0
-            };
-          })
-        );
+        // We'll add a mock stage count for each project
+        const projectsWithStageCounts = mockProjects.map(project => ({
+          ...project,
+          stage_count: Math.floor(Math.random() * 5) + 1
+        }));
         
         setProjects(projectsWithStageCounts);
       } catch (error: any) {

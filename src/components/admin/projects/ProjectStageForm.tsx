@@ -12,19 +12,20 @@ import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
+  slug: z.string().min(3, { message: "El slug debe tener al menos 3 caracteres" }),
   url: z.string().min(1, { message: "La URL es obligatoria" }),
   view: z.string().min(1, { message: "La vista es obligatoria" }),
-  responsible: z.enum(["system", "creator"], {
+  responsible: z.enum(["system", "creator", "admin"], {
     required_error: "Debe seleccionar un responsable",
   }),
-  next_positive_view: z.string().optional(),
-  next_negative_view: z.string().optional()
+  response_positive: z.string().optional(),
+  response_negative: z.string().optional()
 });
 
 interface ProjectStageFormProps {
   projectId: string;
   onSuccess: () => void;
-  defaultValues?: z.infer<typeof formSchema> & { order?: number };
+  defaultValues?: z.infer<typeof formSchema> & { order_index?: number };
   stageId?: string;
 }
 
@@ -36,11 +37,12 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
       name: "",
+      slug: "",
       url: "",
       view: "",
       responsible: "system",
-      next_positive_view: "",
-      next_negative_view: ""
+      response_positive: "",
+      response_negative: ""
     }
   });
   
@@ -53,7 +55,8 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
       console.log("Saving stage:", {
         ...values,
         project_id: projectId,
-        id: stageId || crypto.randomUUID()
+        id: stageId || crypto.randomUUID(),
+        order_index: defaultValues?.order_index || 1
       });
       
       setTimeout(() => {
@@ -85,6 +88,20 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                   <FormLabel>Nombre de la Etapa</FormLabel>
                   <FormControl>
                     <Input placeholder="Ej: Revisión de Solicitud" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: revision-solicitud" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,6 +156,7 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                     <SelectContent>
                       <SelectItem value="system">Sistema</SelectItem>
                       <SelectItem value="creator">Creador</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -149,12 +167,12 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="next_positive_view"
+                name="response_positive"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Vista Siguiente (Positivo)</FormLabel>
                     <FormControl>
-                      <Input placeholder="ApprovalView" {...field} />
+                      <Input placeholder="ApprovalView" {...field} value={field.value || ""} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,12 +181,12 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
               
               <FormField
                 control={form.control}
-                name="next_negative_view"
+                name="response_negative"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Vista Siguiente (Negativo)</FormLabel>
                     <FormControl>
-                      <Input placeholder="RejectionView" {...field} value={field.value || ""} onChange={field.onChange} />
+                      <Input placeholder="RejectionView" value={field.value || ""} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
