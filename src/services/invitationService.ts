@@ -58,11 +58,8 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     // Get the first stage
     const firstStage = stages.sort((a, b) => a.order_index - b.order_index)[0];
     
-    // Generate invitation ID
-    const invitationId = crypto.randomUUID();
-    
-    // Generate invitation URL using the format /url/id
-    const invitationUrl = `/${firstStage.url}/${invitationId}`;
+    // Generate invitation URL
+    const invitationUrl = `/invite/${firstStage.url}/${crypto.randomUUID()}`;
     
     const { data, error } = await supabase
       .from('creator_invitations')
