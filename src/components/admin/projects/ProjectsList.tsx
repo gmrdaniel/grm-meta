@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ProjectsList() {
   const navigate = useNavigate();
@@ -26,31 +26,28 @@ export function ProjectsList() {
             name: "Marketing Campaign",
             status: "active",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            stage_count: 3 // Add the stage_count property
           },
           {
             id: "2",
             name: "Product Launch",
             status: "draft",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            stage_count: 2 // Add the stage_count property
           },
           {
             id: "3",
             name: "Customer Onboarding Flow",
             status: "pending",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            stage_count: 4 // Add the stage_count property
           }
         ];
         
-        // We'll add a mock stage count for each project
-        const projectsWithStageCounts = mockProjects.map(project => ({
-          ...project,
-          stage_count: Math.floor(Math.random() * 5) + 1
-        }));
-        
-        setProjects(projectsWithStageCounts);
+        setProjects(mockProjects);
       } catch (error: any) {
         toast.error(`Error al cargar proyectos: ${error.message}`);
       } finally {
@@ -110,7 +107,7 @@ export function ProjectsList() {
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{getStatusBadge(project.status)}</TableCell>
-                  <TableCell>{project.stage_count}</TableCell>
+                  <TableCell>{project.stage_count || 0}</TableCell>
                   <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>{new Date(project.updated_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">

@@ -5,6 +5,7 @@ export interface Project {
   status: "draft" | "active" | "pending" | "archived";
   created_at: string;
   updated_at: string;
+  stage_count?: number;  // Added optional stage_count property
 }
 
 export interface ProjectStage {
