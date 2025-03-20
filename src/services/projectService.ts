@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Project, ProjectStage } from "@/types/project";
 
@@ -175,7 +176,7 @@ export const deleteProjectStage = async (id: string): Promise<void> => {
 /**
  * Update stages order
  */
-export const updateStagesOrder = async (stages: { id: string; order_index: number }[]): Promise<void> => {
+export const updateStagesOrder = async (stages: Array<{ id: string; order_index: number }>): Promise<void> => {
   const { error } = await supabase.rpc('update_stages_order', { stages_data: stages });
   
   if (error) {
