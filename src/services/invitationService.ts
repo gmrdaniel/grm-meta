@@ -92,12 +92,38 @@ export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
 };
 
 /**
+ * Generate a unique invitation code
+ */
+const generateInvitationCode = (): string => {
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar looking characters I,1,O,0
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return code;
+};
+
+/**
  * Create a new invitation
  */
-export const createInvitation = async (invitation: CreateInvitationData): Promise<CreatorInvitation> => {
+export const createInvitation = async (invitationData: CreateInvitationData): Promise<CreatorInvitation> => {
+  // Generate a unique invitation code
+  const invitationCode = generateInvitationCode();
+  
+  // Generate invitation URL path
+  const invitationUrl = `/invite/${invitationCode}`;
+  
+  // Prepare the complete invitation data
+  const completeInvitation = {
+    ...invitationData,
+    invitation_code: invitationCode,
+    invitation_url: invitationUrl,
+    status: 'pending' as const
+  };
+  
   const { data, error } = await supabase
     .from('creator_invitations')
-    .insert(invitation)
+    .insert(completeInvitation)
     .select()
     .single();
   

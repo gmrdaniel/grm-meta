@@ -14,4 +14,7 @@ export interface CreatorInvitation {
   updated_at: string;
 }
 
-export type CreateInvitationData = Omit<CreatorInvitation, "id" | "invitation_url" | "invitation_code" | "status" | "created_at" | "updated_at">;
+export type CreateInvitationData = Pick<
+  CreatorInvitation,
+  "full_name" | "email" | "social_media_handle" | "social_media_type" | "project_id" | "invitation_type"
+>;
