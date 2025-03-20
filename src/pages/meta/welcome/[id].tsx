@@ -31,7 +31,17 @@ const MetaWelcomePage = () => {
       try {
         setLoading(true);
         
-        // Fetch invitation by code
+        console.log('MetaWelcomePage - Sending raw query to verify invitation existence');
+        // Direct query to check if invitation exists in database
+        const { data: directData, error: directError } = await supabase
+          .from('creator_invitations')
+          .select('*')
+          .eq('invitation_code', id)
+          .limit(1);
+
+        console.log('MetaWelcomePage - Direct query result:', { data: directData, error: directError });
+        
+        // Fetch invitation by code using our service function
         const invitationData = await fetchInvitationByCode(id);
 
         // Add log to validate the invitation data

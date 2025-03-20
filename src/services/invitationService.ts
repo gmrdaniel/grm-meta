@@ -40,20 +40,48 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
 
 /**
  * Fetch a specific invitation by invitation code
+ * Modified to use exact match and ilike to handle case sensitivity issues
  */
 export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation | null> => {
-  const { data, error } = await supabase
+  console.log('Fetching invitation with code:', code);
+  
+  // Try with exact match first
+  const { data: exactData, error: exactError } = await supabase
     .from('creator_invitations')
     .select('*')
     .eq('invitation_code', code)
     .maybeSingle();
   
-  if (error) {
-    console.error('Error fetching invitation by code:', error);
-    throw new Error(error.message);
+  if (exactError) {
+    console.error('Error fetching invitation by exact code:', exactError);
+    throw new Error(exactError.message);
   }
   
-  return data as CreatorInvitation | null;
+  if (exactData) {
+    console.log('Found invitation with exact match:', exactData);
+    return exactData as CreatorInvitation;
+  }
+  
+  // If not found with exact match, try case-insensitive match as fallback
+  console.log('No exact match found, trying case-insensitive match');
+  const { data: ilikeData, error: ilikeError } = await supabase
+    .from('creator_invitations')
+    .select('*')
+    .ilike('invitation_code', code)
+    .maybeSingle();
+  
+  if (ilikeError) {
+    console.error('Error fetching invitation by case-insensitive code:', ilikeError);
+    throw new Error(ilikeError.message);
+  }
+  
+  if (ilikeData) {
+    console.log('Found invitation with case-insensitive match:', ilikeData);
+    return ilikeData as CreatorInvitation;
+  }
+  
+  console.log('No invitation found with code:', code);
+  return null;
 };
 
 /**
