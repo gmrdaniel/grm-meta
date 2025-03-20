@@ -74,7 +74,8 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     }
     
     // Now generate invitation URL using the stage URL and the created invitation ID
-    const invitationUrl = `/invite/${firstStage.url}/${data.id}`;
+    // Updated to remove "/invite" from the path
+    const invitationUrl = `/${firstStage.url}/${data.id}`;
     
     // Update the invitation with the correct URL
     const { data: updatedData, error: updateError } = await supabase
