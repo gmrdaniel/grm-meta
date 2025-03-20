@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -186,85 +187,94 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="flex justify-center mt-4">
-        <img
-          src="/lovable-uploads/9e1be316-e2d0-4ebe-863a-e7062b2e9a78.png"
-          alt="LA NETA Logo"
-          className="h-20 w-auto object-contain"
-        />
-      </div>
-
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              {isLogin ? "Login" : "Create your account"}
-            </h2>
-            {isLogin && (
-              <p className="mt-2 text-center text-sm text-gray-600">
-                Enter your credentials to access the program
-              </p>
-            )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-8">
+        {isLogin ? (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Login</h2>
+            <p className="text-sm text-gray-600">
+              Enter your credentials to access your account
+            </p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              <div>
-                <Input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email address"
-                />
-              </div>
-              <div>
-                <Input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  minLength={6}
-                />
-              </div>
-            </div>
+        ) : (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Create your account</h2>
+            <p className="text-sm text-gray-600">
+              Sign up to get started
+            </p>
+          </div>
+        )}
 
-            <div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={authLoading}
-              >
-                {authLoading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
-              </Button>
-            </div>
-
-            <div className="flex flex-col space-y-2 text-center text-sm">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="block text-sm font-medium">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="password" className="block text-sm font-medium">Password</Label>
               {isLogin && (
                 <button
                   type="button"
                   onClick={() => setIsRecoveryOpen(true)}
-                  className="text-blue-600 hover:text-blue-500"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Forgot your password?
+                  Forgot password?
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-blue-600 hover:text-blue-500"
-              >
-                {isLogin
-                  ? "Don't have an account? Sign up"
-                  : "Already have an account? Sign in"}
-              </button>
             </div>
-          </form>
-        </div>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              minLength={6}
+              className="w-full"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={authLoading}
+          >
+            {authLoading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
+          </Button>
+
+          <div className="text-center text-sm">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-blue-600 hover:text-blue-500 font-medium"
+            >
+              {isLogin
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Sign in"}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <div className="py-4 text-center text-gray-500 text-sm">
+      <div className="mt-6">
+        <img
+          src="/lovable-uploads/9e1be316-e2d0-4ebe-863a-e7062b2e9a78.png"
+          alt="LA NETA Logo"
+          className="h-10 w-auto object-contain"
+        />
+      </div>
+
+      <div className="mt-4 text-center text-gray-500 text-sm">
         © 2025 LA NETA from Global Media Review
       </div>
 
