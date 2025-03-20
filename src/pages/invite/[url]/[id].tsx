@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,16 +24,55 @@ const InvitationPage = () => {
 
         console.log('InvitationPage - Fetching with URL and code:', { url, id });
 
-        // Find the invitation by its invitation_code
-        const { data: invitationData, error: invitationError } = await supabase
+        // Try multiple approaches to find the invitation
+        
+        // Method 1: Try exact match first
+        const { data: exactData, error: exactError } = await supabase
           .from('creator_invitations')
           .select('*, projects:project_id(*)')
           .eq('invitation_code', id)
           .maybeSingle();
+          
+        console.log('InvitationPage - Exact match query result:', { data: exactData, error: exactError });
 
-        if (invitationError) {
-          console.error('Error fetching invitation by code:', invitationError);
-          throw invitationError;
+        // Method 2: If exact match fails, try case-insensitive match
+        let invitationData = exactData;
+        if (!invitationData && !exactError) {
+          console.log('InvitationPage - Trying case-insensitive match');
+          const { data: caseInsensitiveData, error: caseInsensitiveError } = await supabase
+            .from('creator_invitations')
+            .select('*, projects:project_id(*)')
+            .ilike('invitation_code', id)
+            .maybeSingle();
+            
+          console.log('InvitationPage - Case-insensitive match result:', { 
+            data: caseInsensitiveData, 
+            error: caseInsensitiveError 
+          });
+            
+          invitationData = caseInsensitiveData;
+        }
+
+        // Method 3: Try raw SQL query as last resort
+        if (!invitationData) {
+          console.log('InvitationPage - Trying raw SQL query');
+          const { data: rawData, error: rawError } = await supabase.rpc('find_invitation_by_code', { 
+            code_param: id 
+          });
+          
+          console.log('InvitationPage - Raw SQL query result:', { data: rawData, error: rawError });
+          
+          if (rawData && rawData.length > 0) {
+            // Fetch project details separately since RPC doesn't support joins
+            const { data: projectData } = await supabase
+              .from('projects')
+              .select('*')
+              .eq('id', rawData[0].project_id)
+              .maybeSingle();
+              
+            invitationData = rawData[0];
+            invitationData.projects = projectData;
+          }
         }
 
         if (!invitationData) {

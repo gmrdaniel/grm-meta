@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,14 +24,16 @@ const MetaWelcomePage = () => {
     const fetchInvitation = async () => {
       if (!id) return;
       
-      // Add log to validate the URL parameter (now using invitation_code)
+      // Add log to validate the URL parameter
       console.log('MetaWelcomePage - URL Parameter (invitation_code):', id);
       
       try {
         setLoading(true);
         
-        console.log('MetaWelcomePage - Sending raw query to verify invitation existence');
-        // Direct query to check if invitation exists in database
+        // Try multiple methods to find the invitation
+        
+        // Method 1: Check with direct query first
+        console.log('MetaWelcomePage - Trying to find invitation using direct query');
         const { data: directData, error: directError } = await supabase
           .from('creator_invitations')
           .select('*')
@@ -41,26 +42,51 @@ const MetaWelcomePage = () => {
 
         console.log('MetaWelcomePage - Direct query result:', { data: directData, error: directError });
         
-        // Fetch invitation by code using our service function
+        // Method 2: Try with the service function that uses multiple approaches
+        console.log('MetaWelcomePage - Trying to find invitation using service function');
         const invitationData = await fetchInvitationByCode(id);
+        console.log('MetaWelcomePage - Service function result:', invitationData);
+        
+        // Method 3: Try raw SQL query if needed
+        if (!invitationData && !directData?.length) {
+          console.log('MetaWelcomePage - Trying raw SQL query as last resort');
+          const { data: rawData, error: rawError } = await supabase.rpc('find_invitation_by_code', { 
+            code_param: id 
+          });
+          
+          console.log('MetaWelcomePage - Raw SQL query result:', { data: rawData, error: rawError });
+          
+          if (rawData && rawData.length > 0) {
+            console.log('MetaWelcomePage - Found invitation with raw SQL');
+            setInvitation(rawData[0]);
+            setFormData({
+              fullName: rawData[0].full_name,
+              email: rawData[0].email,
+              socialMediaHandle: rawData[0].social_media_handle || '',
+              termsAccepted: false
+            });
+            setLoading(false);
+            return;
+          }
+        }
 
-        // Add log to validate the invitation data
-        console.log('MetaWelcomePage - Invitation data retrieved by code:', invitationData);
-
-        if (invitationData) {
-          setInvitation(invitationData);
+        // Use the results from service function or direct query
+        const foundInvitation = invitationData || (directData?.length ? directData[0] : null);
+        
+        if (foundInvitation) {
+          setInvitation(foundInvitation);
           setFormData({
-            fullName: invitationData.full_name,
-            email: invitationData.email,
-            socialMediaHandle: invitationData.social_media_handle || '',
+            fullName: foundInvitation.full_name,
+            email: foundInvitation.email,
+            socialMediaHandle: foundInvitation.social_media_handle || '',
             termsAccepted: false
           });
           
           // Add log after setting state
           console.log('MetaWelcomePage - Form data initialized:', {
-            fullName: invitationData.full_name,
-            email: invitationData.email,
-            socialMediaHandle: invitationData.social_media_handle || '',
+            fullName: foundInvitation.full_name,
+            email: foundInvitation.email,
+            socialMediaHandle: foundInvitation.social_media_handle || '',
           });
         } else {
           // Handle case when no invitation is found

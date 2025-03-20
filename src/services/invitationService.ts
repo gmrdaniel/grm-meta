@@ -40,47 +40,76 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
 
 /**
  * Fetch a specific invitation by invitation code
- * Modified to use exact match and ilike to handle case sensitivity issues
+ * Modified to add more debugging and handle case insensitivity properly
  */
 export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation | null> => {
+  if (!code) {
+    console.error('Invalid invitation code provided:', code);
+    return null;
+  }
+  
   console.log('Fetching invitation with code:', code);
   
-  // Try with exact match first
-  const { data: exactData, error: exactError } = await supabase
-    .from('creator_invitations')
-    .select('*')
-    .eq('invitation_code', code)
-    .maybeSingle();
-  
-  if (exactError) {
-    console.error('Error fetching invitation by exact code:', exactError);
-    throw new Error(exactError.message);
+  // First attempt: Try direct query with exact match (most reliable)
+  try {
+    const { data: exactData, error: exactError } = await supabase
+      .from('creator_invitations')
+      .select('*')
+      .eq('invitation_code', code)
+      .maybeSingle();
+    
+    if (exactError) {
+      console.error('Error fetching invitation by exact code:', exactError);
+    } else if (exactData) {
+      console.log('Found invitation with exact match:', exactData);
+      return exactData as CreatorInvitation;
+    } else {
+      console.log('No exact match found with code:', code);
+    }
+  } catch (err) {
+    console.error('Exception during exact match query:', err);
   }
   
-  if (exactData) {
-    console.log('Found invitation with exact match:', exactData);
-    return exactData as CreatorInvitation;
+  // Second attempt: Try with ilike for case-insensitive match
+  try {
+    console.log('Trying case-insensitive match for code:', code);
+    const { data: ilikeData, error: ilikeError } = await supabase
+      .from('creator_invitations')
+      .select('*')
+      .ilike('invitation_code', code)
+      .maybeSingle();
+    
+    if (ilikeError) {
+      console.error('Error fetching invitation by case-insensitive code:', ilikeError);
+    } else if (ilikeData) {
+      console.log('Found invitation with case-insensitive match:', ilikeData);
+      return ilikeData as CreatorInvitation;
+    } else {
+      console.log('No case-insensitive match found for code:', code);
+    }
+  } catch (err) {
+    console.error('Exception during case-insensitive query:', err);
   }
   
-  // If not found with exact match, try case-insensitive match as fallback
-  console.log('No exact match found, trying case-insensitive match');
-  const { data: ilikeData, error: ilikeError } = await supabase
-    .from('creator_invitations')
-    .select('*')
-    .ilike('invitation_code', code)
-    .maybeSingle();
-  
-  if (ilikeError) {
-    console.error('Error fetching invitation by case-insensitive code:', ilikeError);
-    throw new Error(ilikeError.message);
+  // Third attempt: Try raw SQL query as a last resort
+  try {
+    console.log('Trying raw SQL query as last resort for code:', code);
+    const { data: rawData, error: rawError } = await supabase
+      .rpc('find_invitation_by_code', { code_param: code });
+    
+    if (rawError) {
+      console.error('Error in raw SQL query for invitation:', rawError);
+    } else if (rawData && rawData.length > 0) {
+      console.log('Found invitation with raw SQL query:', rawData[0]);
+      return rawData[0] as CreatorInvitation;
+    } else {
+      console.log('No invitation found with raw SQL query for code:', code);
+    }
+  } catch (err) {
+    console.error('Exception during raw SQL query:', err);
   }
   
-  if (ilikeData) {
-    console.log('Found invitation with case-insensitive match:', ilikeData);
-    return ilikeData as CreatorInvitation;
-  }
-  
-  console.log('No invitation found with code:', code);
+  console.log('All attempts failed. No invitation found with code:', code);
   return null;
 };
 
