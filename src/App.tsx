@@ -14,11 +14,6 @@ import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
 import PendingServices from "./pages/creator/PendingServices";
 import Campaigns from "./pages/creator/Campaigns";
-import Creators from "./pages/admin/Creators";
-import CreatorDetail from "./pages/admin/CreatorDetail";
-import CreatorRates from "./pages/admin/CreatorRates";
-import Utilities from "./pages/admin/Utilities";
-import AuditLogs from "@/pages/admin/AuditLogs";
 
 const queryClient = new QueryClient();
 
@@ -40,46 +35,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/creators"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <Creators />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/creators/:id"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <CreatorDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/rates"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <CreatorRates />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/utilidades"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <Utilities />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/audit-logs"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AuditLogs />
                   </ProtectedRoute>
                 }
               />
