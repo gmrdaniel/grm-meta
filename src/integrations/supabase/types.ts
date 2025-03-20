@@ -15,6 +15,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          invitation_code: string
           invitation_type: string
           invitation_url: string
           project_id: string | null
@@ -28,6 +29,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          invitation_code: string
           invitation_type: string
           invitation_url: string
           project_id?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          invitation_code?: string
           invitation_type?: string
           invitation_url?: string
           project_id?: string | null

@@ -40,6 +40,50 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
 };
 
 /**
+ * Generate random string of specified length
+ */
+const generateRandomString = (length: number): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+/**
+ * Generate invitation code
+ * Format: project.name + (invitationType = New User ? NU : EU) + day + month + random string
+ */
+const generateInvitationCode = async (projectId: string, invitationType: string): Promise<string> => {
+  try {
+    // Fetch project name
+    const { data: projectData, error: projectError } = await supabase
+      .from('projects')
+      .select('name')
+      .eq('id', projectId)
+      .single();
+    
+    if (projectError) {
+      console.error('Error fetching project:', projectError);
+      throw new Error(projectError.message);
+    }
+    
+    const projectPrefix = projectData.name.substring(0, 3).toUpperCase();
+    const typeCode = invitationType === 'new_user' ? 'NU' : 'EU';
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const randomString = generateRandomString(5);
+    
+    return `${projectPrefix}-${typeCode}${day}${month}-${randomString}`;
+  } catch (error: any) {
+    console.error('Error generating invitation code:', error);
+    throw new Error(error.message);
+  }
+};
+
+/**
  * Create a new invitation
  */
 export const createInvitation = async (invitationData: CreateInvitationData): Promise<CreatorInvitation> => {
@@ -58,12 +102,21 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     // Get the first stage
     const firstStage = stages.sort((a, b) => a.order_index - b.order_index)[0];
     
+    // Generate invitation code
+    const invitationCode = await generateInvitationCode(
+      invitationData.project_id, 
+      invitationData.invitation_type
+    );
+    
+    console.log('Generated invitation code:', invitationCode);
+    
     // First insert the invitation to get the ID
     const { data, error } = await supabase
       .from('creator_invitations')
       .insert({
         ...invitationData,
-        invitation_url: '' // Temporary empty URL
+        invitation_url: '', // Temporary empty URL
+        invitation_code: invitationCode
       })
       .select()
       .single();
@@ -74,7 +127,6 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     }
     
     // Now generate invitation URL using the stage URL and the created invitation ID
-    // Updated to remove "/invite" from the path
     const invitationUrl = `/${firstStage.url}/${data.id}`;
     
     // Update the invitation with the correct URL

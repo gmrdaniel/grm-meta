@@ -8,9 +8,10 @@ export interface CreatorInvitation {
   project_id: string | null;
   invitation_type: "new_user" | "existing_user";
   invitation_url: string;
+  invitation_code: string;
   status: "pending" | "accepted" | "rejected";
   created_at: string;
   updated_at: string;
 }
 
-export type CreateInvitationData = Omit<CreatorInvitation, "id" | "invitation_url" | "status" | "created_at" | "updated_at">;
+export type CreateInvitationData = Omit<CreatorInvitation, "id" | "invitation_url" | "invitation_code" | "status" | "created_at" | "updated_at">;
