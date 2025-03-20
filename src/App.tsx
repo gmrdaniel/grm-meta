@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProjects from "./pages/admin/projects";
+import AdminProjectDetail from "./pages/admin/projects/[id]"; // Import the project detail page
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 
@@ -32,6 +34,22 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/projects"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminProjects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/projects/:id"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminProjectDetail />
                   </ProtectedRoute>
                 }
               />
