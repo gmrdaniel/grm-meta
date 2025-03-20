@@ -4,22 +4,26 @@ import { Home, Package, PenSquare, User, Users, Mail } from "lucide-react";
 export const adminNavigationItems = [
   {
     label: "Dashboard",
-    icon: Home,
+    shortLabel: "Home",
+    icon: <Home size={24} />,
     to: "/admin/dashboard",
   },
   {
     label: "Projects",
-    icon: PenSquare,
+    shortLabel: "Projects",
+    icon: <PenSquare size={24} />,
     to: "/admin/projects",
   },
   {
     label: "Inventory",
-    icon: Package,
+    shortLabel: "Inventory",
+    icon: <Package size={24} />,
     to: "/admin/inventory",
   },
   {
     label: "Invitations",
-    icon: Mail,
+    shortLabel: "Invite",
+    icon: <Mail size={24} />,
     to: "/admin/invitations",
   }
 ];
@@ -27,12 +31,14 @@ export const adminNavigationItems = [
 export const creatorNavigationItems = [
   {
     label: "Dashboard",
-    icon: Home,
+    shortLabel: "Home",
+    icon: <Home size={24} />,
     to: "/creator/dashboard",
   },
   {
     label: "Profile",
-    icon: User,
+    shortLabel: "Profile",
+    icon: <User size={24} />,
     to: "/creator/profile",
   }
 ];
