@@ -58,14 +58,12 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     // Get the first stage
     const firstStage = stages.sort((a, b) => a.order_index - b.order_index)[0];
     
-    // Generate invitation URL
-    const invitationUrl = `/invite/${firstStage.url}/${crypto.randomUUID()}`;
-    
+    // First insert the invitation to get the ID
     const { data, error } = await supabase
       .from('creator_invitations')
       .insert({
         ...invitationData,
-        invitation_url: invitationUrl
+        invitation_url: '' // Temporary empty URL
       })
       .select()
       .single();
@@ -75,10 +73,26 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
       throw new Error(error.message);
     }
     
-    // Send invitation email
-    await sendInvitationEmail(data.email, data.full_name, data.invitation_url);
+    // Now generate invitation URL using the stage URL and the created invitation ID
+    const invitationUrl = `/invite/${firstStage.url}/${data.id}`;
     
-    return data as CreatorInvitation;
+    // Update the invitation with the correct URL
+    const { data: updatedData, error: updateError } = await supabase
+      .from('creator_invitations')
+      .update({ invitation_url: invitationUrl })
+      .eq('id', data.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      console.error('Error updating invitation URL:', updateError);
+      throw new Error(updateError.message);
+    }
+    
+    // Send invitation email
+    await sendInvitationEmail(updatedData.email, updatedData.full_name, updatedData.invitation_url);
+    
+    return updatedData as CreatorInvitation;
   } catch (error: any) {
     console.error('Error in createInvitation:', error);
     throw new Error(error.message);

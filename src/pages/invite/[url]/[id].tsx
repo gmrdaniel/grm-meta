@@ -18,27 +18,32 @@ const InvitationPage = () => {
     const fetchInvitationDetails = async () => {
       try {
         setLoading(true);
-        // Find the invitation based on the URL
-        const { data: stages, error: stagesError } = await supabase
-          .from('project_stages')
-          .select('project_id')
-          .eq('url', url)
-          .single();
+        
+        if (!url || !id) {
+          throw new Error("Missing URL or invitation ID parameters");
+        }
 
-        if (stagesError) throw stagesError;
-
-        // Now find the invitation with this project and id in the url
-        const { data: invitations, error: invitationError } = await supabase
+        // Find the invitation directly by its ID
+        const { data: invitationData, error: invitationError } = await supabase
           .from('creator_invitations')
           .select('*, projects:project_id(*)')
-          .eq('project_id', stages.project_id)
-          .ilike('invitation_url', `%${id}%`)
+          .eq('id', id)
           .single();
 
         if (invitationError) throw invitationError;
 
-        setInvitation(invitations);
-        setProject(invitations.projects);
+        // Verify that the stage URL matches
+        const { data: stageData, error: stageError } = await supabase
+          .from('project_stages')
+          .select('*')
+          .eq('url', url)
+          .eq('project_id', invitationData.project_id)
+          .single();
+
+        if (stageError) throw new Error("Invalid invitation URL");
+
+        setInvitation(invitationData);
+        setProject(invitationData.projects);
         
       } catch (err: any) {
         console.error('Error fetching invitation details:', err);
