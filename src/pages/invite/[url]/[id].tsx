@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,21 +17,12 @@ const InvitationPage = () => {
     const fetchInvitationDetails = async () => {
       try {
         setLoading(true);
-        // Find the invitation based on the URL
-        const { data: stages, error: stagesError } = await supabase
-          .from('project_stages')
-          .select('project_id')
-          .eq('url', url)
-          .single();
-
-        if (stagesError) throw stagesError;
-
-        // Now find the invitation with this project and id in the url
+        
+        // Find the invitation based on the URL pattern /{stage_url}/{invitation_id}
         const { data: invitations, error: invitationError } = await supabase
           .from('creator_invitations')
           .select('*, projects:project_id(*)')
-          .eq('project_id', stages.project_id)
-          .ilike('invitation_url', `%${id}%`)
+          .ilike('invitation_url', `%/${url}/${id}`)
           .single();
 
         if (invitationError) throw invitationError;
