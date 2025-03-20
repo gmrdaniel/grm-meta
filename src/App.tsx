@@ -14,6 +14,7 @@ import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
+import WelcomePage from "./pages/meta/Welcome";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Meta routes - accessible without authentication */}
+              <Route path="/meta/welcome" element={<WelcomePage />} />
+              <Route path="/meta/welcome/:invitationId" element={<WelcomePage />} />
               
               {/* Admin routes */}
               <Route
