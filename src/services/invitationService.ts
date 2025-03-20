@@ -105,6 +105,21 @@ export const updateInvitationStatus = async (id: string, status: CreatorInvitati
 };
 
 /**
+ * Delete an invitation
+ */
+export const deleteInvitation = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('creator_invitations')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting invitation:', error);
+    throw new Error(error.message);
+  }
+};
+
+/**
  * Send invitation email
  */
 const sendInvitationEmail = async (email: string, name: string, invitationUrl: string): Promise<void> => {
