@@ -12,8 +12,6 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import CreatorBankDetail from "./pages/creator/BankDetail";
-import PendingServices from "./pages/creator/PendingServices";
-import Campaigns from "./pages/creator/Campaigns";
 
 const queryClient = new QueryClient();
 
@@ -61,22 +59,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["creator"]}>
                     <CreatorBankDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/creator/pending-services"
-                element={
-                  <ProtectedRoute allowedRoles={["creator"]}>
-                    <PendingServices />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/creator/campaigns"
-                element={
-                  <ProtectedRoute allowedRoles={["creator"]}>
-                    <Campaigns />
                   </ProtectedRoute>
                 }
               />

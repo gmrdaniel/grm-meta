@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Package, Inbox } from "lucide-react";
+import { LayoutDashboard, UserCircle, Wallet } from "lucide-react";
 import { NavigationItem } from "./types";
 
 export const creatorNavigationItems: NavigationItem[] = [
@@ -14,18 +14,6 @@ export const creatorNavigationItems: NavigationItem[] = [
     label: "Datos Bancarios",
     shortLabel: "Banco",
     to: "/creator/bankDetail",
-  },
-  {
-    icon: <Inbox size={24} />,
-    label: "Servicios Pendientes",
-    shortLabel: "Pendientes",
-    to: "/creator/pending-services",
-  },
-  {
-    icon: <LayoutDashboard size={24} />,
-    label: "Mis Campañas",
-    shortLabel: "Campañas",
-    to: "/creator/campaigns",
   },
 ];
 
