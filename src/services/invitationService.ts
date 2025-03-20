@@ -40,6 +40,24 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
 };
 
 /**
+ * Fetch a specific invitation by invitation code
+ */
+export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation> => {
+  const { data, error } = await supabase
+    .from('creator_invitations')
+    .select('*')
+    .eq('invitation_code', code)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching invitation by code:', error);
+    throw new Error(error.message);
+  }
+  
+  return data as CreatorInvitation;
+};
+
+/**
  * Generate random string of specified length
  */
 const generateRandomString = (length: number): string => {
@@ -110,12 +128,16 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     
     console.log('Generated invitation code:', invitationCode);
     
-    // First insert the invitation to get the ID
+    // Generate invitation URL using the stage URL and the invitation code
+    // New format: /{stage_url}/{invitation_code}
+    const invitationUrl = `/${firstStage.url}/${invitationCode}`;
+    
+    // Create the invitation with the generated code and URL
     const { data, error } = await supabase
       .from('creator_invitations')
       .insert({
         ...invitationData,
-        invitation_url: '', // Temporary empty URL
+        invitation_url: invitationUrl,
         invitation_code: invitationCode
       })
       .select()
@@ -126,26 +148,10 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
       throw new Error(error.message);
     }
     
-    // Now generate invitation URL using the stage URL and the created invitation ID
-    const invitationUrl = `/${firstStage.url}/${data.id}`;
-    
-    // Update the invitation with the correct URL
-    const { data: updatedData, error: updateError } = await supabase
-      .from('creator_invitations')
-      .update({ invitation_url: invitationUrl })
-      .eq('id', data.id)
-      .select()
-      .single();
-    
-    if (updateError) {
-      console.error('Error updating invitation URL:', updateError);
-      throw new Error(updateError.message);
-    }
-    
     // Send invitation email
-    await sendInvitationEmail(updatedData.email, updatedData.full_name, updatedData.invitation_url);
+    await sendInvitationEmail(data.email, data.full_name, data.invitation_url);
     
-    return updatedData as CreatorInvitation;
+    return data as CreatorInvitation;
   } catch (error: any) {
     console.error('Error in createInvitation:', error);
     throw new Error(error.message);

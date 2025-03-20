@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { toast } from "sonner";
+import { fetchInvitationByCode } from "@/services/invitationService";
 
 const MetaWelcomePage = () => {
   const { id } = useParams();
@@ -27,43 +28,36 @@ const MetaWelcomePage = () => {
     const fetchInvitation = async () => {
       if (!id) return;
       
-      // Add log to validate the URL parameter
-      console.log('MetaWelcomePage - URL Parameter ID:', id);
+      // Add log to validate the URL parameter (now using invitation_code)
+      console.log('MetaWelcomePage - URL Parameter (invitation_code):', id);
       
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('creator_invitations')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching invitation:', error);
-          throw error;
-        }
+        
+        // Fetch invitation by code instead of ID
+        const invitationData = await fetchInvitationByCode(id);
 
         // Add log to validate the invitation data
-        console.log('MetaWelcomePage - Invitation data retrieved:', data);
+        console.log('MetaWelcomePage - Invitation data retrieved by code:', invitationData);
 
-        if (data) {
-          setInvitation(data as CreatorInvitation);
+        if (invitationData) {
+          setInvitation(invitationData);
           setFormData({
-            fullName: data.full_name,
-            email: data.email,
-            socialMediaHandle: data.social_media_handle || '',
+            fullName: invitationData.full_name,
+            email: invitationData.email,
+            socialMediaHandle: invitationData.social_media_handle || '',
             termsAccepted: false
           });
           
           // Add log after setting state
           console.log('MetaWelcomePage - Form data initialized:', {
-            fullName: data.full_name,
-            email: data.email,
-            socialMediaHandle: data.social_media_handle || '',
+            fullName: invitationData.full_name,
+            email: invitationData.email,
+            socialMediaHandle: invitationData.social_media_handle || '',
           });
         }
       } catch (err: any) {
-        console.error('Error fetching invitation:', err);
+        console.error('Error fetching invitation by code:', err);
         setError('Unable to load invitation details.');
       } finally {
         setLoading(false);
@@ -102,15 +96,16 @@ const MetaWelcomePage = () => {
     // Add log before navigation
     console.log('MetaWelcomePage - Continuing with invitation:', {
       id: invitation.id,
+      code: invitation.invitation_code,
       email: formData.email,
       invitationType: invitation.invitation_type
     });
 
     // Redirect to authentication page with invitation information
     if (invitation.invitation_type === 'new_user') {
-      navigate(`/auth?signup=true&email=${encodeURIComponent(formData.email)}&invitationId=${id}`);
+      navigate(`/auth?signup=true&email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`);
     } else {
-      navigate(`/auth?email=${encodeURIComponent(formData.email)}&invitationId=${id}`);
+      navigate(`/auth?email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`);
     }
   };
 

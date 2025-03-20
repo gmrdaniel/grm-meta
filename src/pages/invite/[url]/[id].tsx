@@ -20,17 +20,24 @@ const InvitationPage = () => {
         setLoading(true);
         
         if (!url || !id) {
-          throw new Error("Missing URL or invitation ID parameters");
+          throw new Error("Missing URL or invitation code parameters");
         }
 
-        // Find the invitation directly by its ID
+        console.log('InvitationPage - Fetching with URL and code:', { url, id });
+
+        // Find the invitation by its invitation_code
         const { data: invitationData, error: invitationError } = await supabase
           .from('creator_invitations')
           .select('*, projects:project_id(*)')
-          .eq('id', id)
+          .eq('invitation_code', id)
           .single();
 
-        if (invitationError) throw invitationError;
+        if (invitationError) {
+          console.error('Error fetching invitation by code:', invitationError);
+          throw invitationError;
+        }
+
+        console.log('InvitationPage - Invitation data:', invitationData);
 
         // Verify that the stage URL matches
         const { data: stageData, error: stageError } = await supabase
@@ -40,7 +47,12 @@ const InvitationPage = () => {
           .eq('project_id', invitationData.project_id)
           .single();
 
-        if (stageError) throw new Error("Invalid invitation URL");
+        if (stageError) {
+          console.error('Error fetching stage:', stageError);
+          throw new Error("Invalid invitation URL");
+        }
+
+        console.log('InvitationPage - Stage data:', stageData);
 
         setInvitation(invitationData);
         setProject(invitationData.projects);
