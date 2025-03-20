@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +42,10 @@ export function ProjectForm({ onSuccess, defaultValues, projectId }: ProjectForm
         await updateProject(projectId, values);
         toast.success("Proyecto actualizado correctamente");
       } else {
-        await createProject(values);
+        await createProject({
+          name: values.name,
+          status: values.status
+        });
         toast.success("Proyecto creado correctamente");
       }
       

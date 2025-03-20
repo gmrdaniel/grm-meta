@@ -16,13 +16,14 @@ export const fetchProjects = async (): Promise<Project[]> => {
     throw new Error(error.message);
   }
   
-  // Transform the data to include stage_count
+  // Transform the data to include stage_count and ensure proper typing
   const projects = data.map(project => ({
     ...project,
+    status: project.status as Project['status'], // Ensure status is properly typed
     stage_count: project.project_stages[0]?.count || 0
   }));
   
-  return projects;
+  return projects as Project[];
 };
 
 /**
@@ -40,7 +41,10 @@ export const fetchProjectById = async (id: string): Promise<Project> => {
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Project['status']
+  };
 };
 
 /**
@@ -58,7 +62,10 @@ export const createProject = async (project: Omit<Project, 'id' | 'created_at' |
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Project['status']
+  };
 };
 
 /**
@@ -77,7 +84,10 @@ export const updateProject = async (id: string, updates: Partial<Project>): Prom
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    status: data.status as Project['status']
+  };
 };
 
 /**
@@ -95,7 +105,10 @@ export const fetchProjectStages = async (projectId: string): Promise<ProjectStag
     throw new Error(error.message);
   }
   
-  return data;
+  return data.map(stage => ({
+    ...stage,
+    responsible: stage.responsible as ProjectStage['responsible']
+  }));
 };
 
 /**
@@ -115,7 +128,10 @@ export const createProjectStage = async (
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    responsible: data.responsible as ProjectStage['responsible']
+  };
 };
 
 /**
@@ -137,7 +153,10 @@ export const updateProjectStage = async (
     throw new Error(error.message);
   }
   
-  return data;
+  return {
+    ...data,
+    responsible: data.responsible as ProjectStage['responsible']
+  };
 };
 
 /**

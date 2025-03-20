@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/projectService";
+import { ProjectStage } from "@/types/project";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
@@ -67,7 +67,13 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
         toast.success("Etapa actualizada correctamente");
       } else {
         await createProjectStage({
-          ...values,
+          name: values.name,
+          slug: values.slug,
+          url: values.url,
+          view: values.view,
+          responsible: values.responsible,
+          response_positive: values.response_positive,
+          response_negative: values.response_negative,
           project_id: projectId,
           order_index: orderIndex
         });
