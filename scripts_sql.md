@@ -93,6 +93,26 @@ ALTER TABLE public.projects
   ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
 ```
 
+## Row Level Security Policies
+
+```sql
+-- RLS Policies for inventario_creadores
+ALTER TABLE public.inventario_creadores ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all operations for authenticated users" 
+ON public.inventario_creadores
+FOR ALL 
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "Allow read for anonymous users" 
+ON public.inventario_creadores
+FOR SELECT 
+TO anon
+USING (true);
+```
+
 ## Database Functions
 
 ```sql
