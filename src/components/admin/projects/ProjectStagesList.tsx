@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Trash } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { ProjectStage } from "@/types/project";
 import { fetchProjectStages, updateProjectStage, deleteProjectStage } from "@/services/projectService";
@@ -12,9 +11,10 @@ import { useQuery } from "@tanstack/react-query";
 interface ProjectStagesListProps {
   projectId: string;
   onStageOrderUpdated?: () => void;
+  onEditStage?: (stage: ProjectStage) => void;
 }
 
-export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectStagesListProps) {
+export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage }: ProjectStagesListProps) {
   const { data: stages, isLoading, error, refetch } = useQuery({
     queryKey: ['project-stages', projectId],
     queryFn: () => fetchProjectStages(projectId)
@@ -137,6 +137,15 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated }: ProjectSta
                       >
                         <ArrowDown size={16} />
                       </Button>
+                      {onEditStage && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => onEditStage(stage)}
+                        >
+                          <Edit size={16} />
+                        </Button>
+                      )}
                       <Button 
                         size="sm" 
                         variant="ghost" 

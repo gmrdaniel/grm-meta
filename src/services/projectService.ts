@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Project, ProjectStage } from "@/types/project";
 
@@ -16,10 +15,9 @@ export const fetchProjects = async (): Promise<Project[]> => {
     throw new Error(error.message);
   }
   
-  // Transform the data to include stage_count and ensure proper typing
   const projects = data.map(project => ({
     ...project,
-    status: project.status as Project['status'], // Ensure status is properly typed
+    status: project.status as Project['status'],
     stage_count: project.project_stages[0]?.count || 0
   }));
   
@@ -177,7 +175,7 @@ export const deleteProjectStage = async (id: string): Promise<void> => {
 /**
  * Update stages order
  */
-export const updateStagesOrder = async (stages: Pick<ProjectStage, 'id' | 'order_index'>[]): Promise<void> => {
+export const updateStagesOrder = async (stages: { id: string; order_index: number }[]): Promise<void> => {
   const { error } = await supabase.rpc('update_stages_order', { stages_data: stages });
   
   if (error) {

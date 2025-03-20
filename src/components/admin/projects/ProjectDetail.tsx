@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { Project } from "@/types/project";
+import { Project, ProjectStage } from "@/types/project";
 import { updateProject } from "@/services/projectService";
 
 interface ProjectDetailProps {
@@ -23,6 +23,7 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("stages");
   const [reload, setReload] = useState(0);
+  const [editingStage, setEditingStage] = useState<ProjectStage | null>(null);
 
   const handleUpdateProject = async () => {
     try {
@@ -43,6 +44,11 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditStage = (stage: ProjectStage) => {
+    setEditingStage(stage);
+    setActiveTab("edit-stage");
   };
 
   const getStatusBadge = (status: string) => {
@@ -138,6 +144,7 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
         <TabsList className="mb-4">
           <TabsTrigger value="stages">Etapas del Proyecto</TabsTrigger>
           <TabsTrigger value="add-stage">Añadir Etapa</TabsTrigger>
+          {editingStage && <TabsTrigger value="edit-stage">Editar Etapa</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="stages">
@@ -145,6 +152,7 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
             projectId={project.id} 
             key={`stages-list-${reload}`}
             onStageOrderUpdated={() => setReload(prev => prev + 1)}
+            onEditStage={handleEditStage}
           />
         </TabsContent>
         
@@ -157,6 +165,30 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
             }}
           />
         </TabsContent>
+        
+        {editingStage && (
+          <TabsContent value="edit-stage">
+            <ProjectStageForm 
+              projectId={project.id}
+              stageId={editingStage.id}
+              defaultValues={{
+                name: editingStage.name,
+                slug: editingStage.slug,
+                url: editingStage.url,
+                view: editingStage.view,
+                responsible: editingStage.responsible,
+                response_positive: editingStage.response_positive || "",
+                response_negative: editingStage.response_negative || "",
+                order_index: editingStage.order_index
+              }}
+              onSuccess={() => {
+                setActiveTab("stages");
+                setEditingStage(null);
+                setReload(prev => prev + 1);
+              }}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
