@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Trash, Edit } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash, Edit, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { ProjectStage } from "@/types/project";
 import { fetchProjectStages, updateProjectStage, deleteProjectStage } from "@/services/projectService";
@@ -69,6 +70,17 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
     }
   };
 
+  const handleTogglePrivacy = async (stage: ProjectStage) => {
+    try {
+      const newPrivacy = stage.privacy === 'private' ? 'public' : 'private';
+      await updateProjectStage(stage.id, { privacy: newPrivacy });
+      toast.success(`Etapa cambiada a ${newPrivacy === 'public' ? 'pública' : 'privada'}`);
+      await refetch();
+    } catch (error: any) {
+      toast.error(`Error al cambiar privacidad: ${error.message}`);
+    }
+  };
+
   return (
     <Card>
       <CardContent className="p-0">
@@ -80,6 +92,7 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
               <TableHead>URL</TableHead>
               <TableHead>Vista</TableHead>
               <TableHead>Responsable</TableHead>
+              <TableHead>Privacidad</TableHead>
               <TableHead>Siguiente (Positivo)</TableHead>
               <TableHead>Siguiente (Negativo)</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
@@ -88,7 +101,7 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={9} className="h-24 text-center">
                   <div className="flex justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
                   </div>
@@ -96,13 +109,13 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-red-500">
+                <TableCell colSpan={9} className="h-24 text-center text-red-500">
                   Error al cargar etapas: {(error as Error).message}
                 </TableCell>
               </TableRow>
             ) : stages?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={9} className="h-24 text-center">
                   No hay etapas creadas aún
                 </TableCell>
               </TableRow>
@@ -116,6 +129,13 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
                   <TableCell>
                     {stage.responsible === "system" ? "Sistema" : 
                      stage.responsible === "creator" ? "Creador" : "Admin"}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      stage.privacy === 'public' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {stage.privacy === 'public' ? 'Público' : 'Privado'}
+                    </span>
                   </TableCell>
                   <TableCell>{stage.response_positive || '-'}</TableCell>
                   <TableCell>{stage.response_negative || '-'}</TableCell>
@@ -136,6 +156,15 @@ export function ProjectStagesList({ projectId, onStageOrderUpdated, onEditStage 
                         disabled={stages && stage.order_index === stages.length}
                       >
                         <ArrowDown size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleTogglePrivacy(stage)}
+                        className={stage.privacy === 'public' ? 'text-green-600' : 'text-red-600'}
+                        title={stage.privacy === 'public' ? 'Hacer privado' : 'Hacer público'}
+                      >
+                        {stage.privacy === 'public' ? <Eye size={16} /> : <EyeOff size={16} />}
                       </Button>
                       {onEditStage && (
                         <Button 

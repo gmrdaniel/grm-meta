@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/projectService";
 import { ProjectStage } from "@/types/project";
@@ -18,6 +20,9 @@ const formSchema = z.object({
   view: z.string().min(1, { message: "La vista es obligatoria" }),
   responsible: z.enum(["system", "creator", "admin"], {
     required_error: "Debe seleccionar un responsable",
+  }),
+  privacy: z.enum(["public", "private"], {
+    required_error: "Debe seleccionar la privacidad",
   }),
   response_positive: z.string().optional(),
   response_negative: z.string().optional()
@@ -42,6 +47,7 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
       url: "",
       view: "",
       responsible: "system",
+      privacy: "private",
       response_positive: "",
       response_negative: ""
     }
@@ -72,6 +78,7 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
           url: values.url,
           view: values.view,
           responsible: values.responsible,
+          privacy: values.privacy,
           response_positive: values.response_positive,
           response_negative: values.response_negative,
           project_id: projectId,
@@ -155,31 +162,58 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
               />
             </div>
             
-            <FormField
-              control={form.control}
-              name="responsible"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Responsable</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar responsable" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="system">Sistema</SelectItem>
-                      <SelectItem value="creator">Creador</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="responsible"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Responsable</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar responsable" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="system">Sistema</SelectItem>
+                        <SelectItem value="creator">Creador</SelectItem>
+                        <SelectItem value="admin">Administrador</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="privacy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Privacidad</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar privacidad" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="public">Público</SelectItem>
+                        <SelectItem value="private">Privado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField

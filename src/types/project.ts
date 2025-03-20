@@ -19,6 +19,7 @@ export interface ProjectStage {
   response_positive?: string;
   response_negative?: string;
   order_index: number;
+  privacy: "public" | "private";
   created_at: string;
   updated_at: string;
 }

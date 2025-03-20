@@ -128,6 +128,7 @@ export type Database = {
           id: string
           name: string
           order_index: number
+          privacy: string
           project_id: string
           response_negative: string | null
           response_positive: string | null
@@ -142,6 +143,7 @@ export type Database = {
           id?: string
           name: string
           order_index: number
+          privacy?: string
           project_id: string
           response_negative?: string | null
           response_positive?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           id?: string
           name?: string
           order_index?: number
+          privacy?: string
           project_id?: string
           response_negative?: string | null
           response_positive?: string | null

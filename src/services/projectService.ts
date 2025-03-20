@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Project, ProjectStage } from "@/types/project";
 
@@ -106,7 +105,8 @@ export const fetchProjectStages = async (projectId: string): Promise<ProjectStag
   
   return data.map(stage => ({
     ...stage,
-    responsible: stage.responsible as ProjectStage['responsible']
+    responsible: stage.responsible as ProjectStage['responsible'],
+    privacy: stage.privacy as ProjectStage['privacy']
   }));
 };
 
@@ -129,7 +129,8 @@ export const createProjectStage = async (
   
   return {
     ...data,
-    responsible: data.responsible as ProjectStage['responsible']
+    responsible: data.responsible as ProjectStage['responsible'],
+    privacy: data.privacy as ProjectStage['privacy']
   };
 };
 
@@ -154,7 +155,8 @@ export const updateProjectStage = async (
   
   return {
     ...data,
-    responsible: data.responsible as ProjectStage['responsible']
+    responsible: data.responsible as ProjectStage['responsible'],
+    privacy: data.privacy as ProjectStage['privacy']
   };
 };
 
