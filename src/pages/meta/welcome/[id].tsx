@@ -27,6 +27,9 @@ const MetaWelcomePage = () => {
     const fetchInvitation = async () => {
       if (!id) return;
       
+      // Add log to validate the URL parameter
+      console.log('MetaWelcomePage - URL Parameter ID:', id);
+      
       try {
         setLoading(true);
         const { data, error } = await supabase
@@ -35,7 +38,13 @@ const MetaWelcomePage = () => {
           .eq('id', id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching invitation:', error);
+          throw error;
+        }
+
+        // Add log to validate the invitation data
+        console.log('MetaWelcomePage - Invitation data retrieved:', data);
 
         if (data) {
           setInvitation(data as CreatorInvitation);
@@ -44,6 +53,13 @@ const MetaWelcomePage = () => {
             email: data.email,
             socialMediaHandle: data.social_media_handle || '',
             termsAccepted: false
+          });
+          
+          // Add log after setting state
+          console.log('MetaWelcomePage - Form data initialized:', {
+            fullName: data.full_name,
+            email: data.email,
+            socialMediaHandle: data.social_media_handle || '',
           });
         }
       } catch (err: any) {
@@ -83,6 +99,13 @@ const MetaWelcomePage = () => {
       return;
     }
 
+    // Add log before navigation
+    console.log('MetaWelcomePage - Continuing with invitation:', {
+      id: invitation.id,
+      email: formData.email,
+      invitationType: invitation.invitation_type
+    });
+
     // Redirect to authentication page with invitation information
     if (invitation.invitation_type === 'new_user') {
       navigate(`/auth?signup=true&email=${encodeURIComponent(formData.email)}&invitationId=${id}`);
@@ -100,6 +123,9 @@ const MetaWelcomePage = () => {
   }
 
   if (error || !invitation) {
+    // Add log when error is detected
+    console.log('MetaWelcomePage - Error state:', { error, invitation });
+    
     return (
       <div className="flex items-center justify-center min-h-screen p-4">
         <Card className="w-full max-w-md">
