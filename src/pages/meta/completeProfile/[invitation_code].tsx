@@ -107,8 +107,8 @@ const CompleteProfilePage = () => {
       const updateData = {
         youtube_channel: formData.youtubeChannel || null,
         instagram_user: formData.instagramUser || null,
-        phone_country_code: formData.phoneCountryCode,
-        phone_number: formData.phoneNumber
+        phone_country_code: formData.phoneCountryCode || null,
+        phone_number: formData.phoneNumber || null
       };
       
       console.log('CompleteProfilePage - Updating invitation with additional data:', updateData);
