@@ -103,19 +103,19 @@ const CompleteProfilePage = () => {
       setSaving(true);
       
       // Prepare the additional data to update
-      const additionalData = {
+      const updateData = {
         youtube_channel: formData.youtubeChannel || null,
         other_social_media: formData.otherSocialMedia || null,
         phone_country_code: formData.phoneCountryCode,
         phone_number: formData.phoneNumber
       };
       
-      console.log('CompleteProfilePage - Updating invitation with additional data:', additionalData);
+      console.log('CompleteProfilePage - Updating invitation with additional data:', updateData);
       
       // Update the invitation with additional data
       const { error } = await supabase
         .from('creator_invitations')
-        .update(additionalData)
+        .update(updateData)
         .eq('id', invitation.id);
       
       if (error) {
@@ -138,11 +138,6 @@ const CompleteProfilePage = () => {
       toast.error('An unexpected error occurred. Please try again.');
       setSaving(false);
     }
-  };
-
-  const handleBack = () => {
-    if (!invitation_code) return;
-    navigate(`/meta/welcome/${invitation_code}`);
   };
 
   if (loading) {
@@ -227,10 +222,7 @@ const CompleteProfilePage = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleBack}>
-            Back
-          </Button>
+        <CardFooter className="flex justify-end">
           <Button 
             onClick={handleSubmit} 
             disabled={saving || !formData.phoneNumber}
