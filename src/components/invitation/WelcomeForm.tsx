@@ -8,7 +8,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CreatorInvitation } from "@/types/invitation";
-import { CheckCircle2, Sparkles, AlertTriangle } from "lucide-react";
 
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
@@ -40,45 +39,6 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
 
   return (
     <>
-      {/* Welcome banner */}
-      <div className="bg-blue-50 p-6 rounded-t-lg border-b border-blue-100">
-        <div className="flex items-center gap-2 text-blue-600 font-bold text-2xl mb-2">
-          <Sparkles className="h-6 w-6" />
-          <h2>Welcome, Creator!</h2>
-        </div>
-        <div className="flex items-center gap-2 text-red-500">
-          <AlertTriangle className="h-4 w-4" />
-          <p className="text-sm">Limited spots available!</p>
-        </div>
-      </div>
-      
-      {/* Benefits section */}
-      <div className="px-6 py-4 border-b">
-        <h3 className="font-semibold text-lg mb-3">Benefits:</h3>
-        <ul className="space-y-2">
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>$5,000 Bonuses (90 days)</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Immediate Facebook Monetization</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Free Meta Verified</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Priority Reach & Insights</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Paid Brand Sponsorships</span>
-          </li>
-        </ul>
-      </div>
-
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
