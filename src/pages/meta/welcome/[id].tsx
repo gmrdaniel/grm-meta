@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -149,10 +148,7 @@ const MetaWelcomePage = () => {
     <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Join Meta Creator Program</CardTitle>
-          <CardDescription>
-            You've been invited to join Meta's exclusive content creator program
-          </CardDescription>
+          {/* Title and description moved to WelcomeForm component */}
         </CardHeader>
         
         <WelcomeForm

@@ -87,6 +87,14 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             <span>Paid Brand Sponsorships</span>
           </li>
         </ul>
+        
+        {/* Join Meta Creator Program Section (Moved from CardHeader) */}
+        <div className="mt-6 border-t border-gray-200 pt-4">
+          <h2 className="text-2xl font-bold text-gray-800">Join Meta Creator Program</h2>
+          <p className="text-gray-600">
+            You've been invited to join Meta's exclusive content creator program
+          </p>
+        </div>
       </div>
 
       <CardContent className="space-y-6">
