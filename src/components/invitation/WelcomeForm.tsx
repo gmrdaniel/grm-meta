@@ -95,7 +95,12 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button onClick={handleContinue}>Continue</Button>
+        <Button 
+          onClick={handleContinue} 
+          disabled={!formData.termsAccepted}
+        >
+          Continue
+        </Button>
       </CardFooter>
     </>
   );
