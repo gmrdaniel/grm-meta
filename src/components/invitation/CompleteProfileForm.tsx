@@ -4,7 +4,8 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Instagram } from "lucide-react";
+import { Instagram, Youtube } from "lucide-react";
+import { PhoneVerification } from "@/components/invitation/PhoneVerification";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
@@ -16,6 +17,7 @@ export interface ProfileFormData {
   instagramUser: string;
   phoneCountryCode: string;
   phoneNumber: string;
+  isPhoneVerified: boolean;
 }
 
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({ 
@@ -26,7 +28,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     youtubeChannel: "",
     instagramUser: "",
     phoneCountryCode: "+1",
-    phoneNumber: ""
+    phoneNumber: "",
+    isPhoneVerified: false
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +37,20 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     setFormData({
       ...formData,
       [name]: value
+    });
+  };
+
+  const handlePhoneChange = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      [field]: value
+    });
+  };
+
+  const handleVerificationSuccess = () => {
+    setFormData({
+      ...formData,
+      isPhoneVerified: true
     });
   };
 
@@ -46,7 +63,9 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="youtubeChannel">YouTube Channel (Optional)</Label>
+            <Label htmlFor="youtubeChannel" className="flex items-center gap-2">
+              <Youtube className="h-4 w-4" /> YouTube Channel (Optional)
+            </Label>
             <Input
               id="youtubeChannel"
               name="youtubeChannel"
@@ -69,34 +88,19 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <div className="flex gap-2">
-              <Input
-                id="phoneCountryCode"
-                name="phoneCountryCode"
-                value={formData.phoneCountryCode}
-                onChange={handleInputChange}
-                className="w-20"
-              />
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Phone number"
-                className="flex-1"
-                type="tel"
-              />
-            </div>
-          </div>
+          <PhoneVerification
+            phoneCountryCode={formData.phoneCountryCode}
+            phoneNumber={formData.phoneNumber}
+            onVerificationSuccess={handleVerificationSuccess}
+            onPhoneChange={handlePhoneChange}
+          />
         </div>
       </CardContent>
 
       <CardFooter className="flex justify-end">
         <Button 
           onClick={handleSubmit} 
-          disabled={isSubmitting || !formData.phoneNumber}
+          disabled={isSubmitting || !formData.phoneNumber || !formData.isPhoneVerified}
         >
           {isSubmitting ? "Saving..." : "Complete Registration"}
         </Button>

@@ -48,6 +48,11 @@ const CompleteProfilePage = () => {
   const handleSubmit = async (formData: ProfileFormData) => {
     if (!invitation) return;
     
+    if (!formData.isPhoneVerified) {
+      toast.error("Please verify your phone number before proceeding");
+      return;
+    }
+    
     try {
       setSaving(true);
       
@@ -103,7 +108,7 @@ const CompleteProfilePage = () => {
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Complete Your Profile</CardTitle>
           <CardDescription>
-            Add additional information to complete your registration
+            Add additional information and verify your phone number to complete your registration
           </CardDescription>
         </CardHeader>
         
