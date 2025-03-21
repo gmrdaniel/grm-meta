@@ -130,12 +130,8 @@ const MetaWelcomePage = () => {
       invitationType: invitation.invitation_type
     });
 
-    // Redirect to authentication page with invitation information
-    const authPath = invitation.invitation_type === 'new_user'
-      ? `/auth?signup=true&email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`
-      : `/auth?email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`;
-      
-    window.location.href = authPath;
+    // Redirect to the FbCreation page with the invitation code
+    window.location.href = `/meta/FbCreation/${invitation.invitation_code}`;
   };
 
   if (loading) {
