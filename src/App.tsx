@@ -18,7 +18,6 @@ import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationPage from "./pages/invite/[url]/[id]";
 import MetaWelcomePage from "./pages/meta/welcome/[id]";
-import FbCreationPage from "./pages/meta/FbCreation/[id]";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,6 @@ function App() {
               {/* Public routes */}
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
               <Route path="/meta/welcome/:id?" element={<MetaWelcomePage />} />
-              <Route path="/meta/FbCreation/:id?" element={<FbCreationPage />} />
               
               {/* Admin routes */}
               <Route
