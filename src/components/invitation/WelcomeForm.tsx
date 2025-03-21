@@ -1,6 +1,5 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,8 +28,6 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
   onCheckboxChange,
   onContinue,
 }) => {
-  const navigate = useNavigate();
-
   const handleContinue = () => {
     if (!formData.termsAccepted) {
       toast.error("You must accept the terms and conditions to continue");
@@ -97,10 +94,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Back
-        </Button>
+      <CardFooter className="flex justify-end">
         <Button onClick={handleContinue}>Continue</Button>
       </CardFooter>
     </>
