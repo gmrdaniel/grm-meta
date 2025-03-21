@@ -329,7 +329,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       <CardFooter className="flex justify-end">
         <Button 
           onClick={handleSubmit} 
-          disabled={isSubmitting || !formData.phoneNumber}
+          disabled={isSubmitting || !formData.phoneVerified || !formData.phoneNumber}
         >
           {isSubmitting ? "Saving..." : "Complete Registration"}
         </Button>

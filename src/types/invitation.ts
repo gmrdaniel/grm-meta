@@ -1,22 +1,22 @@
-
 export interface CreatorInvitation {
   id: string;
-  full_name: string;
+  project_id?: string | null;
   email: string;
-  social_media_handle: string | null;
-  social_media_type: "tiktok" | "pinterest" | null;
-  project_id: string | null;
-  invitation_type: "new_user" | "existing_user";
-  invitation_url: string;
+  full_name: string;
+  social_media_type?: string | null;
+  social_media_handle?: string | null;
+  other_social_media?: string | null;
+  youtube_channel?: string | null;
+  instagram_user?: string | null;
   invitation_code: string;
-  status: "pending" | "accepted" | "rejected";
+  invitation_url: string;
+  status: string;
+  invitation_type: string;
   created_at: string;
   updated_at: string;
-  youtube_channel: string | null;
-  instagram_user: string | null;
-  other_social_media: string | null;
-  phone_country_code: string | null;
-  phone_number: string | null;
+  phone_number?: string | null;
+  phone_country_code?: string | null;
+  phone_verified?: boolean;
 }
 
 export type CreateInvitationData = Pick<
