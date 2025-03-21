@@ -15,42 +15,54 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          instagram_user: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
+          phone_country_code: string | null
+          phone_number: string | null
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: string
           updated_at: string
+          youtube_channel: string | null
         }
         Insert: {
           created_at?: string
           email: string
           full_name: string
           id?: string
+          instagram_user?: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
+          phone_country_code?: string | null
+          phone_number?: string | null
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: string
           updated_at?: string
+          youtube_channel?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           full_name?: string
           id?: string
+          instagram_user?: string | null
           invitation_code?: string
           invitation_type?: string
           invitation_url?: string
+          phone_country_code?: string | null
+          phone_number?: string | null
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: string
           updated_at?: string
+          youtube_channel?: string | null
         }
         Relationships: [
           {
@@ -269,14 +281,18 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          instagram_user: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
+          phone_country_code: string | null
+          phone_number: string | null
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: string
           updated_at: string
+          youtube_channel: string | null
         }[]
       }
       get_table_definition: {
