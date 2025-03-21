@@ -1,5 +1,6 @@
+
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
-import { CreatorInvitation } from "@/types/invitation";
+import { CreatorInvitation, CreateInvitationData } from "@/types/invitation";
 
 /**
  * Fetch a single invitation by its code
