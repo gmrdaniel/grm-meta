@@ -12,6 +12,10 @@ export interface CreatorInvitation {
   status: "pending" | "accepted" | "rejected";
   created_at: string;
   updated_at: string;
+  youtube_channel?: string | null;
+  other_social_media?: string | null;
+  phone_country_code?: string | null;
+  phone_number?: string | null;
 }
 
 export type CreateInvitationData = Pick<

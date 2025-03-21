@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
@@ -11,6 +11,7 @@ import { WelcomeForm } from "@/components/invitation/WelcomeForm";
 
 const MetaWelcomePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,12 +131,8 @@ const MetaWelcomePage = () => {
       invitationType: invitation.invitation_type
     });
 
-    // Redirect to authentication page with invitation information
-    const authPath = invitation.invitation_type === 'new_user'
-      ? `/auth?signup=true&email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`
-      : `/auth?email=${encodeURIComponent(formData.email)}&invitationId=${invitation.id}`;
-      
-    window.location.href = authPath;
+    // Navigate to the complete profile page
+    navigate(`/meta/completeProfile/${invitation.invitation_code}`);
   };
 
   if (loading) {
