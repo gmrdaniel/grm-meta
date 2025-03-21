@@ -56,7 +56,8 @@ const CompleteProfilePage = () => {
         youtube_channel: formData.youtubeChannel || null,
         instagram_user: formData.instagramUser || null,
         phone_country_code: formData.phoneCountryCode || null,
-        phone_number: formData.phoneNumber || null
+        phone_number: formData.phoneNumber || null,
+        phone_verified: formData.phoneVerified
       };
       
       console.log('CompleteProfilePage - Updating invitation with additional data:', updateData);
@@ -110,6 +111,7 @@ const CompleteProfilePage = () => {
         <CompleteProfileForm 
           onSubmit={handleSubmit}
           isSubmitting={saving}
+          invitationId={invitation.id}
         />
       </Card>
     </div>

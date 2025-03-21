@@ -21,6 +21,7 @@ export type Database = {
           invitation_url: string
           phone_country_code: string | null
           phone_number: string | null
+          phone_verified: boolean | null
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
@@ -39,6 +40,7 @@ export type Database = {
           invitation_url: string
           phone_country_code?: string | null
           phone_number?: string | null
+          phone_verified?: boolean | null
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           invitation_url?: string
           phone_country_code?: string | null
           phone_number?: string | null
+          phone_verified?: boolean | null
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
@@ -287,6 +290,7 @@ export type Database = {
           invitation_url: string
           phone_country_code: string | null
           phone_number: string | null
+          phone_verified: boolean | null
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
