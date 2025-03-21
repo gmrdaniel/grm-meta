@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
-import { Instagram } from "lucide-react";
 
 const CompleteProfilePage = () => {
   const { invitation_code } = useParams();
@@ -19,7 +18,7 @@ const CompleteProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     youtubeChannel: "",
-    instagramUser: "",
+    otherSocialMedia: "",
     phoneCountryCode: "+1",
     phoneNumber: ""
   });
@@ -106,7 +105,7 @@ const CompleteProfilePage = () => {
       // Prepare the additional data to update
       const updateData = {
         youtube_channel: formData.youtubeChannel || null,
-        instagram_user: formData.instagramUser || null,
+        other_social_media: formData.otherSocialMedia || null,
         phone_country_code: formData.phoneCountryCode,
         phone_number: formData.phoneNumber
       };
@@ -189,15 +188,13 @@ const CompleteProfilePage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="instagramUser" className="flex items-center gap-2">
-                <Instagram className="h-4 w-4" /> Instagram (Optional)
-              </Label>
+              <Label htmlFor="otherSocialMedia">Other Social Media (Optional)</Label>
               <Input
-                id="instagramUser"
-                name="instagramUser"
-                value={formData.instagramUser}
+                id="otherSocialMedia"
+                name="otherSocialMedia"
+                value={formData.otherSocialMedia}
                 onChange={handleInputChange}
-                placeholder="@username"
+                placeholder="Instagram, Twitter, etc."
               />
             </div>
 
