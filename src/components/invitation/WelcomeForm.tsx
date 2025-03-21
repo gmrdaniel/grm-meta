@@ -88,6 +88,10 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
           </li>
         </ul>
         
+
+      </div>
+
+      <CardContent className="space-y-6">
         {/* Join Meta Creator Program Section (Moved from CardHeader) */}
         <div className="mt-6 border-t border-gray-200 pt-4">
           <h2 className="text-2xl font-bold text-gray-800">Join Meta Creator Program</h2>
@@ -95,9 +99,6 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             You've been invited to join Meta's exclusive content creator program
           </p>
         </div>
-      </div>
-
-      <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
