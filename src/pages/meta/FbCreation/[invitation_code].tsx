@@ -94,7 +94,7 @@ const FbCreationPage = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Facebook Page Creation & Instagram Linking</h1>
               <div className="flex items-center text-red-500 mt-2">
-                <span className="mr-2">♦</span>
+                <span className="mr-2">📌</span>
                 <p className="text-orange-500 font-medium">Important: Set Up Your Facebook Page!</p>
               </div>
             </div>
@@ -102,12 +102,18 @@ const FbCreationPage = () => {
             <div className="space-y-6">
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold">1. Create Your Facebook Page:</h2>
-                <div className="flex items-center text-blue-500">
+                <a 
+                  href="https://www.facebook.com/business/help/104002523024878" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center text-blue-500 hover:underline"
+                >
                   <span className="mr-2 inline-flex items-center">
-                    <ExternalLink className="h-5 w-5 text-blue-500 mr-1" />
+                    <span className="mr-1">▶️</span>
                     Watch How
                   </span>
-                </div>
+                  <ExternalLink className="h-4 w-4" />
+                </a>
                 
                 <div className="space-y-2">
                   <Label htmlFor="facebookPageUrl">Facebook Page URL</Label>
@@ -146,7 +152,15 @@ const FbCreationPage = () => {
               
               <div className="space-y-3">
                 <h2 className="text-lg font-semibold">2. Link Instagram to Facebook:</h2>
-                <p className="text-gray-600">Instructions here</p>
+                <a 
+                  href="https://www.facebook.com/help/1148909221857370" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-500 hover:underline"
+                >
+                  <span>Instructions here</span>
+                  <ExternalLink className="h-4 w-4 ml-1" />
+                </a>
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -157,7 +171,7 @@ const FbCreationPage = () => {
                     }
                   />
                   <Label htmlFor="linkInstagram" className="text-sm">
-                    Link Instagram to Facebook
+                    I've linked my Instagram to Facebook
                   </Label>
                 </div>
               </div>
