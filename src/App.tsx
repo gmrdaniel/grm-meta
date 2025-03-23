@@ -19,6 +19,7 @@ import CreatorProfile from "./pages/creator/Profile";
 import InvitationPage from "./pages/invite/[url]/[id]";
 import MetaWelcomePage from "./pages/meta/welcome/[id]";
 import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
+import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function App() {
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
               <Route path="/meta/welcome/:id?" element={<MetaWelcomePage />} />
               <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
+              <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
               
               {/* Admin routes */}
               <Route
