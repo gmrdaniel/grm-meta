@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ExternalLink, Check, Clock, Eye, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { fetchInvitationByCode, updateFacebookPage } from "@/services/invitationService";
+import { fetchInvitationByCode, updateFacebookPage, updateInvitationStatus } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
@@ -113,6 +113,7 @@ const FbCreationPage = () => {
 
       console.log(`Facebook page URL to save: ${facebookPageUrl}`);
 
+      // Update the Facebook page URL
       const result = await updateFacebookPage(invitation.id, facebookPageUrl);
       
       if (!result) {
@@ -127,6 +128,12 @@ const FbCreationPage = () => {
       
       if (result.facebook_page === facebookPageUrl) {
         console.log("Facebook page URL successfully updated!");
+        
+        // Update invitation status to accepted
+        console.log("Updating invitation status to accepted");
+        const updatedInvitation = await updateInvitationStatus(invitation.id, 'accepted');
+        console.log("Invitation status updated:", updatedInvitation);
+        
         toast.success("Your submission has been received for validation");
         
         // Show submission complete screen instead of redirecting

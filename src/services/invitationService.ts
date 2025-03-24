@@ -1,6 +1,5 @@
-
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
-import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData } from "@/types/invitation";
+import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData, TaskWithInvitation } from "@/types/invitation";
 
 /**
  * Fetch a single invitation by its code
