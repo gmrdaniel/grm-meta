@@ -273,6 +273,74 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          admin_id: string | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          project_id: string
+          stage_id: string
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_id?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          project_id: string
+          stage_id: string
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          project_id?: string
+          stage_id?: string
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -303,9 +371,56 @@ export type Database = {
           youtube_channel: string | null
         }[]
       }
+      get_creators_by_project_stage: {
+        Args: {
+          project_id_param: string
+          stage_id_param: string
+        }
+        Returns: {
+          creator_id: string
+          first_name: string
+          last_name: string
+          email: string
+          task_count: number
+          pending_count: number
+          in_progress_count: number
+          completed_count: number
+          review_count: number
+        }[]
+      }
+      get_creators_count_by_stage: {
+        Args: {
+          project_id_param: string
+        }
+        Returns: {
+          stage_id: string
+          stage_name: string
+          creators_count: number
+        }[]
+      }
       get_table_definition: {
         Args: {
           table_name: string
+        }
+        Returns: string
+      }
+      get_tasks_count_by_stage: {
+        Args: {
+          project_id_param: string
+        }
+        Returns: {
+          stage_id: string
+          stage_name: string
+          tasks_count: number
+          pending_count: number
+          in_progress_count: number
+          completed_count: number
+          review_count: number
+        }[]
+      }
+      get_user_role: {
+        Args: {
+          user_id: string
         }
         Returns: string
       }
@@ -318,6 +433,7 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "rejected"
+      task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
     CompositeTypes: {

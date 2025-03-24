@@ -1,4 +1,3 @@
-
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData } from "@/types/invitation";
 
@@ -90,6 +89,9 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
   // Generate invitation URL path
   const invitationUrl = `/invite/${invitationCode}`;
   
+  // Log the invitation data for debugging
+  console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });
+  
   // Prepare the complete invitation data
   const completeInvitation = {
     ...invitationData,
@@ -113,6 +115,7 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     throw new Error('Failed to create invitation: No data returned');
   }
   
+  console.log('Invitation created successfully:', data);
   return data as CreatorInvitation;
 };
 

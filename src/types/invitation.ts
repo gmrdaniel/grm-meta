@@ -21,10 +21,14 @@ export interface CreatorInvitation {
   phone_verified?: boolean;
 }
 
-export type CreateInvitationData = Pick<
-  CreatorInvitation,
-  "full_name" | "email" | "social_media_handle" | "social_media_type" | "project_id" | "invitation_type"
->;
+export type CreateInvitationData = {
+  full_name: string;
+  email: string;
+  social_media_handle?: string | null;
+  social_media_type?: string | null;
+  project_id: string; // Now marked as required
+  invitation_type: string;
+};
 
 export type UpdateFacebookPageData = {
   facebookPageUrl: string;

@@ -43,7 +43,10 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
   });
 
   const createInvitationMutation = useMutation({
-    mutationFn: (data: CreateInvitationData) => createInvitation(data),
+    mutationFn: (data: CreateInvitationData) => {
+      console.log("Creating invitation with data:", data);
+      return createInvitation(data);
+    },
     onSuccess: () => {
       toast.success("Invitation created and email sent successfully!");
       form.reset();
