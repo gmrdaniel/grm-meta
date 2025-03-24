@@ -78,6 +78,37 @@ export async function fetchTasks({ page, limit, status }: FetchTasksParams): Pro
   }
 }
 
+export async function fetchTaskById(taskId: string): Promise<Task> {
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(`
+        *,
+        projects:project_id(name),
+        project_stages:stage_id(name)
+      `)
+      .eq('id', taskId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching task by ID:', error);
+      throw new Error(error.message);
+    }
+    
+    // Format the data to extract the joined fields
+    const formattedTask = {
+      ...data,
+      project_name: data.projects?.name,
+      stage_name: data.project_stages?.name,
+    };
+    
+    return formattedTask as Task;
+  } catch (error) {
+    console.error('Unexpected error in fetchTaskById:', error);
+    throw error;
+  }
+}
+
 export async function updateTaskStatus(taskId: string, status: 'pending' | 'in_progress' | 'completed' | 'review'): Promise<Task> {
   const { data, error } = await supabase
     .from('tasks')

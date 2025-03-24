@@ -28,6 +28,7 @@ interface TasksListProps {
   onPageChange: (page: number) => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
+  onTaskSelect: (taskId: string) => void;
 }
 
 // Type guard to validate if a string is a valid task status
@@ -35,7 +36,7 @@ function isValidStatus(status: string): status is 'pending' | 'in_progress' | 'c
   return ['pending', 'in_progress', 'completed', 'review'].includes(status);
 }
 
-export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChange }: TasksListProps) {
+export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChange, onTaskSelect }: TasksListProps) {
   const ITEMS_PER_PAGE = 10;
   
   const { data, isLoading, error } = useQuery({
@@ -106,7 +107,11 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
           </TableHeader>
           <TableBody>
             {data.tasks.map((task) => (
-              <TableRow key={task.id}>
+              <TableRow 
+                key={task.id} 
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => onTaskSelect(task.id)}
+              >
                 <TableCell className="font-medium">{task.title}</TableCell>
                 <TableCell>{getStatusBadge(task.status)}</TableCell>
                 <TableCell>{task.project_name || '-'}</TableCell>
