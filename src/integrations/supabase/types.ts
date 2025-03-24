@@ -26,7 +26,7 @@ export type Database = {
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
-          status: string
+          status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
         }
@@ -46,7 +46,7 @@ export type Database = {
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
         }
@@ -66,7 +66,7 @@ export type Database = {
           project_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
         }
@@ -298,7 +298,7 @@ export type Database = {
           project_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
-          status: string
+          status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
         }[]
@@ -317,6 +317,7 @@ export type Database = {
       }
     }
     Enums: {
+      invitation_status: "pending" | "accepted" | "rejected"
       user_role: "admin" | "creator"
     }
     CompositeTypes: {

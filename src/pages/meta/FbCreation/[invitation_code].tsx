@@ -1,16 +1,17 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Check } from "lucide-react";
+import { ExternalLink, Check, Clock, Eye, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { fetchInvitationByCode, updateFacebookPage } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 const FbCreationPage = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -23,6 +24,12 @@ const FbCreationPage = () => {
     facebookPageUrl: "",
     verifyOwnership: false,
     linkInstagram: false,
+  });
+  const [submissionComplete, setSubmissionComplete] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    password: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
@@ -68,6 +75,11 @@ const FbCreationPage = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (name: string, checked: boolean) => {
@@ -117,9 +129,8 @@ const FbCreationPage = () => {
         console.log("Facebook page URL successfully updated!");
         toast.success("Your submission has been received for validation");
         
-        setTimeout(() => {
-          navigate("/creator/dashboard");
-        }, 2000);
+        // Show submission complete screen instead of redirecting
+        setSubmissionComplete(true);
       } else {
         console.error("Data mismatch after save:", {
           expected: facebookPageUrl,
@@ -137,10 +148,146 @@ const FbCreationPage = () => {
     }
   };
 
+  const handleSetPassword = async () => {
+    if (!invitation) return;
+    
+    if (passwordData.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    
+    if (passwordData.password !== passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    setSubmitting(true);
+    
+    try {
+      // Create a new user in Supabase with invitation data
+      const { data: userData, error: userError } = await supabase.auth.signUp({
+        email: invitation.email,
+        password: passwordData.password,
+        options: {
+          data: {
+            full_name: invitation.full_name,
+            phone: invitation.phone_number || null
+          }
+        }
+      });
+      
+      if (userError) {
+        console.error("Error creating user account:", userError);
+        toast.error("Failed to create your account");
+        setError(userError.message);
+        setSubmitting(false);
+        return;
+      }
+      
+      console.log("User account created successfully:", userData);
+      toast.success("Account created successfully! You can now log in");
+      
+      // Redirect to login page after account creation
+      setTimeout(() => {
+        navigate("/auth");
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error in account creation:", error);
+      toast.error("An unexpected error occurred");
+      setError("Failed to create your account. Please try again later.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (submissionComplete) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <Card className="w-full max-w-lg">
+          <CardContent className="pt-8 pb-8 flex flex-col items-center">
+            <div className="bg-blue-100 p-6 rounded-full mb-4">
+              {showPasswordForm ? (
+                <div className="text-blue-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+              ) : (
+                <Clock className="h-12 w-12 text-blue-600" />
+              )}
+            </div>
+            
+            {showPasswordForm ? (
+              <>
+                <CardTitle className="text-2xl font-bold text-center mb-2">
+                  Create Password
+                </CardTitle>
+                <p className="text-gray-600 text-center mb-6">
+                  Set a secure password for your creator account
+                </p>
+                
+                <div className="w-full space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={passwordData.password}
+                      onChange={handlePasswordChange}
+                    />
+                    <p className="text-sm text-gray-500">Must be at least 8 characters</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input 
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={handleSetPassword}
+                    disabled={submitting || passwordData.password.length < 8 || passwordData.password !== passwordData.confirmPassword}
+                    className="w-full"
+                  >
+                    {submitting ? "Creating Account..." : "Set Password & Continue"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <CardTitle className="text-2xl font-bold text-center mb-2">
+                  <Eye className="inline mr-2" /> Your Submission is Under Review!
+                </CardTitle>
+                <p className="text-gray-600 text-center mb-4">
+                  We've received your details and are currently verifying your information (takes 1-3 business days).
+                </p>
+                <p className="text-gray-600 text-center mb-8">
+                  <Mail className="inline mr-2 text-blue-500" /> You'll be notified via email/SMS once approved.
+                </p>
+                
+                <Button onClick={() => setShowPasswordForm(true)}>
+                  Set a Password
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   }
