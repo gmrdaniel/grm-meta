@@ -27,6 +27,31 @@ export const fetchInvitationByCode = async (code: string): Promise<CreatorInvita
 };
 
 /**
+ * Fetch a single invitation by ID
+ */
+export const fetchInvitationById = async (id: string): Promise<CreatorInvitation | null> => {
+  try {
+    console.log(`Fetching invitation with ID: ${id}`);
+    
+    const { data, error } = await supabase
+      .from('creator_invitations')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching invitation by ID:', error);
+      return null;
+    }
+    
+    return data as CreatorInvitation | null;
+  } catch (err) {
+    console.error('Unexpected error in fetchInvitationById:', err);
+    return null;
+  }
+};
+
+/**
  * Fetch all invitations
  */
 export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
