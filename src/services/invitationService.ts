@@ -110,6 +110,39 @@ export const updateInvitationStatus = async (
 };
 
 /**
+ * Update Facebook page URL
+ */
+export const updateFacebookPage = async (
+  invitationId: string,
+  facebookPageUrl: string
+): Promise<CreatorInvitation | null> => {
+  try {
+    // Using the ID for the update which is more reliable
+    console.log(`Service: Updating Facebook page for invitation ID ${invitationId}`);
+    
+    const { data, error } = await supabase
+      .from('creator_invitations')
+      .update({ 
+        facebook_page: facebookPageUrl,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invitationId)
+      .select()
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error updating Facebook page:', error);
+      return null;
+    }
+    
+    return data as CreatorInvitation;
+  } catch (err) {
+    console.error('Unexpected error in updateFacebookPage:', err);
+    return null;
+  }
+};
+
+/**
  * Delete an invitation
  */
 export const deleteInvitation = async (id: string): Promise<void> => {
@@ -123,3 +156,4 @@ export const deleteInvitation = async (id: string): Promise<void> => {
     throw new Error(error.message);
   }
 };
+

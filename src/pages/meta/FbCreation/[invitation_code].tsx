@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -8,9 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ExternalLink, Check } from "lucide-react";
 import { toast } from "sonner";
-import { fetchInvitationByCode } from "@/services/invitationService";
+import { fetchInvitationByCode, updateFacebookPage } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
-import { supabase } from "@/integrations/supabase/client";
 
 const FbCreationPage = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -42,7 +40,6 @@ const FbCreationPage = () => {
 
         setInvitation(invitationData);
         
-        // Pre-fill the form if there's existing data
         if (invitationData.facebook_page) {
           setFormData(prev => ({
             ...prev,
@@ -77,17 +74,17 @@ const FbCreationPage = () => {
       return;
     }
 
-    if (!invitation_code) {
-      toast.error("Invitation code not found");
+    if (!invitation_code || !invitation) {
+      toast.error("Invitation information not found");
       return;
     }
 
     try {
       setSubmitting(true);
-      console.log(`Submitting for invitation code: ${invitation_code}`);
-      console.log(`Facebook page URL to save: ${formData.facebookPageUrl}`);
+      console.log("Starting Facebook page submission process");
+      console.log(`Invitation code: ${invitation_code}`);
+      console.log(`Invitation ID: ${invitation.id}`);
 
-      // First validate that we have a valid URL
       const facebookPageUrl = formData.facebookPageUrl.trim();
       if (!facebookPageUrl) {
         toast.error("Please enter a valid Facebook page URL");
@@ -95,95 +92,30 @@ const FbCreationPage = () => {
         return;
       }
 
-      console.log(`Using cleaned Facebook page URL: ${facebookPageUrl}`);
-      console.log(`Current invitation code: ${invitation_code}`);
-      console.log(`Invitation ID (if available): ${invitation?.id}`);
+      console.log(`Facebook page URL to save: ${facebookPageUrl}`);
 
-      // Get the invitation ID if we have it
-      const invitationId = invitation?.id;
-
-      // Update the facebook_page field in the creator_invitations table
-      // We'll try both by invitation_code and by id for better chances of success
-      let updateResult;
+      const result = await updateFacebookPage(invitation.id, facebookPageUrl);
       
-      if (invitationId) {
-        // First try updating by ID which is more reliable
-        console.log(`Updating by ID: ${invitationId}`);
-        updateResult = await supabase
-          .from('creator_invitations')
-          .update({ 
-            facebook_page: facebookPageUrl,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', invitationId)
-          .select();
-      } else {
-        // Fallback to updating by invitation_code
-        console.log(`Updating by invitation_code: ${invitation_code}`);
-        updateResult = await supabase
-          .from('creator_invitations')
-          .update({ 
-            facebook_page: facebookPageUrl,
-            updated_at: new Date().toISOString()
-          })
-          .eq('invitation_code', invitation_code)
-          .select();
-      }
-
-      const { error, data } = updateResult;
-
-      if (error) {
-        console.error("Error updating invitation with Facebook page:", error);
-        toast.error("Failed to save Facebook page URL");
-        setSubmitting(false);
-        return;
-      }
-
-      console.log("Supabase update response:", data);
-      
-      // Verify the update was successful by fetching the record again
-      // Try to verify by ID first if available, then by invitation_code
-      let verifyResult;
-      
-      if (invitationId) {
-        console.log(`Verifying by ID: ${invitationId}`);
-        verifyResult = await supabase
-          .from('creator_invitations')
-          .select('facebook_page, invitation_code, id')
-          .eq('id', invitationId)
-          .single();
-      } else {
-        console.log(`Verifying by invitation_code: ${invitation_code}`);
-        verifyResult = await supabase
-          .from('creator_invitations')
-          .select('facebook_page, invitation_code, id')
-          .eq('invitation_code', invitation_code)
-          .single();
-      }
-        
-      const { data: verifyData, error: verifyError } = verifyResult;
-        
-      if (verifyError) {
-        console.error("Error verifying update:", verifyError);
-        toast.error("Failed to verify the update");
+      if (!result) {
+        console.error("Failed to update Facebook page URL");
+        toast.error("There was an error saving your Facebook page. Please try again.");
         setSubmitting(false);
         return;
       }
       
-      console.log("Verification data:", verifyData);
+      console.log("Facebook page update result:", result);
       
-      if (verifyData && verifyData.facebook_page === facebookPageUrl) {
-        console.log("Facebook page URL saved successfully!");
+      if (result.facebook_page === facebookPageUrl) {
+        console.log("Facebook page URL successfully updated!");
         toast.success("Your submission has been received for validation");
         
-        // Navigate to dashboard after successful submission
         setTimeout(() => {
           navigate("/creator/dashboard");
         }, 2000);
       } else {
         console.error("Data mismatch after save:", {
           expected: facebookPageUrl,
-          actual: verifyData ? verifyData.facebook_page : 'null'
+          actual: result ? result.facebook_page : 'null'
         });
         toast.error("There was an issue saving your data. Please try again.");
       }
@@ -203,7 +135,6 @@ const FbCreationPage = () => {
     );
   }
 
-  // Check if the Facebook Page URL is empty to disable the button
   const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership;
 
   return (

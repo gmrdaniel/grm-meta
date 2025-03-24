@@ -25,3 +25,9 @@ export type CreateInvitationData = Pick<
   CreatorInvitation,
   "full_name" | "email" | "social_media_handle" | "social_media_type" | "project_id" | "invitation_type"
 >;
+
+export type UpdateFacebookPageData = {
+  facebookPageUrl: string;
+  verifyOwnership: boolean;
+  linkInstagram: boolean;
+};
