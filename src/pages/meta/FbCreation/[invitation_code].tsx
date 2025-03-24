@@ -97,16 +97,40 @@ const FbCreationPage = () => {
 
       console.log(`Using cleaned Facebook page URL: ${facebookPageUrl}`);
       console.log(`Current invitation code: ${invitation_code}`);
+      console.log(`Invitation ID (if available): ${invitation?.id}`);
+
+      // Get the invitation ID if we have it
+      const invitationId = invitation?.id;
 
       // Update the facebook_page field in the creator_invitations table
-      const { error, data } = await supabase
-        .from('creator_invitations')
-        .update({ 
-          facebook_page: facebookPageUrl,
-          updated_at: new Date().toISOString()
-        })
-        .eq('invitation_code', invitation_code)
-        .select();
+      // We'll try both by invitation_code and by id for better chances of success
+      let updateResult;
+      
+      if (invitationId) {
+        // First try updating by ID which is more reliable
+        console.log(`Updating by ID: ${invitationId}`);
+        updateResult = await supabase
+          .from('creator_invitations')
+          .update({ 
+            facebook_page: facebookPageUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', invitationId)
+          .select();
+      } else {
+        // Fallback to updating by invitation_code
+        console.log(`Updating by invitation_code: ${invitation_code}`);
+        updateResult = await supabase
+          .from('creator_invitations')
+          .update({ 
+            facebook_page: facebookPageUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq('invitation_code', invitation_code)
+          .select();
+      }
+
+      const { error, data } = updateResult;
 
       if (error) {
         console.error("Error updating invitation with Facebook page:", error);
@@ -118,11 +142,26 @@ const FbCreationPage = () => {
       console.log("Supabase update response:", data);
       
       // Verify the update was successful by fetching the record again
-      const { data: verifyData, error: verifyError } = await supabase
-        .from('creator_invitations')
-        .select('facebook_page, invitation_code, id')
-        .eq('invitation_code', invitation_code)
-        .single();
+      // Try to verify by ID first if available, then by invitation_code
+      let verifyResult;
+      
+      if (invitationId) {
+        console.log(`Verifying by ID: ${invitationId}`);
+        verifyResult = await supabase
+          .from('creator_invitations')
+          .select('facebook_page, invitation_code, id')
+          .eq('id', invitationId)
+          .single();
+      } else {
+        console.log(`Verifying by invitation_code: ${invitation_code}`);
+        verifyResult = await supabase
+          .from('creator_invitations')
+          .select('facebook_page, invitation_code, id')
+          .eq('invitation_code', invitation_code)
+          .single();
+      }
+        
+      const { data: verifyData, error: verifyError } = verifyResult;
         
       if (verifyError) {
         console.error("Error verifying update:", verifyError);
