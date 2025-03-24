@@ -88,44 +88,56 @@ const FbCreationPage = () => {
       console.log(`Facebook page URL to save: ${formData.facebookPageUrl}`);
 
       // First validate that we have a valid URL
-      if (!formData.facebookPageUrl.trim()) {
+      const facebookPageUrl = formData.facebookPageUrl.trim();
+      if (!facebookPageUrl) {
         toast.error("Please enter a valid Facebook page URL");
         setSubmitting(false);
         return;
       }
 
       // Update the facebook_page field in the creator_invitations table
-      // using the invitation_code from URL params to find the correct record
       const { error, data } = await supabase
         .from('creator_invitations')
-        .update({ facebook_page: formData.facebookPageUrl.trim() })
+        .update({ facebook_page: facebookPageUrl })
         .eq('invitation_code', invitation_code)
         .select();
 
       if (error) {
         console.error("Error updating invitation with Facebook page:", error);
+        toast.error("Failed to save Facebook page URL");
         throw error;
       }
 
       console.log("Update response:", data);
-      console.log("Facebook page URL saved successfully");
-      toast.success("Your submission has been received for validation");
       
       // Verify the update was successful by fetching the record again
       const { data: verifyData, error: verifyError } = await supabase
         .from('creator_invitations')
-        .select('facebook_page')
+        .select('facebook_page, invitation_code')
         .eq('invitation_code', invitation_code)
         .single();
         
       if (verifyError) {
         console.error("Error verifying update:", verifyError);
+        toast.error("Failed to verify the update");
       } else {
         console.log("Verified saved data:", verifyData);
+        if (verifyData.facebook_page === facebookPageUrl) {
+          console.log("Facebook page URL saved successfully!");
+          toast.success("Your submission has been received for validation");
+          
+          // Navigate to dashboard after successful submission
+          setTimeout(() => {
+            navigate("/creator/dashboard");
+          }, 2000);
+        } else {
+          console.error("Data mismatch after save:", {
+            expected: facebookPageUrl,
+            actual: verifyData.facebook_page
+          });
+          toast.error("There was an issue saving your data. Please try again.");
+        }
       }
-      
-      // Navigate to dashboard after successful submission
-      navigate("/creator/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to submit your information");
