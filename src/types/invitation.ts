@@ -9,6 +9,7 @@ export interface CreatorInvitation {
   other_social_media?: string | null;
   youtube_channel?: string | null;
   instagram_user?: string | null;
+  facebook_page?: string | null;
   invitation_code: string;
   invitation_url: string;
   status: string;
