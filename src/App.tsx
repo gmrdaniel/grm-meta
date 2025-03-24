@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +17,7 @@ import AdminTest from "./pages/admin/test";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationPage from "./pages/invite/[url]/[id]";
-import MetaWelcomePage from "./pages/meta/welcome/[id]";
+import MetaWelcomePage from "./pages/meta/welcome/[invitation_code]";
 import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
 import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
 
