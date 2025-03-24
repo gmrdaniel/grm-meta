@@ -1,4 +1,3 @@
-
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData } from "@/types/invitation";
 

@@ -228,6 +228,9 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     value={formData.phoneCountryCode}
                     onChange={handleInputChange}
                     className="w-20"
+                    readOnly={formData.phoneVerified}
+                    disabled={formData.phoneVerified}
+                    aria-readonly={formData.phoneVerified}
                   />
                   <Input
                     id="phoneNumber"
@@ -237,6 +240,9 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     placeholder="Phone number"
                     className="flex-1"
                     type="tel"
+                    readOnly={formData.phoneVerified}
+                    disabled={formData.phoneVerified}
+                    aria-readonly={formData.phoneVerified}
                   />
                 </div>
                 
@@ -337,3 +343,4 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     </>
   );
 };
+
