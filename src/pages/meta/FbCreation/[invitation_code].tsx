@@ -76,17 +76,21 @@ const FbCreationPage = () => {
 
     try {
       setSubmitting(true);
+      console.log(`Submitting for invitation code: ${invitation_code}`);
 
       // Update the facebook_page field in the creator_invitations table
+      // using the invitation_code from URL params to find the correct record
       const { error } = await supabase
         .from('creator_invitations')
         .update({ facebook_page: formData.facebookPageUrl })
-        .eq('id', invitation.id);
+        .eq('invitation_code', invitation_code);
 
       if (error) {
+        console.error("Error updating invitation with Facebook page:", error);
         throw error;
       }
 
+      console.log("Facebook page URL saved successfully");
       toast.success("Your submission has been received for validation");
       
       // Navigate to dashboard after successful submission
