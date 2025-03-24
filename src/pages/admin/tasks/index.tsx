@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
+import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TasksList } from "@/components/admin/tasks/TasksList";
 import { TaskDetail } from "@/components/admin/tasks/TaskDetail";
@@ -18,6 +19,7 @@ export default function AdminTasks() {
   
   return (
     <Layout>
+      <Header />
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
