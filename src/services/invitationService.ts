@@ -150,9 +150,21 @@ export const updateFacebookPage = async (
   facebookPageUrl: string
 ): Promise<CreatorInvitation | null> => {
   try {
-    // Using the ID for the update which is more reliable
-    console.log(`Service: Updating Facebook page for invitation ID ${invitationId}`);
+    // Log details for debugging
+    console.log('------- UPDATE FACEBOOK PAGE -------');
+    console.log(`Updating Facebook page for invitation ID: ${invitationId}`);
+    console.log(`Facebook page URL: ${facebookPageUrl}`);
     
+    // Verify the invitation exists before updating
+    const invitation = await fetchInvitationById(invitationId);
+    if (!invitation) {
+      console.error(`No invitation found with ID: ${invitationId}`);
+      return null;
+    }
+    
+    console.log(`Found invitation: ${invitation.id} - ${invitation.full_name}`);
+    
+    // Using the ID for the update which is more reliable
     const { data, error } = await supabase
       .from('creator_invitations')
       .update({ 
@@ -160,13 +172,22 @@ export const updateFacebookPage = async (
         updated_at: new Date().toISOString()
       })
       .eq('id', invitationId)
-      .select()
-      .maybeSingle();  // Changed from .single() to .maybeSingle()
+      .select('*')  // Make sure we select all columns
+      .maybeSingle();
       
     if (error) {
       console.error('Error updating Facebook page:', error);
+      console.error('Error details:', JSON.stringify(error));
       return null;
     }
+    
+    if (!data) {
+      console.error('No data returned after update');
+      return null;
+    }
+    
+    console.log(`Successfully updated Facebook page for ${data.full_name}`);
+    console.log(`New Facebook page URL: ${data.facebook_page}`);
     
     return data as CreatorInvitation;
   } catch (err) {

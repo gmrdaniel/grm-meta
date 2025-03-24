@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { ExternalLink, Check } from "lucide-react";
 import { toast } from "sonner";
 import { fetchInvitationByCode, updateFacebookPage } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const FbCreationPage = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -16,6 +18,7 @@ const FbCreationPage = () => {
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     facebookPageUrl: "",
     verifyOwnership: false,
@@ -30,6 +33,7 @@ const FbCreationPage = () => {
         }
 
         setLoading(true);
+        setError(null);
         const invitationData = await fetchInvitationByCode(invitation_code);
         
         if (!invitationData) {
@@ -39,6 +43,7 @@ const FbCreationPage = () => {
         }
 
         setInvitation(invitationData);
+        console.log("Invitation data loaded:", invitationData);
         
         if (invitationData.facebook_page) {
           setFormData(prev => ({
@@ -49,6 +54,7 @@ const FbCreationPage = () => {
       } catch (error) {
         console.error("Error fetching invitation:", error);
         toast.error("Failed to load invitation details");
+        setError("Failed to load invitation details. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -81,6 +87,7 @@ const FbCreationPage = () => {
 
     try {
       setSubmitting(true);
+      setError(null);
       console.log("Starting Facebook page submission process");
       console.log(`Invitation code: ${invitation_code}`);
       console.log(`Invitation ID: ${invitation.id}`);
@@ -99,6 +106,7 @@ const FbCreationPage = () => {
       if (!result) {
         console.error("Failed to update Facebook page URL");
         toast.error("There was an error saving your Facebook page. Please try again.");
+        setError("Failed to update your Facebook page information. Please try again later.");
         setSubmitting(false);
         return;
       }
@@ -118,10 +126,12 @@ const FbCreationPage = () => {
           actual: result ? result.facebook_page : 'null'
         });
         toast.error("There was an issue saving your data. Please try again.");
+        setError("The saved data does not match what was submitted. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to submit your information");
+      setError("An unexpected error occurred. Please try again later.");
     } finally {
       setSubmitting(false);
     }
@@ -149,6 +159,12 @@ const FbCreationPage = () => {
                 <p className="text-orange-500 font-medium">Important: Set Up Your Facebook Page!</p>
               </div>
             </div>
+            
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             
             <div className="space-y-6">
               <div className="space-y-3">
@@ -238,7 +254,11 @@ const FbCreationPage = () => {
         </CardContent>
         
         <CardFooter className="flex justify-end pt-0">
-          <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitDisabled}
+            className="min-w-[200px]"
+          >
             {submitting ? "Submitting..." : "Submit for Validation"}
           </Button>
         </CardFooter>
