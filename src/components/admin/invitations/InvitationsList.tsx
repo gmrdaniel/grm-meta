@@ -29,7 +29,7 @@ const InvitationsList = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: CreatorInvitation['status'] }) => 
+    mutationFn: ({ id, status }: { id: string; status: 'pending' | 'accepted' | 'rejected' }) => 
       updateInvitationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
@@ -51,7 +51,7 @@ const InvitationsList = () => {
     }
   });
 
-  const handleStatusChange = (id: string, newStatus: CreatorInvitation['status']) => {
+  const handleStatusChange = (id: string, newStatus: 'pending' | 'accepted' | 'rejected') => {
     updateStatusMutation.mutate({ id, status: newStatus });
   };
 

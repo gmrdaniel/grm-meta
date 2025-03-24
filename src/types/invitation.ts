@@ -12,7 +12,7 @@ export interface CreatorInvitation {
   facebook_page?: string | null;
   invitation_code: string;
   invitation_url: string;
-  status: string;
+  status: 'pending' | 'accepted' | 'rejected';
   invitation_type: string;
   created_at: string;
   updated_at: string;
@@ -26,7 +26,7 @@ export type CreateInvitationData = {
   email: string;
   social_media_handle?: string | null;
   social_media_type?: string | null;
-  project_id: string; // Now marked as required
+  project_id: string;
   invitation_type: string;
 };
 
