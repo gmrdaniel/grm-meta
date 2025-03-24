@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Project, ProjectStage, Task } from "@/types/project";
+import { Project, ProjectStage } from "@/types/project";
 
 /**
  * Fetch all projects
@@ -187,44 +187,4 @@ export const updateStagesOrder = async (stages: Array<{ id: string; order_index:
     console.error('Error updating stages order:', error);
     throw new Error(error.message);
   }
-};
-
-/**
- * Fetch a project stage by view
- */
-export const fetchProjectStageByView = async (view: string): Promise<ProjectStage | null> => {
-  const { data, error } = await supabase
-    .from('project_stages')
-    .select('*')
-    .eq('view', view)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching project stage by view:', error);
-    return null;
-  }
-  
-  return {
-    ...data,
-    responsible: data.responsible as ProjectStage['responsible'],
-    privacy: data.privacy as ProjectStage['privacy']
-  };
-};
-
-/**
- * Create a task
- */
-export const createTask = async (task: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task | null> => {
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert(task)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error creating task:', error);
-    return null;
-  }
-  
-  return data as Task;
 };
