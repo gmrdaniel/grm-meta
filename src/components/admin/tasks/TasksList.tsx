@@ -30,6 +30,11 @@ interface TasksListProps {
   onStatusFilterChange: (status: string) => void;
 }
 
+// Type guard to validate if a string is a valid task status
+function isValidStatus(status: string): status is 'pending' | 'in_progress' | 'completed' | 'review' {
+  return ['pending', 'in_progress', 'completed', 'review'].includes(status);
+}
+
 export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChange }: TasksListProps) {
   const ITEMS_PER_PAGE = 10;
   
@@ -38,7 +43,7 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
     queryFn: () => fetchTasks({ 
       page, 
       limit: ITEMS_PER_PAGE, 
-      status: statusFilter !== 'all' ? statusFilter : undefined 
+      status: statusFilter !== 'all' && isValidStatus(statusFilter) ? statusFilter : undefined 
     }),
   });
 
