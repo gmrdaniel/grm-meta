@@ -1,6 +1,6 @@
 
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
-import { CreatorInvitation, CreateInvitationData } from "@/types/invitation";
+import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData } from "@/types/invitation";
 
 /**
  * Fetch a single invitation by its code
@@ -77,11 +77,15 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     .from('creator_invitations')
     .insert(completeInvitation)
     .select()
-    .single();
+    .maybeSingle();  // Changed from .single() to .maybeSingle()
   
   if (error) {
     console.error('Error creating invitation:', error);
     throw new Error(error.message);
+  }
+  
+  if (!data) {
+    throw new Error('Failed to create invitation: No data returned');
   }
   
   return data as CreatorInvitation;
@@ -99,11 +103,15 @@ export const updateInvitationStatus = async (
     .update({ status })
     .eq('id', id)
     .select()
-    .single();
+    .maybeSingle();  // Changed from .single() to .maybeSingle()
   
   if (error) {
     console.error('Error updating invitation status:', error);
     throw new Error(error.message);
+  }
+  
+  if (!data) {
+    throw new Error(`Invitation with ID ${id} not found`);
   }
   
   return data as CreatorInvitation;
@@ -128,7 +136,7 @@ export const updateFacebookPage = async (
       })
       .eq('id', invitationId)
       .select()
-      .maybeSingle();
+      .maybeSingle();  // Changed from .single() to .maybeSingle()
       
     if (error) {
       console.error('Error updating Facebook page:', error);
@@ -156,4 +164,3 @@ export const deleteInvitation = async (id: string): Promise<void> => {
     throw new Error(error.message);
   }
 };
-
