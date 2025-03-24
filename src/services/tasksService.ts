@@ -20,7 +20,7 @@ export interface Task {
 interface FetchTasksParams {
   page: number;
   limit: number;
-  status?: string;
+  status?: 'pending' | 'in_progress' | 'completed' | 'review';
 }
 
 interface TasksResponse {
