@@ -41,6 +41,14 @@ const FbCreationPage = () => {
         }
 
         setInvitation(invitationData);
+        
+        // Pre-fill the form if there's existing data
+        if (invitationData.facebook_page) {
+          setFormData(prev => ({
+            ...prev,
+            facebookPageUrl: invitationData.facebook_page
+          }));
+        }
       } catch (error) {
         console.error("Error fetching invitation:", error);
         toast.error("Failed to load invitation details");
@@ -69,29 +77,52 @@ const FbCreationPage = () => {
       return;
     }
 
-    if (!invitation) {
-      toast.error("Invitation details not found");
+    if (!invitation_code) {
+      toast.error("Invitation code not found");
       return;
     }
 
     try {
       setSubmitting(true);
       console.log(`Submitting for invitation code: ${invitation_code}`);
+      console.log(`Facebook page URL to save: ${formData.facebookPageUrl}`);
+
+      // First validate that we have a valid URL
+      if (!formData.facebookPageUrl.trim()) {
+        toast.error("Please enter a valid Facebook page URL");
+        setSubmitting(false);
+        return;
+      }
 
       // Update the facebook_page field in the creator_invitations table
       // using the invitation_code from URL params to find the correct record
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('creator_invitations')
-        .update({ facebook_page: formData.facebookPageUrl })
-        .eq('invitation_code', invitation_code);
+        .update({ facebook_page: formData.facebookPageUrl.trim() })
+        .eq('invitation_code', invitation_code)
+        .select();
 
       if (error) {
         console.error("Error updating invitation with Facebook page:", error);
         throw error;
       }
 
+      console.log("Update response:", data);
       console.log("Facebook page URL saved successfully");
       toast.success("Your submission has been received for validation");
+      
+      // Verify the update was successful by fetching the record again
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('creator_invitations')
+        .select('facebook_page')
+        .eq('invitation_code', invitation_code)
+        .single();
+        
+      if (verifyError) {
+        console.error("Error verifying update:", verifyError);
+      } else {
+        console.log("Verified saved data:", verifyData);
+      }
       
       // Navigate to dashboard after successful submission
       navigate("/creator/dashboard");
