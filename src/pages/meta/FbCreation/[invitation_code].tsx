@@ -95,48 +95,58 @@ const FbCreationPage = () => {
         return;
       }
 
+      console.log(`Using cleaned Facebook page URL: ${facebookPageUrl}`);
+      console.log(`Current invitation code: ${invitation_code}`);
+
       // Update the facebook_page field in the creator_invitations table
       const { error, data } = await supabase
         .from('creator_invitations')
-        .update({ facebook_page: facebookPageUrl })
+        .update({ 
+          facebook_page: facebookPageUrl,
+          updated_at: new Date().toISOString()
+        })
         .eq('invitation_code', invitation_code)
         .select();
 
       if (error) {
         console.error("Error updating invitation with Facebook page:", error);
         toast.error("Failed to save Facebook page URL");
-        throw error;
+        setSubmitting(false);
+        return;
       }
 
-      console.log("Update response:", data);
+      console.log("Supabase update response:", data);
       
       // Verify the update was successful by fetching the record again
       const { data: verifyData, error: verifyError } = await supabase
         .from('creator_invitations')
-        .select('facebook_page, invitation_code')
+        .select('facebook_page, invitation_code, id')
         .eq('invitation_code', invitation_code)
         .single();
         
       if (verifyError) {
         console.error("Error verifying update:", verifyError);
         toast.error("Failed to verify the update");
+        setSubmitting(false);
+        return;
+      }
+      
+      console.log("Verification data:", verifyData);
+      
+      if (verifyData && verifyData.facebook_page === facebookPageUrl) {
+        console.log("Facebook page URL saved successfully!");
+        toast.success("Your submission has been received for validation");
+        
+        // Navigate to dashboard after successful submission
+        setTimeout(() => {
+          navigate("/creator/dashboard");
+        }, 2000);
       } else {
-        console.log("Verified saved data:", verifyData);
-        if (verifyData.facebook_page === facebookPageUrl) {
-          console.log("Facebook page URL saved successfully!");
-          toast.success("Your submission has been received for validation");
-          
-          // Navigate to dashboard after successful submission
-          setTimeout(() => {
-            navigate("/creator/dashboard");
-          }, 2000);
-        } else {
-          console.error("Data mismatch after save:", {
-            expected: facebookPageUrl,
-            actual: verifyData.facebook_page
-          });
-          toast.error("There was an issue saving your data. Please try again.");
-        }
+        console.error("Data mismatch after save:", {
+          expected: facebookPageUrl,
+          actual: verifyData ? verifyData.facebook_page : 'null'
+        });
+        toast.error("There was an issue saving your data. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
