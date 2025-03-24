@@ -63,18 +63,6 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center p-8">Loading tasks...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 p-4">Error loading tasks: {(error as Error).message}</div>;
-  }
-
-  if (!data || data.tasks.length === 0) {
-    return <div className="text-center p-8 text-gray-500">No tasks found</div>;
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -106,71 +94,93 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.tasks.map((task) => (
-              <TableRow 
-                key={task.id} 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => onTaskSelect(task.id)}
-              >
-                <TableCell className="font-medium">{task.title}</TableCell>
-                <TableCell>{getStatusBadge(task.status)}</TableCell>
-                <TableCell>{task.project_name || '-'}</TableCell>
-                <TableCell>{task.stage_name || '-'}</TableCell>
-                <TableCell>{format(new Date(task.created_at), 'dd MMM yyyy')}</TableCell>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  Loading tasks...
+                </TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center text-red-500">
+                  Error loading tasks: {(error as Error).message}
+                </TableCell>
+              </TableRow>
+            ) : !data || data.tasks.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center text-gray-500">
+                  No tasks found
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.tasks.map((task) => (
+                <TableRow 
+                  key={task.id} 
+                  className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => onTaskSelect(task.id)}
+                >
+                  <TableCell className="font-medium">{task.title}</TableCell>
+                  <TableCell>{getStatusBadge(task.status)}</TableCell>
+                  <TableCell>{task.project_name || '-'}</TableCell>
+                  <TableCell>{task.stage_name || '-'}</TableCell>
+                  <TableCell>{format(new Date(task.created_at), 'dd MMM yyyy')}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
       
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious 
-              onClick={() => page > 1 && onPageChange(page - 1)}
-              className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-          
-          {Array.from({ length: Math.min(5, data.totalPages) }).map((_, i) => {
-            let pageNumber: number;
-            
-            if (data.totalPages <= 5) {
-              pageNumber = i + 1;
-            } else if (page <= 3) {
-              pageNumber = i + 1;
-            } else if (page >= data.totalPages - 2) {
-              pageNumber = data.totalPages - 4 + i;
-            } else {
-              pageNumber = page - 2 + i;
-            }
-            
-            return (
-              <PaginationItem key={pageNumber}>
-                <PaginationLink 
-                  isActive={pageNumber === page}
-                  onClick={() => onPageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </PaginationLink>
-              </PaginationItem>
-            );
-          })}
-          
-          {data.totalPages > 5 && page < data.totalPages - 2 && (
+      {data && data.totalPages > 0 && (
+        <Pagination>
+          <PaginationContent>
             <PaginationItem>
-              <PaginationEllipsis />
+              <PaginationPrevious 
+                onClick={() => page > 1 && onPageChange(page - 1)}
+                className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
             </PaginationItem>
-          )}
-          
-          <PaginationItem>
-            <PaginationNext 
-              onClick={() => page < data.totalPages && onPageChange(page + 1)}
-              className={page === data.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            
+            {Array.from({ length: Math.min(5, data.totalPages) }).map((_, i) => {
+              let pageNumber: number;
+              
+              if (data.totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (page <= 3) {
+                pageNumber = i + 1;
+              } else if (page >= data.totalPages - 2) {
+                pageNumber = data.totalPages - 4 + i;
+              } else {
+                pageNumber = page - 2 + i;
+              }
+              
+              return (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink 
+                    isActive={pageNumber === page}
+                    onClick={() => onPageChange(pageNumber)}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            {data.totalPages > 5 && page < data.totalPages - 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => page < data.totalPages && onPageChange(page + 1)}
+                className={page === data.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }
