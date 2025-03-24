@@ -1,12 +1,14 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
-import { fetchInvitationByCode } from "@/services/invitationService";
+import { fetchInvitationByCode, updateInvitationStatus } from "@/services/invitationService";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ErrorCard } from "@/components/invitation/ErrorCard";
 import { WelcomeForm } from "@/components/invitation/WelcomeForm";
+import { toast } from "sonner";
 
 const MetaWelcomePage = () => {
   const { id } = useParams();
@@ -20,6 +22,7 @@ const MetaWelcomePage = () => {
     socialMediaHandle: "",
     termsAccepted: false
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -119,7 +122,7 @@ const MetaWelcomePage = () => {
     });
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!invitation) return;
 
     // Add log before navigation
@@ -130,8 +133,28 @@ const MetaWelcomePage = () => {
       invitationType: invitation.invitation_type
     });
 
-    // Navigate to the complete profile page
-    navigate(`/meta/completeProfile/${invitation.invitation_code}`);
+    try {
+      setIsSubmitting(true);
+      
+      // Update the invitation status to accepted
+      console.log('MetaWelcomePage - Updating invitation status to accepted');
+      const updatedInvitation = await updateInvitationStatus(invitation.id, "accepted");
+      
+      if (!updatedInvitation) {
+        toast.error("Failed to update invitation status");
+        return;
+      }
+      
+      console.log('MetaWelcomePage - Invitation status updated successfully', updatedInvitation);
+      
+      // Navigate to the complete profile page
+      navigate(`/meta/completeProfile/${invitation.invitation_code}`);
+    } catch (error) {
+      console.error('MetaWelcomePage - Error updating invitation status:', error);
+      toast.error("Failed to update invitation status");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -157,6 +180,7 @@ const MetaWelcomePage = () => {
           onInputChange={handleInputChange}
           onCheckboxChange={handleCheckboxChange}
           onContinue={handleContinue}
+          isSubmitting={isSubmitting}
         />
       </Card>
     </div>

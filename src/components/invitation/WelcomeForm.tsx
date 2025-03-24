@@ -21,6 +21,7 @@ interface WelcomeFormProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;
   onContinue: () => void;
+  isSubmitting?: boolean;
 }
 
 export const WelcomeForm: React.FC<WelcomeFormProps> = ({
@@ -29,6 +30,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
   onInputChange,
   onCheckboxChange,
   onContinue,
+  isSubmitting = false,
 }) => {
   const handleContinue = () => {
     if (!formData.termsAccepted) {
@@ -157,9 +159,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
       <CardFooter className="flex justify-end">
         <Button 
           onClick={handleContinue} 
-          disabled={!formData.termsAccepted}
+          disabled={!formData.termsAccepted || isSubmitting}
         >
-          Continue
+          {isSubmitting ? "Processing..." : "Continue"}
         </Button>
       </CardFooter>
     </>
