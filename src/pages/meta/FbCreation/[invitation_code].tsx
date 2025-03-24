@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ExternalLink, Check, Clock, Eye, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { fetchInvitationByCode, updateFacebookPage } from "@/services/invitationService";
+import { fetchProjectStageByView, createTask } from "@/services/projectService";
 import { CreatorInvitation } from "@/types/invitation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,9 +127,33 @@ const FbCreationPage = () => {
       
       if (result.facebook_page === facebookPageUrl) {
         console.log("Facebook page URL successfully updated!");
+        
+        try {
+          const stageData = await fetchProjectStageByView('meta/FbCreation');
+          
+          if (!stageData) {
+            console.error("Could not find project stage for meta/FbCreation");
+          } else if (invitation.project_id) {
+            const taskData = {
+              title: "Validar registro",
+              project_id: invitation.project_id,
+              stage_id: stageData.id,
+              creator_id: "00000000-0000-0000-0000-000000000000",
+              status: 'pending' as const,
+              creator_invitation_id: invitation.id
+            };
+            
+            const taskResult = await createTask(taskData);
+            console.log("Task creation result:", taskResult);
+          } else {
+            console.warn("No project_id found in invitation, skipping task creation");
+          }
+        } catch (taskError) {
+          console.error("Error creating validation task:", taskError);
+        }
+        
         toast.success("Your submission has been received for validation");
         
-        // Show submission complete screen instead of redirecting
         setSubmissionComplete(true);
       } else {
         console.error("Data mismatch after save:", {
@@ -164,7 +188,6 @@ const FbCreationPage = () => {
     setSubmitting(true);
     
     try {
-      // Create a new user in Supabase with invitation data
       const { data: userData, error: userError } = await supabase.auth.signUp({
         email: invitation.email,
         password: passwordData.password,
@@ -187,7 +210,6 @@ const FbCreationPage = () => {
       console.log("User account created successfully:", userData);
       toast.success("Account created successfully! You can now log in");
       
-      // Redirect to login page after account creation
       setTimeout(() => {
         navigate("/auth");
       }, 2000);
