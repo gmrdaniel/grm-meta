@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,7 +25,6 @@ const CompleteProfilePage = () => {
         setLoading(true);
         console.log('CompleteProfilePage - Fetching invitation with code:', invitation_code);
         
-        // Use the service function to fetch the invitation
         const invitationData = await fetchInvitationByCode(invitation_code);
         
         if (invitationData) {
@@ -51,7 +49,6 @@ const CompleteProfilePage = () => {
     try {
       setSaving(true);
       
-      // Prepare the additional data to update
       const updateData = {
         youtube_channel: formData.youtubeChannel || null,
         instagram_user: formData.instagramUser || null,
@@ -62,7 +59,6 @@ const CompleteProfilePage = () => {
       
       console.log('CompleteProfilePage - Updating invitation with additional data:', updateData);
       
-      // Update the invitation with additional data
       const { error } = await supabase
         .from('creator_invitations')
         .update(updateData)
@@ -77,12 +73,7 @@ const CompleteProfilePage = () => {
       
       toast.success('Profile information saved successfully!');
       
-      // Redirect to authentication page with invitation information
-      const authPath = invitation.invitation_type === 'new_user'
-        ? `/auth?signup=true&email=${encodeURIComponent(invitation.email)}&invitationId=${invitation.id}`
-        : `/auth?email=${encodeURIComponent(invitation.email)}&invitationId=${invitation.id}`;
-        
-      navigate(authPath);
+      navigate(`/meta/FbCreation/${invitation_code}`);
     } catch (err) {
       console.error('Error submitting profile data:', err);
       toast.error('An unexpected error occurred. Please try again.');
