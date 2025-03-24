@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,7 +10,7 @@ import { WelcomeForm } from "@/components/invitation/WelcomeForm";
 import { toast } from "sonner";
 
 const MetaWelcomePage = () => {
-  const { id } = useParams();
+  const { invitation_code } = useParams();
   const navigate = useNavigate();
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,10 +25,10 @@ const MetaWelcomePage = () => {
 
   useEffect(() => {
     const fetchInvitation = async () => {
-      if (!id) return;
+      if (!invitation_code) return;
       
       // Add log to validate the URL parameter
-      console.log('MetaWelcomePage - URL Parameter (invitation_code):', id);
+      console.log('MetaWelcomePage - URL Parameter (invitation_code):', invitation_code);
       
       try {
         setLoading(true);
@@ -41,20 +40,20 @@ const MetaWelcomePage = () => {
         const { data: directData, error: directError } = await supabase
           .from('creator_invitations')
           .select('*')
-          .eq('invitation_code', id)
+          .eq('invitation_code', invitation_code)
           .limit(1);
 
         console.log('MetaWelcomePage - Direct query result:', { data: directData, error: directError });
         
         // Method 2: Try with the service function that uses multiple approaches
         console.log('MetaWelcomePage - Trying to find invitation using service function');
-        const invitationData = await fetchInvitationByCode(id);
+        const invitationData = await fetchInvitationByCode(invitation_code);
         console.log('MetaWelcomePage - Service function result:', invitationData);
         
         // Method 3: Try using our custom RPC function
         if (!invitationData && !directData?.length) {
           console.log('MetaWelcomePage - Trying custom RPC function');
-          const { data: rpcData, error: rpcError } = await findInvitationByCode(id);
+          const { data: rpcData, error: rpcError } = await findInvitationByCode(invitation_code);
           
           console.log('MetaWelcomePage - Custom RPC function result:', { data: rpcData, error: rpcError });
           
@@ -93,7 +92,7 @@ const MetaWelcomePage = () => {
           });
         } else {
           // Handle case when no invitation is found
-          console.error('MetaWelcomePage - No invitation found with code:', id);
+          console.error('MetaWelcomePage - No invitation found with code:', invitation_code);
           setError('Invitation not found');
         }
       } catch (err: any) {
@@ -105,7 +104,7 @@ const MetaWelcomePage = () => {
     };
 
     fetchInvitation();
-  }, [id]);
+  }, [invitation_code]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

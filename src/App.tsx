@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,7 +36,7 @@ function App() {
               
               {/* Public routes */}
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
-              <Route path="/meta/welcome/:id?" element={<MetaWelcomePage />} />
+              <Route path="/meta/welcome/:invitation_code?" element={<MetaWelcomePage />} />
               <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
               <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
               
