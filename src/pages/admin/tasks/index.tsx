@@ -9,6 +9,12 @@ export default function AdminTasks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
+  
+  const handleTaskSelect = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setActiveTab("detail");
+  };
   
   return (
     <Layout>
@@ -18,30 +24,32 @@ export default function AdminTasks() {
             <h1 className="text-2xl font-bold">Tasks Management</h1>
           </div>
           
-          <div className="bg-white rounded-lg shadow">
-            <Tabs defaultValue="list" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 rounded-none border-b">
-                <TabsTrigger value="list" className="text-sm md:text-base">Task List</TabsTrigger>
-                <TabsTrigger 
-                  value="detail" 
-                  className="text-sm md:text-base"
-                  disabled={!selectedTaskId}
-                >
-                  Task Detail
-                </TabsTrigger>
-              </TabsList>
+          <div className="bg-white rounded-lg shadow p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="mb-6">
+                <TabsList className="w-full max-w-xs">
+                  <TabsTrigger value="list" className="flex-1">Task List</TabsTrigger>
+                  <TabsTrigger 
+                    value="detail" 
+                    className="flex-1"
+                    disabled={!selectedTaskId}
+                  >
+                    Task Detail
+                  </TabsTrigger>
+                </TabsList>
+              </div>
               
-              <TabsContent value="list" className="p-4">
+              <TabsContent value="list">
                 <TasksList 
                   page={currentPage}
                   onPageChange={setCurrentPage}
                   statusFilter={statusFilter}
                   onStatusFilterChange={setStatusFilter}
-                  onTaskSelect={(taskId) => setSelectedTaskId(taskId)}
+                  onTaskSelect={handleTaskSelect}
                 />
               </TabsContent>
               
-              <TabsContent value="detail" className="p-4">
+              <TabsContent value="detail">
                 {selectedTaskId ? (
                   <TaskDetail taskId={selectedTaskId} />
                 ) : (
