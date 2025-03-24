@@ -1,3 +1,4 @@
+
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData } from "@/types/invitation";
 
@@ -94,14 +95,14 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     ...invitationData,
     invitation_code: invitationCode,
     invitation_url: invitationUrl,
-    status: 'pending' as const // Fixed: Type assertion to ensure 'pending' is treated as the literal type
+    status: 'pending' as 'pending' // Fix: Use type literal instead of type assertion
   };
   
   const { data, error } = await supabase
     .from('creator_invitations')
     .insert(completeInvitation)
     .select()
-    .maybeSingle();  // Changed from .single() to .maybeSingle()
+    .maybeSingle();
   
   if (error) {
     console.error('Error creating invitation:', error);
