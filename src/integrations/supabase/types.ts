@@ -277,7 +277,7 @@ export type Database = {
         Row: {
           admin_id: string | null
           created_at: string
-          creator_id: string
+          creator_id: string | null
           creator_invitation_id: string | null
           description: string | null
           id: string
@@ -290,7 +290,7 @@ export type Database = {
         Insert: {
           admin_id?: string | null
           created_at?: string
-          creator_id: string
+          creator_id?: string | null
           creator_invitation_id?: string | null
           description?: string | null
           id?: string
@@ -303,7 +303,7 @@ export type Database = {
         Update: {
           admin_id?: string | null
           created_at?: string
-          creator_id?: string
+          creator_id?: string | null
           creator_invitation_id?: string | null
           description?: string | null
           id?: string

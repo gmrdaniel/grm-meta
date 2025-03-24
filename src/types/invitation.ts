@@ -40,4 +40,7 @@ export type UpdateFacebookPageData = {
 export interface TaskWithInvitation {
   taskId: string;
   creatorInvitationId: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'review';
+  title: string;
+  created_at: string;
 }
