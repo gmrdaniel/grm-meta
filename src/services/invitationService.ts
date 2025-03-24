@@ -95,7 +95,7 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
     ...invitationData,
     invitation_code: invitationCode,
     invitation_url: invitationUrl,
-    status: 'pending' as const
+    status: 'pending' as const // Fixed: Type assertion to ensure 'pending' is treated as the literal type
   };
   
   const { data, error } = await supabase
