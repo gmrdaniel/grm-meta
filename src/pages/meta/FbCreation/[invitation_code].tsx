@@ -107,6 +107,9 @@ const FbCreationPage = () => {
     );
   }
 
+  // Check if the Facebook Page URL is empty to disable the button
+  const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership;
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-xl">
@@ -208,7 +211,7 @@ const FbCreationPage = () => {
         </CardContent>
         
         <CardFooter className="flex justify-end pt-0">
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
             {submitting ? "Submitting..." : "Submit for Validation"}
           </Button>
         </CardFooter>
