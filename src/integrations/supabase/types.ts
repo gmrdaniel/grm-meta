@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          facebook_page: string | null
           full_name: string
           id: string
           instagram_user: string | null
@@ -32,6 +33,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
+          facebook_page?: string | null
           full_name: string
           id?: string
           instagram_user?: string | null
@@ -51,6 +53,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
+          facebook_page?: string | null
           full_name?: string
           id?: string
           instagram_user?: string | null
@@ -282,6 +285,7 @@ export type Database = {
         Returns: {
           created_at: string
           email: string
+          facebook_page: string | null
           full_name: string
           id: string
           instagram_user: string | null

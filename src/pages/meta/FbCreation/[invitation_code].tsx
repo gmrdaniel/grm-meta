@@ -10,12 +10,14 @@ import { ExternalLink, Check } from "lucide-react";
 import { toast } from "sonner";
 import { fetchInvitationByCode } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
+import { supabase } from "@/integrations/supabase/client";
 
 const FbCreationPage = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     facebookPageUrl: "",
     verifyOwnership: false,
@@ -67,14 +69,33 @@ const FbCreationPage = () => {
       return;
     }
 
+    if (!invitation) {
+      toast.error("Invitation details not found");
+      return;
+    }
+
     try {
+      setSubmitting(true);
+
+      // Update the facebook_page field in the creator_invitations table
+      const { error } = await supabase
+        .from('creator_invitations')
+        .update({ facebook_page: formData.facebookPageUrl })
+        .eq('id', invitation.id);
+
+      if (error) {
+        throw error;
+      }
+
       toast.success("Your submission has been received for validation");
-      // Here you would typically save the data to your database
-      // For now we'll just navigate to the dashboard
+      
+      // Navigate to dashboard after successful submission
       navigate("/creator/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to submit your information");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -187,7 +208,9 @@ const FbCreationPage = () => {
         </CardContent>
         
         <CardFooter className="flex justify-end pt-0">
-          <Button onClick={handleSubmit}>Submit for Validation</Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit for Validation"}
+          </Button>
         </CardFooter>
       </Card>
     </div>
