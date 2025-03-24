@@ -1,4 +1,3 @@
-
 export interface Project {
   id: string;
   name: string;
@@ -22,4 +21,18 @@ export interface ProjectStage {
   privacy: "public" | "private";
   created_at: string;
   updated_at: string;
+}
+
+export interface Task {
+  id: string;
+  project_id: string;
+  stage_id: string;
+  creator_id: string;
+  admin_id?: string | null;
+  title: string;
+  description?: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'review';
+  created_at: string;
+  updated_at: string;
+  creator_invitation_id?: string | null;
 }

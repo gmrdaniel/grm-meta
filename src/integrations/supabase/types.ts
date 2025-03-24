@@ -278,6 +278,7 @@ export type Database = {
           admin_id: string | null
           created_at: string
           creator_id: string
+          creator_invitation_id: string | null
           description: string | null
           id: string
           project_id: string
@@ -290,6 +291,7 @@ export type Database = {
           admin_id?: string | null
           created_at?: string
           creator_id: string
+          creator_invitation_id?: string | null
           description?: string | null
           id?: string
           project_id: string
@@ -302,6 +304,7 @@ export type Database = {
           admin_id?: string | null
           created_at?: string
           creator_id?: string
+          creator_invitation_id?: string | null
           description?: string | null
           id?: string
           project_id?: string
@@ -323,6 +326,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_creator_invitation_id_fkey"
+            columns: ["creator_invitation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_invitations"
             referencedColumns: ["id"]
           },
           {

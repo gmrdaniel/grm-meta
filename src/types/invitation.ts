@@ -35,3 +35,9 @@ export type UpdateFacebookPageData = {
   verifyOwnership: boolean;
   linkInstagram: boolean;
 };
+
+// New addition: Define a type for task with creator invitation relation
+export interface TaskWithInvitation {
+  taskId: string;
+  creatorInvitationId: string | null;
+}
