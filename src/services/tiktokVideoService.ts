@@ -71,3 +71,27 @@ export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTok
   
   return data as TikTokVideo;
 };
+
+/**
+ * Fetch TikTok user information using the TikTok API
+ */
+export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
+  try {
+    const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching TikTok user info:', error);
+    throw error;
+  }
+};
