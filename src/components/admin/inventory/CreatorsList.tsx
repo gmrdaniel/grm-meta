@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
+import { fetchTikTokUserInfo, updateCreatorTikTokInfo, fetchTikTokUserVideos } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check 
+  Users, Loader2, Filter, X, Check, TrendingUp
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -66,6 +66,7 @@ export function CreatorsList({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
+  const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
@@ -127,6 +128,23 @@ export function CreatorsList({
     }
   });
 
+  const fetchTikTokVideosMutation = useMutation({
+    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+      const result = await fetchTikTokUserVideos(username, creatorId);
+      return result;
+    },
+    onSuccess: (data, variables) => {
+      toast.success(`Se guardaron ${data.savedCount} videos de TikTok de @${variables.username} (${data.savedCount}/${data.totalCount})`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error al obtener videos de TikTok: ${(error as Error).message}`);
+    },
+    onSettled: () => {
+      setLoadingTikTokVideos(null);
+    }
+  });
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -180,6 +198,16 @@ export function CreatorsList({
     
     setLoadingTikTokInfo(creatorId);
     updateTikTokInfoMutation.mutate({ creatorId, username });
+  };
+
+  const handleFetchTikTokVideos = (creatorId: string, username: string) => {
+    if (!username) {
+      toast.error("Este creador no tiene un nombre de usuario de TikTok");
+      return;
+    }
+    
+    setLoadingTikTokVideos(creatorId);
+    fetchTikTokVideosMutation.mutate({ creatorId, username });
   };
 
   const toggleFilter = (filterName: keyof CreatorFilter) => {
@@ -311,29 +339,48 @@ export function CreatorsList({
                                   <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
                                 </span>
                               )}
-                              <Button 
-                                size="sm" 
-                                variant="secondary" 
-                                className="ml-1 h-6 rounded-md"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
-                                }}
-                                disabled={loadingTikTokInfo === creator.id}
-                              >
-                                {loadingTikTokInfo === creator.id ? (
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                ) : (
-                                  <svg 
-                                    viewBox="0 0 24 24"
-                                    className="h-3 w-3 mr-1"
-                                    fill="currentColor"
-                                  >
-                                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                                  </svg>
-                                )}
-                                TikTok info
-                              </Button>
+                              <div className="flex gap-1 ml-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="secondary" 
+                                  className="h-6 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
+                                  }}
+                                  disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
+                                >
+                                  {loadingTikTokInfo === creator.id ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <svg 
+                                      viewBox="0 0 24 24"
+                                      className="h-3 w-3 mr-1"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                                    </svg>
+                                  )}
+                                  Info
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="secondary" 
+                                  className="h-6 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFetchTikTokVideos(creator.id, creator.usuario_tiktok || '');
+                                  }}
+                                  disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
+                                >
+                                  {loadingTikTokVideos === creator.id ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                  )}
+                                  Engagement
+                                </Button>
+                              </div>
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
                               <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
