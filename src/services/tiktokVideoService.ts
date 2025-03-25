@@ -144,6 +144,7 @@ export const fetchTikTokUserVideos = async (creatorId: string, username: string)
             continue;
           }
           
+          // Updated mapping according to the specified format
           const videoData = {
             creator_id: creatorId,
             video_id: video.id,
