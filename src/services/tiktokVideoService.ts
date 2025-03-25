@@ -116,7 +116,7 @@ export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: 
   
   // Only include secUid in the update if it's provided
   if (secUid) {
-    updateData.secuid_tiktok = secUid; // Changed from secUid_tiktok to secuid_tiktok
+    updateData.secuid_tiktok = secUid; // Consistently using secuid_tiktok
   }
   
   const { error } = await supabase

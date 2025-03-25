@@ -5,7 +5,7 @@ export interface Creator {
   apellido: string;
   correo: string;
   usuario_tiktok?: string;
-  secuid_tiktok?: string; // Changed from secUid_tiktok to match database column name
+  secuid_tiktok?: string; // Consistently using secuid_tiktok (lowercase "u")
   seguidores_tiktok?: number;
   elegible_tiktok?: boolean;
   engagement_tiktok?: number;
