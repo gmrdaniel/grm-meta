@@ -120,10 +120,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
               name="email"
               type="email"
               value={formData.email}
-              onChange={onInputChange}
-              placeholder="your@email.com"
               readOnly
               className="bg-gray-50"
+              placeholder="your@email.com"
             />
           </div>
 
@@ -136,10 +135,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
                 id="socialMediaHandle"
                 name="socialMediaHandle"
                 value={formData.socialMediaHandle}
-                onChange={onInputChange}
-                placeholder={invitation.social_media_type === 'tiktok' ? '@username' : 'username'}
                 readOnly
                 className="bg-gray-50"
+                placeholder={invitation.social_media_type === 'tiktok' ? '@username' : 'username'}
               />
             </div>
           )}
@@ -171,3 +169,4 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
     </>
   );
 };
+
