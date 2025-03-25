@@ -22,13 +22,13 @@ export const fetchAndUpdateTikTokDetails = async (creatorId: string, tiktokUsern
       })
     });
 
+    const result = await response.json();
+    
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Error response from TikTok API:', errorData);
-      throw new Error(`Error from TikTok API: ${errorData}`);
+      console.error('Error response from TikTok API:', result);
+      throw new Error(`Error from TikTok API: ${result.error || JSON.stringify(result)}`);
     }
 
-    const result = await response.json();
     console.log('TikTok details update response:', result);
     
     toast.success("TikTok details update request was sent successfully. The creator's data will be updated in the background.");
