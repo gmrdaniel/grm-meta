@@ -1,3 +1,4 @@
+
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData, TaskWithInvitation } from "@/types/invitation";
 
@@ -86,8 +87,8 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
   // Generate a unique invitation code
   const invitationCode = generateInvitationCode();
   
-  // Generate invitation URL path
-  const invitationUrl = `/invite/${invitationCode}`;
+  // Generate invitation URL path - UPDATED to use meta/welcome format
+  const invitationUrl = `/meta/welcome/${invitationCode}`;
   
   // Log the invitation data for debugging
   console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });
