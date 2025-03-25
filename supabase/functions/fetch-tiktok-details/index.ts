@@ -49,16 +49,20 @@ serve(async (req) => {
       try {
         console.log('Making request to TikTok API')
         
-        // Make request to TikTok API with correct endpoint and parameters
-        const apiUrl = `https://${TIKTOK_API_HOST}/user/details?username=${encodeURIComponent(username)}`
+        // Use POST request to TikTok API with username in the body
+        const apiUrl = `https://${TIKTOK_API_HOST}/user/details`
         console.log(`API URL: ${apiUrl}`)
         
         const response = await fetch(apiUrl, {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'x-rapidapi-key': TIKTOK_API_KEY,
-            'x-rapidapi-host': TIKTOK_API_HOST
-          }
+            'x-rapidapi-host': TIKTOK_API_HOST,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: username
+          })
         });
 
         // Log detailed response for debugging
