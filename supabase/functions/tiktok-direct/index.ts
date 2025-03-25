@@ -2,7 +2,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 
 const TIKTOK_API_KEY = Deno.env.get('TIKTOK_API_KEY') || '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5'
-const TIKTOK_API_HOST = 'tiktok-api6.p.rapidapi.com'
+const TIKTOK_API_HOST = 'tiktok-api23.p.rapidapi.com'
 
 interface RequestBody {
   username: string;
@@ -37,20 +37,16 @@ serve(async (req) => {
 
     console.log(`Processing direct TikTok details for username: ${username}`)
 
-    // Make request to TikTok API
-    const apiUrl = `https://${TIKTOK_API_HOST}/user/details`
+    // Make request to TikTok API - using GET method with query params instead of POST
+    const apiUrl = `https://${TIKTOK_API_HOST}/api/user/info?uniqueId=${encodeURIComponent(username)}`
     console.log(`API URL: ${apiUrl}`)
     
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'x-rapidapi-key': TIKTOK_API_KEY,
-        'x-rapidapi-host': TIKTOK_API_HOST,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: username
-      })
+        'x-rapidapi-host': TIKTOK_API_HOST
+      }
     });
 
     // Log detailed response for debugging
