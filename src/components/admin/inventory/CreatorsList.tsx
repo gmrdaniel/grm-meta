@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
@@ -58,12 +59,19 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
   const updateTikTokInfoMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
       const userInfo = await fetchTikTokUserInfo(username);
-      const followerCount = userInfo.data?.stats?.followerCount;
+      
+      console.log('Processing TikTok user info result:', userInfo);
+      
+      // Extract follower count from the nested structure
+      const followerCount = userInfo?.userInfo?.stats?.followerCount;
+      
+      console.log('Extracted follower count:', followerCount);
       
       if (followerCount !== undefined) {
         await updateCreatorTikTokFollowers(creatorId, followerCount);
         return { followerCount };
       }
+      
       throw new Error('No se pudo obtener el número de seguidores');
     },
     onSuccess: (data, variables) => {

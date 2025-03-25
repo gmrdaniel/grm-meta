@@ -77,6 +77,7 @@ export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTok
  */
 export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
   try {
+    console.log('Fetching TikTok info for:', username);
     const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
       method: 'GET',
       headers: {
@@ -89,7 +90,10 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
       throw new Error(`API request failed with status ${response.status}`);
     }
     
-    return await response.json();
+    const responseData = await response.json();
+    console.log('TikTok API response:', responseData);
+    
+    return responseData;
   } catch (error) {
     console.error('Error fetching TikTok user info:', error);
     throw error;
