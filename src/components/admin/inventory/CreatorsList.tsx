@@ -255,7 +255,11 @@ export function CreatorsList({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleViewDetails(creator)}
+          onClick={() => {
+            if (onCreatorSelect) {
+              onCreatorSelect(creator);
+            }
+          }}
         >
           Ver Detalles
         </Button>
