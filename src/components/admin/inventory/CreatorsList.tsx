@@ -1,9 +1,11 @@
+
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchCreators } from "@/services/creatorService";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { fetchCreators, updateCreator } from "@/services/creatorService";
+import { fetchTikTokUserInfo, updateCreatorTikTokFollowers } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users } from "lucide-react";
+import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users, BrandTiktok, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -46,11 +48,35 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
   const [editCreator, setEditCreator] = useState<Creator | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
   const itemsPerPage = 10;
 
   const { data: allCreators = [], isLoading, error, refetch } = useQuery({
     queryKey: ["creators"],
     queryFn: fetchCreators,
+  });
+
+  const updateTikTokInfoMutation = useMutation({
+    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+      const userInfo = await fetchTikTokUserInfo(username);
+      const followerCount = userInfo.data?.stats?.followerCount;
+      
+      if (followerCount !== undefined) {
+        await updateCreatorTikTokFollowers(creatorId, followerCount);
+        return { followerCount };
+      }
+      throw new Error('No se pudo obtener el número de seguidores');
+    },
+    onSuccess: (data, variables) => {
+      toast.success(`Información de TikTok actualizada correctamente. Seguidores: ${data.followerCount.toLocaleString()}`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error al obtener información de TikTok: ${(error as Error).message}`);
+    },
+    onSettled: () => {
+      setLoadingTikTokInfo(null);
+    }
   });
 
   const totalPages = Math.ceil(allCreators.length / itemsPerPage);
@@ -95,6 +121,16 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
     setCurrentPage(page);
   };
 
+  const handleFetchTikTokInfo = (creatorId: string, username: string) => {
+    if (!username) {
+      toast.error("Este creador no tiene un nombre de usuario de TikTok");
+      return;
+    }
+    
+    setLoadingTikTokInfo(creatorId);
+    updateTikTokInfoMutation.mutate({ creatorId, username });
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -133,7 +169,7 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                   <TableHead className="w-[180px]">Teléfono</TableHead>
                   <TableHead className="w-[150px]">Fecha</TableHead>
                   <TableHead className="w-[120px]">Estatus</TableHead>
-                  <TableHead className="w-[100px] text-right">Acciones</TableHead>
+                  <TableHead className="w-[120px] text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -174,6 +210,23 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                                   <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
                                 </span>
                               )}
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="ml-1 h-6 px-2 text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
+                                }}
+                                disabled={loadingTikTokInfo === creator.id}
+                              >
+                                {loadingTikTokInfo === creator.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <BrandTiktok className="h-3 w-3 mr-1" />
+                                )}
+                                TikTok info
+                              </Button>
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
                               <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>

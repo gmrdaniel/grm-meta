@@ -95,3 +95,18 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
     throw error;
   }
 };
+
+/**
+ * Update creator's TikTok follower count
+ */
+export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
+  const { error } = await supabase
+    .from('inventario_creadores')
+    .update({ seguidores_tiktok: followerCount })
+    .eq('id', creatorId);
+  
+  if (error) {
+    console.error('Error updating creator TikTok followers:', error);
+    throw new Error(error.message);
+  }
+};
