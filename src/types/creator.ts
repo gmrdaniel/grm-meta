@@ -5,7 +5,7 @@ export interface Creator {
   apellido: string;
   correo: string;
   usuario_tiktok?: string;
-  secUid_tiktok?: string;
+  secuid_tiktok?: string; // Changed from secUid_tiktok to match database column name
   seguidores_tiktok?: number;
   elegible_tiktok?: boolean;
   engagement_tiktok?: number;

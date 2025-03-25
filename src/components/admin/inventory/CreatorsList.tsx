@@ -324,143 +324,141 @@ export function CreatorsList({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="space-y-1">
-                        {creator.usuario_tiktok && (
-                          <div className="text-sm">
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">TikTok:</span> 
-                              <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                @{creator.usuario_tiktok}
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                              {creator.seguidores_tiktok && (
-                                <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
-                                </span>
+                      {creator.usuario_tiktok && (
+                        <div className="text-sm">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">TikTok:</span> 
+                            <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-blue-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              @{creator.usuario_tiktok}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                            {creator.seguidores_tiktok && (
+                              <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                              </span>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="secondary" 
+                              className="ml-1 h-6 rounded-md"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
+                              }}
+                              disabled={loadingTikTokInfo === creator.id}
+                            >
+                              {loadingTikTokInfo === creator.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <svg 
+                                  viewBox="0 0 24 24"
+                                  className="h-3 w-3 mr-1"
+                                  fill="currentColor"
+                                >
+                                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                                </svg>
                               )}
+                              TikTok info
+                            </Button>
+                            
+                            {creator.secuid_tiktok && (
                               <Button 
                                 size="sm" 
-                                variant="secondary" 
+                                variant="outline" 
                                 className="ml-1 h-6 rounded-md"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
+                                  handleFetchTikTokEngagement(creator.id, creator.secuid_tiktok || '');
                                 }}
-                                disabled={loadingTikTokInfo === creator.id}
+                                disabled={loadingTikTokEngagement === creator.id}
                               >
-                                {loadingTikTokInfo === creator.id ? (
+                                {loadingTikTokEngagement === creator.id ? (
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                 ) : (
-                                  <svg 
-                                    viewBox="0 0 24 24"
-                                    className="h-3 w-3 mr-1"
-                                    fill="currentColor"
-                                  >
-                                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                                  </svg>
+                                  <BarChart className="h-3 w-3 mr-1" />
                                 )}
-                                TikTok info
+                                TikTok engagement
                               </Button>
-                              
-                              {creator.secuid_tiktok && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="ml-1 h-6 rounded-md"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleFetchTikTokEngagement(creator.id, creator.secuid_tiktok || '');
-                                  }}
-                                  disabled={loadingTikTokEngagement === creator.id}
-                                >
-                                  {loadingTikTokEngagement === creator.id ? (
-                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  ) : (
-                                    <BarChart className="h-3 w-3 mr-1" />
-                                  )}
-                                  TikTok engagement
-                                </Button>
-                              )}
-                            </div>
-                            <div className="flex gap-3 mt-1 text-xs">
-                              <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
-                                {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
-                              </span>
-                              {creator.engagement_tiktok && (
-                                <span className="flex items-center text-gray-500">
-                                  Engagement: {formatEngagement(creator.engagement_tiktok)}
-                                </span>
-                              )}
-                            </div>
+                            )}
                           </div>
-                        )}
-                        {creator.usuario_youtube && (
-                          <div className="text-sm">
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">YouTube:</span> 
-                              <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline">
-                                @{creator.usuario_youtube}
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                              {creator.seguidores_youtube && (
-                                <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-3 mt-1 text-xs">
-                              <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
-                                {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
-                              </span>
-                              {creator.engagement_youtube && (
-                                <span className="flex items-center text-gray-500">
-                                  Engagement: {formatEngagement(creator.engagement_youtube)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        {creator.usuario_pinterest && (
-                          <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">Pinterest:</span> 
-                            <a href={`https://pinterest.com/${creator.usuario_pinterest}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline">
-                              @{creator.usuario_pinterest}
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                            {creator.seguidores_pinterest && (
-                              <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
+                          <div className="flex gap-3 mt-1 text-xs">
+                            <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
+                              {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
+                            </span>
+                            {creator.engagement_tiktok && (
+                              <span className="flex items-center text-gray-500">
+                                Engagement: {formatEngagement(creator.engagement_tiktok)}
                               </span>
                             )}
                           </div>
-                        )}
-                        {creator.page_facebook && (
-                          <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">Facebook:</span> 
-                            <a href={creator.page_facebook} 
+                        </div>
+                      )}
+                      {creator.usuario_youtube && (
+                        <div className="text-sm">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">YouTube:</span> 
+                            <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="flex items-center gap-1 text-blue-600 hover:underline">
-                              Página
+                              @{creator.usuario_youtube}
                               <ExternalLink className="h-3 w-3" />
                             </a>
+                            {creator.seguidores_youtube && (
+                              <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                              </span>
+                            )}
                           </div>
-                        )}
-                        {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
-                          <span className="text-sm text-gray-500">Sin redes sociales</span>
-                        )}
-                      </div>
+                          <div className="flex gap-3 mt-1 text-xs">
+                            <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
+                              {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
+                            </span>
+                            {creator.engagement_youtube && (
+                              <span className="flex items-center text-gray-500">
+                                Engagement: {formatEngagement(creator.engagement_youtube)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {creator.usuario_pinterest && (
+                        <div className="text-sm flex items-center gap-1">
+                          <span className="font-medium">Pinterest:</span> 
+                          <a href={`https://pinterest.com/${creator.usuario_pinterest}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline">
+                            @{creator.usuario_pinterest}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          {creator.seguidores_pinterest && (
+                            <span className="ml-2 flex items-center text-gray-500 text-xs">
+                              <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {creator.page_facebook && (
+                        <div className="text-sm flex items-center gap-1">
+                          <span className="font-medium">Facebook:</span> 
+                          <a href={creator.page_facebook} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline">
+                            Página
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
+                      {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
+                        <span className="text-sm text-gray-500">Sin redes sociales</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {creator.telefono ? (
