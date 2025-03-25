@@ -5,7 +5,7 @@ export interface Creator {
   apellido: string;
   correo: string;
   usuario_tiktok?: string;
-  secuid_tiktok?: string; // Consistently using secuid_tiktok (lowercase "u")
+  secUid_tiktok?: string;
   seguidores_tiktok?: number;
   elegible_tiktok?: boolean;
   engagement_tiktok?: number;

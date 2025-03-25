@@ -1,16 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { 
-  fetchTikTokUserInfo, 
-  updateCreatorTikTokInfo, 
-  fetchAndSaveTikTokPosts 
-} from "@/services/tiktokVideoService";
+import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check, BarChart 
+  Users, Loader2, Filter, X, Check 
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -69,7 +66,6 @@ export function CreatorsList({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
-  const [loadingTikTokEngagement, setLoadingTikTokEngagement] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
@@ -83,11 +79,12 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
+  // Apply filters when they change
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
     }
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [activeFilters, onFilterChange]);
 
   const creators = creatorsData?.data || [];
@@ -99,6 +96,7 @@ export function CreatorsList({
       
       console.log('Processing TikTok user info result:', userInfo);
       
+      // Extract follower count and secUid from the nested structure
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
@@ -106,8 +104,10 @@ export function CreatorsList({
       console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
+        // Now using the updated function that also sets eligibility status and secUid
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
         
+        // Return follower count and eligibility status for toast message
         const isEligible = followerCount >= 100000;
         return { followerCount, isEligible, secUid };
       }
@@ -125,50 +125,6 @@ export function CreatorsList({
     onSettled: () => {
       setLoadingTikTokInfo(null);
     }
-  });
-
-  const updateTikTokEngagementMutation = useMutation({
-    mutationFn: async ({ creatorId, secUid }: { creatorId: string; secUid: string }) => {
-      if (!secUid) {
-        throw new Error('Este creador no tiene un secUid de TikTok. Por favor, actualiza primero la información de TikTok.');
-      }
-      
-      const result = await fetchAndSaveTikTokPosts(creatorId, secUid);
-      return result;
-    },
-    onSuccess: (data) => {
-      toast.success(`Videos procesados: ${data.savedCount}/${data.totalVideos}`);
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(`Error al obtener videos de TikTok: ${(error as Error).message}`);
-    },
-    onSettled: () => {
-      setLoadingTikTokEngagement(null);
-    }
-  });
-
-  const fetchAndSavePostsMutation = useMutation({
-    mutationFn: async (creator: Creator) => {
-      try {
-        if (!creator.usuario_tiktok) {
-          throw new Error("TikTok username is required to fetch videos");
-        }
-        
-        const result = await fetchAndSaveTikTokPosts(creator.id, creator.usuario_tiktok);
-        return result;
-      } catch (error) {
-        console.error("Error fetching and saving TikTok posts:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      toast.success(`Videos procesados: ${data.savedCount} de ${data.totalVideos}`);
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(`Error procesando videos: ${error.message}`);
-    },
   });
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -213,7 +169,7 @@ export function CreatorsList({
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(parseInt(value));
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
@@ -226,57 +182,18 @@ export function CreatorsList({
     updateTikTokInfoMutation.mutate({ creatorId, username });
   };
 
-  const handleFetchTikTokEngagement = (creatorId: string, secUid: string) => {
-    if (!secUid) {
-      toast.error("Este creador no tiene un secUid de TikTok. Por favor, actualiza primero la información de TikTok.");
-      return;
-    }
-    
-    setLoadingTikTokEngagement(creatorId);
-    updateTikTokEngagementMutation.mutate({ creatorId, secUid });
-  };
-
   const toggleFilter = (filterName: keyof CreatorFilter) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
       newFilters[filterName] = !prev[filterName];
       
+      // If filter is being disabled, remove it from the object
       if (!newFilters[filterName]) {
         delete newFilters[filterName];
       }
       
       return newFilters;
     });
-  };
-
-  const actionCell = (creator: Creator) => {
-    return (
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            if (onCreatorSelect) {
-              onCreatorSelect(creator);
-            }
-          }}
-        >
-          Ver Detalles
-        </Button>
-        
-        {creator.usuario_tiktok && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-pink-50 text-pink-700 hover:bg-pink-100 hover:text-pink-800"
-            onClick={() => fetchAndSavePostsMutation.mutate(creator)}
-            disabled={fetchAndSavePostsMutation.isPending}
-          >
-            {fetchAndSavePostsMutation.isPending ? "Procesando..." : "TikTok Engagement"}
-          </Button>
-        )}
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -377,141 +294,121 @@ export function CreatorsList({
                       </div>
                     </TableCell>
                     <TableCell>
-                      {creator.usuario_tiktok && (
-                        <div className="text-sm">
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">TikTok:</span> 
-                            <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              @{creator.usuario_tiktok}
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                            {creator.seguidores_tiktok && (
-                              <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
-                              </span>
-                            )}
-                            <Button 
-                              size="sm" 
-                              variant="secondary" 
-                              className="ml-1 h-6 rounded-md"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
-                              }}
-                              disabled={loadingTikTokInfo === creator.id}
-                            >
-                              {loadingTikTokInfo === creator.id ? (
-                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              ) : (
-                                <svg 
-                                  viewBox="0 0 24 24"
-                                  className="h-3 w-3 mr-1"
-                                  fill="currentColor"
-                                >
-                                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                                </svg>
+                      <div className="space-y-1">
+                        {creator.usuario_tiktok && (
+                          <div className="text-sm">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">TikTok:</span> 
+                              <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                @{creator.usuario_tiktok}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              {creator.seguidores_tiktok && (
+                                <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                                </span>
                               )}
-                              TikTok info
-                            </Button>
-                            
-                            {creator.secuid_tiktok && (
                               <Button 
                                 size="sm" 
-                                variant="outline" 
+                                variant="secondary" 
                                 className="ml-1 h-6 rounded-md"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleFetchTikTokEngagement(creator.id, creator.secuid_tiktok || '');
+                                  handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
                                 }}
-                                disabled={loadingTikTokEngagement === creator.id}
+                                disabled={loadingTikTokInfo === creator.id}
                               >
-                                {loadingTikTokEngagement === creator.id ? (
+                                {loadingTikTokInfo === creator.id ? (
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                 ) : (
-                                  <BarChart className="h-3 w-3 mr-1" />
+                                  <svg 
+                                    viewBox="0 0 24 24"
+                                    className="h-3 w-3 mr-1"
+                                    fill="currentColor"
+                                  >
+                                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                                  </svg>
                                 )}
-                                TikTok engagement
+                                TikTok info
                               </Button>
-                            )}
-                          </div>
-                          <div className="flex gap-3 mt-1 text-xs">
-                            <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
-                              {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
-                            </span>
-                            {creator.engagement_tiktok && (
-                              <span className="flex items-center text-gray-500">
-                                Engagement: {formatEngagement(creator.engagement_tiktok)}
+                            </div>
+                            <div className="flex gap-3 mt-1 text-xs">
+                              <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
+                                {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
                               </span>
-                            )}
+                              {creator.engagement_tiktok && (
+                                <span className="flex items-center text-gray-500">
+                                  Engagement: {formatEngagement(creator.engagement_tiktok)}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {creator.usuario_youtube && (
-                        <div className="text-sm">
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">YouTube:</span> 
-                            <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
+                        )}
+                        {creator.usuario_youtube && (
+                          <div className="text-sm">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">YouTube:</span> 
+                              <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                @{creator.usuario_youtube}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              {creator.seguidores_youtube && (
+                                <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-3 mt-1 text-xs">
+                              <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
+                                {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
+                              </span>
+                              {creator.engagement_youtube && (
+                                <span className="flex items-center text-gray-500">
+                                  Engagement: {formatEngagement(creator.engagement_youtube)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {creator.usuario_pinterest && (
+                          <div className="text-sm flex items-center gap-1">
+                            <span className="font-medium">Pinterest:</span> 
+                            <a href={`https://pinterest.com/${creator.usuario_pinterest}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="flex items-center gap-1 text-blue-600 hover:underline">
-                              @{creator.usuario_youtube}
+                              @{creator.usuario_pinterest}
                               <ExternalLink className="h-3 w-3" />
                             </a>
-                            {creator.seguidores_youtube && (
+                            {creator.seguidores_pinterest && (
                               <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
                               </span>
                             )}
                           </div>
-                          <div className="flex gap-3 mt-1 text-xs">
-                            <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
-                              {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
-                            </span>
-                            {creator.engagement_youtube && (
-                              <span className="flex items-center text-gray-500">
-                                Engagement: {formatEngagement(creator.engagement_youtube)}
-                              </span>
-                            )}
+                        )}
+                        {creator.page_facebook && (
+                          <div className="text-sm flex items-center gap-1">
+                            <span className="font-medium">Facebook:</span> 
+                            <a href={creator.page_facebook} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-blue-600 hover:underline">
+                              Página
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
                           </div>
-                        </div>
-                      )}
-                      {creator.usuario_pinterest && (
-                        <div className="text-sm flex items-center gap-1">
-                          <span className="font-medium">Pinterest:</span> 
-                          <a href={`https://pinterest.com/${creator.usuario_pinterest}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-blue-600 hover:underline">
-                            @{creator.usuario_pinterest}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                          {creator.seguidores_pinterest && (
-                            <span className="ml-2 flex items-center text-gray-500 text-xs">
-                              <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {creator.page_facebook && (
-                        <div className="text-sm flex items-center gap-1">
-                          <span className="font-medium">Facebook:</span> 
-                          <a href={creator.page_facebook} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-blue-600 hover:underline">
-                            Página
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      )}
-                      {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
-                        <span className="text-sm text-gray-500">Sin redes sociales</span>
-                      )}
+                        )}
+                        {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
+                          <span className="text-sm text-gray-500">Sin redes sociales</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {creator.telefono ? (

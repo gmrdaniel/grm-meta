@@ -29,7 +29,7 @@ const creatorFormSchema = z.object({
   apellido: z.string().min(2, "El apellido es requerido"),
   correo: z.string().email("Ingrese un correo electrónico válido"),
   usuario_tiktok: z.string().optional(),
-  secuid_tiktok: z.string().optional(),
+  secUid_tiktok: z.string().optional(),
   seguidores_tiktok: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number().int().positive("Debe ser un número positivo").optional()
@@ -79,7 +79,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       apellido: initialData?.apellido || "",
       correo: initialData?.correo || "",
       usuario_tiktok: initialData?.usuario_tiktok || "",
-      secuid_tiktok: initialData?.secuid_tiktok || "",
+      secUid_tiktok: initialData?.secUid_tiktok || "",
       seguidores_tiktok: initialData?.seguidores_tiktok || undefined,
       elegible_tiktok: initialData?.elegible_tiktok || false,
       engagement_tiktok: initialData?.engagement_tiktok || undefined,
@@ -117,7 +117,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           apellido: "",
           correo: "",
           usuario_tiktok: "",
-          secuid_tiktok: "",
+          secUid_tiktok: "",
           seguidores_tiktok: undefined,
           elegible_tiktok: false,
           engagement_tiktok: undefined,
@@ -241,7 +241,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
               />
               <FormField
                 control={form.control}
-                name="secuid_tiktok"
+                name="secUid_tiktok"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>TikTok Secure ID</FormLabel>
