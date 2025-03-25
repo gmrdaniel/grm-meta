@@ -22,11 +22,20 @@ export const fetchAndUpdateTikTokDetails = async (creatorId: string, tiktokUsern
       })
     });
 
-    const result = await response.json();
-    
+    // First check if response is valid before trying to parse JSON
     if (!response.ok) {
-      console.error('Error response from TikTok API:', result);
-      throw new Error(`Error from TikTok API: ${result.error || JSON.stringify(result)}`);
+      const errorText = await response.text();
+      console.error('Error response from TikTok API:', errorText);
+      throw new Error(`Error from TikTok API: ${errorText || 'Unknown error'}`);
+    }
+    
+    // Try to parse JSON safely
+    let result;
+    try {
+      result = await response.json();
+    } catch (jsonError) {
+      console.error('Failed to parse JSON response:', jsonError);
+      throw new Error('Failed to parse response from server');
     }
 
     console.log('TikTok details update response:', result);

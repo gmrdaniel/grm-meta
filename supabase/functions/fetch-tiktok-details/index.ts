@@ -49,15 +49,15 @@ serve(async (req) => {
       try {
         console.log('Making request to TikTok API')
         
-        // Make request to TikTok API with improved error handling
-        const apiUrl = `https://${TIKTOK_API_HOST}/user/info?username=${encodeURIComponent(username)}`
+        // Make request to TikTok API with correct endpoint and parameters
+        const apiUrl = `https://${TIKTOK_API_HOST}/user/details?username=${encodeURIComponent(username)}`
         console.log(`API URL: ${apiUrl}`)
         
         const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': TIKTOK_API_KEY,
-            'X-RapidAPI-Host': TIKTOK_API_HOST
+            'x-rapidapi-key': TIKTOK_API_KEY,
+            'x-rapidapi-host': TIKTOK_API_HOST
           }
         });
 
@@ -70,20 +70,31 @@ serve(async (req) => {
           return;
         }
 
-        const data = await response.json();
-        console.log('TikTok API response received:', JSON.stringify(data));
+        const text = await response.text();
+        console.log('Raw TikTok API response:', text);
+        
+        // Parse JSON carefully
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse TikTok API response:', e, 'Raw response:', text);
+          return;
+        }
+        
+        console.log('TikTok API response parsed:', JSON.stringify(data));
         
         // Extract relevant info from TikTok API response
-        if (!data || !data.stats) {
-          console.error('No data or stats found in API response:', JSON.stringify(data));
+        if (!data || !data.data) {
+          console.error('No data found in API response:', JSON.stringify(data));
           return;
         }
         
         // Extract followers and other statistics from the correct path in response
-        const followers = data.stats?.followerCount || 0;
+        const followers = data.data.followers || 0;
         
         // Calculate engagement rate based on total likes / followers * 100
-        const totalLikes = data.stats?.heartCount || 0;
+        const totalLikes = data.data.total_heart || 0;
         const engagement = followers > 0 ? (totalLikes / followers) * 100 : 0;
         
         // Determine eligibility (example: eligible if has more than 10K followers)
