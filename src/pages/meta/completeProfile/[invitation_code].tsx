@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -86,7 +87,7 @@ const CompleteProfilePage = () => {
   }
 
   if (error || !invitation) {
-    return <InvitationError error={error || "Unable to find your invitation"} />;
+    return <InvitationError message={error || "Unable to find your invitation"} />;
   }
 
   return (
