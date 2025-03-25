@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowLeft, Download, Upload, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Download, Upload, AlertTriangle, CheckCircle2, XCircle, FileSpreadsheet } from "lucide-react";
 import { createCreator } from "@/services/creatorService";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import * as XLSX from 'xlsx';
 
 interface TikTokImportTemplateProps {
   onSuccess?: () => void;
@@ -18,7 +19,7 @@ interface CreatorImportData {
   apellido: string;
   correo: string;
   usuario_tiktok: string;
-  estatus: 'activo' | 'inactivo' | 'pendiente'; // Add estatus to the interface
+  estatus: 'activo' | 'inactivo' | 'pendiente';
 }
 
 interface ImportError {
@@ -32,18 +33,69 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
   const [importSuccess, setImportSuccess] = useState<number>(0);
+  const [importMethod, setImportMethod] = useState<'csv' | 'excel'>('csv');
+  const [file, setFile] = useState<File | null>(null);
   
-  // Template sample
+  // Template sample data
+  const templateData = [
+    ["nombre", "apellido", "correo", "usuario_tiktok"],
+    ["Juan", "Pérez", "juan@example.com", "juantiktok"],
+    ["María", "González", "maria@example.com", "mariatiktok"]
+  ];
+  
+  // CSV template string
   const templateSample = "nombre,apellido,correo,usuario_tiktok\nJuan,Pérez,juan@example.com,juantiktok\nMaría,González,maria@example.com,mariatiktok";
   
   const downloadTemplate = () => {
-    const element = document.createElement("a");
-    const file = new Blob([templateSample], { type: "text/csv" });
-    element.href = URL.createObjectURL(file);
-    element.download = "plantilla_tiktok.csv";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Plantilla TikTok");
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(wb, "plantilla_tiktok.xlsx");
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+      setImportMethod('excel');
+    }
+  };
+  
+  const processExcelFile = async () => {
+    if (!file) {
+      toast.error("Selecciona un archivo Excel para importar");
+      return;
+    }
+    
+    try {
+      // Read the Excel file
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      
+      // Get the first worksheet
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      
+      // Convert to JSON
+      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
+      
+      // Convert to CSV format for existing processing logic
+      let csvData = "";
+      
+      jsonData.forEach((row: any[], index: number) => {
+        csvData += row.join(",") + "\n";
+      });
+      
+      setInputData(csvData);
+      processImport(csvData);
+      
+    } catch (error) {
+      console.error("Error reading Excel file:", error);
+      toast.error("Error al leer el archivo Excel");
+    }
   };
   
   const importMutation = useMutation({
@@ -52,8 +104,10 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     }
   });
   
-  const processImport = async () => {
-    if (!inputData.trim()) {
+  const processImport = async (csvContent?: string) => {
+    const dataToProcess = csvContent || inputData;
+    
+    if (!dataToProcess.trim()) {
       toast.error("Ingresa los datos para importar");
       return;
     }
@@ -64,7 +118,7 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     
     try {
       // Parse CSV data
-      const lines = inputData.trim().split('\n');
+      const lines = dataToProcess.trim().split('\n');
       const headers = lines[0].split(',');
       
       // Validate headers
@@ -184,16 +238,75 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
               className="flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Descargar Plantilla
+              Descargar Plantilla Excel
             </Button>
           </div>
           
-          <Textarea 
-            placeholder="Pega aquí los datos en formato CSV o escribe directamente respetando el formato"
-            value={inputData}
-            onChange={(e) => setInputData(e.target.value)}
-            className="min-h-[200px] font-mono text-sm"
-          />
+          <div className="border rounded-md p-4 bg-gray-50">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-2">Elige un método de importación:</h3>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant={importMethod === 'csv' ? 'default' : 'outline'}
+                  onClick={() => setImportMethod('csv')}
+                >
+                  Texto CSV
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant={importMethod === 'excel' ? 'default' : 'outline'}
+                  onClick={() => setImportMethod('excel')}
+                >
+                  Archivo Excel
+                </Button>
+              </div>
+            </div>
+            
+            {importMethod === 'excel' ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <FileSpreadsheet className="w-8 h-8 mb-2 text-gray-500" />
+                      <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Haz clic para seleccionar</span> o arrastra un archivo Excel</p>
+                      <p className="text-xs text-gray-500">.XLS, .XLSX</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept=".xls,.xlsx" 
+                      onChange={handleFileChange} 
+                    />
+                  </label>
+                </div>
+                
+                {file && (
+                  <div className="bg-blue-50 p-3 rounded-md flex items-center justify-between">
+                    <div className="flex items-center">
+                      <FileSpreadsheet className="h-5 w-5 text-blue-600 mr-2" />
+                      <span className="text-sm font-medium truncate max-w-xs">{file.name}</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setFile(null)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Textarea 
+                placeholder="Pega aquí los datos en formato CSV o escribe directamente respetando el formato"
+                value={inputData}
+                onChange={(e) => setInputData(e.target.value)}
+                className="min-h-[200px] font-mono text-sm"
+              />
+            )}
+          </div>
           
           <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200">
             <AlertDescription className="text-sm">
@@ -204,7 +317,7 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
         <CardFooter className="flex justify-end">
           <Button 
             disabled={isProcessing} 
-            onClick={processImport}
+            onClick={importMethod === 'excel' ? processExcelFile : () => processImport()}
             className="flex items-center gap-2"
           >
             {isProcessing ? (
@@ -288,3 +401,4 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     </div>
   );
 }
+
