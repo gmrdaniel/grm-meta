@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { fetchTikTokUserInfo, updateCreatorTikTokFollowers } from "@/services/tiktokVideoService";
+import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users, Loader2 } from "lucide-react";
@@ -67,14 +68,19 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
       console.log('Extracted follower count:', followerCount);
       
       if (followerCount !== undefined) {
-        await updateCreatorTikTokFollowers(creatorId, followerCount);
-        return { followerCount };
+        // Now using the updated function that also sets eligibility status
+        await updateCreatorTikTokInfo(creatorId, followerCount);
+        
+        // Return follower count and eligibility status for toast message
+        const isEligible = followerCount >= 100000;
+        return { followerCount, isEligible };
       }
       
       throw new Error('No se pudo obtener el número de seguidores');
     },
     onSuccess: (data, variables) => {
-      toast.success(`Información de TikTok actualizada correctamente. Seguidores: ${data.followerCount.toLocaleString()}`);
+      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
+      toast.success(`Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`);
       refetch();
     },
     onError: (error) => {

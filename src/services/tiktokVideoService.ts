@@ -101,16 +101,31 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 };
 
 /**
- * Update creator's TikTok follower count
+ * Update creator's TikTok follower count and eligibility status
  */
-export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
+export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: number): Promise<void> => {
+  // Determine eligibility based on follower count
+  const isEligible = followerCount >= 100000;
+  
+  console.log(`Updating creator ${creatorId} with follower count: ${followerCount}, eligible: ${isEligible}`);
+  
   const { error } = await supabase
     .from('inventario_creadores')
-    .update({ seguidores_tiktok: followerCount })
+    .update({ 
+      seguidores_tiktok: followerCount,
+      elegible_tiktok: isEligible
+    })
     .eq('id', creatorId);
   
   if (error) {
-    console.error('Error updating creator TikTok followers:', error);
+    console.error('Error updating creator TikTok info:', error);
     throw new Error(error.message);
   }
+};
+
+/**
+ * Update creator's TikTok follower count (legacy function, kept for compatibility)
+ */
+export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
+  return updateCreatorTikTokInfo(creatorId, followerCount);
 };
