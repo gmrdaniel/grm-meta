@@ -84,6 +84,10 @@ export type Database = {
         Row: {
           apellido: string
           correo: string
+          elegible_tiktok: boolean | null
+          elegible_youtube: boolean | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
           estatus: string | null
           fecha_creacion: string | null
           id: string
@@ -101,6 +105,10 @@ export type Database = {
         Insert: {
           apellido: string
           correo: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
           estatus?: string | null
           fecha_creacion?: string | null
           id?: string
@@ -118,6 +126,10 @@ export type Database = {
         Update: {
           apellido?: string
           correo?: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
           estatus?: string | null
           fecha_creacion?: string | null
           id?: string

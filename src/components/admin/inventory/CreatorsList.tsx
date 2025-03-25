@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
@@ -50,17 +49,14 @@ export function CreatorsList() {
     queryFn: fetchCreators,
   });
 
-  // Calculate pagination
   const totalPages = Math.ceil(allCreators.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCreators = allCreators.slice(startIndex, startIndex + itemsPerPage);
 
-  // Get initials for avatar
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "MMM d, yyyy");
@@ -69,12 +65,16 @@ export function CreatorsList() {
     }
   };
 
-  // Format followers count
   const formatFollowers = (count?: number) => {
     if (count === undefined || count === null) return "N/A";
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
+  };
+
+  const formatEngagement = (rate?: number) => {
+    if (rate === undefined || rate === null) return "N/A";
+    return `${rate.toFixed(2)}%`;
   };
 
   const handleEdit = (creator: Creator) => {
@@ -120,8 +120,8 @@ export function CreatorsList() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[300px]">Creador</TableHead>
-                  <TableHead className="w-[250px]">Redes Sociales</TableHead>
+                  <TableHead className="w-[250px]">Creador</TableHead>
+                  <TableHead className="w-[300px]">Redes Sociales</TableHead>
                   <TableHead className="w-[180px]">Teléfono</TableHead>
                   <TableHead className="w-[150px]">Fecha</TableHead>
                   <TableHead className="w-[120px]">Estatus</TableHead>
@@ -147,20 +147,61 @@ export function CreatorsList() {
                     <TableCell>
                       <div className="space-y-1">
                         {creator.usuario_tiktok && (
-                          <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">TikTok:</span> 
-                            <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline">
-                              @{creator.usuario_tiktok}
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                            {creator.seguidores_tiktok && (
-                              <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                          <div className="text-sm">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">TikTok:</span> 
+                              <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                @{creator.usuario_tiktok}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              {creator.seguidores_tiktok && (
+                                <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-3 mt-1 text-xs">
+                              <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
+                                {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
                               </span>
-                            )}
+                              {creator.engagement_tiktok && (
+                                <span className="flex items-center text-gray-500">
+                                  Engagement: {formatEngagement(creator.engagement_tiktok)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {creator.usuario_youtube && (
+                          <div className="text-sm">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">YouTube:</span> 
+                              <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                @{creator.usuario_youtube}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              {creator.seguidores_youtube && (
+                                <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-3 mt-1 text-xs">
+                              <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
+                                {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
+                              </span>
+                              {creator.engagement_youtube && (
+                                <span className="flex items-center text-gray-500">
+                                  Engagement: {formatEngagement(creator.engagement_youtube)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
                         {creator.usuario_pinterest && (
@@ -176,23 +217,6 @@ export function CreatorsList() {
                             {creator.seguidores_pinterest && (
                               <span className="ml-2 flex items-center text-gray-500 text-xs">
                                 <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {creator.usuario_youtube && (
-                          <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">YouTube:</span> 
-                            <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline">
-                              @{creator.usuario_youtube}
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                            {creator.seguidores_youtube && (
-                              <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
                               </span>
                             )}
                           </div>
@@ -274,7 +298,6 @@ export function CreatorsList() {
                 
                 {[...Array(totalPages)].map((_, i) => {
                   const page = i + 1;
-                  // Show current page, first, last, and pages around current
                   if (
                     page === 1 || 
                     page === totalPages || 
@@ -293,7 +316,6 @@ export function CreatorsList() {
                     );
                   }
                   
-                  // Show ellipsis for gaps
                   if (
                     (page === 2 && currentPage > 3) || 
                     (page === totalPages - 1 && currentPage < totalPages - 2)
