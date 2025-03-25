@@ -375,6 +375,68 @@ export type Database = {
           },
         ]
       }
+      tiktok_video: {
+        Row: {
+          author: string | null
+          author_id: string | null
+          create_time: number | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          duration: number | null
+          id: string
+          number_of_comments: number | null
+          number_of_hearts: number | null
+          number_of_plays: number | null
+          number_of_reposts: number | null
+          updated_at: string
+          video_definition: string | null
+          video_id: string
+        }
+        Insert: {
+          author?: string | null
+          author_id?: string | null
+          create_time?: number | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          number_of_comments?: number | null
+          number_of_hearts?: number | null
+          number_of_plays?: number | null
+          number_of_reposts?: number | null
+          updated_at?: string
+          video_definition?: string | null
+          video_id: string
+        }
+        Update: {
+          author?: string | null
+          author_id?: string | null
+          create_time?: number | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          number_of_comments?: number | null
+          number_of_hearts?: number | null
+          number_of_plays?: number | null
+          number_of_reposts?: number | null
+          updated_at?: string
+          video_definition?: string | null
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiktok_video_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "inventario_creadores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

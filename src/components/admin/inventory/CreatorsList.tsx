@@ -38,7 +38,11 @@ import {
 } from "@/components/ui/pagination";
 import { format } from "date-fns";
 
-export function CreatorsList() {
+interface CreatorsListProps {
+  onCreatorSelect?: (creator: Creator) => void;
+}
+
+export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
   const [editCreator, setEditCreator] = useState<Creator | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,8 +82,12 @@ export function CreatorsList() {
   };
 
   const handleEdit = (creator: Creator) => {
-    setEditCreator(creator);
-    setIsEditDialogOpen(true);
+    if (onCreatorSelect) {
+      onCreatorSelect(creator);
+    } else {
+      setEditCreator(creator);
+      setIsEditDialogOpen(true);
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -130,7 +138,11 @@ export function CreatorsList() {
               </TableHeader>
               <TableBody>
                 {paginatedCreators.map((creator) => (
-                  <TableRow key={creator.id}>
+                  <TableRow 
+                    key={creator.id}
+                    className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
+                    onClick={onCreatorSelect ? () => onCreatorSelect(creator) : undefined}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
@@ -267,13 +279,28 @@ export function CreatorsList() {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={(e) => {
+                              if (onCreatorSelect) {
+                                e.stopPropagation();
+                              }
+                            }}
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Abrir menú</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(creator)}>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              if (onCreatorSelect) {
+                                e.stopPropagation();
+                              }
+                              handleEdit(creator);
+                            }}
+                          >
                             <Pencil className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
@@ -342,27 +369,29 @@ export function CreatorsList() {
         </>
       )}
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar Creador</DialogTitle>
-            <DialogDescription>
-              Actualiza los datos del creador seleccionado.
-            </DialogDescription>
-          </DialogHeader>
-          {editCreator && (
-            <CreatorForm 
-              initialData={editCreator} 
-              onSuccess={() => {
-                setIsEditDialogOpen(false);
-                refetch();
-                toast.success("Creador actualizado correctamente");
-              }} 
-              onCancel={() => setIsEditDialogOpen(false)} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {!onCreatorSelect && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Creador</DialogTitle>
+              <DialogDescription>
+                Actualiza los datos del creador seleccionado.
+              </DialogDescription>
+            </DialogHeader>
+            {editCreator && (
+              <CreatorForm 
+                initialData={editCreator} 
+                onSuccess={() => {
+                  setIsEditDialogOpen(false);
+                  refetch();
+                  toast.success("Creador actualizado correctamente");
+                }} 
+                onCancel={() => setIsEditDialogOpen(false)} 
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
