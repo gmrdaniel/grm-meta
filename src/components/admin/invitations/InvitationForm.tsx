@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,7 +55,16 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     setSubmitError(null);
 
     try {
-      await createInvitation(data);
+      const invitationData = {
+        email: data.email,
+        full_name: data.full_name,
+        project_id: data.project_id,
+        invitation_type: data.invitation_type,
+        social_media_type: data.social_media_type,
+        social_media_handle: data.social_media_handle,
+      };
+      
+      await createInvitation(invitationData);
       toast({
         title: "Invitation created",
         description: `An invitation has been created for ${data.full_name}`,

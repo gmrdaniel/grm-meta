@@ -1,7 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import * as https from 'https';
 
 const TIKTOK_API_KEY = Deno.env.get('TIKTOK_API_KEY') || '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5'
 const TIKTOK_API_HOST = 'tiktok-api6.p.rapidapi.com'
@@ -50,54 +49,23 @@ serve(async (req) => {
       try {
         console.log('Making request to TikTok API')
         
-        // Function to fetch TikTok API data using the HTTP/HTTPS pattern from the example
-        const fetchTikTokData = () => {
-          return new Promise((resolve, reject) => {
-            const options = {
-              method: 'GET',
-              hostname: TIKTOK_API_HOST,
-              path: `/user/details?username=${encodeURIComponent(username)}`,
-              headers: {
-                'x-rapidapi-key': TIKTOK_API_KEY,
-                'x-rapidapi-host': TIKTOK_API_HOST
-              }
-            };
+        // Make request to TikTok API
+        const apiUrl = `https://${TIKTOK_API_HOST}/user/details?username=${encodeURIComponent(username)}`
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key': TIKTOK_API_KEY,
+            'x-rapidapi-host': TIKTOK_API_HOST
+          }
+        });
 
-            const req = https.request(options, (res) => {
-              const chunks: Uint8Array[] = [];
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`TikTok API error: ${response.status} - ${errorText}`);
+          return;
+        }
 
-              res.on('data', (chunk) => {
-                chunks.push(chunk);
-              });
-
-              res.on('end', () => {
-                const body = Buffer.concat(chunks);
-                const responseText = new TextDecoder().decode(body);
-                
-                try {
-                  // Try to parse JSON
-                  const data = JSON.parse(responseText);
-                  if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                    resolve(data);
-                  } else {
-                    reject(new Error(`TikTok API error: ${res.statusCode} - ${responseText}`));
-                  }
-                } catch (error) {
-                  reject(new Error(`Error parsing TikTok API response: ${error.message}`));
-                }
-              });
-            });
-
-            req.on('error', (error) => {
-              reject(error);
-            });
-
-            req.end();
-          });
-        };
-
-        // Make the request using our helper function
-        const data = await fetchTikTokData();
+        const data = await response.json();
         console.log('TikTok API response received:', JSON.stringify(data));
         
         // Extract relevant info from TikTok API response

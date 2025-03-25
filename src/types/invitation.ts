@@ -12,7 +12,7 @@ export interface CreatorInvitation {
   project_id?: string;
   social_media_type?: string;
   social_media_handle?: string;
-  phone_number?: string;  // Add this field
+  phone_number?: string;
   updated_at: string;
 }
 
@@ -23,7 +23,7 @@ export interface CreateInvitationData {
   email: string;
   full_name: string;
   invitation_type: string;
-  project_id?: string;
+  project_id: string;
   social_media_type?: string;
   social_media_handle?: string;
 }
