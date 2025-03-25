@@ -96,18 +96,20 @@ export function CreatorsList({
       
       console.log('Processing TikTok user info result:', userInfo);
       
-      // Extract follower count from the nested structure
+      // Extract follower count and secUid from the nested structure
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
+      const secUid = userInfo?.userInfo?.user?.secUid;
       
       console.log('Extracted follower count:', followerCount);
+      console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
-        // Now using the updated function that also sets eligibility status
-        await updateCreatorTikTokInfo(creatorId, followerCount);
+        // Now using the updated function that also sets eligibility status and secUid
+        await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
         
         // Return follower count and eligibility status for toast message
         const isEligible = followerCount >= 100000;
-        return { followerCount, isEligible };
+        return { followerCount, isEligible, secUid };
       }
       
       throw new Error('No se pudo obtener el número de seguidores');
