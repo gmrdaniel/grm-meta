@@ -1,11 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
 import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users, Loader2 } from "lucide-react";
+import { 
+  Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
+  Users, Loader2, Filter, X, Check 
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -38,23 +41,54 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
+import { CreatorFilter } from "../inventory/import-templates/types";
 
 interface CreatorsListProps {
   onCreatorSelect?: (creator: Creator) => void;
+  filters?: CreatorFilter;
+  onFilterChange?: (filters: CreatorFilter) => void;
 }
 
-export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
+export function CreatorsList({ 
+  onCreatorSelect, 
+  filters = {}, 
+  onFilterChange 
+}: CreatorsListProps) {
   const [editCreator, setEditCreator] = useState<Creator | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
-  const itemsPerPage = 10;
+  const [pageSize, setPageSize] = useState(10);
+  const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
-  const { data: allCreators = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["creators"],
-    queryFn: fetchCreators,
+  const { 
+    data: creatorsData, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
+    queryKey: ["creators", currentPage, pageSize, activeFilters],
+    queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
+
+  // Apply filters when they change
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange(activeFilters);
+    }
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [activeFilters, onFilterChange]);
+
+  const creators = creatorsData?.data || [];
+  const totalCount = creatorsData?.count || 0;
 
   const updateTikTokInfoMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
@@ -91,9 +125,7 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
     }
   });
 
-  const totalPages = Math.ceil(allCreators.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedCreators = allCreators.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -133,6 +165,11 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
     setCurrentPage(page);
   };
 
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(parseInt(value));
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
     if (!username) {
       toast.error("Este creador no tiene un nombre de usuario de TikTok");
@@ -141,6 +178,20 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
     
     setLoadingTikTokInfo(creatorId);
     updateTikTokInfoMutation.mutate({ creatorId, username });
+  };
+
+  const toggleFilter = (filterName: keyof CreatorFilter) => {
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      newFilters[filterName] = !prev[filterName];
+      
+      // If filter is being disabled, remove it from the object
+      if (!newFilters[filterName]) {
+        delete newFilters[filterName];
+      }
+      
+      return newFilters;
+    });
   };
 
   if (isLoading) {
@@ -161,14 +212,50 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Lista de Creadores</h2>
-        <p className="text-gray-500">Todos los creadores registrados en el sistema</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold">Lista de Creadores</h2>
+          <p className="text-gray-500">Total: {totalCount} creadores</p>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button 
+            variant={activeFilters.tiktokEligible ? "default" : "outline"} 
+            size="sm"
+            onClick={() => toggleFilter('tiktokEligible')}
+            className="flex items-center gap-1"
+          >
+            {activeFilters.tiktokEligible ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+            TikTok Elegible
+          </Button>
+          
+          <Button 
+            variant={activeFilters.hasTiktokUsername ? "default" : "outline"} 
+            size="sm"
+            onClick={() => toggleFilter('hasTiktokUsername')}
+            className="flex items-center gap-1"
+          >
+            {activeFilters.hasTiktokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+            Usuario TikTok
+          </Button>
+          
+          {(activeFilters.tiktokEligible || activeFilters.hasTiktokUsername) && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setActiveFilters({})}
+              className="flex items-center gap-1"
+            >
+              <X className="h-4 w-4" />
+              Limpiar filtros
+            </Button>
+          )}
+        </div>
       </div>
       
-      {allCreators.length === 0 ? (
+      {creators.length === 0 ? (
         <div className="p-8 text-center text-gray-500 border rounded-md">
-          No hay creadores registrados
+          No hay creadores que coincidan con los criterios seleccionados
         </div>
       ) : (
         <>
@@ -185,7 +272,7 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedCreators.map((creator) => (
+                {creators.map((creator) => (
                   <TableRow 
                     key={creator.id}
                     className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
@@ -384,59 +471,79 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
             </Table>
           </div>
 
-          {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                
-                {[...Array(totalPages)].map((_, i) => {
-                  const page = i + 1;
-                  if (
-                    page === 1 || 
-                    page === totalPages || 
-                    page === currentPage || 
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationLink 
-                          isActive={page === currentPage}
-                          onClick={() => handlePageChange(page)}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  }
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Resultados por página:</span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={handlePageSizeChange}
+              >
+                <SelectTrigger className="w-[70px]">
+                  <SelectValue placeholder="10" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
                   
-                  if (
-                    (page === 2 && currentPage > 3) || 
-                    (page === totalPages - 1 && currentPage < totalPages - 2)
-                  ) {
-                    return (
-                      <PaginationItem key={page}>
-                        <span className="flex h-9 w-9 items-center justify-center">...</span>
-                      </PaginationItem>
-                    );
-                  }
+                  {[...Array(totalPages)].map((_, i) => {
+                    const page = i + 1;
+                    if (
+                      page === 1 || 
+                      page === totalPages || 
+                      page === currentPage || 
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink 
+                            isActive={page === currentPage}
+                            onClick={() => handlePageChange(page)}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    if (
+                      (page === 2 && currentPage > 3) || 
+                      (page === totalPages - 1 && currentPage < totalPages - 2)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <span className="flex h-9 w-9 items-center justify-center">...</span>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    return null;
+                  })}
                   
-                  return null;
-                })}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => handlePageChange(currentPage + 1)} 
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(currentPage + 1)} 
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         </>
       )}
 

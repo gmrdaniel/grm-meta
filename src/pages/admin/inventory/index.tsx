@@ -11,14 +11,16 @@ import { ImportCreators } from "@/components/admin/inventory/ImportCreators";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { toast } from "sonner";
+import { CreatorFilter } from "@/components/admin/inventory/import-templates/types";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [filters, setFilters] = useState<CreatorFilter>({});
   
   const { refetch } = useQuery({
     queryKey: ["creators"],
-    queryFn: fetchCreators,
+    queryFn: () => fetchCreators(1, 10, filters),
   });
 
   const handleCreatorSelect = (creator: Creator) => {
@@ -29,6 +31,10 @@ export default function AdminInventory() {
   const handleBackToList = () => {
     setSelectedCreator(null);
     setActiveTab("list");
+  };
+
+  const handleFilterChange = (newFilters: CreatorFilter) => {
+    setFilters(newFilters);
   };
 
   return (
@@ -51,7 +57,11 @@ export default function AdminInventory() {
               </TabsList>
               
               <TabsContent value="list" className="space-y-6">
-                <CreatorsList onCreatorSelect={handleCreatorSelect} />
+                <CreatorsList 
+                  onCreatorSelect={handleCreatorSelect}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
               </TabsContent>
               
               <TabsContent value="create" className="space-y-6">
