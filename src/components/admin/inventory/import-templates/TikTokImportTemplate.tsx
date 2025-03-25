@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { createCreator } from "@/services/creatorService";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
+import { supabase } from "@/integrations/supabase/client";
 
 interface TikTokImportTemplateProps {
   onSuccess?: () => void;
@@ -36,25 +36,18 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
   const [importMethod, setImportMethod] = useState<'csv' | 'excel'>('csv');
   const [file, setFile] = useState<File | null>(null);
   
-  // Template sample data
   const templateData = [
     ["nombre", "apellido", "correo", "usuario_tiktok"],
     ["Juan", "Pérez", "juan@example.com", "juantiktok"],
     ["María", "González", "maria@example.com", "mariatiktok"]
   ];
   
-  // CSV template string
   const templateSample = "nombre,apellido,correo,usuario_tiktok\nJuan,Pérez,juan@example.com,juantiktok\nMaría,González,maria@example.com,mariatiktok";
   
   const downloadTemplate = () => {
-    // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(templateData);
-    
-    // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, "Plantilla TikTok");
-    
-    // Generate Excel file and trigger download
     XLSX.writeFile(wb, "plantilla_tiktok.xlsx");
   };
   
@@ -72,17 +65,11 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     }
     
     try {
-      // Read the Excel file
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
-      
-      // Get the first worksheet
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      
-      // Convert to JSON
       const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
       
-      // Convert to CSV format for existing processing logic
       let csvData = "";
       
       jsonData.forEach((row: any[], index: number) => {
@@ -103,6 +90,72 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
       return createCreator(creator);
     }
   });
+
+  const createBulkInvitationMutation = useMutation({
+    mutationFn: async (data: { fileName: string; totalRows: number }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        throw new Error("No se ha iniciado sesión");
+      }
+
+      const { data: invitation, error } = await supabase
+        .from("bulk_creator_invitations")
+        .insert({
+          file_name: data.fileName,
+          status: "processing",
+          total_rows: data.totalRows,
+          created_by: userData.user.id
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return invitation;
+    }
+  });
+
+  const updateBulkInvitationMutation = useMutation({
+    mutationFn: async (data: { 
+      id: string, 
+      processedRows: number, 
+      failedRows: number, 
+      status: string 
+    }) => {
+      const { error } = await supabase
+        .from("bulk_creator_invitations")
+        .update({
+          processed_rows: data.processedRows,
+          failed_rows: data.failedRows,
+          status: data.status,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", data.id);
+
+      if (error) throw error;
+    }
+  });
+
+  const createBulkInvitationDetailMutation = useMutation({
+    mutationFn: async (data: { 
+      bulkInvitationId: string, 
+      fullName: string, 
+      email: string, 
+      status: string, 
+      errorMessage?: string 
+    }) => {
+      const { error } = await supabase
+        .from("bulk_creator_invitation_details")
+        .insert({
+          bulk_invitation_id: data.bulkInvitationId,
+          full_name: data.fullName,
+          email: data.email,
+          status: data.status,
+          error_message: data.errorMessage || null
+        });
+
+      if (error) throw error;
+    }
+  });
   
   const processImport = async (csvContent?: string) => {
     const dataToProcess = csvContent || inputData;
@@ -117,11 +170,9 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     setImportSuccess(0);
     
     try {
-      // Parse CSV data
       const lines = dataToProcess.trim().split('\n');
       const headers = lines[0].split(',');
       
-      // Validate headers
       const requiredHeaders = ["nombre", "apellido", "correo", "usuario_tiktok"];
       const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
       
@@ -130,8 +181,15 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
         setIsProcessing(false);
         return;
       }
+
+      const validRowsCount = lines.filter((line, index) => index > 0 && line.trim()).length;
       
-      // Process data rows
+      const fileName = file ? file.name : "import-csv-" + new Date().toISOString().slice(0, 10);
+      const bulkInvitation = await createBulkInvitationMutation.mutateAsync({
+        fileName,
+        totalRows: validRowsCount
+      });
+      
       const errors: ImportError[] = [];
       let successCount = 0;
       
@@ -141,12 +199,10 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
         const values = lines[i].split(',');
         const rowData: any = {};
         
-        // Create object from CSV row
         headers.forEach((header, index) => {
           rowData[header.trim()] = values[index]?.trim() || "";
         });
         
-        // Validate required fields
         const rowErrors = [];
         if (!rowData.nombre) rowErrors.push("Nombre es requerido");
         if (!rowData.apellido) rowErrors.push("Apellido es requerido");
@@ -157,32 +213,65 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
         }
         
         if (rowErrors.length > 0) {
+          const errorMsg = rowErrors.join(", ");
           errors.push({
             row: i,
-            error: rowErrors.join(", "),
-            data: {...rowData, estatus: 'activo'} // Ensure estatus is included
+            error: errorMsg,
+            data: {...rowData, estatus: 'activo'}
           });
+          
+          await createBulkInvitationDetailMutation.mutateAsync({
+            bulkInvitationId: bulkInvitation.id,
+            fullName: `${rowData.nombre || ''} ${rowData.apellido || ''}`.trim() || 'Sin nombre',
+            email: rowData.correo || 'Sin correo',
+            status: 'failed',
+            errorMessage: errorMsg
+          });
+          
           continue;
         }
         
-        // Import to database
         try {
           await importMutation.mutateAsync({
             nombre: rowData.nombre,
             apellido: rowData.apellido,
             correo: rowData.correo,
             usuario_tiktok: rowData.usuario_tiktok,
-            estatus: 'activo' // Set default status
+            estatus: 'activo'
           });
+          
+          await createBulkInvitationDetailMutation.mutateAsync({
+            bulkInvitationId: bulkInvitation.id,
+            fullName: `${rowData.nombre} ${rowData.apellido}`,
+            email: rowData.correo,
+            status: 'completed'
+          });
+          
           successCount++;
         } catch (error: any) {
+          const errorMsg = error.message || "Error al crear creador";
           errors.push({
             row: i,
-            error: error.message || "Error al crear creador",
-            data: {...rowData, estatus: 'activo'} // Ensure estatus is included
+            error: errorMsg,
+            data: {...rowData, estatus: 'activo'}
+          });
+          
+          await createBulkInvitationDetailMutation.mutateAsync({
+            bulkInvitationId: bulkInvitation.id,
+            fullName: `${rowData.nombre} ${rowData.apellido}`,
+            email: rowData.correo,
+            status: 'failed',
+            errorMessage: errorMsg
           });
         }
       }
+      
+      await updateBulkInvitationMutation.mutateAsync({
+        id: bulkInvitation.id,
+        processedRows: successCount,
+        failedRows: errors.length,
+        status: errors.length === 0 ? 'completed' : (successCount > 0 ? 'completed' : 'failed')
+      });
       
       setImportSuccess(successCount);
       setImportErrors(errors);
@@ -193,7 +282,7 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
       } else if (errors.length > 0 && successCount > 0) {
         toast.info(`Importación parcial: ${successCount} creadores importados, ${errors.length} errores`);
       } else if (errors.length > 0 && successCount === 0) {
-        toast.error(`La importación falló: ${errors.length} errores`);
+        toast.error(`La importación falló con ${errors.length} errores`);
       }
       
     } catch (error) {
@@ -401,4 +490,3 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
     </div>
   );
 }
-

@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TikTokImportTemplate } from "./import-templates/TikTokImportTemplate";
+import { BulkInvitationsHistory } from "./BulkInvitationsHistory";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ImportCreatorsProps {
   onSuccess?: () => void;
@@ -17,7 +19,7 @@ export function ImportCreators({ onSuccess }: ImportCreatorsProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Importar Creadores</h2>
-        <p className="text-gray-500">Importa creadores utilizando plantillas predefinidas o personaliza tu propia importación</p>
+        <p className="text-gray-500">Importa creadores utilizando plantillas predefinidas o consulta el historial de importaciones</p>
       </div>
       
       <Tabs defaultValue="templates" value={activeTab} onValueChange={setActiveTab}>
@@ -74,24 +76,12 @@ export function ImportCreators({ onSuccess }: ImportCreatorsProps) {
         </TabsContent>
         
         <TabsContent value="history" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historial de Importaciones</CardTitle>
-              <CardDescription>
-                Revisa tus importaciones recientes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500 text-center py-6">
-                No hay importaciones recientes
-              </p>
-            </CardContent>
-          </Card>
+          <BulkInvitationsHistory />
         </TabsContent>
         
         <TabsContent value="tiktok-template" className="pt-4">
           <TikTokImportTemplate onSuccess={() => {
-            setActiveTab("templates");
+            setActiveTab("history");
             if (onSuccess) onSuccess();
           }} />
         </TabsContent>
