@@ -1,44 +1,46 @@
 
 export interface CreatorInvitation {
   id: string;
-  created_at: string;
+  project_id?: string | null;
   email: string;
   full_name: string;
+  social_media_type?: string | null;
+  social_media_handle?: string | null;
+  other_social_media?: string | null;
+  youtube_channel?: string | null;
+  instagram_user?: string | null;
+  facebook_page?: string | null;
   invitation_code: string;
   invitation_url: string;
   status: 'pending' | 'accepted' | 'rejected';
-  facebook_page?: string;
   invitation_type: string;
-  project_id?: string;
-  social_media_type?: string;
-  social_media_handle?: string;
-  phone_number?: string;
-  updated_at: string;
-}
-
-/**
- * Data for creating a new invitation
- */
-export interface CreateInvitationData {
-  email: string;
-  full_name: string;
-  invitation_type: string;
-  project_id: string;
-  social_media_type?: string;
-  social_media_handle?: string;
-}
-
-export interface UpdateFacebookPageData {
-  facebook_page: string;
-}
-
-export interface TaskWithInvitation {
-  id: string;
   created_at: string;
-  name: string;
-  description: string;
-  due_date: string;
-  status: 'open' | 'in progress' | 'done' | 'blocked';
-  creator_invitation_id: string;
-  creator_invitations: CreatorInvitation;
+  updated_at: string;
+  phone_number?: string | null;
+  phone_country_code?: string | null;
+  phone_verified?: boolean;
+}
+
+export type CreateInvitationData = {
+  full_name: string;
+  email: string;
+  social_media_handle?: string | null;
+  social_media_type?: string | null;
+  project_id: string;
+  invitation_type: string;
+};
+
+export type UpdateFacebookPageData = {
+  facebookPageUrl: string;
+  verifyOwnership: boolean;
+  linkInstagram: boolean;
+};
+
+// Define a type for task with creator invitation relation
+export interface TaskWithInvitation {
+  taskId: string;
+  creatorInvitationId: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'review';
+  title: string;
+  created_at: string;
 }

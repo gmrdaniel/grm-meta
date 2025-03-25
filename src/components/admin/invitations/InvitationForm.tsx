@@ -1,118 +1,90 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import * as z from "zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createInvitation } from "@/services/invitationService";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { fetchProjects } from "@/services/projectService";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { fetchProjects } from "@/services/projectService";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { CreateInvitationData } from "@/types/invitation";
 
-const FormSchema = z.object({
-  full_name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email format"),
-  social_media_type: z.string().optional(),
+const formSchema = z.object({
+  full_name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
   social_media_handle: z.string().optional(),
-  project_id: z.string().min(1, "Project is required"),
-  invitation_type: z.string().min(1, "Invitation type is required"),
+  social_media_type: z.enum(["tiktok", "pinterest"]).optional(),
+  project_id: z.string().uuid({ message: "Please select a project" }),
+  invitation_type: z.enum(["new_user", "existing_user"])
 });
 
-type FormValues = z.infer<typeof FormSchema>;
-
-type InvitationFormProps = {
+interface InvitationFormProps {
   onSuccess?: () => void;
-};
+}
 
 const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       full_name: "",
       email: "",
-      social_media_type: "",
       social_media_handle: "",
-      project_id: "",
-      invitation_type: "facebook",
-    },
-  });
-
-  const { data: projects, isLoading: projectsLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: fetchProjects,
-  });
-
-  const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const invitationData = {
-        email: data.email,
-        full_name: data.full_name,
-        project_id: data.project_id,
-        invitation_type: data.invitation_type,
-        social_media_type: data.social_media_type,
-        social_media_handle: data.social_media_handle,
-      };
-      
-      await createInvitation(invitationData);
-      toast({
-        title: "Invitation created",
-        description: `An invitation has been created for ${data.full_name}`,
-      });
-      form.reset();
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error: any) {
-      console.error("Error creating invitation:", error);
-      setSubmitError(error.message || "Failed to create invitation. Please try again.");
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to create invitation",
-      });
-    } finally {
-      setIsSubmitting(false);
+      invitation_type: "new_user"
     }
+  });
+
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ["projects"],
+    queryFn: fetchProjects
+  });
+
+  const createInvitationMutation = useMutation({
+    mutationFn: (data: CreateInvitationData) => {
+      console.log("Creating invitation with data:", data);
+      return createInvitation(data);
+    },
+    onSuccess: () => {
+      toast.success("Invitation created and email sent successfully!");
+      form.reset();
+      if (onSuccess) onSuccess();
+    },
+    onError: (error: Error) => {
+      toast.error(`Error creating invitation: ${error.message}`);
+    }
+  });
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    // Convert form data to match the expected API format
+    const invitationData: CreateInvitationData = {
+      full_name: data.full_name,
+      email: data.email,
+      social_media_handle: data.social_media_handle || null,
+      social_media_type: data.social_media_type || null,
+      project_id: data.project_id,
+      invitation_type: data.invitation_type
+    };
+
+    createInvitationMutation.mutate(invitationData);
   };
 
-  if (projectsLoading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading projects...</span>
-      </div>
-    );
-  }
+  const hasSocialMedia = form.watch("social_media_handle") !== "";
 
   return (
-    <div>
-      {submitError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-          <p>{submitError}</p>
-        </div>
-      )}
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="full_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>Creator Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input {...field} placeholder="Enter full name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,35 +96,10 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="john.doe@example.com" type="email" {...field} />
+                  <Input {...field} type="email" placeholder="Enter email address" />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="social_media_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Social Media Type (Optional)</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select social media type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -163,10 +110,39 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             name="social_media_handle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Social Media Handle (Optional)</FormLabel>
+                <FormLabel>Social Media Handle</FormLabel>
                 <FormControl>
-                  <Input placeholder="@username" {...field} />
+                  <Input {...field} placeholder="Enter social media handle" />
                 </FormControl>
+                <FormDescription>
+                  Optional: Creator's username on social media
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="social_media_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social Media Platform</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value}
+                  disabled={!hasSocialMedia}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select social media platform" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -178,20 +154,29 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Project</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select project" />
+                      <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {projects?.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
+                    {isLoadingProjects ? (
+                      <SelectItem value="loading" disabled>
+                        Loading projects...
                       </SelectItem>
-                    ))}
+                    ) : (
+                      projects?.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  The project this invitation is associated with
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -203,40 +188,37 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Invitation Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select invitation type" />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="multi">Multi Platform</SelectItem>
+                    <SelectItem value="new_user">New User</SelectItem>
+                    <SelectItem value="existing_user">Existing User</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  Whether this is for a new user or an existing user
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+        </div>
 
+        <div className="flex justify-end">
           <Button
             type="submit"
-            className="w-full"
-            disabled={isSubmitting}
+            disabled={createInvitationMutation.isPending}
+            className="min-w-32"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create Invitation"
-            )}
+            {createInvitationMutation.isPending ? "Creating..." : "Create Invitation"}
           </Button>
-        </form>
-      </Form>
-    </div>
+        </div>
+      </form>
+    </Form>
   );
 };
 

@@ -8,8 +8,6 @@ import { toast } from "sonner";
  */
 export const fetchAndUpdateTikTokDetails = async (creatorId: string, tiktokUsername: string): Promise<void> => {
   try {
-    console.log(`Fetching TikTok details for ${tiktokUsername} (Creator ID: ${creatorId})`);
-    
     // Make request to Supabase Edge Function
     const response = await fetch('/api/fetch-tiktok-details', {
       method: 'POST',
@@ -22,24 +20,11 @@ export const fetchAndUpdateTikTokDetails = async (creatorId: string, tiktokUsern
       })
     });
 
-    // First check if response is valid before trying to parse JSON
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response from TikTok API:', errorText);
-      throw new Error(`Error from TikTok API: ${errorText || 'Unknown error'}`);
-    }
-    
-    // Try to parse JSON safely
-    let result;
-    try {
-      result = await response.json();
-    } catch (jsonError) {
-      console.error('Failed to parse JSON response:', jsonError);
-      throw new Error('Failed to parse response from server');
+      const errorData = await response.text();
+      throw new Error(`Error from TikTok API: ${errorData}`);
     }
 
-    console.log('TikTok details update response:', result);
-    
     toast.success("TikTok details update request was sent successfully. The creator's data will be updated in the background.");
 
   } catch (error) {

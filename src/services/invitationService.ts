@@ -1,4 +1,3 @@
-
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation, CreateInvitationData, UpdateFacebookPageData, TaskWithInvitation } from "@/types/invitation";
 
@@ -69,23 +68,6 @@ export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
 };
 
 /**
- * Check if an email is already used in an invitation
- */
-export const checkEmailExists = async (email: string): Promise<boolean> => {
-  const { data, error, count } = await supabase
-    .from('creator_invitations')
-    .select('*', { count: 'exact', head: true })
-    .eq('email', email);
-  
-  if (error) {
-    console.error('Error checking email existence:', error);
-    throw new Error(error.message);
-  }
-  
-  return count !== null && count > 0;
-};
-
-/**
  * Generate a unique invitation code
  */
 const generateInvitationCode = (): string => {
@@ -101,57 +83,40 @@ const generateInvitationCode = (): string => {
  * Create a new invitation
  */
 export const createInvitation = async (invitationData: CreateInvitationData): Promise<CreatorInvitation> => {
-  try {
-    // Check if email already exists
-    const emailExists = await checkEmailExists(invitationData.email);
-    if (emailExists) {
-      throw new Error(`The email ${invitationData.email} is already associated with another invitation.`);
-    }
-    
-    // Generate a unique invitation code
-    const invitationCode = generateInvitationCode();
-    
-    // Generate invitation URL path
-    const invitationUrl = `/invite/${invitationCode}`;
-    
-    // Log the invitation data for debugging
-    console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });
-    
-    // Prepare the complete invitation data
-    const completeInvitation = {
-      ...invitationData,
-      invitation_code: invitationCode,
-      invitation_url: invitationUrl,
-      status: 'pending' as 'pending' | 'accepted' | 'rejected'
-    };
-    
-    const { data, error } = await supabase
-      .from('creator_invitations')
-      .insert(completeInvitation)
-      .select()
-      .maybeSingle();
-    
-    if (error) {
-      // Handle unique constraint violation
-      if (error.code === '23505') {
-        throw new Error(`The email ${invitationData.email} is already associated with another invitation.`);
-      }
-      
-      console.error('Error creating invitation:', error);
-      throw new Error(error.message);
-    }
-    
-    if (!data) {
-      throw new Error('Failed to create invitation: No data returned');
-    }
-    
-    console.log('Invitation created successfully:', data);
-    return data as CreatorInvitation;
-  } catch (error) {
-    // Re-throw the error to be handled by the caller
-    console.error('Error in createInvitation:', error);
-    throw error;
+  // Generate a unique invitation code
+  const invitationCode = generateInvitationCode();
+  
+  // Generate invitation URL path
+  const invitationUrl = `/invite/${invitationCode}`;
+  
+  // Log the invitation data for debugging
+  console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });
+  
+  // Prepare the complete invitation data
+  const completeInvitation = {
+    ...invitationData,
+    invitation_code: invitationCode,
+    invitation_url: invitationUrl,
+    status: 'pending' as 'pending' | 'accepted' | 'rejected'
+  };
+  
+  const { data, error } = await supabase
+    .from('creator_invitations')
+    .insert(completeInvitation)
+    .select()
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error creating invitation:', error);
+    throw new Error(error.message);
   }
+  
+  if (!data) {
+    throw new Error('Failed to create invitation: No data returned');
+  }
+  
+  console.log('Invitation created successfully:', data);
+  return data as CreatorInvitation;
 };
 
 /**

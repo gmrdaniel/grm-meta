@@ -7,11 +7,10 @@ import { Input } from "@/components/ui/input";
 import { fetchInvitationByCode } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2, BrandTiktok } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { fetchAndUpdateTikTokDetails } from "@/services/creatorTikTokService";
 
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
@@ -21,11 +20,6 @@ export default function AdminTestPage() {
   const [directLoading, setDirectLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [directError, setDirectError] = useState<string | null>(null);
-  const [tiktokUsername, setTiktokUsername] = useState<string>("");
-  const [tiktokCreatorId, setTiktokCreatorId] = useState<string>("00000000-0000-0000-0000-000000000000");
-  const [tiktokResult, setTiktokResult] = useState<any>(null);
-  const [tiktokLoading, setTiktokLoading] = useState<boolean>(false);
-  const [tiktokError, setTiktokError] = useState<string | null>(null);
 
   // Test using the service function
   const handleTestService = async () => {
@@ -89,44 +83,6 @@ export default function AdminTestPage() {
       setDirectLoading(false);
     }
   };
-  
-  // Test TikTok API function
-  const handleTikTokTest = async () => {
-    if (!tiktokUsername.trim()) {
-      setTiktokError("Por favor ingrese un nombre de usuario de TikTok");
-      return;
-    }
-    
-    if (!tiktokCreatorId) {
-      setTiktokError("Por favor ingrese un ID de creador válido");
-      return;
-    }
-
-    setTiktokLoading(true);
-    setTiktokError(null);
-    try {
-      // Call the TikTok service
-      await fetchAndUpdateTikTokDetails(tiktokCreatorId, tiktokUsername);
-      
-      setTiktokResult({
-        message: "Solicitud de actualización de TikTok enviada con éxito",
-        username: tiktokUsername,
-        creatorId: tiktokCreatorId,
-        success: true,
-        timestamp: new Date().toLocaleString()
-      });
-    } catch (err) {
-      console.error("Error testing TikTok API:", err);
-      setTiktokError("Error al consultar API de TikTok: " + (err instanceof Error ? err.message : String(err)));
-      setTiktokResult({
-        success: false,
-        error: err,
-        timestamp: new Date().toLocaleString()
-      });
-    } finally {
-      setTiktokLoading(false);
-    }
-  };
 
   return (
     <Layout>
@@ -146,7 +102,6 @@ export default function AdminTestPage() {
           <TabsList className="mb-4">
             <TabsTrigger value="service">Usando Servicio</TabsTrigger>
             <TabsTrigger value="direct">Llamada Directa RPC</TabsTrigger>
-            <TabsTrigger value="tiktok">Prueba TikTok Detail</TabsTrigger>
           </TabsList>
           
           <TabsContent value="service">
@@ -261,76 +216,6 @@ export default function AdminTestPage() {
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
                 Este panel permite probar directamente la función RPC find_invitation_by_code sin autenticación
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="tiktok">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Prueba Servicio TikTok
-                  <Badge variant="outline" className="ml-2">fetchAndUpdateTikTokDetails</Badge>
-                </CardTitle>
-                <CardDescription>
-                  Esta prueba utiliza el servicio para obtener detalles del usuario de TikTok
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="tiktokUsername" className="block text-sm font-medium mb-1">
-                      Usuario de TikTok
-                    </label>
-                    <Input
-                      id="tiktokUsername"
-                      placeholder="Ej: mrbeast"
-                      value={tiktokUsername}
-                      onChange={(e) => setTiktokUsername(e.target.value)}
-                      className="mb-3"
-                    />
-                    
-                    <label htmlFor="creatorId" className="block text-sm font-medium mb-1">
-                      ID del Creador
-                    </label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="creatorId"
-                        placeholder="UUID del creador en la base de datos"
-                        value={tiktokCreatorId}
-                        onChange={(e) => setTiktokCreatorId(e.target.value)}
-                      />
-                      <Button 
-                        onClick={handleTikTokTest} 
-                        disabled={tiktokLoading}
-                      >
-                        {tiktokLoading ? "Procesando..." : "Consultar TikTok"}
-                      </Button>
-                    </div>
-                    
-                    {tiktokError && (
-                      <Alert variant="destructive" className="mt-2">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{tiktokError}</AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-
-                  {tiktokResult && (
-                    <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado TikTok ({tiktokResult.timestamp}):</h3>
-                      <div className="bg-gray-50 p-4 rounded-md border">
-                        <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
-                          {JSON.stringify(tiktokResult, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="text-sm text-gray-500">
-                Este panel permite probar el servicio de consulta a la API de TikTok
               </CardFooter>
             </Card>
           </TabsContent>
