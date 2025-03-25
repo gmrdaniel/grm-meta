@@ -7,6 +7,7 @@ import { CreatorsList } from "@/components/admin/inventory/CreatorsList";
 import { CreatorForm } from "@/components/admin/inventory/CreatorForm";
 import { Creator } from "@/types/creator";
 import { CreatorDetail } from "@/components/admin/inventory/CreatorDetail";
+import { ImportCreators } from "@/components/admin/inventory/ImportCreators";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 
@@ -42,6 +43,7 @@ export default function AdminInventory() {
               <TabsList className="mb-6">
                 <TabsTrigger value="list">Lista de Creadores</TabsTrigger>
                 <TabsTrigger value="create">Crear Creador</TabsTrigger>
+                <TabsTrigger value="import">Importar Creadores</TabsTrigger>
                 {selectedCreator && (
                   <TabsTrigger value="detail">Detalle del Creador</TabsTrigger>
                 )}
@@ -60,6 +62,13 @@ export default function AdminInventory() {
                     }} 
                   />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="import" className="space-y-6">
+                <ImportCreators onSuccess={() => {
+                  refetch();
+                  toast.success("Creadores importados correctamente");
+                }} />
               </TabsContent>
 
               {selectedCreator && (
