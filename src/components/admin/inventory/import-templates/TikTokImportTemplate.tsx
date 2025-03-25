@@ -18,6 +18,7 @@ interface CreatorImportData {
   apellido: string;
   correo: string;
   usuario_tiktok: string;
+  estatus: 'activo' | 'inactivo' | 'pendiente'; // Add estatus to the interface
 }
 
 interface ImportError {
@@ -105,7 +106,7 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
           errors.push({
             row: i,
             error: rowErrors.join(", "),
-            data: rowData
+            data: {...rowData, estatus: 'activo'} // Ensure estatus is included
           });
           continue;
         }
@@ -117,14 +118,14 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
             apellido: rowData.apellido,
             correo: rowData.correo,
             usuario_tiktok: rowData.usuario_tiktok,
-            estatus: 'activo'
+            estatus: 'activo' // Set default status
           });
           successCount++;
         } catch (error: any) {
           errors.push({
             row: i,
             error: error.message || "Error al crear creador",
-            data: rowData
+            data: {...rowData, estatus: 'activo'} // Ensure estatus is included
           });
         }
       }

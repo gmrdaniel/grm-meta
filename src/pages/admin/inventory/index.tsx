@@ -10,6 +10,7 @@ import { CreatorDetail } from "@/components/admin/inventory/CreatorDetail";
 import { ImportCreators } from "@/components/admin/inventory/ImportCreators";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
+import { toast } from "sonner";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
