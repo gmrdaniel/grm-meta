@@ -1,67 +1,22 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 import { createCreator, updateCreator } from "@/services/creatorService";
 import { toast } from "sonner";
 import { Creator } from "@/types/creator";
 
-const creatorFormSchema = z.object({
-  nombre: z.string().min(2, "El nombre es requerido"),
-  apellido: z.string().min(2, "El apellido es requerido"),
-  correo: z.string().email("Ingrese un correo electrónico válido"),
-  usuario_tiktok: z.string().min(1, "El usuario de TikTok es requerido"),
-  secUid_tiktok: z.string().optional(),
-  seguidores_tiktok: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
-  elegible_tiktok: z.boolean().optional(),
-  engagement_tiktok: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().positive("Debe ser un número positivo").optional()
-  ),
-  usuario_pinterest: z.string().optional(),
-  seguidores_pinterest: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
-  usuario_youtube: z.string().optional(),
-  seguidores_youtube: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
-  elegible_youtube: z.boolean().optional(),
-  engagement_youtube: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().positive("Debe ser un número positivo").optional()
-  ),
-  page_facebook: z.string().optional(),
-  lada_telefono: z.string().optional(),
-  telefono: z.string().optional(),
-  estatus: z.enum(["activo", "inactivo", "pendiente"]),
-});
-
-type CreatorFormValues = z.infer<typeof creatorFormSchema>;
+import { creatorFormSchema, CreatorFormValues } from "./form-schemas/creatorFormSchema";
+import { FormHeader } from "./form/FormHeader";
+import { FormSection } from "./form/FormSection";
+import { PersonalInfoFields } from "./form/PersonalInfoFields";
+import { TikTokFields } from "./form/TikTokFields";
+import { YouTubeFields } from "./form/YouTubeFields";
+import { OtherSocialFields } from "./form/OtherSocialFields";
+import { StatusField } from "./form/StatusField";
+import { FormActions } from "./form/FormActions";
 
 interface CreatorFormProps {
   initialData?: Creator;
@@ -145,372 +100,29 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nombre" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="apellido"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Apellido *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Apellido" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="correo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Correo Electrónico *</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="correo@ejemplo.com"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="lada_telefono"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Lada Telefónica</FormLabel>
-                <FormControl>
-                  <Input placeholder="52" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="telefono"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <Input placeholder="1234567890" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <PersonalInfoFields form={form} />
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Redes Sociales</h3>
+          <FormHeader title="Redes Sociales" />
           
-          <div className="rounded-md border p-4 space-y-4">
-            <h4 className="font-medium">TikTok</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="usuario_tiktok"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usuario TikTok *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="@usuario" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="secUid_tiktok"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>TikTok Secure ID</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="MS4wLjABAAAAAxxxxx..." 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="seguidores_tiktok"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Seguidores TikTok</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="10000" 
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                          field.onChange(value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="elegible_tiktok"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Elegible TikTok</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="engagement_tiktok"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Engagement TikTok (%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="2.5" 
-                        step="0.01"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                          field.onChange(value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <FormSection title="TikTok">
+            <TikTokFields form={form} />
+          </FormSection>
 
-          <div className="rounded-md border p-4 space-y-4">
-            <h4 className="font-medium">YouTube</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="usuario_youtube"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usuario YouTube</FormLabel>
-                    <FormControl>
-                      <Input placeholder="@usuario" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="seguidores_youtube"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Seguidores YouTube</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="10000" 
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                          field.onChange(value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="elegible_youtube"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Elegible YouTube</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="engagement_youtube"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Engagement YouTube (%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="2.5" 
-                        step="0.01"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                          field.onChange(value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <FormSection title="YouTube">
+            <YouTubeFields form={form} />
+          </FormSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="usuario_pinterest"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Usuario Pinterest</FormLabel>
-                  <FormControl>
-                    <Input placeholder="@usuario" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="seguidores_pinterest"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Seguidores Pinterest</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="10000" 
-                      {...field}
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                        field.onChange(value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="page_facebook"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Página de Facebook</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://facebook.com/pagina"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <OtherSocialFields form={form} />
         </div>
 
-        <FormField
-          control={form.control}
-          name="estatus"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estatus</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estatus" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                  <SelectItem value="pendiente">Pendiente</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+        <StatusField form={form} />
+
+        <FormActions 
+          isSubmitting={isSubmitting} 
+          isEditing={isEditing} 
+          onCancel={onCancel} 
         />
-
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-            >
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-opacity-50 border-t-transparent rounded-full" />
-                {isEditing ? "Actualizando..." : "Guardando..."}
-              </>
-            ) : (
-              <>{isEditing ? "Actualizar Creador" : "Guardar Creador"}</>
-            )}
-          </Button>
-        </div>
       </form>
     </Form>
   );
