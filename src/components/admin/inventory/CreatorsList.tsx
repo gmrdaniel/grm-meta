@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check, TrendingUp
+  Users, Loader2, Filter, X, Check, Download
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -80,12 +79,11 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
-  // Apply filters when they change
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
     }
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [activeFilters, onFilterChange]);
 
   const creators = creatorsData?.data || [];
@@ -97,7 +95,6 @@ export function CreatorsList({
       
       console.log('Processing TikTok user info result:', userInfo);
       
-      // Extract follower count and secUid from the nested structure
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
@@ -105,10 +102,8 @@ export function CreatorsList({
       console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
-        // Now using the updated function that also sets eligibility status and secUid
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
         
-        // Return follower count and eligibility status for toast message
         const isEligible = followerCount >= 100000;
         return { followerCount, isEligible, secUid };
       }
@@ -187,7 +182,7 @@ export function CreatorsList({
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(parseInt(value));
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
@@ -215,7 +210,6 @@ export function CreatorsList({
       const newFilters = { ...prev };
       newFilters[filterName] = !prev[filterName];
       
-      // If filter is being disabled, remove it from the object
       if (!newFilters[filterName]) {
         delete newFilters[filterName];
       }
@@ -376,9 +370,9 @@ export function CreatorsList({
                                   {loadingTikTokVideos === creator.id ? (
                                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                   ) : (
-                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                    <Download className="h-3 w-3 mr-1" />
                                   )}
-                                  Engagement
+                                  Descarga videos
                                 </Button>
                               </div>
                             </div>
