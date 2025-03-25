@@ -1,16 +1,14 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { ExternalLink, Check, Clock, Eye, Mail } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { fetchInvitationByCode, updateFacebookPage, updateInvitationStatus } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
+import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
+import { validateFacebookPageUrl } from "@/utils/validationUtils";
 
 const FbCreationPage = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -30,7 +28,6 @@ const FbCreationPage = () => {
     password: "",
     confirmPassword: "",
   });
-  const [fbUrlError, setFbUrlError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -72,47 +69,9 @@ const FbCreationPage = () => {
     }
   }, [invitation_code, navigate]);
 
-  const validateFacebookPageUrl = (url: string): boolean => {
-    if (!url) return false;
-    
-    let pageName = url;
-    
-    try {
-      if (url.includes('facebook.com/')) {
-        const urlObj = new URL(url);
-        const pathParts = urlObj.pathname.split('/').filter(Boolean);
-        if (pathParts.length > 0) {
-          pageName = pathParts[0];
-        }
-      } else if (url.includes('/')) {
-        pageName = url.split('/').filter(Boolean)[0];
-      }
-    } catch (e) {
-      console.log("URL parsing failed, using original input for validation");
-    }
-    
-    if (pageName.length < 5 || pageName.length > 30) {
-      setFbUrlError("Page name must be between 5 and 30 characters long");
-      return false;
-    }
-    
-    const validRegex = /^[a-zA-Z0-9._]+$/;
-    if (!validRegex.test(pageName)) {
-      setFbUrlError("Page name can only contain letters, numbers, periods, and underscores");
-      return false;
-    }
-    
-    setFbUrlError(null);
-    return true;
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    if (name === "facebookPageUrl") {
-      validateFacebookPageUrl(value);
-    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,8 +89,9 @@ const FbCreationPage = () => {
       return;
     }
 
-    if (!validateFacebookPageUrl(formData.facebookPageUrl)) {
-      toast.error("Please enter a valid Facebook page URL");
+    const { isValid, errorMessage } = validateFacebookPageUrl(formData.facebookPageUrl);
+    if (!isValid) {
+      toast.error(errorMessage || "Please enter a valid Facebook page URL");
       return;
     }
 
@@ -254,212 +214,30 @@ const FbCreationPage = () => {
     );
   }
 
-  if (submissionComplete) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-        <Card className="w-full max-w-lg">
-          <CardContent className="pt-8 pb-8 flex flex-col items-center">
-            <div className="bg-blue-100 p-6 rounded-full mb-4">
-              {showPasswordForm ? (
-                <div className="text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </div>
-              ) : (
-                <Clock className="h-12 w-12 text-blue-600" />
-              )}
-            </div>
-            
-            {showPasswordForm ? (
-              <>
-                <CardTitle className="text-2xl font-bold text-center mb-2">
-                  Create Password
-                </CardTitle>
-                <p className="text-gray-600 text-center mb-6">
-                  Set a secure password for your creator account
-                </p>
-                
-                <div className="w-full space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input 
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={passwordData.password}
-                      onChange={handlePasswordChange}
-                    />
-                    <p className="text-sm text-gray-500">Must be at least 8 characters</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input 
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                    />
-                  </div>
-                  
-                  <Button
-                    onClick={handleSetPassword}
-                    disabled={submitting || passwordData.password.length < 8 || passwordData.password !== passwordData.confirmPassword}
-                    className="w-full"
-                  >
-                    {submitting ? "Creating Account..." : "Set Password & Continue"}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <CardTitle className="text-2xl font-bold text-center mb-2">
-                  <Eye className="inline mr-2" /> Your Submission is Under Review!
-                </CardTitle>
-                <p className="text-gray-600 text-center mb-4">
-                  We've received your details and are currently verifying your information (takes 1-3 business days).
-                </p>
-                <p className="text-gray-600 text-center mb-8">
-                  <Mail className="inline mr-2 text-blue-500" /> You'll be notified via email/SMS once approved.
-                </p>
-                
-                <Button onClick={() => setShowPasswordForm(true)}>
-                  Set a Password
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership || !!fbUrlError;
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <Card className="w-full max-w-xl">
         <CardContent className="pt-6">
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Facebook Page Creation & Instagram Linking</h1>
-              <div className="flex items-center text-red-500 mt-2">
-                <span className="mr-2">📌</span>
-                <p className="text-orange-500 font-medium">Important: Set Up Your Facebook Page!</p>
-              </div>
-            </div>
-            
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold">1. Create Your Facebook Page:</h2>
-                <a 
-                  href="https://www.facebook.com/business/help/104002523024878" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="flex items-center text-blue-500 hover:underline"
-                >
-                  <span className="mr-2 inline-flex items-center">
-                    <span className="mr-1">▶️</span>
-                    Watch How
-                  </span>
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="facebookPageUrl">Facebook Page URL</Label>
-                  <div className="flex items-center">
-                    <div className="bg-gray-100 p-2 rounded-l-md border-y border-l border-gray-300">
-                      <span className="text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                        </svg>
-                      </span>
-                    </div>
-                    <Input
-                      id="facebookPageUrl"
-                      name="facebookPageUrl"
-                      value={formData.facebookPageUrl}
-                      onChange={handleInputChange}
-                      className="rounded-l-none"
-                      placeholder="https://www.facebook.com/yourpage"
-                    />
-                  </div>
-                  {fbUrlError && (
-                    <p className="text-sm text-red-500 mt-1">{fbUrlError}</p>
-                  )}
-                  <p className="text-xs text-gray-500">
-                    Page name must be 5-30 characters long. Only letters, numbers, periods, and underscores are allowed.
-                  </p>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="verifyOwnership"
-                    checked={formData.verifyOwnership}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange("verifyOwnership", checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="verifyOwnership" className="text-sm">
-                    I verify that I own this Facebook page
-                  </Label>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <h2 className="text-lg font-semibold">2. Link Instagram to Facebook:</h2>
-                <a 
-                  href="https://www.facebook.com/help/1148909221857370" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center text-blue-500 hover:underline"
-                >
-                  <span>Instructions here</span>
-                  <ExternalLink className="h-4 w-4 ml-1" />
-                </a>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="linkInstagram"
-                    checked={formData.linkInstagram}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange("linkInstagram", checked as boolean)
-                    }
-                  />
-                  <Label htmlFor="linkInstagram" className="text-sm">
-                    I've linked my Instagram to Facebook
-                  </Label>
-                </div>
-              </div>
-              
-              <div className="bg-blue-50 p-4 rounded-md border border-blue-100 flex items-center">
-                <div className="rounded-full bg-green-100 p-1 mr-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span className="text-blue-700">Submit for validation (1-3 business days).</span>
-              </div>
-            </div>
-          </div>
+          {submissionComplete ? (
+            <SubmissionCompleteScreen 
+              showPasswordForm={showPasswordForm}
+              passwordData={passwordData}
+              submitting={submitting}
+              onPasswordChange={handlePasswordChange}
+              onSetPassword={handleSetPassword}
+              onShowPasswordForm={() => setShowPasswordForm(true)}
+            />
+          ) : (
+            <FacebookPageForm 
+              formData={formData}
+              submitting={submitting}
+              error={error}
+              onInputChange={handleInputChange}
+              onCheckboxChange={handleCheckboxChange}
+              onSubmit={handleSubmit}
+            />
+          )}
         </CardContent>
-        
-        <CardFooter className="flex justify-end pt-0">
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitDisabled}
-            className="min-w-[200px]"
-          >
-            {submitting ? "Submitting..." : "Submit for Validation"}
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );
