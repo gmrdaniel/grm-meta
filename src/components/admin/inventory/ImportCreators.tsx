@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TikTokImportTemplate } from "./import-templates/TikTokImportTemplate";
 import { BulkInvitationsHistory } from "./BulkInvitationsHistory";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ImportCreatorsProps {
   onSuccess?: () => void;
@@ -51,7 +49,6 @@ export function ImportCreators({ onSuccess }: ImportCreatorsProps) {
               </CardContent>
             </Card>
             
-            {/* Placeholder for future templates */}
             <Card className="bg-gray-50 border-dashed">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-400">Próximamente</CardTitle>
