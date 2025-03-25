@@ -174,6 +174,7 @@ export type Database = {
           lada_telefono: string | null
           nombre: string
           page_facebook: string | null
+          secuid_tiktok: string | null
           seguidores_pinterest: number | null
           seguidores_tiktok: number | null
           seguidores_youtube: number | null
@@ -195,6 +196,7 @@ export type Database = {
           lada_telefono?: string | null
           nombre: string
           page_facebook?: string | null
+          secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
@@ -216,6 +218,7 @@ export type Database = {
           lada_telefono?: string | null
           nombre?: string
           page_facebook?: string | null
+          secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null

@@ -4,6 +4,7 @@ export interface CreatorImportData {
   apellido: string;
   correo: string;
   usuario_tiktok: string;
+  secUid_tiktok?: string;
   estatus: 'activo' | 'inactivo' | 'pendiente';
 }
 

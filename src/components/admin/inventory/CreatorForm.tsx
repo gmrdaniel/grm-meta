@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,12 +24,12 @@ import { createCreator, updateCreator } from "@/services/creatorService";
 import { toast } from "sonner";
 import { Creator } from "@/types/creator";
 
-// Schema validation
 const creatorFormSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
   apellido: z.string().min(2, "El apellido es requerido"),
   correo: z.string().email("Ingrese un correo electrónico válido"),
   usuario_tiktok: z.string().optional(),
+  secUid_tiktok: z.string().optional(),
   seguidores_tiktok: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
     z.number().int().positive("Debe ser un número positivo").optional()
@@ -80,6 +79,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       apellido: initialData?.apellido || "",
       correo: initialData?.correo || "",
       usuario_tiktok: initialData?.usuario_tiktok || "",
+      secUid_tiktok: initialData?.secUid_tiktok || "",
       seguidores_tiktok: initialData?.seguidores_tiktok || undefined,
       elegible_tiktok: initialData?.elegible_tiktok || false,
       engagement_tiktok: initialData?.engagement_tiktok || undefined,
@@ -99,7 +99,6 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
   const onSubmit = async (data: CreatorFormValues) => {
     setIsSubmitting(true);
     try {
-      // Clean empty strings and convert them to null/undefined
       const formData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [
           key,
@@ -118,6 +117,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           apellido: "",
           correo: "",
           usuario_tiktok: "",
+          secUid_tiktok: "",
           seguidores_tiktok: undefined,
           elegible_tiktok: false,
           engagement_tiktok: undefined,
@@ -239,6 +239,24 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="secUid_tiktok"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>TikTok Secure ID</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="MS4wLjABAAAAAxxxxx..." 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="seguidores_tiktok"

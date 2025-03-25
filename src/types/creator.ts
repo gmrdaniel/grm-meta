@@ -5,6 +5,7 @@ export interface Creator {
   apellido: string;
   correo: string;
   usuario_tiktok?: string;
+  secUid_tiktok?: string;
   seguidores_tiktok?: number;
   elegible_tiktok?: boolean;
   engagement_tiktok?: number;
