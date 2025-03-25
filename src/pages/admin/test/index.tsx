@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -7,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { fetchInvitationByCode } from "@/services/invitationService";
 import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2, BrandTiktok } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { fetchAndUpdateTikTokDetails } from "@/services/creatorTikTokService";
+import { toast } from "sonner";
 
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
@@ -26,6 +26,9 @@ export default function AdminTestPage() {
   const [tiktokResult, setTiktokResult] = useState<any>(null);
   const [tiktokLoading, setTiktokLoading] = useState<boolean>(false);
   const [tiktokError, setTiktokError] = useState<string | null>(null);
+  const [tiktokDirectResult, setTiktokDirectResult] = useState<any>(null);
+  const [tiktokDirectLoading, setTiktokDirectLoading] = useState<boolean>(false);
+  const [tiktokDirectError, setTiktokDirectError] = useState<string | null>(null);
 
   // Test using the service function
   const handleTestService = async () => {
@@ -105,7 +108,6 @@ export default function AdminTestPage() {
     setTiktokLoading(true);
     setTiktokError(null);
     try {
-      // Call the TikTok service
       await fetchAndUpdateTikTokDetails(tiktokCreatorId, tiktokUsername);
       
       setTiktokResult({
@@ -128,6 +130,56 @@ export default function AdminTestPage() {
     }
   };
 
+  // Test direct TikTok API call
+  const handleDirectTikTokTest = async () => {
+    if (!tiktokUsername.trim()) {
+      setTiktokDirectError("Por favor ingrese un nombre de usuario de TikTok");
+      return;
+    }
+
+    setTiktokDirectLoading(true);
+    setTiktokDirectError(null);
+    try {
+      const response = await fetch('/api/tiktok-direct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: tiktokUsername
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error from TikTok API: ${errorText || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      setTiktokDirectResult({
+        data,
+        success: true,
+        timestamp: new Date().toLocaleString()
+      });
+      
+      toast.success("Consulta directa a la API de TikTok realizada con éxito");
+      
+    } catch (err) {
+      console.error("Error testing direct TikTok API:", err);
+      setTiktokDirectError("Error al consultar API de TikTok: " + (err instanceof Error ? err.message : String(err)));
+      setTiktokDirectResult({
+        success: false,
+        error: err,
+        timestamp: new Date().toLocaleString()
+      });
+      
+      toast.error(`Error en la consulta directa a TikTok: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+    } finally {
+      setTiktokDirectLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -147,6 +199,7 @@ export default function AdminTestPage() {
             <TabsTrigger value="service">Usando Servicio</TabsTrigger>
             <TabsTrigger value="direct">Llamada Directa RPC</TabsTrigger>
             <TabsTrigger value="tiktok">Prueba TikTok Detail</TabsTrigger>
+            <TabsTrigger value="tiktok-direct">Prueba TikTok Direct</TabsTrigger>
           </TabsList>
           
           <TabsContent value="service">
@@ -334,8 +387,68 @@ export default function AdminTestPage() {
               </CardFooter>
             </Card>
           </TabsContent>
+          
+          <TabsContent value="tiktok-direct">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Prueba Directa API TikTok
+                  <Badge variant="outline" className="ml-2">API TikTok</Badge>
+                </CardTitle>
+                <CardDescription>
+                  Esta prueba realiza una llamada directa a la API de TikTok
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="directTiktokUsername" className="block text-sm font-medium mb-1">
+                      Usuario de TikTok
+                    </label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="directTiktokUsername"
+                        placeholder="Ej: mrbeast"
+                        value={tiktokUsername}
+                        onChange={(e) => setTiktokUsername(e.target.value)}
+                      />
+                      <Button 
+                        onClick={handleDirectTikTokTest} 
+                        disabled={tiktokDirectLoading}
+                      >
+                        {tiktokDirectLoading ? "Procesando..." : "Consultar TikTok"}
+                      </Button>
+                    </div>
+                    
+                    {tiktokDirectError && (
+                      <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{tiktokDirectError}</AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+
+                  {tiktokDirectResult && (
+                    <div className="mt-4">
+                      <h3 className="font-medium mb-2">Resultado TikTok Directo ({tiktokDirectResult.timestamp}):</h3>
+                      <div className="bg-gray-50 p-4 rounded-md border">
+                        <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
+                          {JSON.stringify(tiktokDirectResult.data, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="text-sm text-gray-500">
+                Este panel permite probar directamente la consulta a la API de TikTok
+              </CardFooter>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
   );
 }
+
