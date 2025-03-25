@@ -101,6 +101,34 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 };
 
 /**
+ * Fetch TikTok videos for a user using the TikTok API
+ */
+export const fetchTikTokUserVideos = async (username: string): Promise<any> => {
+  try {
+    console.log('Fetching TikTok videos for:', username);
+    const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'X-RapidAPI-Host': 'tiktok-api6.p.rapidapi.com'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('TikTok Video API response:', responseData);
+    
+    return responseData;
+  } catch (error) {
+    console.error('Error fetching TikTok user videos:', error);
+    throw error;
+  }
+};
+
+/**
  * Update creator's TikTok follower count and eligibility status
  */
 export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: number, secUid?: string): Promise<void> => {
