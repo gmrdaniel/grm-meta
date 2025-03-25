@@ -1,3 +1,4 @@
+
 export interface CreatorInvitation {
   id: string;
   created_at: string;
@@ -11,6 +12,7 @@ export interface CreatorInvitation {
   project_id?: string;
   social_media_type?: string;
   social_media_handle?: string;
+  phone_number?: string;  // Add this field
   updated_at: string;
 }
 
