@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +30,7 @@ const FbCreationPage = () => {
     password: "",
     confirmPassword: "",
   });
+  const [fbUrlError, setFbUrlError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -72,9 +72,47 @@ const FbCreationPage = () => {
     }
   }, [invitation_code, navigate]);
 
+  const validateFacebookPageUrl = (url: string): boolean => {
+    if (!url) return false;
+    
+    let pageName = url;
+    
+    try {
+      if (url.includes('facebook.com/')) {
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/').filter(Boolean);
+        if (pathParts.length > 0) {
+          pageName = pathParts[0];
+        }
+      } else if (url.includes('/')) {
+        pageName = url.split('/').filter(Boolean)[0];
+      }
+    } catch (e) {
+      console.log("URL parsing failed, using original input for validation");
+    }
+    
+    if (pageName.length < 5 || pageName.length > 30) {
+      setFbUrlError("Page name must be between 5 and 30 characters long");
+      return false;
+    }
+    
+    const validRegex = /^[a-zA-Z0-9._]+$/;
+    if (!validRegex.test(pageName)) {
+      setFbUrlError("Page name can only contain letters, numbers, periods, and underscores");
+      return false;
+    }
+    
+    setFbUrlError(null);
+    return true;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (name === "facebookPageUrl") {
+      validateFacebookPageUrl(value);
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +127,11 @@ const FbCreationPage = () => {
   const handleSubmit = async () => {
     if (!formData.verifyOwnership) {
       toast.error("Please verify that you own this Facebook page");
+      return;
+    }
+
+    if (!validateFacebookPageUrl(formData.facebookPageUrl)) {
+      toast.error("Please enter a valid Facebook page URL");
       return;
     }
 
@@ -113,7 +156,6 @@ const FbCreationPage = () => {
 
       console.log(`Facebook page URL to save: ${facebookPageUrl}`);
 
-      // Update the Facebook page URL
       const result = await updateFacebookPage(invitation.id, facebookPageUrl);
       
       if (!result) {
@@ -129,14 +171,12 @@ const FbCreationPage = () => {
       if (result.facebook_page === facebookPageUrl) {
         console.log("Facebook page URL successfully updated!");
         
-        // Update invitation status to accepted
         console.log("Updating invitation status to accepted");
         const updatedInvitation = await updateInvitationStatus(invitation.id, 'accepted');
         console.log("Invitation status updated:", updatedInvitation);
         
         toast.success("Your submission has been received for validation");
         
-        // Show submission complete screen instead of redirecting
         setSubmissionComplete(true);
       } else {
         console.error("Data mismatch after save:", {
@@ -171,7 +211,6 @@ const FbCreationPage = () => {
     setSubmitting(true);
     
     try {
-      // Create a new user in Supabase with invitation data
       const { data: userData, error: userError } = await supabase.auth.signUp({
         email: invitation.email,
         password: passwordData.password,
@@ -194,7 +233,6 @@ const FbCreationPage = () => {
       console.log("User account created successfully:", userData);
       toast.success("Account created successfully! You can now log in");
       
-      // Redirect to login page after account creation
       setTimeout(() => {
         navigate("/auth");
       }, 2000);
@@ -299,7 +337,7 @@ const FbCreationPage = () => {
     );
   }
 
-  const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership;
+  const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership || !!fbUrlError;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -355,6 +393,12 @@ const FbCreationPage = () => {
                       placeholder="https://www.facebook.com/yourpage"
                     />
                   </div>
+                  {fbUrlError && (
+                    <p className="text-sm text-red-500 mt-1">{fbUrlError}</p>
+                  )}
+                  <p className="text-xs text-gray-500">
+                    Page name must be 5-30 characters long. Only letters, numbers, periods, and underscores are allowed.
+                  </p>
                 </div>
                 
                 <div className="flex items-center space-x-2">
