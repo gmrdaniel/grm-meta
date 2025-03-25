@@ -136,3 +136,101 @@ export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: 
 export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
   return updateCreatorTikTokInfo(creatorId, followerCount);
 };
+
+/**
+ * Fetch TikTok posts for a user by secUid and save them to the database
+ */
+export const fetchAndSaveTikTokPosts = async (creatorId: string, secUid: string): Promise<{
+  savedCount: number,
+  totalVideos: number
+}> => {
+  if (!secUid) {
+    throw new Error('SecUid is required to fetch TikTok posts');
+  }
+
+  try {
+    console.log(`Fetching TikTok posts for creator ${creatorId} with secUid: ${secUid}`);
+    
+    const url = `https://tiktok-api23.p.rapidapi.com/api/user/posts?secUid=${encodeURIComponent(secUid)}&count=35&cursor=0`;
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
+      }
+    };
+
+    const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('TikTok posts API response:', result);
+    
+    // Check if the API returned videos properly
+    if (!result.itemList || !Array.isArray(result.itemList)) {
+      throw new Error('Invalid API response: No videos found');
+    }
+    
+    // Process and save each video
+    let savedCount = 0;
+    const totalVideos = result.itemList.length;
+    
+    for (const item of result.itemList) {
+      try {
+        // Extract relevant video data
+        const videoData = {
+          creator_id: creatorId,
+          video_id: item.id,
+          description: item.desc,
+          create_time: item.createTime,
+          author: item.author?.uniqueId,
+          author_id: item.author?.id,
+          video_definition: item.video?.definition,
+          duration: item.video?.duration,
+          number_of_comments: item.stats?.commentCount,
+          number_of_hearts: item.stats?.diggCount,
+          number_of_plays: item.stats?.playCount,
+          number_of_reposts: item.stats?.shareCount
+        };
+        
+        console.log('Saving video data:', videoData);
+        
+        // Check if video already exists
+        const { data: existingVideo } = await supabase
+          .from('tiktok_video')
+          .select('id')
+          .eq('creator_id', creatorId)
+          .eq('video_id', item.id)
+          .maybeSingle();
+        
+        if (existingVideo) {
+          // Update existing video
+          await updateTikTokVideo(existingVideo.id, videoData);
+        } else {
+          // Add new video
+          await addTikTokVideo(videoData);
+        }
+        
+        savedCount++;
+      } catch (videoError) {
+        console.error('Error processing video:', videoError);
+        // Continue with the next video
+      }
+    }
+    
+    // Calculate engagement rate based on recent videos
+    // You can add this functionality if needed
+    
+    return {
+      savedCount,
+      totalVideos
+    };
+    
+  } catch (error) {
+    console.error('Error fetching and saving TikTok posts:', error);
+    throw error;
+  }
+};

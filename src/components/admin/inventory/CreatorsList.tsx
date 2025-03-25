@@ -1,13 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
+import { 
+  fetchTikTokUserInfo, 
+  updateCreatorTikTokInfo, 
+  fetchAndSaveTikTokPosts 
+} from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check 
+  Users, Loader2, Filter, X, Check, BarChart 
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -66,6 +69,7 @@ export function CreatorsList({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
+  const [loadingTikTokEngagement, setLoadingTikTokEngagement] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
@@ -79,12 +83,11 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
-  // Apply filters when they change
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
     }
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [activeFilters, onFilterChange]);
 
   const creators = creatorsData?.data || [];
@@ -96,7 +99,6 @@ export function CreatorsList({
       
       console.log('Processing TikTok user info result:', userInfo);
       
-      // Extract follower count and secUid from the nested structure
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
@@ -104,10 +106,8 @@ export function CreatorsList({
       console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
-        // Now using the updated function that also sets eligibility status and secUid
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
         
-        // Return follower count and eligibility status for toast message
         const isEligible = followerCount >= 100000;
         return { followerCount, isEligible, secUid };
       }
@@ -124,6 +124,27 @@ export function CreatorsList({
     },
     onSettled: () => {
       setLoadingTikTokInfo(null);
+    }
+  });
+
+  const updateTikTokEngagementMutation = useMutation({
+    mutationFn: async ({ creatorId, secUid }: { creatorId: string; secUid: string }) => {
+      if (!secUid) {
+        throw new Error('Este creador no tiene un secUid de TikTok. Por favor, actualiza primero la información de TikTok.');
+      }
+      
+      const result = await fetchAndSaveTikTokPosts(creatorId, secUid);
+      return result;
+    },
+    onSuccess: (data) => {
+      toast.success(`Videos procesados: ${data.savedCount}/${data.totalVideos}`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error al obtener videos de TikTok: ${(error as Error).message}`);
+    },
+    onSettled: () => {
+      setLoadingTikTokEngagement(null);
     }
   });
 
@@ -169,7 +190,7 @@ export function CreatorsList({
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(parseInt(value));
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
@@ -182,12 +203,21 @@ export function CreatorsList({
     updateTikTokInfoMutation.mutate({ creatorId, username });
   };
 
+  const handleFetchTikTokEngagement = (creatorId: string, secUid: string) => {
+    if (!secUid) {
+      toast.error("Este creador no tiene un secUid de TikTok. Por favor, actualiza primero la información de TikTok.");
+      return;
+    }
+    
+    setLoadingTikTokEngagement(creatorId);
+    updateTikTokEngagementMutation.mutate({ creatorId, secUid });
+  };
+
   const toggleFilter = (filterName: keyof CreatorFilter) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
       newFilters[filterName] = !prev[filterName];
       
-      // If filter is being disabled, remove it from the object
       if (!newFilters[filterName]) {
         delete newFilters[filterName];
       }
@@ -302,7 +332,9 @@ export function CreatorsList({
                               <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                className="flex items-center gap-1 text-blue-600 hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 @{creator.usuario_tiktok}
                                 <ExternalLink className="h-3 w-3" />
                               </a>
@@ -334,6 +366,26 @@ export function CreatorsList({
                                 )}
                                 TikTok info
                               </Button>
+                              
+                              {creator.secuid_tiktok && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="ml-1 h-6 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFetchTikTokEngagement(creator.id, creator.secuid_tiktok || '');
+                                  }}
+                                  disabled={loadingTikTokEngagement === creator.id}
+                                >
+                                  {loadingTikTokEngagement === creator.id ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <BarChart className="h-3 w-3 mr-1" />
+                                  )}
+                                  TikTok engagement
+                                </Button>
+                              )}
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
                               <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
