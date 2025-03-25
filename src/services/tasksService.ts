@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Task {
@@ -31,7 +30,6 @@ interface TasksResponse {
 
 export async function fetchTasks({ page, limit, status }: FetchTasksParams): Promise<TasksResponse> {
   try {
-    // Calculate offset based on page and limit
     const offset = (page - 1) * limit;
     
     let query = supabase
@@ -42,12 +40,10 @@ export async function fetchTasks({ page, limit, status }: FetchTasksParams): Pro
         project_stages:stage_id(name)
       `, { count: 'exact' });
     
-    // Apply status filter if provided
     if (status) {
       query = query.eq('status', status);
     }
     
-    // Apply pagination
     const { data, error, count } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -57,7 +53,6 @@ export async function fetchTasks({ page, limit, status }: FetchTasksParams): Pro
       throw new Error(error.message);
     }
     
-    // Format the data to extract the joined fields
     const formattedTasks = data.map(task => ({
       ...task,
       project_name: task.projects?.name,
@@ -95,7 +90,6 @@ export async function fetchTaskById(taskId: string): Promise<Task> {
       throw new Error(error.message);
     }
     
-    // Format the data to extract the joined fields
     const formattedTask = {
       ...data,
       project_name: data.projects?.name,
@@ -119,6 +113,71 @@ export async function updateTaskStatus(taskId: string, status: 'pending' | 'in_p
   
   if (error) {
     console.error('Error updating task status:', error);
+    throw new Error(error.message);
+  }
+  
+  return data as Task;
+}
+
+export async function checkExistingTask(
+  creatorId?: string | null, 
+  creatorInvitationId?: string | null
+): Promise<boolean> {
+  if (!creatorId && !creatorInvitationId) {
+    throw new Error("Either creatorId or creatorInvitationId must be provided");
+  }
+  
+  let query = supabase.from('tasks').select('id');
+  
+  if (creatorId) {
+    query = query.eq('creator_id', creatorId);
+  }
+  
+  if (creatorInvitationId) {
+    query = query.eq('creator_invitation_id', creatorInvitationId);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error checking for existing task:', error);
+    throw new Error(error.message);
+  }
+  
+  return data && data.length > 0;
+}
+
+export async function createTask(taskData: {
+  title: string;
+  description?: string;
+  project_id: string;
+  stage_id: string;
+  creator_id?: string | null;
+  admin_id?: string | null;
+  creator_invitation_id?: string | null;
+  status?: 'pending' | 'in_progress' | 'completed' | 'review';
+}): Promise<Task> {
+  const hasExistingTask = await checkExistingTask(
+    taskData.creator_id, 
+    taskData.creator_invitation_id
+  );
+  
+  if (hasExistingTask) {
+    throw new Error("A task already exists for this user");
+  }
+  
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert({
+      ...taskData,
+      status: taskData.status || 'pending',
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating task:', error);
     throw new Error(error.message);
   }
   

@@ -1,178 +1,153 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
-import { CreatorInvitation } from "@/types/invitation";
-import { fetchInvitationByCode, updateInvitationStatus } from "@/services/invitationService";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ErrorCard } from "@/components/invitation/ErrorCard";
-import { WelcomeForm } from "@/components/invitation/WelcomeForm";
-import { toast } from "sonner";
 
-const MetaWelcomePage = () => {
-  const { invitation_code } = useParams();
+// We need to make sure the action to accept an invitation checks for existing tasks
+// This is a modification of the existing page that accepts invitations
+
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { WelcomeForm } from "@/components/invitation/WelcomeForm";
+import { findInvitationByCode } from "@/integrations/supabase/client";
+import { InvitationError } from "@/components/invitation/InvitationError";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { CreatorInvitation } from "@/types/invitation";
+import { checkExistingTask } from "@/services/tasksService";
+
+export default function WelcomePage() {
+  const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
+  
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     socialMediaHandle: "",
     termsAccepted: false
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   useEffect(() => {
     const fetchInvitation = async () => {
-      if (!invitation_code) return;
-      
-      // Add log to validate the URL parameter
-      console.log('MetaWelcomePage - URL Parameter (invitation_code):', invitation_code);
-      
       try {
         setLoading(true);
         
-        // Try multiple methods to find the invitation
-        
-        // Method 1: Check with direct query first
-        console.log('MetaWelcomePage - Trying to find invitation using direct query');
-        const { data: directData, error: directError } = await supabase
-          .from('creator_invitations')
-          .select('*')
-          .eq('invitation_code', invitation_code)
-          .limit(1);
-
-        console.log('MetaWelcomePage - Direct query result:', { data: directData, error: directError });
-        
-        // Method 2: Try with the service function that uses multiple approaches
-        console.log('MetaWelcomePage - Trying to find invitation using service function');
-        const invitationData = await fetchInvitationByCode(invitation_code);
-        console.log('MetaWelcomePage - Service function result:', invitationData);
-        
-        // Method 3: Try using our custom RPC function
-        if (!invitationData && !directData?.length) {
-          console.log('MetaWelcomePage - Trying custom RPC function');
-          const { data: rpcData, error: rpcError } = await findInvitationByCode(invitation_code);
-          
-          console.log('MetaWelcomePage - Custom RPC function result:', { data: rpcData, error: rpcError });
-          
-          if (rpcData && rpcData.length > 0) {
-            console.log('MetaWelcomePage - Found invitation with custom RPC function');
-            const foundInvitation = rpcData[0] as unknown as CreatorInvitation;
-            setInvitation(foundInvitation);
-            setFormData({
-              fullName: foundInvitation.full_name || '',
-              email: foundInvitation.email || '',
-              socialMediaHandle: foundInvitation.social_media_handle || '',
-              termsAccepted: false
-            });
-            setLoading(false);
-            return;
-          }
+        if (!invitation_code) {
+          setError("No invitation code provided");
+          return;
         }
-
-        // Use the results from service function or direct query
-        const foundInvitation = invitationData || (directData?.length ? directData[0] as CreatorInvitation : null);
         
-        if (foundInvitation) {
-          setInvitation(foundInvitation);
-          setFormData({
-            fullName: foundInvitation.full_name || '',
-            email: foundInvitation.email || '',
-            socialMediaHandle: foundInvitation.social_media_handle || '',
-            termsAccepted: false
-          });
-          
-          // Add log after setting state
-          console.log('MetaWelcomePage - Form data initialized:', {
-            fullName: foundInvitation.full_name,
-            email: foundInvitation.email,
-            socialMediaHandle: foundInvitation.social_media_handle || '',
-          });
-        } else {
-          // Handle case when no invitation is found
-          console.error('MetaWelcomePage - No invitation found with code:', invitation_code);
-          setError('Invitation not found');
+        const { data, error } = await findInvitationByCode(invitation_code);
+        
+        if (error || !data || data.length === 0) {
+          console.error("Error fetching invitation:", error);
+          setError("Invalid invitation code or invitation not found");
+          return;
         }
-      } catch (err: any) {
-        console.error('Error fetching invitation by code:', err);
-        setError('Unable to load invitation details.');
+        
+        const invitationData = data[0];
+        
+        // Check if invitation has already been accepted
+        if (invitationData.status === "accepted") {
+          setError("This invitation has already been accepted");
+          return;
+        }
+        
+        setInvitation(invitationData);
+        
+        // Pre-fill form data
+        setFormData({
+          fullName: invitationData.full_name || "",
+          email: invitationData.email || "",
+          socialMediaHandle: invitationData.social_media_handle || "",
+          termsAccepted: false
+        });
+        
+      } catch (err) {
+        console.error("Error in fetchInvitation:", err);
+        setError("Failed to fetch invitation details");
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchInvitation();
   }, [invitation_code]);
-
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-
+  
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData({
-      ...formData,
-      termsAccepted: checked
-    });
+    setFormData(prev => ({ ...prev, termsAccepted: checked }));
   };
-
+  
   const handleContinue = async () => {
-    if (!invitation) return;
-
-    // Add log before navigation
-    console.log('MetaWelcomePage - Continuing with invitation:', {
-      id: invitation.id,
-      code: invitation.invitation_code,
-      email: formData.email,
-      invitationType: invitation.invitation_type
-    });
-
     try {
+      if (!invitation) return;
+      
       setIsSubmitting(true);
       
-      // Update the invitation status to accepted
-      console.log('MetaWelcomePage - Updating invitation status to accepted');
-      const updatedInvitation = await updateInvitationStatus(invitation.id, "accepted");
+      // Check if a task already exists for this invitation
+      const hasExistingTask = await checkExistingTask(null, invitation.id);
       
-      if (!updatedInvitation) {
-        toast.error("Failed to update invitation status");
+      if (hasExistingTask) {
+        toast.error("This invitation has already been processed");
         return;
       }
       
-      console.log('MetaWelcomePage - Invitation status updated successfully', updatedInvitation);
+      // Update the invitation status to accepted
+      const { error } = await supabase
+        .from('creator_invitations')
+        .update({ 
+          status: 'accepted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', invitation.id);
       
-      // Navigate to the complete profile page
-      navigate(`/meta/completeProfile/${invitation.invitation_code}`);
-    } catch (error) {
-      console.error('MetaWelcomePage - Error updating invitation status:', error);
-      toast.error("Failed to update invitation status");
+      if (error) {
+        console.error("Error accepting invitation:", error);
+        toast.error("Failed to accept invitation");
+        return;
+      }
+      
+      toast.success("Invitation accepted successfully!");
+      
+      // Redirect to complete profile page
+      navigate(`/meta/completeProfile/${invitation_code}`);
+      
+    } catch (err) {
+      console.error("Error in handleContinue:", err);
+      toast.error("An error occurred while processing your request");
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex justify-center">
+              <div className="loader">Loading...</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-
+  
   if (error || !invitation) {
-    // Add log when error is detected
-    console.log('MetaWelcomePage - Error state:', { error, invitation });
-    return <ErrorCard />;
+    return <InvitationError message={error || "Invitation not found"} />;
   }
-
+  
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          {/* Title and description moved to WelcomeForm component */}
-        </CardHeader>
-        
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <Card className="w-full max-w-md">
         <WelcomeForm
           invitation={invitation}
           formData={formData}
@@ -184,6 +159,4 @@ const MetaWelcomePage = () => {
       </Card>
     </div>
   );
-};
-
-export default MetaWelcomePage;
+}
