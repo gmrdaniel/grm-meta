@@ -30,7 +30,20 @@ const creatorFormSchema = z.object({
   apellido: z.string().min(2, "El apellido es requerido"),
   correo: z.string().email("Ingrese un correo electrónico válido"),
   usuario_tiktok: z.string().optional(),
+  seguidores_tiktok: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number().int().positive("Debe ser un número positivo").optional()
+  ),
   usuario_pinterest: z.string().optional(),
+  seguidores_pinterest: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number().int().positive("Debe ser un número positivo").optional()
+  ),
+  usuario_youtube: z.string().optional(),
+  seguidores_youtube: z.preprocess(
+    (val) => (val === "" ? undefined : Number(val)),
+    z.number().int().positive("Debe ser un número positivo").optional()
+  ),
   page_facebook: z.string().optional(),
   lada_telefono: z.string().optional(),
   telefono: z.string().optional(),
@@ -56,7 +69,11 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       apellido: initialData?.apellido || "",
       correo: initialData?.correo || "",
       usuario_tiktok: initialData?.usuario_tiktok || "",
+      seguidores_tiktok: initialData?.seguidores_tiktok || undefined,
       usuario_pinterest: initialData?.usuario_pinterest || "",
+      seguidores_pinterest: initialData?.seguidores_pinterest || undefined,
+      usuario_youtube: initialData?.usuario_youtube || "",
+      seguidores_youtube: initialData?.seguidores_youtube || undefined,
       page_facebook: initialData?.page_facebook || "",
       lada_telefono: initialData?.lada_telefono || "",
       telefono: initialData?.telefono || "",
@@ -86,7 +103,11 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           apellido: "",
           correo: "",
           usuario_tiktok: "",
+          seguidores_tiktok: undefined,
           usuario_pinterest: "",
+          seguidores_pinterest: undefined,
+          usuario_youtube: "",
+          seguidores_youtube: undefined,
           page_facebook: "",
           lada_telefono: "",
           telefono: "",
@@ -180,33 +201,123 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="usuario_tiktok"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Usuario TikTok</FormLabel>
-                <FormControl>
-                  <Input placeholder="@usuario" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="usuario_pinterest"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Usuario Pinterest</FormLabel>
-                <FormControl>
-                  <Input placeholder="@usuario" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Redes Sociales</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="usuario_tiktok"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Usuario TikTok</FormLabel>
+                  <FormControl>
+                    <Input placeholder="@usuario" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="seguidores_tiktok"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Seguidores TikTok</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="10000" 
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="usuario_pinterest"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Usuario Pinterest</FormLabel>
+                  <FormControl>
+                    <Input placeholder="@usuario" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="seguidores_pinterest"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Seguidores Pinterest</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="10000" 
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="usuario_youtube"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Usuario YouTube</FormLabel>
+                  <FormControl>
+                    <Input placeholder="@usuario" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="seguidores_youtube"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Seguidores YouTube</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="10000" 
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
             name="page_facebook"

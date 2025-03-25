@@ -90,9 +90,13 @@ export type Database = {
           lada_telefono: string | null
           nombre: string
           page_facebook: string | null
+          seguidores_pinterest: number | null
+          seguidores_tiktok: number | null
+          seguidores_youtube: number | null
           telefono: string | null
           usuario_pinterest: string | null
           usuario_tiktok: string | null
+          usuario_youtube: string | null
         }
         Insert: {
           apellido: string
@@ -103,9 +107,13 @@ export type Database = {
           lada_telefono?: string | null
           nombre: string
           page_facebook?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
           telefono?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
+          usuario_youtube?: string | null
         }
         Update: {
           apellido?: string
@@ -116,9 +124,13 @@ export type Database = {
           lada_telefono?: string | null
           nombre?: string
           page_facebook?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
           telefono?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
+          usuario_youtube?: string | null
         }
         Relationships: []
       }

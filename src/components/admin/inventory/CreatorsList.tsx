@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal } from "lucide-react";
+import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -67,6 +67,14 @@ export function CreatorsList() {
     } catch (e) {
       return "N/A";
     }
+  };
+
+  // Format followers count
+  const formatFollowers = (count?: number) => {
+    if (count === undefined || count === null) return "N/A";
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
   };
 
   const handleEdit = (creator: Creator) => {
@@ -148,6 +156,11 @@ export function CreatorsList() {
                               @{creator.usuario_tiktok}
                               <ExternalLink className="h-3 w-3" />
                             </a>
+                            {creator.seguidores_tiktok && (
+                              <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                              </span>
+                            )}
                           </div>
                         )}
                         {creator.usuario_pinterest && (
@@ -160,6 +173,28 @@ export function CreatorsList() {
                               @{creator.usuario_pinterest}
                               <ExternalLink className="h-3 w-3" />
                             </a>
+                            {creator.seguidores_pinterest && (
+                              <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {creator.usuario_youtube && (
+                          <div className="text-sm flex items-center gap-1">
+                            <span className="font-medium">YouTube:</span> 
+                            <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-blue-600 hover:underline">
+                              @{creator.usuario_youtube}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                            {creator.seguidores_youtube && (
+                              <span className="ml-2 flex items-center text-gray-500 text-xs">
+                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                              </span>
+                            )}
                           </div>
                         )}
                         {creator.page_facebook && (
@@ -174,7 +209,7 @@ export function CreatorsList() {
                             </a>
                           </div>
                         )}
-                        {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.page_facebook && (
+                        {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
                           <span className="text-sm text-gray-500">Sin redes sociales</span>
                         )}
                       </div>
