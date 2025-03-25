@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTikTokVideos, addTikTokVideo, deleteTikTokVideo } from "@/services/tiktokVideoService";
@@ -65,6 +64,23 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const prepareVideoData = (values: FormValues, creatorId: string): Omit<TikTokVideo, "id" | "created_at" | "updated_at"> => {
+  return {
+    video_id: values.video_id,
+    description: values.description || "",
+    create_time: values.create_time || Math.floor(Date.now() / 1000),
+    author: values.author || "",
+    author_id: values.author_id || "",
+    video_definition: values.video_definition || "",
+    duration: values.duration || 0,
+    number_of_comments: values.number_of_comments || 0,
+    number_of_hearts: values.number_of_hearts || 0,
+    number_of_plays: values.number_of_plays || 0,
+    number_of_reposts: values.number_of_reposts || 0,
+    creator_id: creatorId,
+  };
+};
+
 export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
   const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -116,10 +132,8 @@ export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
   });
 
   const onSubmit = (values: FormValues) => {
-    addVideoMutation.mutate({
-      creator_id: creatorId,
-      ...values,
-    });
+    const videoData = prepareVideoData(values, creatorId);
+    addVideoMutation.mutate(videoData);
   };
 
   const formatNumber = (num?: number): string => {

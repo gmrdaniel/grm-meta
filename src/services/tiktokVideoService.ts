@@ -24,6 +24,15 @@ export const fetchTikTokVideos = async (creatorId: string): Promise<TikTokVideo[
  * Add a TikTok video for a creator
  */
 export const addTikTokVideo = async (video: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'>): Promise<TikTokVideo> => {
+  // Validate required fields
+  if (!video.video_id) {
+    throw new Error("Missing video_id");
+  }
+  
+  if (!video.creator_id) {
+    throw new Error("Missing creator_id");
+  }
+  
   const { data, error } = await supabase
     .from('tiktok_video')
     .insert(video)
