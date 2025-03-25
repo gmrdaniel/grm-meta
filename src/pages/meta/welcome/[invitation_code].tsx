@@ -1,7 +1,3 @@
-
-// We need to make sure the action to accept an invitation checks for existing tasks
-// This is a modification of the existing page that accepts invitations
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -49,7 +45,6 @@ export default function WelcomePage() {
         
         const invitationData = data[0];
         
-        // Check if invitation has already been accepted
         if (invitationData.status === "accepted") {
           setError("This invitation has already been accepted");
           return;
@@ -57,7 +52,6 @@ export default function WelcomePage() {
         
         setInvitation(invitationData);
         
-        // Pre-fill form data
         setFormData({
           fullName: invitationData.full_name || "",
           email: invitationData.email || "",
@@ -91,7 +85,6 @@ export default function WelcomePage() {
       
       setIsSubmitting(true);
       
-      // Check if a task already exists for this invitation
       const hasExistingTask = await checkExistingTask(null, invitation.id);
       
       if (hasExistingTask) {
@@ -99,7 +92,6 @@ export default function WelcomePage() {
         return;
       }
       
-      // Update the invitation status to accepted
       const { error } = await supabase
         .from('creator_invitations')
         .update({ 
@@ -116,7 +108,6 @@ export default function WelcomePage() {
       
       toast.success("Invitation accepted successfully!");
       
-      // Redirect to complete profile page
       navigate(`/meta/completeProfile/${invitation_code}`);
       
     } catch (err) {

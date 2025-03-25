@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-interface InvitationErrorProps {
+export interface InvitationErrorProps {
   title?: string;
-  error?: string;
+  message?: string;
 }
 
 export const InvitationError: React.FC<InvitationErrorProps> = ({
   title = "Error",
-  error = "Unable to find your invitation. Please check the link and try again."
+  message = "Unable to find your invitation. Please check the link and try again."
 }) => {
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ export const InvitationError: React.FC<InvitationErrorProps> = ({
         <CardHeader>
           <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           <CardDescription>
-            {error}
+            {message}
           </CardDescription>
         </CardHeader>
         <CardFooter>
