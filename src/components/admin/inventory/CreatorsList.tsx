@@ -372,7 +372,7 @@ export function CreatorsList({
                                   ) : (
                                     <Download className="h-3 w-3 mr-1" />
                                   )}
-                                  Descarga videos
+                                  Videos
                                 </Button>
                               </div>
                             </div>
