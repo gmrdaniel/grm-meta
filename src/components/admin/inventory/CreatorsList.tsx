@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
-import { fetchAndUpdateTikTokDetails } from "@/services/creatorTikTokService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users, Video } from "lucide-react";
+import { Pencil, Phone, ExternalLink, Mail, MoreHorizontal, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -38,7 +37,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { format } from "date-fns";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface CreatorsListProps {
   onCreatorSelect?: (creator: Creator) => void;
@@ -48,8 +46,6 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
   const [editCreator, setEditCreator] = useState<Creator | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
-  const [processingTikTok, setProcessingTikTok] = useState<string[]>([]);
   const itemsPerPage = 10;
 
   const { data: allCreators = [], isLoading, error, refetch } = useQuery({
@@ -60,21 +56,6 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
   const totalPages = Math.ceil(allCreators.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCreators = allCreators.slice(startIndex, startIndex + itemsPerPage);
-
-  const tiktokDetailsMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      return fetchAndUpdateTikTokDetails(creatorId, username);
-    },
-    onSuccess: (_, variables) => {
-      toast.success(`TikTok details update requested for creator ID: ${variables.creatorId}`);
-      setProcessingTikTok((prev) => [...prev, variables.creatorId]);
-      
-      setTimeout(() => {
-        setProcessingTikTok((prev) => prev.filter(id => id !== variables.creatorId));
-        refetch();
-      }, 5000);
-    },
-  });
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -114,54 +95,6 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
     setCurrentPage(page);
   };
 
-  const handleSelectCreator = (creatorId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedCreators((prev) => [...prev, creatorId]);
-    } else {
-      setSelectedCreators((prev) => prev.filter(id => id !== creatorId));
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedCreators(paginatedCreators.map(creator => creator.id));
-    } else {
-      setSelectedCreators([]);
-    }
-  };
-
-  const handleFetchTikTokDetails = (creator: Creator) => {
-    if (!creator.usuario_tiktok) {
-      toast.error("This creator doesn't have a TikTok username");
-      return;
-    }
-
-    tiktokDetailsMutation.mutate({
-      creatorId: creator.id,
-      username: creator.usuario_tiktok
-    });
-  };
-
-  const handleFetchSelectedTikTokDetails = () => {
-    const selectedWithTikTok = allCreators.filter(
-      creator => selectedCreators.includes(creator.id) && creator.usuario_tiktok
-    );
-
-    if (selectedWithTikTok.length === 0) {
-      toast.error("None of the selected creators have a TikTok username");
-      return;
-    }
-
-    selectedWithTikTok.forEach(creator => {
-      tiktokDetailsMutation.mutate({
-        creatorId: creator.id,
-        username: creator.usuario_tiktok!
-      });
-    });
-
-    setSelectedCreators([]);
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -180,30 +113,9 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Lista de Creadores</h2>
-          <p className="text-gray-500">Todos los creadores registrados en el sistema</p>
-        </div>
-        
-        {selectedCreators.length > 0 && (
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedCreators([])}
-            >
-              Cancelar ({selectedCreators.length})
-            </Button>
-            <Button 
-              onClick={handleFetchSelectedTikTokDetails}
-              disabled={tiktokDetailsMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              <Video className="h-4 w-4" />
-              {tiktokDetailsMutation.isPending ? "Procesando..." : "TikTok Detail"}
-            </Button>
-          </div>
-        )}
+      <div>
+        <h2 className="text-2xl font-bold">Lista de Creadores</h2>
+        <p className="text-gray-500">Todos los creadores registrados en el sistema</p>
       </div>
       
       {allCreators.length === 0 ? (
@@ -216,18 +128,12 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">
-                    <Checkbox 
-                      checked={paginatedCreators.length > 0 && paginatedCreators.every(creator => selectedCreators.includes(creator.id))}
-                      onCheckedChange={handleSelectAll}
-                    />
-                  </TableHead>
                   <TableHead className="w-[250px]">Creador</TableHead>
                   <TableHead className="w-[300px]">Redes Sociales</TableHead>
                   <TableHead className="w-[180px]">Teléfono</TableHead>
                   <TableHead className="w-[150px]">Fecha</TableHead>
                   <TableHead className="w-[120px]">Estatus</TableHead>
-                  <TableHead className="w-[150px] text-right">Acciones</TableHead>
+                  <TableHead className="w-[100px] text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -235,20 +141,8 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                   <TableRow 
                     key={creator.id}
                     className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
-                    onClick={onCreatorSelect ? (e) => {
-                      if ((e.target as HTMLElement).closest('button, input[type="checkbox"]')) {
-                        return;
-                      }
-                      onCreatorSelect(creator);
-                    } : undefined}
+                    onClick={onCreatorSelect ? () => onCreatorSelect(creator) : undefined}
                   >
-                    <TableCell>
-                      <Checkbox 
-                        checked={selectedCreators.includes(creator.id)}
-                        onCheckedChange={(checked) => handleSelectCreator(creator.id, checked === true)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
@@ -383,52 +277,35 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {creator.usuario_tiktok && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
                             onClick={(e) => {
-                              e.stopPropagation();
-                              handleFetchTikTokDetails(creator);
+                              if (onCreatorSelect) {
+                                e.stopPropagation();
+                              }
                             }}
-                            disabled={tiktokDetailsMutation.isPending || processingTikTok.includes(creator.id)}
                           >
-                            <Video className="h-4 w-4" />
-                            {processingTikTok.includes(creator.id) ? "..." : "TikTok Detail"}
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menú</span>
                           </Button>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={(e) => {
-                                if (onCreatorSelect) {
-                                  e.stopPropagation();
-                                }
-                              }}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Abrir menú</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                if (onCreatorSelect) {
-                                  e.stopPropagation();
-                                }
-                                handleEdit(creator);
-                              }}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              if (onCreatorSelect) {
+                                e.stopPropagation();
+                              }
+                              handleEdit(creator);
+                            }}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
