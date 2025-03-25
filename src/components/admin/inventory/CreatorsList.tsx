@@ -1,17 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { 
-  fetchTikTokUserInfo, 
-  updateCreatorTikTokInfo, 
-  fetchTikTokUserVideos, 
-  addTikTokVideo 
-} from "@/services/tiktokVideoService";
+import { fetchTikTokUserInfo, updateCreatorTikTokInfo } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check, BarChart 
+  Users, Loader2, Filter, X, Check 
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -70,7 +66,6 @@ export function CreatorsList({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
-  const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
@@ -84,11 +79,12 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
+  // Apply filters when they change
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
     }
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [activeFilters, onFilterChange]);
 
   const creators = creatorsData?.data || [];
@@ -100,6 +96,7 @@ export function CreatorsList({
       
       console.log('Processing TikTok user info result:', userInfo);
       
+      // Extract follower count and secUid from the nested structure
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
@@ -107,8 +104,10 @@ export function CreatorsList({
       console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
+        // Now using the updated function that also sets eligibility status and secUid
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
         
+        // Return follower count and eligibility status for toast message
         const isEligible = followerCount >= 100000;
         return { followerCount, isEligible, secUid };
       }
@@ -125,31 +124,6 @@ export function CreatorsList({
     },
     onSettled: () => {
       setLoadingTikTokInfo(null);
-    }
-  });
-
-  const fetchAndSaveTikTokVideosMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      const result = await fetchTikTokUserVideos(creatorId, username);
-      
-      return {
-        videoCount: result.savedCount,
-        totalCount: result.totalCount,
-        engagement: result.engagement
-      };
-    },
-    onSuccess: (data, variables) => {
-      toast.success(`Se guardaron ${data.videoCount} videos de TikTok de @${variables.username} (${data.videoCount}/${data.totalCount})`);
-      if (data.engagement > 0) {
-        toast.success(`Engagement promedio: ${data.engagement.toFixed(2)}%`);
-      }
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(`Error al obtener videos de TikTok: ${(error as Error).message}`);
-    },
-    onSettled: () => {
-      setLoadingTikTokVideos(null);
     }
   });
 
@@ -195,7 +169,7 @@ export function CreatorsList({
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(parseInt(value));
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
@@ -208,21 +182,12 @@ export function CreatorsList({
     updateTikTokInfoMutation.mutate({ creatorId, username });
   };
 
-  const handleFetchTikTokVideos = (creatorId: string, username: string) => {
-    if (!username) {
-      toast.error("Este creador no tiene un nombre de usuario de TikTok");
-      return;
-    }
-    
-    setLoadingTikTokVideos(creatorId);
-    fetchAndSaveTikTokVideosMutation.mutate({ creatorId, username });
-  };
-
   const toggleFilter = (filterName: keyof CreatorFilter) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
       newFilters[filterName] = !prev[filterName];
       
+      // If filter is being disabled, remove it from the object
       if (!newFilters[filterName]) {
         delete newFilters[filterName];
       }
@@ -354,7 +319,7 @@ export function CreatorsList({
                                   e.stopPropagation();
                                   handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
                                 }}
-                                disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
+                                disabled={loadingTikTokInfo === creator.id}
                               >
                                 {loadingTikTokInfo === creator.id ? (
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -368,24 +333,6 @@ export function CreatorsList({
                                   </svg>
                                 )}
                                 TikTok info
-                              </Button>
-                              
-                              <Button 
-                                size="sm" 
-                                variant="secondary" 
-                                className="ml-1 h-6 rounded-md"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleFetchTikTokVideos(creator.id, creator.usuario_tiktok || '');
-                                }}
-                                disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
-                              >
-                                {loadingTikTokVideos === creator.id ? (
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                ) : (
-                                  <BarChart className="h-3 w-3 mr-1" />
-                                )}
-                                Engagement
                               </Button>
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
