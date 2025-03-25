@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -28,7 +29,7 @@ const creatorFormSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
   apellido: z.string().min(2, "El apellido es requerido"),
   correo: z.string().email("Ingrese un correo electrónico válido"),
-  usuario_tiktok: z.string().optional(),
+  usuario_tiktok: z.string().min(1, "El usuario de TikTok es requerido"),
   secUid_tiktok: z.string().optional(),
   seguidores_tiktok: z.preprocess(
     (val) => (val === "" ? undefined : Number(val)),
@@ -92,7 +93,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       page_facebook: initialData?.page_facebook || "",
       lada_telefono: initialData?.lada_telefono || "",
       telefono: initialData?.telefono || "",
-      estatus: initialData?.estatus || "activo",
+      estatus: initialData?.estatus || "pendiente",
     },
   });
 
@@ -130,7 +131,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           page_facebook: "",
           lada_telefono: "",
           telefono: "",
-          estatus: "activo",
+          estatus: "pendiente",
         });
       }
       onSuccess();
@@ -231,7 +232,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
                 name="usuario_tiktok"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Usuario TikTok</FormLabel>
+                    <FormLabel>Usuario TikTok *</FormLabel>
                     <FormControl>
                       <Input placeholder="@usuario" {...field} />
                     </FormControl>
