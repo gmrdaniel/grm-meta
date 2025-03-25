@@ -101,9 +101,9 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 };
 
 /**
- * Fetch TikTok videos for a user using the TikTok API
+ * Fetch TikTok videos for a user using the TikTok API and persist them in the database
  */
-export const fetchTikTokUserVideos = async (username: string): Promise<any> => {
+export const fetchTikTokUserVideos = async (creatorId: string, username: string): Promise<any> => {
   try {
     console.log('Fetching TikTok videos for:', username);
     const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
@@ -121,9 +121,83 @@ export const fetchTikTokUserVideos = async (username: string): Promise<any> => {
     const responseData = await response.json();
     console.log('TikTok Video API response:', responseData);
     
-    return responseData;
+    // Persist each video in the database
+    const savedVideos = [];
+    let totalEngagement = 0;
+    let totalVideos = 0;
+    
+    if (responseData?.videos && responseData.videos.length > 0) {
+      console.log(`Found ${responseData.videos.length} videos to persist`);
+      
+      for (const video of responseData.videos) {
+        try {
+          // Check if video already exists to avoid duplicates
+          const { data: existingVideo } = await supabase
+            .from('tiktok_video')
+            .select('id')
+            .eq('video_id', video.id)
+            .eq('creator_id', creatorId)
+            .single();
+          
+          if (existingVideo) {
+            console.log(`Video ${video.id} already exists, skipping`);
+            continue;
+          }
+          
+          const videoData = {
+            creator_id: creatorId,
+            video_id: video.id,
+            description: video.description || '',
+            create_time: video.createTime,
+            author: username,
+            author_id: video.authorId || '',
+            video_definition: video.definition || 'unknown',
+            duration: video.duration || 0,
+            number_of_comments: video.commentCount || 0,
+            number_of_hearts: video.diggCount || 0,
+            number_of_plays: video.playCount || 0,
+            number_of_reposts: video.shareCount || 0
+          };
+          
+          const savedVideo = await addTikTokVideo(videoData);
+          savedVideos.push(savedVideo);
+          
+          // Calculate engagement metrics
+          if (video.playCount > 0) {
+            const videoEngagement = ((video.diggCount + video.commentCount + video.shareCount) / video.playCount) * 100;
+            totalEngagement += videoEngagement;
+            totalVideos++;
+          }
+        } catch (error) {
+          console.error('Error saving video:', error);
+        }
+      }
+      
+      // Calculate average engagement and update creator profile
+      if (totalVideos > 0) {
+        const averageEngagement = totalEngagement / totalVideos;
+        console.log(`Average engagement rate: ${averageEngagement.toFixed(2)}%`);
+        
+        // Update the creator's engagement rate
+        const { error: updateError } = await supabase
+          .from('inventario_creadores')
+          .update({ engagement_tiktok: averageEngagement })
+          .eq('id', creatorId);
+        
+        if (updateError) {
+          console.error('Error updating creator engagement rate:', updateError);
+        }
+      }
+    }
+    
+    return {
+      videos: responseData.videos,
+      savedCount: savedVideos.length,
+      totalCount: responseData.videos ? responseData.videos.length : 0,
+      engagement: totalVideos > 0 ? (totalEngagement / totalVideos) : 0
+    };
   } catch (error) {
-    console.error('Error fetching TikTok user videos:', error);
+    console.error('Error fetching and persisting TikTok user videos:', error);
     throw error;
   }
 };

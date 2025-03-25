@@ -130,45 +130,19 @@ export function CreatorsList({
 
   const fetchAndSaveTikTokVideosMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      const videosData = await fetchTikTokUserVideos(username);
-      console.log('Videos data:', videosData);
-      
-      if (!videosData || !videosData.videos || videosData.videos.length === 0) {
-        throw new Error('No se pudieron obtener videos');
-      }
-      
-      const savedVideos = [];
-      for (const video of videosData.videos) {
-        try {
-          const videoData = {
-            creator_id: creatorId,
-            video_id: video.id,
-            description: video.description || '',
-            create_time: video.createTime,
-            author: username,
-            author_id: video.authorId || '',
-            video_definition: video.definition || 'unknown',
-            duration: video.duration || 0,
-            number_of_comments: video.commentCount || 0,
-            number_of_hearts: video.diggCount || 0,
-            number_of_plays: video.playCount || 0,
-            number_of_reposts: video.shareCount || 0
-          };
-          
-          const savedVideo = await addTikTokVideo(videoData);
-          savedVideos.push(savedVideo);
-        } catch (error) {
-          console.error('Error saving video:', error);
-        }
-      }
+      const result = await fetchTikTokUserVideos(creatorId, username);
       
       return {
-        videoCount: savedVideos.length,
-        totalCount: videosData.videos.length
+        videoCount: result.savedCount,
+        totalCount: result.totalCount,
+        engagement: result.engagement
       };
     },
     onSuccess: (data, variables) => {
-      toast.success(`Se guardaron ${data.videoCount} videos de TikTok de ${variables.username} (${data.videoCount}/${data.totalCount})`);
+      toast.success(`Se guardaron ${data.videoCount} videos de TikTok de @${variables.username} (${data.videoCount}/${data.totalCount})`);
+      if (data.engagement > 0) {
+        toast.success(`Engagement promedio: ${data.engagement.toFixed(2)}%`);
+      }
       refetch();
     },
     onError: (error) => {
