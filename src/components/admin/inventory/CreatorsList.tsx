@@ -148,6 +148,29 @@ export function CreatorsList({
     }
   });
 
+  const fetchAndSavePostsMutation = useMutation({
+    mutationFn: async (creator: Creator) => {
+      try {
+        if (!creator.usuario_tiktok) {
+          throw new Error("TikTok username is required to fetch videos");
+        }
+        
+        const result = await fetchAndSaveTikTokPosts(creator.id, creator.usuario_tiktok);
+        return result;
+      } catch (error) {
+        console.error("Error fetching and saving TikTok posts:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      toast.success(`Videos procesados: ${data.savedCount} de ${data.totalVideos}`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error procesando videos: ${error.message}`);
+    },
+  });
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -224,6 +247,32 @@ export function CreatorsList({
       
       return newFilters;
     });
+  };
+
+  const actionCell = (creator: Creator) => {
+    return (
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleViewDetails(creator)}
+        >
+          Ver Detalles
+        </Button>
+        
+        {creator.usuario_tiktok && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-pink-50 text-pink-700 hover:bg-pink-100 hover:text-pink-800"
+            onClick={() => fetchAndSavePostsMutation.mutate(creator)}
+            disabled={fetchAndSavePostsMutation.isPending}
+          >
+            {fetchAndSavePostsMutation.isPending ? "Procesando..." : "TikTok Engagement"}
+          </Button>
+        )}
+      </div>
+    );
   };
 
   if (isLoading) {
