@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
@@ -219,8 +218,8 @@ export function CreatorsList({ onCreatorSelect }: CreatorsListProps) {
                               )}
                               <Button 
                                 size="sm" 
-                                variant="ghost" 
-                                className="ml-1 h-6 px-2 text-xs"
+                                variant="secondary" 
+                                className="ml-1 h-6 rounded-md"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
