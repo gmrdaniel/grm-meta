@@ -24,6 +24,12 @@ export const fetchTikTokVideos = async (creatorId: string): Promise<TikTokVideo[
  * Add a TikTok video for a creator
  */
 export const addTikTokVideo = async (video: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'>): Promise<TikTokVideo> => {
+  // Validate that video_id is not null or undefined
+  if (!video.video_id) {
+    console.error('Cannot add TikTok video: video_id is required');
+    throw new Error('video_id is required');
+  }
+  
   const { data, error } = await supabase
     .from('tiktok_video')
     .insert(video)
@@ -131,6 +137,12 @@ export const fetchTikTokUserVideos = async (creatorId: string, username: string)
       
       for (const video of responseData.videos) {
         try {
+          // Ensure video has an id before trying to save it
+          if (!video.id) {
+            console.log('Skipping video without ID');
+            continue;
+          }
+          
           // Check if video already exists to avoid duplicates
           const { data: existingVideo } = await supabase
             .from('tiktok_video')
@@ -144,13 +156,13 @@ export const fetchTikTokUserVideos = async (creatorId: string, username: string)
             continue;
           }
           
-          // Updated mapping according to the specified format
+          // Create the video data object with proper null checks for each field
           const videoData = {
             creator_id: creatorId,
-            video_id: video.id,
+            video_id: video.id, // This should never be null at this point
             description: video.description || '',
-            create_time: video.createTime,
-            author: username,
+            create_time: video.createTime || Math.floor(Date.now() / 1000),
+            author: username || '',
             author_id: video.authorId || '',
             video_definition: video.definition || 'unknown',
             duration: video.duration || 0,
@@ -159,6 +171,8 @@ export const fetchTikTokUserVideos = async (creatorId: string, username: string)
             number_of_plays: video.playCount || 0,
             number_of_reposts: video.shareCount || 0
           };
+          
+          console.log('Saving video data:', videoData);
           
           const savedVideo = await addTikTokVideo(videoData);
           savedVideos.push(savedVideo);
@@ -192,7 +206,7 @@ export const fetchTikTokUserVideos = async (creatorId: string, username: string)
     }
     
     return {
-      videos: responseData.videos,
+      videos: responseData.videos || [],
       savedCount: savedVideos.length,
       totalCount: responseData.videos ? responseData.videos.length : 0,
       engagement: totalVideos > 0 ? (totalEngagement / totalVideos) : 0
