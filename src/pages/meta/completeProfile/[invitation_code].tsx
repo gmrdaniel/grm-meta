@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { CompleteProfileForm, ProfileFormData } from "@/components/invitation/CompleteProfileForm";
-import { fetchInvitationByCode } from "@/services/invitationService";
+import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 
 const CompleteProfilePage = () => {
   const { invitation_code } = useParams();
