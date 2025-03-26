@@ -1,6 +1,6 @@
 
 // This is a Supabase Edge Function that will be called by the trigger
-// It creates a validation task when an invitation is accepted but only if one doesn't already exist
+// It checks if a validation task exists for an invitation
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
@@ -42,54 +42,18 @@ serve(async (req) => {
       throw checkError;
     }
 
-    // If a task already exists, don't create a new one
+    // Return information about whether a task exists
     if (existingTasks && existingTasks.length > 0) {
       return new Response(
-        JSON.stringify({ message: "Task already exists for this invitation", task_id: existingTasks[0].id }),
+        JSON.stringify({ taskExists: true, task_id: existingTasks[0].id }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({ taskExists: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Get the appropriate stage for the validation task
-    const { data: stages, error: stageError } = await supabase
-      .from("project_stages")
-      .select("id")
-      .eq("project_id", invitation.project_id)
-      .eq("view", "meta/FbCreation")
-      .limit(1);
-
-    if (stageError) {
-      throw stageError;
-    }
-
-    if (!stages || stages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No appropriate stage found for validation task" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
-      );
-    }
-
-    // Create the validation task
-    const { data: task, error: taskError } = await supabase
-      .from("tasks")
-      .insert({
-        title: "Validar registro",
-        project_id: invitation.project_id,
-        stage_id: stages[0].id,
-        status: "pending",
-        creator_invitation_id: invitation.id
-      })
-      .select()
-      .single();
-
-    if (taskError) {
-      throw taskError;
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, task }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (error) {
     console.error("Error in create_validation_task function:", error);
     return new Response(
