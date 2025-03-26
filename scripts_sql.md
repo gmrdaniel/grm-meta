@@ -311,6 +311,33 @@ BEGIN
   END LOOP;
 END;
 $function$;
+
+-- Function: find_invitation_by_code
+CREATE OR REPLACE FUNCTION public.find_invitation_by_code(code_param TEXT)
+RETURNS SETOF creator_invitations AS $$
+BEGIN
+  -- Try exact match first
+  RETURN QUERY 
+  SELECT * FROM creator_invitations 
+  WHERE invitation_code = code_param;
+  
+  -- If no rows returned, try case-insensitive match
+  IF NOT FOUND THEN
+    RETURN QUERY 
+    SELECT * FROM creator_invitations 
+    WHERE LOWER(invitation_code) = LOWER(code_param);
+  END IF;
+  
+  -- If still no rows, try partial match
+  IF NOT FOUND THEN
+    RETURN QUERY 
+    SELECT * FROM creator_invitations 
+    WHERE invitation_code ILIKE '%' || code_param || '%';
+  END IF;
+  
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 ## Triggers

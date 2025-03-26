@@ -1,6 +1,4 @@
 
-import { LucideIcon } from "lucide-react";
-
 export interface NavigationItem {
   icon: React.ReactNode;
   label: string;

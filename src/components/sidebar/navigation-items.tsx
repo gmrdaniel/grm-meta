@@ -1,45 +1,56 @@
 
-import { LayoutDashboard, UserCircle, Wallet, Folder, FolderOpen, Users, Database } from "lucide-react";
-import { NavigationItem } from "./types";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare } from "lucide-react";
 
-export const creatorNavigationItems: NavigationItem[] = [
+export const adminNavigationItems = [
   {
-    icon: <UserCircle size={24} />,
-    label: "Perfil",
-    shortLabel: "Perfil",
-    to: "/creator/profile",
-  },
-  {
-    icon: <Wallet size={24} />,
-    label: "Datos Bancarios",
-    shortLabel: "Banco",
-    to: "/creator/bankDetail",
-  },
-];
-
-export const adminNavigationItems: NavigationItem[] = [
-  {
-    icon: <LayoutDashboard size={24} />,
     label: "Dashboard",
-    shortLabel: "Dashboard",
+    shortLabel: "Home",
+    icon: <Home size={24} />,
     to: "/admin/dashboard",
   },
   {
-    icon: <FolderOpen size={24} />,
-    label: "Proyectos",
-    shortLabel: "Proyectos",
+    label: "Projects",
+    shortLabel: "Projects",
+    icon: <PenSquare size={24} />,
     to: "/admin/projects",
   },
   {
-    icon: <Users size={24} />,
-    label: "Inventario",
-    shortLabel: "Inventario",
+    label: "Inventory",
+    shortLabel: "Inventory",
+    icon: <Package size={24} />,
     to: "/admin/inventory",
   },
   {
-    icon: <Database size={24} />,
-    label: "Migraciones",
-    shortLabel: "Migraciones",
-    to: "/admin/migrations",
+    label: "Invitations",
+    shortLabel: "Invite",
+    icon: <Mail size={24} />,
+    to: "/admin/invitations",
   },
+  {
+    label: "Tasks",
+    shortLabel: "Tasks",
+    icon: <CheckSquare size={24} />,
+    to: "/admin/tasks",
+  },
+  {
+    label: "Test Services",
+    shortLabel: "Test",
+    icon: <TestTube size={24} />,
+    to: "/admin/test",
+  }
+];
+
+export const creatorNavigationItems = [
+  {
+    label: "Dashboard",
+    shortLabel: "Home",
+    icon: <Home size={24} />,
+    to: "/creator/dashboard",
+  },
+  {
+    label: "Profile",
+    shortLabel: "Profile",
+    icon: <User size={24} />,
+    to: "/creator/profile",
+  }
 ];

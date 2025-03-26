@@ -5,9 +5,37 @@ import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreatorsList } from "@/components/admin/inventory/CreatorsList";
 import { CreatorForm } from "@/components/admin/inventory/CreatorForm";
+import { Creator } from "@/types/creator";
+import { CreatorDetail } from "@/components/admin/inventory/CreatorDetail";
+import { ImportCreators } from "@/components/admin/inventory/ImportCreators";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCreators } from "@/services/creatorService";
+import { toast } from "sonner";
+import { CreatorFilter } from "@/components/admin/inventory/import-templates/types";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [filters, setFilters] = useState<CreatorFilter>({});
+  
+  const { refetch } = useQuery({
+    queryKey: ["creators"],
+    queryFn: () => fetchCreators(1, 10, filters),
+  });
+
+  const handleCreatorSelect = (creator: Creator) => {
+    setSelectedCreator(creator);
+    setActiveTab("detail");
+  };
+
+  const handleBackToList = () => {
+    setSelectedCreator(null);
+    setActiveTab("list");
+  };
+
+  const handleFilterChange = (newFilters: CreatorFilter) => {
+    setFilters(newFilters);
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -22,10 +50,18 @@ export default function AdminInventory() {
               <TabsList className="mb-6">
                 <TabsTrigger value="list">Lista de Creadores</TabsTrigger>
                 <TabsTrigger value="create">Crear Creador</TabsTrigger>
+                <TabsTrigger value="import">Importar Creadores</TabsTrigger>
+                {selectedCreator && (
+                  <TabsTrigger value="detail">Detalle del Creador</TabsTrigger>
+                )}
               </TabsList>
               
               <TabsContent value="list" className="space-y-6">
-                <CreatorsList />
+                <CreatorsList 
+                  onCreatorSelect={handleCreatorSelect}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
               </TabsContent>
               
               <TabsContent value="create" className="space-y-6">
@@ -38,6 +74,25 @@ export default function AdminInventory() {
                   />
                 </div>
               </TabsContent>
+
+              <TabsContent value="import" className="space-y-6">
+                <ImportCreators onSuccess={() => {
+                  refetch();
+                  toast.success("Creadores importados correctamente");
+                }} />
+              </TabsContent>
+
+              {selectedCreator && (
+                <TabsContent value="detail" className="space-y-6">
+                  <CreatorDetail 
+                    creator={selectedCreator}
+                    onBack={handleBackToList}
+                    onUpdate={() => {
+                      refetch();
+                    }}
+                  />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </main>

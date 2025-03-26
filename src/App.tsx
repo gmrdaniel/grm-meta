@@ -12,8 +12,15 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/projects";
 import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
+import AdminInvitations from "./pages/admin/invitations";
+import AdminTasks from "./pages/admin/tasks";
+import AdminTest from "./pages/admin/test";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
+import InvitationPage from "./pages/invite/[url]/[id]";
+import MetaWelcomePage from "./pages/meta/welcome/[invitation_code]";
+import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
+import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +35,12 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Public routes */}
+              <Route path="/invite/:url/:id" element={<InvitationPage />} />
+              <Route path="/meta/welcome/:invitation_code?" element={<MetaWelcomePage />} />
+              <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
+              <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
               
               {/* Admin routes */}
               <Route
@@ -59,6 +72,30 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminInventory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/invitations"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminInvitations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/tasks"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminTasks />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/test"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminTest />
                   </ProtectedRoute>
                 }
               />

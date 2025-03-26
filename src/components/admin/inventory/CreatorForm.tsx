@@ -1,43 +1,22 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { createCreator, updateCreator } from "@/services/creatorService";
 import { toast } from "sonner";
 import { Creator } from "@/types/creator";
 
-// Schema validation
-const creatorFormSchema = z.object({
-  nombre: z.string().min(2, "El nombre es requerido"),
-  apellido: z.string().min(2, "El apellido es requerido"),
-  correo: z.string().email("Ingrese un correo electrónico válido"),
-  usuario_tiktok: z.string().optional(),
-  usuario_pinterest: z.string().optional(),
-  page_facebook: z.string().optional(),
-  lada_telefono: z.string().optional(),
-  telefono: z.string().optional(),
-  estatus: z.enum(["activo", "inactivo", "pendiente"]),
-});
-
-type CreatorFormValues = z.infer<typeof creatorFormSchema>;
+import { creatorFormSchema, CreatorFormValues } from "./form-schemas/creatorFormSchema";
+import { FormHeader } from "./form/FormHeader";
+import { FormSection } from "./form/FormSection";
+import { PersonalInfoFields } from "./form/PersonalInfoFields";
+import { TikTokFields } from "./form/TikTokFields";
+import { YouTubeFields } from "./form/YouTubeFields";
+import { OtherSocialFields } from "./form/OtherSocialFields";
+import { StatusField } from "./form/StatusField";
+import { FormActions } from "./form/FormActions";
 
 interface CreatorFormProps {
   initialData?: Creator;
@@ -56,18 +35,26 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       apellido: initialData?.apellido || "",
       correo: initialData?.correo || "",
       usuario_tiktok: initialData?.usuario_tiktok || "",
+      secUid_tiktok: initialData?.secUid_tiktok || "",
+      seguidores_tiktok: initialData?.seguidores_tiktok || undefined,
+      elegible_tiktok: initialData?.elegible_tiktok || false,
+      engagement_tiktok: initialData?.engagement_tiktok || undefined,
       usuario_pinterest: initialData?.usuario_pinterest || "",
+      seguidores_pinterest: initialData?.seguidores_pinterest || undefined,
+      usuario_youtube: initialData?.usuario_youtube || "",
+      seguidores_youtube: initialData?.seguidores_youtube || undefined,
+      elegible_youtube: initialData?.elegible_youtube || false,
+      engagement_youtube: initialData?.engagement_youtube || undefined,
       page_facebook: initialData?.page_facebook || "",
       lada_telefono: initialData?.lada_telefono || "",
       telefono: initialData?.telefono || "",
-      estatus: initialData?.estatus || "activo",
+      estatus: initialData?.estatus || "pendiente",
     },
   });
 
   const onSubmit = async (data: CreatorFormValues) => {
     setIsSubmitting(true);
     try {
-      // Clean empty strings and convert them to null/undefined
       const formData = Object.fromEntries(
         Object.entries(data).map(([key, value]) => [
           key,
@@ -86,11 +73,20 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
           apellido: "",
           correo: "",
           usuario_tiktok: "",
+          secUid_tiktok: "",
+          seguidores_tiktok: undefined,
+          elegible_tiktok: false,
+          engagement_tiktok: undefined,
           usuario_pinterest: "",
+          seguidores_pinterest: undefined,
+          usuario_youtube: "",
+          seguidores_youtube: undefined,
+          elegible_youtube: false,
+          engagement_youtube: undefined,
           page_facebook: "",
           lada_telefono: "",
           telefono: "",
-          estatus: "activo",
+          estatus: "pendiente",
         });
       }
       onSuccess();
@@ -104,174 +100,29 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nombre" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="apellido"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Apellido *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Apellido" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <PersonalInfoFields form={form} />
+
+        <div className="space-y-4">
+          <FormHeader title="Redes Sociales" />
+          
+          <FormSection title="TikTok">
+            <TikTokFields form={form} />
+          </FormSection>
+
+          <FormSection title="YouTube">
+            <YouTubeFields form={form} />
+          </FormSection>
+
+          <OtherSocialFields form={form} />
         </div>
 
-        <FormField
-          control={form.control}
-          name="correo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Correo Electrónico *</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="correo@ejemplo.com"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <StatusField form={form} />
+
+        <FormActions 
+          isSubmitting={isSubmitting} 
+          isEditing={isEditing} 
+          onCancel={onCancel} 
         />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="lada_telefono"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Lada Telefónica</FormLabel>
-                <FormControl>
-                  <Input placeholder="52" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="telefono"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <Input placeholder="1234567890" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="usuario_tiktok"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Usuario TikTok</FormLabel>
-                <FormControl>
-                  <Input placeholder="@usuario" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="usuario_pinterest"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Usuario Pinterest</FormLabel>
-                <FormControl>
-                  <Input placeholder="@usuario" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="page_facebook"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Página de Facebook</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://facebook.com/pagina"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="estatus"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estatus</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estatus" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                  <SelectItem value="pendiente">Pendiente</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-            >
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-opacity-50 border-t-transparent rounded-full" />
-                {isEditing ? "Actualizando..." : "Guardando..."}
-              </>
-            ) : (
-              <>{isEditing ? "Actualizar Creador" : "Guardar Creador"}</>
-            )}
-          </Button>
-        </div>
       </form>
     </Form>
   );
