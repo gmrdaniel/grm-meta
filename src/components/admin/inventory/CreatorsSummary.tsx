@@ -7,6 +7,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 import FechaDesdeTimestamp from "@/components/admin/test/FechaDesdeTimestamp";
+import { Badge } from "@/components/ui/badge";
 
 export function CreatorsSummary() {
   const [page, setPage] = useState(1);
@@ -27,6 +28,11 @@ export function CreatorsSummary() {
     if (data && page < Math.ceil(data.count / pageSize)) {
       setPage(page + 1);
     }
+  };
+
+  const isEligible = (followers: number | null, engagement: number | null) => {
+    if (!followers || !engagement) return false;
+    return followers > 100000 && engagement > 4;
   };
 
   if (isLoading) {
@@ -68,6 +74,7 @@ export function CreatorsSummary() {
               <TableHead className="text-right">Engagement</TableHead>
               <TableHead>Último Post</TableHead>
               <TableHead className="text-right">Duración Promedio</TableHead>
+              <TableHead>Elegible</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,11 +102,18 @@ export function CreatorsSummary() {
                   <TableCell className="text-right">
                     {creator.duration_average ? `${creator.duration_average.toFixed(1)}s` : "-"}
                   </TableCell>
+                  <TableCell>
+                    {isEligible(creator.seguidores_tiktok, creator.engagement) ? (
+                      <Badge variant="default" className="bg-green-500 hover:bg-green-600">Elegible</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-red-500 border-red-500">No Elegible</Badge>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">
+                <TableCell colSpan={8} className="text-center py-4">
                   No hay datos disponibles
                 </TableCell>
               </TableRow>
