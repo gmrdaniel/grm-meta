@@ -7,7 +7,7 @@ import { fetchInvitationByCode } from "@/services/invitationService";
 import { fetchTikTokUserInfo } from "@/services/tiktokVideoService";
 import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2, Facebook } from "lucide-react";
+import { AlertCircle, CheckCircle2, Facebook, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,9 @@ export default function AdminTestPage() {
   const [facebookPageResult, setFacebookPageResult] = useState<any>(null);
   const [facebookPageLoading, setFacebookPageLoading] = useState<boolean>(false);
   const [facebookPageError, setFacebookPageError] = useState<string | null>(null);
+  const [facebookPageReels, setFacebookPageReels] = useState<any[]>([]);
+  const [reelsLoading, setReelsLoading] = useState<boolean>(false);
+  const [reelsError, setReelsError] = useState<string | null>(null);
 
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
@@ -224,6 +227,74 @@ export default function AdminTestPage() {
       });
     } finally {
       setFacebookPageLoading(false);
+    }
+  };
+
+  const handleGetPageReels = async () => {
+    if (!facebookPageResult?.pageName) {
+      setReelsError("Por favor valide una página de Facebook primero");
+      return;
+    }
+
+    setReelsLoading(true);
+    setReelsError(null);
+    
+    try {
+      const mockReels = [
+        { 
+          id: 'r1', 
+          title: 'Reel #1: Producto destacado', 
+          description: 'Descubre nuestro nuevo producto increíble',
+          thumbnail: 'https://picsum.photos/200/300',
+          views: 2500, 
+          likes: 430, 
+          comments: 65,
+          created_at: '2023-06-15T10:30:00Z',
+          duration: '00:45'
+        },
+        { 
+          id: 'r2', 
+          title: 'Reel #2: Tutorial fácil', 
+          description: 'Aprende a usar nuestro producto en 3 pasos',
+          thumbnail: 'https://picsum.photos/201/300',
+          views: 5600, 
+          likes: 890, 
+          comments: 112,
+          created_at: '2023-06-17T15:45:00Z',
+          duration: '01:20'
+        },
+        { 
+          id: 'r3', 
+          title: 'Reel #3: Testimonial de cliente', 
+          description: 'Lo que nuestros clientes dicen sobre nosotros',
+          thumbnail: 'https://picsum.photos/202/300',
+          views: 1800, 
+          likes: 320, 
+          comments: 47,
+          created_at: '2023-06-19T09:15:00Z',
+          duration: '00:55'
+        },
+        { 
+          id: 'r4', 
+          title: 'Reel #4: Detrás de cámaras', 
+          description: 'Un vistazo a nuestro proceso creativo',
+          thumbnail: 'https://picsum.photos/203/300',
+          views: 3200, 
+          likes: 540, 
+          comments: 78,
+          created_at: '2023-06-21T14:20:00Z',
+          duration: '01:10'
+        },
+      ];
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setFacebookPageReels(mockReels);
+    } catch (err) {
+      console.error("Error fetching Facebook Reels:", err);
+      setReelsError("Error al obtener Reels de Facebook: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setReelsLoading(false);
     }
   };
 
@@ -528,7 +599,7 @@ export default function AdminTestPage() {
                     )}
                   </div>
 
-                  {facebookPageResult && (
+                  {facebookPageResult && facebookPageResult.success && (
                     <div className="mt-4 space-y-4">
                       <div>
                         <h3 className="font-medium mb-2">Resultado de Verificación ({facebookPageResult.timestamp}):</h3>
@@ -550,21 +621,74 @@ export default function AdminTestPage() {
                             </div>
                           </div>
                           
-                          {facebookPageResult.exists && facebookPageResult.reels && facebookPageResult.reels.length > 0 && (
-                            <div>
-                              <div className="font-semibold mb-2">Reels disponibles:</div>
-                              <div className="grid gap-2">
-                                {facebookPageResult.reels.map((reel: any) => (
-                                  <div key={reel.id} className="bg-white p-3 rounded border">
-                                    <div className="font-medium">{reel.title}</div>
-                                    <div className="text-sm text-gray-500 flex gap-4 mt-1">
-                                      <span>{reel.views} views</span>
-                                      <span>{reel.likes} likes</span>
-                                      <span>{reel.comments} comments</span>
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="font-semibold">Reels disponibles:</div>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={handleGetPageReels}
+                              disabled={reelsLoading || !facebookPageResult.exists}
+                              className="flex items-center gap-2"
+                            >
+                              <RefreshCw className={`h-4 w-4 ${reelsLoading ? 'animate-spin' : ''}`} />
+                              {reelsLoading ? "Cargando Reels..." : "Get Page Reels"}
+                            </Button>
+                          </div>
+                          
+                          {reelsError && (
+                            <Alert variant="destructive" className="mt-2 mb-4">
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertTitle>Error</AlertTitle>
+                              <AlertDescription>{reelsError}</AlertDescription>
+                            </Alert>
+                          )}
+                          
+                          {facebookPageReels.length > 0 ? (
+                            <div className="grid gap-3">
+                              {facebookPageReels.map((reel) => (
+                                <div key={reel.id} className="bg-white p-3 rounded border hover:shadow-md transition-shadow">
+                                  <div className="flex gap-3">
+                                    <div className="w-16 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                      <img 
+                                        src={reel.thumbnail} 
+                                        alt={reel.title} 
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="font-medium text-blue-600">{reel.title}</div>
+                                      <div className="text-sm text-gray-600 mt-1">{reel.description}</div>
+                                      <div className="text-xs text-gray-500 mt-2">
+                                        Duración: {reel.duration} • Creado: {new Date(reel.created_at).toLocaleDateString()}
+                                      </div>
+                                      <div className="text-sm text-gray-500 flex gap-4 mt-2">
+                                        <span>{reel.views.toLocaleString()} views</span>
+                                        <span>{reel.likes.toLocaleString()} likes</span>
+                                        <span>{reel.comments.toLocaleString()} comments</span>
+                                      </div>
                                     </div>
                                   </div>
-                                ))}
-                              </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : facebookPageResult.reels && facebookPageResult.reels.length > 0 ? (
+                            <div className="grid gap-2">
+                              {facebookPageResult.reels.map((reel: any) => (
+                                <div key={reel.id} className="bg-white p-3 rounded border">
+                                  <div className="font-medium">{reel.title}</div>
+                                  <div className="text-sm text-gray-500 flex gap-4 mt-1">
+                                    <span>{reel.views} views</span>
+                                    <span>{reel.likes} likes</span>
+                                    <span>{reel.comments} comments</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-gray-500">
+                              {facebookPageResult.exists ? 
+                                "Haga clic en 'Get Page Reels' para obtener los reels disponibles" : 
+                                "No hay reels disponibles para mostrar"}
                             </div>
                           )}
                           
