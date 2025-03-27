@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -183,7 +182,6 @@ export default function AdminTestPage() {
       return;
     }
 
-    // Validate the Facebook page URL
     const validation = validateFacebookPageUrl(facebookPageUrl);
     if (!validation.isValid) {
       setFacebookPageError(validation.errorMessage);
@@ -194,13 +192,11 @@ export default function AdminTestPage() {
     setFacebookPageError(null);
     
     try {
-      // Process the Facebook page URL to get the correct format for the API
       let processedUrl = facebookPageUrl;
       if (!processedUrl.startsWith('https://')) {
         processedUrl = `https://www.facebook.com/${processedUrl}`;
       }
       
-      // Encode the URL for the API request
       const encodedUrl = encodeURIComponent(processedUrl);
       const apiUrl = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedUrl}`;
       
@@ -222,14 +218,14 @@ export default function AdminTestPage() {
       const data = await response.json();
       console.log("Facebook API response:", data);
       
-      // Extract the required data or use fallbacks
       const pageData = {
-        name: data.name || "No name available",
-        page_id: data.page_id || "No ID available",
-        followers: data.followers || "No followers data",
-        email: data.email || "No email available",
+        name: data.results?.name || "No name available",
+        page_id: data.results?.page_id || "No ID available",
+        followers: data.results?.followers || "No followers data",
+        email: data.results?.email || "No email available",
         success: true,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
+        originalResponse: data
       };
       
       toast({
@@ -240,14 +236,12 @@ export default function AdminTestPage() {
       
       setFacebookPageResult({
         ...pageData,
-        originalResponse: data,
         exists: true,
         reels: [] // Placeholder for reels that can be fetched separately
       });
     } catch (err) {
       console.error("Error fetching Facebook page:", err);
       
-      // Fallback to mock data for demonstration
       const mockData = {
         name: "La Neta",
         page_id: "123456789012345",
