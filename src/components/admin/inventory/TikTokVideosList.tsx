@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTikTokVideos, addTikTokVideo, deleteTikTokVideo } from "@/services/tiktokVideoService";
@@ -89,11 +90,14 @@ export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
   const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: videos = [], isLoading, error } = useQuery({
+  const { data: videosData, isLoading, error } = useQuery({
     queryKey: ["tiktokVideos", creatorId],
     queryFn: () => fetchTikTokVideos(creatorId),
     enabled: !!creatorId,
   });
+
+  // Extract videos array from the response
+  const videos = videosData?.data || [];
 
   const addVideoMutation = useMutation({
     mutationFn: addTikTokVideo,
