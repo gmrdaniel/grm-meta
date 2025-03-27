@@ -89,6 +89,75 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_inventory: {
+        Row: {
+          apellido: string
+          correo: string
+          elegible_tiktok: boolean | null
+          elegible_youtube: boolean | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
+          estatus: string | null
+          fecha_creacion: string | null
+          id: string
+          lada_telefono: string | null
+          nombre: string
+          page_facebook: string | null
+          secuid_tiktok: string | null
+          seguidores_pinterest: number | null
+          seguidores_tiktok: number | null
+          seguidores_youtube: number | null
+          telefono: string | null
+          usuario_pinterest: string | null
+          usuario_tiktok: string | null
+          usuario_youtube: string | null
+        }
+        Insert: {
+          apellido: string
+          correo: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre: string
+          page_facebook?: string | null
+          secuid_tiktok?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+          usuario_youtube?: string | null
+        }
+        Update: {
+          apellido?: string
+          correo?: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre?: string
+          page_facebook?: string | null
+          secuid_tiktok?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+          usuario_youtube?: string | null
+        }
+        Relationships: []
+      }
       creator_invitations: {
         Row: {
           created_at: string
@@ -159,75 +228,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      inventario_creadores: {
-        Row: {
-          apellido: string
-          correo: string
-          elegible_tiktok: boolean | null
-          elegible_youtube: boolean | null
-          engagement_tiktok: number | null
-          engagement_youtube: number | null
-          estatus: string | null
-          fecha_creacion: string | null
-          id: string
-          lada_telefono: string | null
-          nombre: string
-          page_facebook: string | null
-          secuid_tiktok: string | null
-          seguidores_pinterest: number | null
-          seguidores_tiktok: number | null
-          seguidores_youtube: number | null
-          telefono: string | null
-          usuario_pinterest: string | null
-          usuario_tiktok: string | null
-          usuario_youtube: string | null
-        }
-        Insert: {
-          apellido: string
-          correo: string
-          elegible_tiktok?: boolean | null
-          elegible_youtube?: boolean | null
-          engagement_tiktok?: number | null
-          engagement_youtube?: number | null
-          estatus?: string | null
-          fecha_creacion?: string | null
-          id?: string
-          lada_telefono?: string | null
-          nombre: string
-          page_facebook?: string | null
-          secuid_tiktok?: string | null
-          seguidores_pinterest?: number | null
-          seguidores_tiktok?: number | null
-          seguidores_youtube?: number | null
-          telefono?: string | null
-          usuario_pinterest?: string | null
-          usuario_tiktok?: string | null
-          usuario_youtube?: string | null
-        }
-        Update: {
-          apellido?: string
-          correo?: string
-          elegible_tiktok?: boolean | null
-          elegible_youtube?: boolean | null
-          engagement_tiktok?: number | null
-          engagement_youtube?: number | null
-          estatus?: string | null
-          fecha_creacion?: string | null
-          id?: string
-          lada_telefono?: string | null
-          nombre?: string
-          page_facebook?: string | null
-          secuid_tiktok?: string | null
-          seguidores_pinterest?: number | null
-          seguidores_tiktok?: number | null
-          seguidores_youtube?: number | null
-          telefono?: string | null
-          usuario_pinterest?: string | null
-          usuario_tiktok?: string | null
-          usuario_youtube?: string | null
-        }
-        Relationships: []
       }
       notifications: {
         Row: {
@@ -515,14 +515,26 @@ export type Database = {
             foreignKeyName: "tiktok_video_creator_id_fkey"
             columns: ["creator_id"]
             isOneToOne: false
-            referencedRelation: "inventario_creadores"
+            referencedRelation: "creator_inventory"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      summary_creator: {
+        Row: {
+          apellido: string | null
+          correo: string | null
+          date_last_post: number | null
+          duration_average: number | null
+          engagement: number | null
+          nombre: string | null
+          seguidores_tiktok: number | null
+          usuario_tiktok: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       find_invitation_by_code: {
