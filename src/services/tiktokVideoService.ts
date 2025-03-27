@@ -133,12 +133,12 @@ export const fetchTikTokVideosWithCreator = async (
  */
 export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
   try {
-    const url = `https://tiktok-api6.p.rapidapi.com/user/info?username=${encodeURIComponent(username)}`;
+    const url = `https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`;
     const options = {
       method: 'GET',
       headers: {
         'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-        'x-rapidapi-host': 'tiktok-api6.p.rapidapi.com'
+        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com'
       }
     };
 
@@ -226,24 +226,24 @@ export const fetchTikTokUserVideos = async (
     for (const video of videos) {
       try {
         // Verificar que video.id no sea nulo
-        if (!video.id) {
+        if (!video.video_id) {
           console.error('Video sin ID encontrado, saltando:', video);
           continue;
         }
         
         const videoData = {
           creator_id: creatorId,
-          video_id: video.id,
+          video_id: video.video_id,
           description: video.description || '',
-          create_time: video.createTime || Math.floor(Date.now() / 1000),
-          author: username || '',
+          create_time: video.create_time || Math.floor(Date.now() / 1000),
+          author: video.author_name || '',
           author_id: video.authorId || '',
-          video_definition: video.definition || 'unknown',
+          video_definition: video.video_definition || 'unknown',
           duration: video.duration || 0,
-          number_of_comments: video.commentCount || 0,
-          number_of_hearts: video.likesCount || 0,
-          number_of_plays: video.playCount || 0,
-          number_of_reposts: video.shareCount || 0
+          number_of_comments: video.statistics.number_of_comments || 0,
+          number_of_hearts: video.statistics.number_of_hearts || 0,
+          number_of_plays: video.statistics.number_of_plays || 0,
+          number_of_reposts: video.statistics.number_of_reposts || 0
         };
         
         // Verificar todos los campos antes de intentar insertar
