@@ -4,6 +4,7 @@ import {
   fetchInvitations,
   updateInvitationStatus,
   deleteInvitation,
+  sendCreatorInvitationEmail,
 } from "@/services/invitationService";
 import {
   Check,
@@ -88,6 +89,24 @@ const InvitationsList = () => {
     },
   });
 
+  const sendEmailMutation = useMutation({
+    mutationFn: ({
+      email,
+      name,
+      invitationUrl,
+    }: {
+      email: string;
+      name?: string;
+      invitationUrl: string;
+    }) => sendCreatorInvitationEmail({ email, name, invitationUrl }),
+    onSuccess: () => {
+      toast.success("Invitation email sent successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error sending email: ${error.message}`);
+    },
+  });
+
   const handleStatusChange = (
     id: string,
     newStatus: "pending" | "accepted" | "rejected"
@@ -106,12 +125,17 @@ const InvitationsList = () => {
     }
   };
 
-  const copyInvitationLink = (invitation: CreatorInvitation) => {
+  const createInvitationLink = (invitation: CreatorInvitation) => { 
     const baseUrl = window.location.origin;
     const fullUrl = `${baseUrl}${invitation.invitation_url}`;
 
+    return fullUrl
+  }
+  const copyInvitationLink = (invitation: CreatorInvitation) => {
+    
+
     navigator.clipboard
-      .writeText(fullUrl)
+      .writeText(createInvitationLink(invitation))
       .then(() => toast.success("Invitation link copied to clipboard"))
       .catch(() => toast.error("Failed to copy invitation link"));
   };
@@ -235,6 +259,20 @@ const InvitationsList = () => {
                     >
                       <Copy className="mr-2 h-4 w-4" />
                       Copy invitation link
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        sendEmailMutation.mutate({
+                          email: invitation.email,
+                          name: invitation.full_name,
+                          invitationUrl: createInvitationLink(invitation),
+                        })
+                      }
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-indigo-600"
+                    >
+                      <MailCheck className="mr-2 h-4 w-4" />
+                      Send invitation email
                     </DropdownMenuItem>
 
                     {invitation.status === "pending" && (
