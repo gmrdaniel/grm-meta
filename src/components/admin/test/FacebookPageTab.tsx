@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 type FacebookReel = {
   id: string;
@@ -19,6 +20,13 @@ type FacebookReel = {
   duration: string;
 };
 
+type FacebookPageData = {
+  page_id?: string;
+  name?: string;
+  followers?: number;
+  rating?: number;
+};
+
 export function FacebookPageTab() {
   const [facebookPageUrl, setFacebookPageUrl] = useState<string>("");
   const [facebookPageResult, setFacebookPageResult] = useState<any>(null);
@@ -27,6 +35,7 @@ export function FacebookPageTab() {
   const [facebookPageReels, setFacebookPageReels] = useState<FacebookReel[]>([]);
   const [reelsLoading, setReelsLoading] = useState<boolean>(false);
   const [reelsError, setReelsError] = useState<string | null>(null);
+  const [pageData, setPageData] = useState<FacebookPageData | null>(null);
 
   const handleFacebookPageTest = async () => {
     if (!facebookPageUrl.trim()) {
@@ -36,40 +45,117 @@ export function FacebookPageTab() {
 
     setFacebookPageLoading(true);
     setFacebookPageError(null);
+    setPageData(null);
     
     try {
-      let pageName = facebookPageUrl;
+      // Prepare the URL for API call
+      let pageUrlForApi = facebookPageUrl;
       
-      try {
-        if (facebookPageUrl.includes('facebook.com/')) {
-          const urlObj = new URL(facebookPageUrl);
-          const pathParts = urlObj.pathname.split('/').filter(Boolean);
-          if (pathParts.length > 0) {
-            pageName = pathParts[0];
-          }
-        } else if (facebookPageUrl.includes('/')) {
-          pageName = facebookPageUrl.split('/').filter(Boolean)[0];
-        }
-      } catch (e) {
-        console.log("URL parsing failed, using original input");
+      // If it doesn't start with http/https, add it
+      if (!pageUrlForApi.startsWith('http')) {
+        pageUrlForApi = `https://www.facebook.com/${pageUrlForApi}`;
       }
       
-      const pageExists = pageName.length >= 2;
+      // Encode the URL for the API
+      const encodedUrl = encodeURIComponent(pageUrlForApi);
+      const apiUrl = `https://facebook-pages-scraper2.p.rapidapi.com/get_facebook_pages_details?link=${encodedUrl}`;
       
-      const mockReels = pageExists ? [
-        { id: '1', title: 'Reel #1', views: 1200, likes: 230, comments: 45 },
-        { id: '2', title: 'Reel #2', views: 3400, likes: 560, comments: 78 },
-        { id: '3', title: 'Reel #3', views: 890, likes: 120, comments: 23 }
-      ] : [];
+      // API call options
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'facebook-pages-scraper2.p.rapidapi.com'
+        }
+      };
       
-      setFacebookPageResult({
-        pageUrl: facebookPageUrl,
-        pageName,
-        exists: pageExists,
-        reels: mockReels,
-        success: true,
-        timestamp: new Date().toLocaleString()
-      });
+      console.log("Fetching Facebook page details for:", pageUrlForApi);
+      
+      try {
+        // Make the API call
+        const response = await fetch(apiUrl, options);
+        
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log("API result:", result);
+        
+        // Extract required data
+        const fetchedPageData: FacebookPageData = {
+          page_id: result.page_id,
+          name: result.name,
+          followers: result.followers,
+          rating: result.rating
+        };
+        
+        setPageData(fetchedPageData);
+        
+        // Set the result for display
+        setFacebookPageResult({
+          pageUrl: facebookPageUrl,
+          pageName: fetchedPageData.name || "",
+          exists: true,
+          pageId: fetchedPageData.page_id,
+          followers: fetchedPageData.followers,
+          rating: fetchedPageData.rating,
+          success: true,
+          timestamp: new Date().toLocaleString()
+        });
+        
+        toast.success("Información de página obtenida con éxito");
+      } catch (apiError) {
+        console.error("API Error:", apiError);
+        
+        // Fallback to mock data if API fails
+        let pageName = facebookPageUrl;
+        
+        try {
+          if (facebookPageUrl.includes('facebook.com/')) {
+            const urlObj = new URL(facebookPageUrl);
+            const pathParts = urlObj.pathname.split('/').filter(Boolean);
+            if (pathParts.length > 0) {
+              pageName = pathParts[0];
+            }
+          } else if (facebookPageUrl.includes('/')) {
+            pageName = facebookPageUrl.split('/').filter(Boolean)[0];
+          }
+        } catch (e) {
+          console.log("URL parsing failed, using original input");
+        }
+        
+        const pageExists = pageName.length >= 2;
+        
+        const mockReels = pageExists ? [
+          { id: '1', title: 'Reel #1', views: 1200, likes: 230, comments: 45 },
+          { id: '2', title: 'Reel #2', views: 3400, likes: 560, comments: 78 },
+          { id: '3', title: 'Reel #3', views: 890, likes: 120, comments: 23 }
+        ] : [];
+        
+        const mockPageData: FacebookPageData = {
+          page_id: "123456789",
+          name: pageName,
+          followers: 12500,
+          rating: 4.7
+        };
+        
+        setPageData(mockPageData);
+        
+        setFacebookPageResult({
+          pageUrl: facebookPageUrl,
+          pageName,
+          exists: pageExists,
+          pageId: mockPageData.page_id,
+          followers: mockPageData.followers,
+          rating: mockPageData.rating,
+          reels: mockReels,
+          success: true,
+          timestamp: new Date().toLocaleString()
+        });
+        
+        toast.warning("Usando datos de ejemplo - API no disponible");
+      }
       
       // Reset reels when testing a new page
       setFacebookPageReels([]);
@@ -221,6 +307,26 @@ export function FacebookPageTab() {
                       )}
                     </div>
                   </div>
+                  
+                  {pageData && (
+                    <div className="mb-4 bg-white p-3 rounded border">
+                      <h4 className="font-semibold mb-2">Detalles de la Página:</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="font-medium">Page ID:</span> {pageData.page_id}
+                        </div>
+                        <div>
+                          <span className="font-medium">Nombre:</span> {pageData.name}
+                        </div>
+                        <div>
+                          <span className="font-medium">Seguidores:</span> {pageData.followers?.toLocaleString() || 'N/A'}
+                        </div>
+                        <div>
+                          <span className="font-medium">Rating:</span> {pageData.rating || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="flex justify-between items-center mb-4">
                     <div className="font-semibold">Reels disponibles:</div>
