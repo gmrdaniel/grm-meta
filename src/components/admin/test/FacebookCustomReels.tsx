@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Facebook, ExternalLink, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import FechaDesdeTimestamp from "./FechaDesdeTimestamp";
 
 export function FacebookCustomReels() {
   const [customPageId, setCustomPageId] = useState<string>("");
@@ -182,7 +183,7 @@ export function FacebookCustomReels() {
                           Video ID: {reel.video_id}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Fecha: {new Date(reel.timestamp).toLocaleDateString()}
+                          Fecha: <FechaDesdeTimestamp timestamp={reel.timestamp} />
                         </div>
                       </div>
                     </div>
