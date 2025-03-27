@@ -35,6 +35,11 @@ export const fetchTikTokVideos = async (
  * Add new TikTok video data
  */
 export const addTikTokVideo = async (video: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'>): Promise<TikTokVideo> => {
+  // Verificar que video_id no sea nulo
+  if (!video.video_id) {
+    throw new Error('El campo video_id es obligatorio');
+  }
+  
   const { data, error } = await supabase
     .from('tiktok_video')
     .insert(video)
@@ -71,6 +76,11 @@ export const linkCreatorToVideos = async (
   creatorId: string, 
   videoIds: string[]
 ): Promise<void> => {
+  // Verificar que ningún videoId sea nulo
+  if (videoIds.some(id => !id)) {
+    throw new Error('Todos los IDs de video deben ser válidos');
+  }
+  
   const updates = videoIds.map(videoId => ({
     creator_id: creatorId,
     video_id: videoId,
@@ -215,20 +225,29 @@ export const fetchTikTokUserVideos = async (
     
     for (const video of videos) {
       try {
+        // Verificar que video.id no sea nulo
+        if (!video.id) {
+          console.error('Video sin ID encontrado, saltando:', video);
+          continue;
+        }
+        
         const videoData = {
           creator_id: creatorId,
           video_id: video.id,
           description: video.description || '',
-          create_time: video.createTime,
-          author: username,
+          create_time: video.createTime || Math.floor(Date.now() / 1000),
+          author: username || '',
           author_id: video.authorId || '',
           video_definition: video.definition || 'unknown',
-          duration: video.duration,
-          number_of_comments: video.commentCount,
-          number_of_hearts: video.likesCount,
-          number_of_plays: video.playCount,
-          number_of_reposts: video.shareCount
+          duration: video.duration || 0,
+          number_of_comments: video.commentCount || 0,
+          number_of_hearts: video.likesCount || 0,
+          number_of_plays: video.playCount || 0,
+          number_of_reposts: video.shareCount || 0
         };
+        
+        // Verificar todos los campos antes de intentar insertar
+        console.log('Intentando guardar video con datos:', videoData);
         
         const { error } = await supabase
           .from('tiktok_video')
@@ -236,11 +255,13 @@ export const fetchTikTokUserVideos = async (
             onConflict: 'video_id'
           });
           
-        if (!error) {
+        if (error) {
+          console.error('Error guardando video en la base de datos:', error);
+        } else {
           savedCount++;
         }
       } catch (err) {
-        console.error('Error saving video:', err);
+        console.error('Error guardando video individual:', err);
       }
     }
     
