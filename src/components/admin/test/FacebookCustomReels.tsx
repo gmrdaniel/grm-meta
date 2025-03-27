@@ -51,7 +51,7 @@ export function FacebookCustomReels() {
           video_id: reel.video_id || "No ID",
           url: reel.url || "#",
           timestamp: reel.timestamp || "No date",
-          title: reel.title || "Reel sin título",
+          title: `Video ID: ${reel.video_id || "No ID"}`,
           description: reel.description || "Sin descripción",
           thumbnail: reel.thumbnail || "https://picsum.photos/200/300",
           views: reel.views || Math.floor(Math.random() * 10000),
@@ -78,9 +78,8 @@ export function FacebookCustomReels() {
           video_id: 'cv123456789',
           url: 'https://www.facebook.com/watch/?v=123456789',
           timestamp: '2023-07-15T10:30:00Z',
-          title: 'Custom Reel #1', 
+          title: 'Video ID: cv123456789', 
           description: 'Descripción del reel personalizado',
-          thumbnail: 'https://picsum.photos/203/300',
           views: 3500, 
           likes: 530, 
           comments: 85,
@@ -90,9 +89,8 @@ export function FacebookCustomReels() {
           video_id: 'cv987654321',
           url: 'https://www.facebook.com/watch/?v=987654321',
           timestamp: '2023-07-17T15:45:00Z',
-          title: 'Custom Reel #2', 
+          title: 'Video ID: cv987654321', 
           description: 'Otro reel personalizado de prueba',
-          thumbnail: 'https://picsum.photos/204/300',
           views: 6200, 
           likes: 790, 
           comments: 132,
@@ -171,13 +169,6 @@ export function FacebookCustomReels() {
               {customReels.map((reel) => (
                 <div key={reel.id} className="bg-white p-3 rounded border hover:shadow-md transition-shadow">
                   <div className="flex gap-3">
-                    <div className="w-16 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                      <img 
-                        src={reel.thumbnail} 
-                        alt={reel.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
                     <div className="flex-1">
                       <div className="font-medium text-blue-600 flex items-center">
                         {reel.title}
