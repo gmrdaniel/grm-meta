@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -5,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchInvitationByCode } from "@/services/invitationService";
 import { fetchTikTokUserInfo } from "@/services/tiktokVideoService";
-import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, CheckCircle2, Facebook, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { validateFacebookPageUrl } from "@/utils/validationUtils";
+import { toast } from "@/hooks/use-toast";
 
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
@@ -181,50 +183,91 @@ export default function AdminTestPage() {
       return;
     }
 
+    // Validate the Facebook page URL
+    const validation = validateFacebookPageUrl(facebookPageUrl);
+    if (!validation.isValid) {
+      setFacebookPageError(validation.errorMessage);
+      return;
+    }
+
     setFacebookPageLoading(true);
     setFacebookPageError(null);
     
     try {
-      let pageName = facebookPageUrl;
-      
-      try {
-        if (facebookPageUrl.includes('facebook.com/')) {
-          const urlObj = new URL(facebookPageUrl);
-          const pathParts = urlObj.pathname.split('/').filter(Boolean);
-          if (pathParts.length > 0) {
-            pageName = pathParts[0];
-          }
-        } else if (facebookPageUrl.includes('/')) {
-          pageName = facebookPageUrl.split('/').filter(Boolean)[0];
-        }
-      } catch (e) {
-        console.log("URL parsing failed, using original input");
+      // Process the Facebook page URL to get the correct format for the API
+      let processedUrl = facebookPageUrl;
+      if (!processedUrl.startsWith('https://')) {
+        processedUrl = `https://www.facebook.com/${processedUrl}`;
       }
       
-      const pageExists = pageName.length >= 2;
+      // Encode the URL for the API request
+      const encodedUrl = encodeURIComponent(processedUrl);
+      const apiUrl = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedUrl}`;
       
-      const mockReels = pageExists ? [
-        { id: '1', title: 'Reel #1', views: 1200, likes: 230, comments: 45 },
-        { id: '2', title: 'Reel #2', views: 3400, likes: 560, comments: 78 },
-        { id: '3', title: 'Reel #3', views: 890, likes: 120, comments: 23 }
-      ] : [];
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'facebook-scraper3.p.rapidapi.com'
+        }
+      };
+
+      console.log("Fetching Facebook page details from:", apiUrl);
+      const response = await fetch(apiUrl, options);
       
-      setFacebookPageResult({
-        pageUrl: facebookPageUrl,
-        pageName,
-        exists: pageExists,
-        reels: mockReels,
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Facebook API response:", data);
+      
+      // Extract the required data or use fallbacks
+      const pageData = {
+        name: data.name || "No name available",
+        page_id: data.page_id || "No ID available",
+        followers: data.followers || "No followers data",
+        email: data.email || "No email available",
         success: true,
         timestamp: new Date().toLocaleString()
+      };
+      
+      toast({
+        title: "Página verificada",
+        description: `Se encontró la página: ${pageData.name}`,
+        variant: "default",
+      });
+      
+      setFacebookPageResult({
+        ...pageData,
+        originalResponse: data,
+        exists: true,
+        reels: [] // Placeholder for reels that can be fetched separately
       });
     } catch (err) {
-      console.error("Error testing Facebook Page:", err);
-      setFacebookPageError("Error al consultar la página de Facebook: " + (err instanceof Error ? err.message : String(err)));
-      setFacebookPageResult({
-        success: false,
-        error: err,
-        timestamp: new Date().toLocaleString()
+      console.error("Error fetching Facebook page:", err);
+      
+      // Fallback to mock data for demonstration
+      const mockData = {
+        name: "La Neta",
+        page_id: "123456789012345",
+        followers: "304,889",
+        email: "empresa@laneta.com",
+        exists: true,
+        timestamp: new Date().toLocaleString(),
+        success: true,
+        error: err instanceof Error ? err.message : String(err),
+        reels: []
+      };
+      
+      toast({
+        title: "Error al verificar la página",
+        description: "Usando datos de demostración",
+        variant: "destructive",
       });
+      
+      setFacebookPageResult(mockData);
+      setFacebookPageError("Error al consultar la API de Facebook: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setFacebookPageLoading(false);
     }
@@ -610,7 +653,7 @@ export default function AdminTestPage() {
                               {facebookPageResult.exists ? (
                                 <>
                                   <CheckCircle2 className="mr-1 h-4 w-4" />
-                                  <span>Página encontrada: {facebookPageResult.pageName}</span>
+                                  <span>Página encontrada: {facebookPageResult.name}</span>
                                 </>
                               ) : (
                                 <>
@@ -620,6 +663,27 @@ export default function AdminTestPage() {
                               )}
                             </div>
                           </div>
+                          
+                          {facebookPageResult.exists && (
+                            <div className="grid grid-cols-2 gap-3 mb-4 border-t pt-3">
+                              <div>
+                                <div className="text-sm font-medium text-gray-500">Nombre</div>
+                                <div className="font-medium">{facebookPageResult.name}</div>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-500">Page ID</div>
+                                <div className="font-medium">{facebookPageResult.page_id}</div>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-500">Seguidores</div>
+                                <div className="font-medium">{facebookPageResult.followers}</div>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-500">Correo</div>
+                                <div className="font-medium">{facebookPageResult.email || "No disponible"}</div>
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="flex justify-between items-center mb-4">
                             <div className="font-semibold">Reels disponibles:</div>
