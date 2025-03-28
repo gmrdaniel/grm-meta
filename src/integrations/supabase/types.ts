@@ -160,7 +160,7 @@ export type Database = {
           },
         ]
       }
-      inventario_creadores: {
+      creator_inventory: {
         Row: {
           apellido: string
           correo: string
@@ -515,7 +515,7 @@ export type Database = {
             foreignKeyName: "tiktok_video_creator_id_fkey"
             columns: ["creator_id"]
             isOneToOne: false
-            referencedRelation: "inventario_creadores"
+            referencedRelation: "creator_inventory"
             referencedColumns: ["id"]
           },
         ]
@@ -611,7 +611,7 @@ export type Database = {
       }
     }
     Enums: {
-      invitation_status: "pending" | "accepted" | "rejected"
+      invitation_status: "pending" | "accepted" | "rejected" | 'completed'
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
