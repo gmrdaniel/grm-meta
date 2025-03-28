@@ -67,7 +67,7 @@ const InvitationsList = () => {
       status,
     }: {
       id: string;
-      status: "pending" | "accepted" | "rejected";
+      status: "pending" | "accepted" | "rejected" | 'completed';
     }) => updateInvitationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
@@ -109,13 +109,9 @@ const InvitationsList = () => {
 
   const handleStatusChange = (
     id: string,
-    newStatus: "pending" | "accepted" | "rejected"
+    newStatus: "pending" | "accepted" | "rejected" | 'completed'
   ) => {
     updateStatusMutation.mutate({ id, status: newStatus });
-  };
-
-  const handleDelete = (id: string) => {
-    setSelectedInvitation(id);
   };
 
   const confirmDelete = () => {

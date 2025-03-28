@@ -108,10 +108,11 @@ export default function InvitationStepperPage() {
         }
 
         const invitationData = data[0];
-        /*  if (invitationData.status === "accepted") {
+        
+        if (invitationData.status === "completed") {
           setError("This invitation has already been accepted");
           return;
-        } */
+        }
 
         setInvitation(invitationData);
         setFormData({
@@ -289,7 +290,7 @@ export default function InvitationStepperPage() {
         return;
       }
 
-      await updateInvitationStatus(invitation.id, "accepted");
+      await updateInvitationStatus(invitation.id, "completed");
       toast.success("Your submission has been received");
       setSubmissionComplete(true);
     } catch (err) {
@@ -337,11 +338,11 @@ export default function InvitationStepperPage() {
   };
 
   // 🖼️ Render
-  if (loading) {
+  if (!loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
+      <div className="flex items-center justify-center bg-gray-50">
+        <Card className="w-full">
+          <CardContent className="text-center">
             <LoadingSpinner />
           </CardContent>
         </Card>

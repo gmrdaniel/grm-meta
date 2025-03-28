@@ -611,7 +611,7 @@ export type Database = {
       }
     }
     Enums: {
-      invitation_status: "pending" | "accepted" | "rejected"
+      invitation_status: "pending" | "accepted" | "rejected" | 'completed'
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
