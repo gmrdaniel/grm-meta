@@ -388,7 +388,7 @@ export default function InvitationStepperPage() {
       <Card className="w-full max-w-lg min-h-lg">
         <CardContent className="pt-6">
           <Stepper steps={stepList} currentStep={currentStep.id} />
-
+          <hr />
           {currentStep.id === "welcome" && (
             <WelcomeForm
               invitation={invitation}
