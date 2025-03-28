@@ -50,7 +50,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
       
       <div className="space-y-6">
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">1. Create Your Facebook Page:</h2>
+          <h2 className="text-lg font-semibold">1. Share your Facebook Page</h2>
           <a 
             href="https://www.facebook.com/business/help/104002523024878" 
             target="_blank" 
@@ -100,13 +100,13 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               }
             />
             <Label htmlFor="verifyOwnership" className="text-sm">
-              I verify that I own this Facebook page
+              I verify that this is my Facebook page
             </Label>
           </div>
         </div>
         
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">2. Link Instagram to Facebook:</h2>
+          <h2 className="text-lg font-semibold">2. Link Instagram Professional Account and  Facebook Page:</h2>
           <a 
             href="https://www.facebook.com/help/1148909221857370" 
             target="_blank" 
@@ -126,7 +126,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               }
             />
             <Label htmlFor="linkInstagram" className="text-sm">
-              I've linked my Instagram to Facebook
+              I've linked both accounts
             </Label>
           </div>
         </div>

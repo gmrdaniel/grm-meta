@@ -1,18 +1,18 @@
-
 import React, { useState, useEffect } from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Instagram, Phone, Shield } from "lucide-react";
+import { CheckCheck, Instagram, Phone, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  InputOTP, 
-  InputOTPGroup, 
-  InputOTPSlot 
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "../ui/checkbox";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
@@ -23,25 +23,29 @@ interface CompleteProfileFormProps {
 export interface ProfileFormData {
   youtubeChannel: string;
   instagramUser: string;
+  isIGProfessional: boolean;
   phoneCountryCode: string;
   phoneNumber: string;
   phoneVerified: boolean;
 }
 
-export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({ 
-  onSubmit, 
+export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
+  onSubmit,
   isSubmitting,
-  invitationId 
+  invitationId,
 }) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     youtubeChannel: "",
     instagramUser: "",
     phoneCountryCode: "+1",
     phoneNumber: "",
-    phoneVerified: false
+    phoneVerified: false,
+    isIGProfessional: false,
   });
 
-  const [verificationStep, setVerificationStep] = useState<"input" | "verification">("input");
+  const [verificationStep, setVerificationStep] = useState<
+    "input" | "verification"
+  >("input");
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -57,56 +61,62 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       return () => clearTimeout(timer);
     }
   }, [countdown]);
-  
+
   // Format countdown as mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const validateInstagramUsername = (username: string): boolean => {
     if (!username) return true; // Allow empty value as it's optional
-    
+
     // Remove @ if present at the beginning
-    const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
-    
+    const cleanUsername = username.startsWith("@")
+      ? username.substring(1)
+      : username;
+
     // Check length (5-30 characters)
     if (cleanUsername.length < 5 || cleanUsername.length > 30) {
       setInstagramError("Username must be between 5 and 30 characters long");
       return false;
     }
-    
+
     // Check allowed characters: letters, numbers, periods, and underscores
     const validRegex = /^[a-zA-Z0-9._]+$/;
     if (!validRegex.test(cleanUsername)) {
-      setInstagramError("Only letters, numbers, periods, and underscores are allowed");
+      setInstagramError(
+        "Only letters, numbers, periods, and underscores are allowed"
+      );
       return false;
     }
-    
+
     setInstagramError(null);
     return true;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     // For phone numbers, only allow digits
     if (name === "phoneNumber") {
       setFormData({
         ...formData,
-        [name]: value.replace(/[^0-9]/g, '')
+        [name]: value.replace(/[^0-9]/g, ""),
       });
     } else if (name === "instagramUser") {
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
       validateInstagramUsername(value);
     } else {
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
     }
   };
@@ -121,22 +131,22 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     try {
       setIsVerifying(true);
       setError(null);
-      
-      const { data, error } = await supabase.functions.invoke('verify-phone', {
+
+      const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
-          action: 'send',
+          action: "send",
           phoneNumber: formData.phoneNumber,
-          countryCode: formData.phoneCountryCode
-        }
+          countryCode: formData.phoneCountryCode,
+        },
       });
-      
+
       if (error) {
         console.error("Error sending verification code:", error);
         setError(error.message || "Failed to send verification code");
         toast.error("Failed to send verification code");
         return;
       }
-      
+
       if (data.success) {
         toast.success("Verification code sent to your phone");
         setVerificationStep("verification");
@@ -163,29 +173,29 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     try {
       setIsVerifying(true);
       setError(null);
-      
-      const { data, error } = await supabase.functions.invoke('verify-phone', {
+
+      const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
-          action: 'verify',
+          action: "verify",
           phoneNumber: formData.phoneNumber,
           countryCode: formData.phoneCountryCode,
           verificationCode,
-          invitationId
-        }
+          invitationId,
+        },
       });
-      
+
       if (error) {
         console.error("Error verifying code:", error);
         setError(error.message || "Failed to verify code");
         toast.error("Failed to verify code");
         return;
       }
-      
+
       if (data.success) {
         toast.success("Phone verified successfully");
         setFormData({
           ...formData,
-          phoneVerified: true
+          phoneVerified: true,
         });
         setVerificationStep("input");
       } else {
@@ -212,7 +222,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       toast.error("Please fix the Instagram username format");
       return;
     }
-    
+
     onSubmit(formData);
   };
 
@@ -246,13 +256,25 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               <p className="text-sm text-red-500 mt-1">{instagramError}</p>
             )}
             <p className="text-xs text-gray-500">
-              Must be 5-30 characters long. Only letters, numbers, periods, and underscores are allowed.
+              Must be 5-30 characters long. Only letters, numbers, periods, and
+              underscores are allowed.
             </p>
           </div>
 
           <div className="space-y-2">
+            <Checkbox
+              checked={formData.isIGProfessional}
+              onCheckedChange={() => {}}
+            />
+            <span>I have a Instagram professional account</span>{' '}
+            <div className="space-y-1 leading-none">
+              <Label>Elegible TikTok</Label>
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> Phone Number 
+              <Phone className="h-4 w-4" /> Phone Number
               {formData.phoneVerified && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                   <Shield className="mr-1 h-3 w-3" />
@@ -260,7 +282,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                 </span>
               )}
             </Label>
-            
+
             {verificationStep === "input" ? (
               <div>
                 <div className="flex gap-2 mb-2">
@@ -287,14 +309,18 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     aria-readonly={formData.phoneVerified}
                   />
                 </div>
-                
+
                 {!formData.phoneVerified && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     type="button"
                     onClick={handleSendVerificationCode}
-                    disabled={isVerifying || !formData.phoneNumber || formData.phoneNumber.length < 10}
+                    disabled={
+                      isVerifying ||
+                      !formData.phoneNumber ||
+                      formData.phoneNumber.length < 10
+                    }
                     className="mt-1"
                   >
                     {isVerifying ? "Sending..." : "Verify Phone Number"}
@@ -309,9 +335,11 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="verification-code">Enter the 4-digit verification code</Label>
+                  <Label htmlFor="verification-code">
+                    Enter the 4-digit verification code
+                  </Label>
                   <div className="flex justify-center py-4">
                     <InputOTP
                       maxLength={4}
@@ -328,19 +356,23 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                   </div>
                   <div className="text-sm text-center space-y-2">
                     <p className="text-muted-foreground">
-                      We sent a code to {formData.phoneCountryCode} {formData.phoneNumber}
+                      We sent a code to {formData.phoneCountryCode}{" "}
+                      {formData.phoneNumber}
                     </p>
                     {countdown > 0 && (
                       <p className="text-muted-foreground">
-                        Code expires in: <span className="font-medium">{formatTime(countdown)}</span>
+                        Code expires in:{" "}
+                        <span className="font-medium">
+                          {formatTime(countdown)}
+                        </span>
                       </p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex justify-between">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       setVerificationStep("input");
@@ -351,7 +383,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     Back
                   </Button>
                   <div className="space-x-2">
-                    <Button 
+                    <Button
                       variant="outline"
                       size="sm"
                       onClick={handleResendCode}
@@ -359,7 +391,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     >
                       Resend Code
                     </Button>
-                    <Button 
+                    <Button
                       size="sm"
                       onClick={handleVerifyCode}
                       disabled={verificationCode.length !== 4 || isVerifying}
@@ -375,9 +407,14 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting || !formData.phoneVerified || !formData.phoneNumber || !!instagramError}
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting ||
+            !formData.phoneVerified ||
+            !formData.phoneNumber ||
+            !!instagramError
+          }
         >
           {isSubmitting ? "Saving..." : "Complete Registration"}
         </Button>

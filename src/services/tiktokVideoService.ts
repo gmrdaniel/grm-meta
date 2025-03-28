@@ -197,7 +197,7 @@ export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: 
   }
   
   const { error } = await supabase
-    .from('inventario_creadores')
+    .from('creator_inventory')
     .update(updateData)
     .eq('id', creatorId);
   

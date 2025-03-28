@@ -1,25 +1,41 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createInvitation } from "@/services/invitationService";
 import { fetchProjects } from "@/services/projectService";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CreateInvitationData } from "@/types/invitation";
+import { useSendInvitationEmail } from "@/hooks/useSendInvitationEmail";
 
 const formSchema = z.object({
-  full_name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  full_name: z
+    .string()
+    .min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   social_media_handle: z.string().optional(),
   social_media_type: z.enum(["tiktok", "pinterest"]).optional(),
   project_id: z.string().uuid({ message: "Please select a project" }),
-  invitation_type: z.enum(["new_user", "existing_user"])
+  invitation_type: z.enum(["new_user", "existing_user"]),
 });
 
 interface InvitationFormProps {
@@ -27,19 +43,27 @@ interface InvitationFormProps {
 }
 
 const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
+  const sendEmail = useSendInvitationEmail();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       full_name: "",
       email: "",
       social_media_handle: "",
-      invitation_type: "new_user"
-    }
+      invitation_type: "new_user",
+    },
   });
+
+  const [createdInvitation, setCreatedInvitation] = useState<null | {
+    email: string;
+    full_name?: string;
+    invitation_code: string;
+  }>(null);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
-    queryFn: fetchProjects
+    queryFn: fetchProjects,
   });
 
   const createInvitationMutation = useMutation({
@@ -54,7 +78,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     },
     onError: (error: Error) => {
       toast.error(`Error creating invitation: ${error.message}`);
-    }
+    },
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -65,10 +89,34 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       social_media_handle: data.social_media_handle || null,
       social_media_type: data.social_media_type || null,
       project_id: data.project_id,
-      invitation_type: data.invitation_type
+      invitation_type: data.invitation_type,
     };
 
-    createInvitationMutation.mutate(invitationData);
+    createInvitationMutation.mutate(invitationData, {
+      onSuccess: (invitation) => {
+        setCreatedInvitation({
+          email: invitation.email,
+          full_name: invitation.full_name,
+          invitation_code: invitation.invitation_code,
+        });
+
+        toast.success("Invitation created!");
+        form.reset();
+        if (onSuccess) onSuccess();
+      },
+    });
+  };
+
+  const handleSendEmail = () => {
+    if (!createdInvitation || sendEmail.isPending) return;
+
+    const invitationUrl = `${window.location.origin}/invitation/${createdInvitation.invitation_code}`;
+
+    sendEmail.mutate({
+      email: createdInvitation.email,
+      name: createdInvitation.full_name,
+      invitationUrl,
+    });
   };
 
   const hasSocialMedia = form.watch("social_media_handle") !== "";
@@ -98,7 +146,11 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" placeholder="Enter email address" />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="Enter email address"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,8 +180,8 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Social Media Platform</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
+                <Select
+                  onValueChange={field.onChange}
                   value={field.value}
                   disabled={!hasSocialMedia}
                 >
@@ -214,8 +266,30 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             disabled={createInvitationMutation.isPending}
             className="min-w-32"
           >
-            {createInvitationMutation.isPending ? "Creating..." : "Create Invitation"}
+            {createInvitationMutation.isPending
+              ? "Creating..."
+              : "Create Invitation"}
           </Button>
+          {/* 
+          
+          I will comment this code temporarily because
+          the form redirect to the list. 
+
+          So the user wont see this button ever.
+            
+          {createdInvitation && (
+            <div className="flex justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={handleSendEmail}
+                disabled={sendEmail.isPending}
+              >
+                {sendEmail.isPending
+                  ? "Sending Email..."
+                  : "Send Invitation Email"}
+              </Button>
+            </div>
+          )} */}
         </div>
       </form>
     </Form>
