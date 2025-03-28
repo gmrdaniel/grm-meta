@@ -121,6 +121,10 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     }
   };
 
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: checked }));
+  };
+
   const handleSendVerificationCode = async () => {
     // Validation
     if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
@@ -261,15 +265,17 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex items-center space-x-2">
             <Checkbox
+              id="isIGProfessional"
               checked={formData.isIGProfessional}
-              onCheckedChange={() => {}}
+              onCheckedChange={(checked) =>
+                handleCheckboxChange("isIGProfessional", checked as boolean)
+              }
             />
-            <span>I have a Instagram professional account</span>{' '}
-            <div className="space-y-1 leading-none">
-              <Label>Elegible TikTok</Label>
-            </div>
+            <Label htmlFor="isIGProfessional" className="text-sm">
+              I have a Instagram professional account
+            </Label>
           </div>
 
           <div className="space-y-2">
@@ -413,6 +419,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
             isSubmitting ||
             !formData.phoneVerified ||
             !formData.phoneNumber ||
+            !formData.isIGProfessional ||
             !!instagramError
           }
         >
