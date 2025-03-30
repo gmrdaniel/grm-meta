@@ -12,7 +12,7 @@ export const fetchCreators = async (
   filters?: CreatorFilter
 ): Promise<{ data: Creator[], count: number }> => {
   let query = supabase
-    .from('inventario_creadores')
+    .from('creator_inventory')
     .select('*', { count: 'exact' });
   
   // Apply filters if provided
@@ -50,7 +50,7 @@ export const fetchCreators = async (
  */
 export const createCreator = async (creator: Omit<Creator, 'id' | 'fecha_creacion'>): Promise<Creator> => {
   const { data, error } = await supabase
-    .from('inventario_creadores')
+    .from('creator_inventory')
     .insert(creator)
     .select()
     .single();
@@ -68,7 +68,7 @@ export const createCreator = async (creator: Omit<Creator, 'id' | 'fecha_creacio
  */
 export const updateCreator = async (id: string, updates: Partial<Creator>): Promise<Creator> => {
   const { data, error } = await supabase
-    .from('inventario_creadores')
+    .from('creator_inventory')
     .update(updates)
     .eq('id', id)
     .select()
@@ -87,7 +87,7 @@ export const updateCreator = async (id: string, updates: Partial<Creator>): Prom
  */
 export const deleteCreator = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('inventario_creadores')
+    .from('creator_inventory')
     .delete()
     .eq('id', id);
   
