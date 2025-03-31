@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,11 +75,18 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
       if (error) throw error;
       
       // Get total count for pagination
-      const { count: totalCount, error: countError } = await supabase
+      let countQuery = supabase
         .from('summary_creator')
-        .select('*', { count: 'exact', head: true })
-        .if(tiktokEligibleFilter, (query) => 
-          query.gte('seguidores_tiktok', 100000).gte('engagement', 4));
+        .select('*', { count: 'exact', head: true });
+      
+      // Apply the same filters to the count query if needed
+      if (tiktokEligibleFilter) {
+        countQuery = countQuery
+          .gte('seguidores_tiktok', 100000)
+          .gte('engagement', 4);
+      }
+      
+      const { count: totalCount, error: countError } = await countQuery;
         
       if (countError) throw countError;
       
