@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
@@ -76,7 +75,6 @@ export function CreatorsList({
   const [bulkDownloadingVideos, setBulkDownloadingVideos] = useState(false);
   const [bulkVideoProgress, setBulkVideoProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
   
-  // New state for selected creators
   const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -100,18 +98,15 @@ export function CreatorsList({
     setCurrentPage(1);
   }, [activeFilters, onFilterChange]);
 
-  // Clear selections when page changes
   useEffect(() => {
     setSelectedCreators([]);
     setSelectAll(false);
   }, [currentPage, pageSize]);
 
-  // Toggle select all
   useEffect(() => {
     if (selectAll) {
       setSelectedCreators(creators.map(creator => creator.id));
     } else if (selectedCreators.length === creators.length) {
-      // If we're unselecting "all" checkbox but all individual items are selected
       setSelectedCreators([]);
     }
   }, [selectAll, creators]);
@@ -179,7 +174,6 @@ export function CreatorsList({
     }
   });
 
-  // New function to handle bulk update of TikTok info for selected creators
   const updateSelectedCreatorsTikTokInfo = async () => {
     if (selectedCreators.length === 0) {
       toast.warning("No hay creadores seleccionados");
@@ -189,7 +183,6 @@ export function CreatorsList({
     try {
       setBulkUpdatingTikTok(true);
       
-      // Get the selected creators with TikTok usernames
       const selectedCreatorsWithTikTok = creators.filter(
         creator => selectedCreators.includes(creator.id) && creator.usuario_tiktok
       );
@@ -250,7 +243,61 @@ export function CreatorsList({
     }
   };
 
-  // Handle individual item selection
+  const downloadSelectedCreatorVideos = async () => {
+    if (selectedCreators.length === 0) {
+      toast.warning("No hay creadores seleccionados");
+      return;
+    }
+
+    try {
+      setBulkDownloadingVideos(true);
+      
+      const selectedCreatorsWithTikTok = creators.filter(
+        creator => selectedCreators.includes(creator.id) && creator.usuario_tiktok
+      );
+      
+      if (selectedCreatorsWithTikTok.length === 0) {
+        toast.warning("Ninguno de los creadores seleccionados tiene nombre de usuario de TikTok");
+        setBulkDownloadingVideos(false);
+        return;
+      }
+      
+      setBulkVideoProgress({current: 0, total: selectedCreatorsWithTikTok.length});
+      
+      let successCount = 0;
+      let failCount = 0;
+      let totalVideos = 0;
+      
+      for (let i = 0; i < selectedCreatorsWithTikTok.length; i++) {
+        const creator = selectedCreatorsWithTikTok[i];
+        setBulkVideoProgress({current: i + 1, total: selectedCreatorsWithTikTok.length});
+        
+        if (creator.usuario_tiktok) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const result = await fetchTikTokUserVideos(creator.usuario_tiktok, creator.id);
+            totalVideos += result.savedCount;
+            successCount++;
+          } catch (err) {
+            console.error(`Error descargando videos para ${creator.nombre} ${creator.apellido}:`, err);
+            failCount++;
+          }
+        }
+      }
+      
+      toast.success(`Descarga completada: ${successCount} creadores procesados, ${totalVideos} videos guardados, ${failCount} errores`);
+      refetch();
+      setSelectedCreators([]);
+    } catch (error) {
+      console.error("Error en descarga de videos:", error);
+      toast.error(`Error en descarga de videos: ${(error as Error).message}`);
+    } finally {
+      setBulkDownloadingVideos(false);
+      setBulkVideoProgress({current: 0, total: 0});
+    }
+  };
+
   const toggleCreatorSelection = (creatorId: string) => {
     setSelectedCreators(prev => {
       if (prev.includes(creatorId)) {
@@ -261,7 +308,6 @@ export function CreatorsList({
     });
   };
 
-  // Handle select all checkbox
   const toggleSelectAll = () => {
     setSelectAll(!selectAll);
   };
@@ -513,24 +559,42 @@ export function CreatorsList({
               : "Descargar todos los videos TikTok"}
           </Button>
           
-          {/* Button to update TikTok info for selected creators */}
           {selectedCreators.length > 0 && (
-            <Button 
-              variant="secondary"
-              size="sm" 
-              onClick={updateSelectedCreatorsTikTokInfo}
-              disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
-              className="flex items-center gap-1"
-            >
-              {bulkUpdatingTikTok ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <CheckSquare className="h-4 w-4 mr-1" />
-              )}
-              {bulkUpdatingTikTok 
-                ? `Actualizando seleccionados... ${bulkUpdateProgress.current}/${bulkUpdateProgress.total}` 
-                : `Actualizar TikTok (${selectedCreators.length} seleccionados)`}
-            </Button>
+            <>
+              <Button 
+                variant="secondary"
+                size="sm" 
+                onClick={updateSelectedCreatorsTikTokInfo}
+                disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
+                className="flex items-center gap-1"
+              >
+                {bulkUpdatingTikTok ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <CheckSquare className="h-4 w-4 mr-1" />
+                )}
+                {bulkUpdatingTikTok 
+                  ? `Actualizando seleccionados... ${bulkUpdateProgress.current}/${bulkUpdateProgress.total}` 
+                  : `Actualizar TikTok (${selectedCreators.length} seleccionados)`}
+              </Button>
+              
+              <Button 
+                variant="secondary"
+                size="sm" 
+                onClick={downloadSelectedCreatorVideos}
+                disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
+                className="flex items-center gap-1"
+              >
+                {bulkDownloadingVideos ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Video className="h-4 w-4 mr-1" />
+                )}
+                {bulkDownloadingVideos 
+                  ? `Descargando videos... ${bulkVideoProgress.current}/${bulkVideoProgress.total}` 
+                  : `Descargar Videos (${selectedCreators.length} seleccionados)`}
+              </Button>
+            </>
           )}
           
           <Button 
@@ -618,7 +682,6 @@ export function CreatorsList({
                     key={creator.id}
                     className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
                     onClick={onCreatorSelect ? (e) => {
-                      // Prevent row click if checkbox is clicked
                       const target = e.target as HTMLElement;
                       if (target.closest('[data-checkbox]')) {
                         e.stopPropagation();
