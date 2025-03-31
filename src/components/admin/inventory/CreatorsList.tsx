@@ -1,13 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
 import { fetchTikTokUserInfo, updateCreatorTikTokInfo, fetchTikTokUserVideos } from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
   Users, Loader2, Filter, X, Check, Download, RefreshCw,
-  Ban, Video, VideoOff
+  Ban, Video, VideoOff, CheckSquare, Square
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -73,6 +75,10 @@ export function CreatorsList({
   const [bulkUpdateProgress, setBulkUpdateProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
   const [bulkDownloadingVideos, setBulkDownloadingVideos] = useState(false);
   const [bulkVideoProgress, setBulkVideoProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
+  
+  // New state for selected creators
+  const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const { 
     data: creatorsData, 
@@ -84,6 +90,9 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
+  const creators = creatorsData?.data || [];
+  const totalCount = creatorsData?.count || 0;
+
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
@@ -91,8 +100,21 @@ export function CreatorsList({
     setCurrentPage(1);
   }, [activeFilters, onFilterChange]);
 
-  const creators = creatorsData?.data || [];
-  const totalCount = creatorsData?.count || 0;
+  // Clear selections when page changes
+  useEffect(() => {
+    setSelectedCreators([]);
+    setSelectAll(false);
+  }, [currentPage, pageSize]);
+
+  // Toggle select all
+  useEffect(() => {
+    if (selectAll) {
+      setSelectedCreators(creators.map(creator => creator.id));
+    } else if (selectedCreators.length === creators.length) {
+      // If we're unselecting "all" checkbox but all individual items are selected
+      setSelectedCreators([]);
+    }
+  }, [selectAll, creators]);
 
   const updateTikTokInfoMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
@@ -156,6 +178,93 @@ export function CreatorsList({
       setLoadingTikTokVideos(null);
     }
   });
+
+  // New function to handle bulk update of TikTok info for selected creators
+  const updateSelectedCreatorsTikTokInfo = async () => {
+    if (selectedCreators.length === 0) {
+      toast.warning("No hay creadores seleccionados");
+      return;
+    }
+
+    try {
+      setBulkUpdatingTikTok(true);
+      
+      // Get the selected creators with TikTok usernames
+      const selectedCreatorsWithTikTok = creators.filter(
+        creator => selectedCreators.includes(creator.id) && creator.usuario_tiktok
+      );
+      
+      if (selectedCreatorsWithTikTok.length === 0) {
+        toast.warning("Ninguno de los creadores seleccionados tiene nombre de usuario de TikTok");
+        setBulkUpdatingTikTok(false);
+        return;
+      }
+      
+      setBulkUpdateProgress({current: 0, total: selectedCreatorsWithTikTok.length});
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (let i = 0; i < selectedCreatorsWithTikTok.length; i++) {
+        const creator = selectedCreatorsWithTikTok[i];
+        setBulkUpdateProgress({current: i + 1, total: selectedCreatorsWithTikTok.length});
+        
+        if (creator.usuario_tiktok) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const userInfo = await fetchTikTokUserInfo(creator.usuario_tiktok);
+            
+            const followerCount = userInfo?.userInfo?.stats?.followerCount;
+            const heartCount = userInfo?.userInfo?.stats?.heartCount;
+            const secUid = userInfo?.userInfo?.user?.secUid;
+            
+            let engagementRate: number | undefined = undefined;
+            
+            if (followerCount && heartCount && followerCount > 0) {
+              engagementRate = (heartCount / followerCount) * 100;
+            }
+            
+            if (followerCount !== undefined) {
+              await updateCreatorTikTokInfo(creator.id, followerCount, engagementRate, secUid);
+              successCount++;
+            } else {
+              failCount++;
+            }
+          } catch (err) {
+            console.error(`Error actualizando creador ${creator.nombre} ${creator.apellido}:`, err);
+            failCount++;
+          }
+        }
+      }
+      
+      toast.success(`Actualización completada: ${successCount} creadores actualizados, ${failCount} fallidos`);
+      refetch();
+      setSelectedCreators([]);
+    } catch (error) {
+      console.error("Error en actualización de seleccionados:", error);
+      toast.error(`Error en actualización de seleccionados: ${(error as Error).message}`);
+    } finally {
+      setBulkUpdatingTikTok(false);
+      setBulkUpdateProgress({current: 0, total: 0});
+    }
+  };
+
+  // Handle individual item selection
+  const toggleCreatorSelection = (creatorId: string) => {
+    setSelectedCreators(prev => {
+      if (prev.includes(creatorId)) {
+        return prev.filter(id => id !== creatorId);
+      } else {
+        return [...prev, creatorId];
+      }
+    });
+  };
+
+  // Handle select all checkbox
+  const toggleSelectAll = () => {
+    setSelectAll(!selectAll);
+  };
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -404,6 +513,26 @@ export function CreatorsList({
               : "Descargar todos los videos TikTok"}
           </Button>
           
+          {/* Button to update TikTok info for selected creators */}
+          {selectedCreators.length > 0 && (
+            <Button 
+              variant="secondary"
+              size="sm" 
+              onClick={updateSelectedCreatorsTikTokInfo}
+              disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
+              className="flex items-center gap-1"
+            >
+              {bulkUpdatingTikTok ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <CheckSquare className="h-4 w-4 mr-1" />
+              )}
+              {bulkUpdatingTikTok 
+                ? `Actualizando seleccionados... ${bulkUpdateProgress.current}/${bulkUpdateProgress.total}` 
+                : `Actualizar TikTok (${selectedCreators.length} seleccionados)`}
+            </Button>
+          )}
+          
           <Button 
             variant={activeFilters.tiktokEligible ? "default" : "outline"} 
             size="sm"
@@ -468,6 +597,13 @@ export function CreatorsList({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={selectAll}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Seleccionar todos los creadores"
+                    />
+                  </TableHead>
                   <TableHead className="w-[250px]">Creador</TableHead>
                   <TableHead className="w-[300px]">Redes Sociales</TableHead>
                   <TableHead className="w-[180px]">Teléfono</TableHead>
@@ -481,8 +617,26 @@ export function CreatorsList({
                   <TableRow 
                     key={creator.id}
                     className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
-                    onClick={onCreatorSelect ? () => onCreatorSelect(creator) : undefined}
+                    onClick={onCreatorSelect ? (e) => {
+                      // Prevent row click if checkbox is clicked
+                      const target = e.target as HTMLElement;
+                      if (target.closest('[data-checkbox]')) {
+                        e.stopPropagation();
+                        return;
+                      }
+                      onCreatorSelect(creator);
+                    } : undefined}
                   >
+                    <TableCell>
+                      <div data-checkbox>
+                        <Checkbox
+                          checked={selectedCreators.includes(creator.id)}
+                          onCheckedChange={() => toggleCreatorSelection(creator.id)}
+                          aria-label={`Seleccionar ${creator.nombre} ${creator.apellido}`}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
