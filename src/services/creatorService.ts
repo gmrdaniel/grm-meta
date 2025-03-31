@@ -30,16 +30,9 @@ export const fetchCreators = async (
     }
     
     if (filters.noVideos) {
-      // We need to use a different approach for this filter since it involves checking a relationship
-      // We'll use a subquery to find creators who don't have any videos
-      const creatorIdsWithVideos = await supabase
-        .from('tiktok_video')
-        .select('creator_id')
-        .then(({ data }) => data?.map(record => record.creator_id) || []);
-      
-      if (creatorIdsWithVideos.length > 0) {
-        query = query.not('id', 'in', creatorIdsWithVideos);
-      }
+      // Instead of using a complex subquery, we'll handle this filter separately after fetching creators
+      // We'll fetch all creators for now and filter them in-memory
+      // In a production app with large datasets, this should be optimized with a proper database query
     }
   }
   
@@ -56,9 +49,33 @@ export const fetchCreators = async (
     throw new Error(error.message);
   }
   
+  let filteredData = data as Creator[];
+  
+  // If we need to filter creators without videos, we'll do it separately
+  if (filters?.noVideos) {
+    try {
+      // Get all creator IDs that have videos
+      const { data: videoData } = await supabase
+        .from('tiktok_video')
+        .select('creator_id')
+        .limit(10000);
+      
+      if (videoData) {
+        // Get unique creator IDs that have videos
+        const creatorIdsWithVideos = [...new Set(videoData.map(item => item.creator_id))];
+        
+        // Filter out creators that have videos
+        filteredData = filteredData.filter(creator => !creatorIdsWithVideos.includes(creator.id));
+      }
+    } catch (videoError) {
+      console.error('Error fetching video data for filtering:', videoError);
+      // Continue with unfiltered data if there's an error with the video filtering
+    }
+  }
+  
   return { 
-    data: data as Creator[], 
-    count: count || 0 
+    data: filteredData, 
+    count: filters?.noVideos ? filteredData.length : (count || 0)
   };
 };
 
