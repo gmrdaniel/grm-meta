@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check, Download
+  Users, Loader2, Filter, X, Check, Download, RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -68,6 +68,8 @@ export function CreatorsList({
   const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
+  const [bulkUpdatingTikTok, setBulkUpdatingTikTok] = useState(false);
+  const [bulkUpdateProgress, setBulkUpdateProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
 
   const { 
     data: creatorsData, 
@@ -230,6 +232,68 @@ export function CreatorsList({
     });
   };
 
+  const updateAllTikTokCreators = async () => {
+    try {
+      setBulkUpdatingTikTok(true);
+      
+      const allCreatorsResponse = await fetchCreators(1, 1000, { hasTiktokUsername: true });
+      const creatorsWithTikTok = allCreatorsResponse.data.filter(creator => creator.usuario_tiktok);
+      
+      if (creatorsWithTikTok.length === 0) {
+        toast.info("No se encontraron creadores con nombre de usuario de TikTok");
+        setBulkUpdatingTikTok(false);
+        return;
+      }
+      
+      setBulkUpdateProgress({current: 0, total: creatorsWithTikTok.length});
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (let i = 0; i < creatorsWithTikTok.length; i++) {
+        const creator = creatorsWithTikTok[i];
+        setBulkUpdateProgress({current: i + 1, total: creatorsWithTikTok.length});
+        
+        if (creator.usuario_tiktok) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const userInfo = await fetchTikTokUserInfo(creator.usuario_tiktok);
+            
+            const followerCount = userInfo?.userInfo?.stats?.followerCount;
+            const heartCount = userInfo?.userInfo?.stats?.heartCount;
+            const secUid = userInfo?.userInfo?.user?.secUid;
+            
+            let engagementRate: number | undefined = undefined;
+            
+            if (followerCount && heartCount && followerCount > 0) {
+              engagementRate = (heartCount / followerCount) * 100;
+            }
+            
+            if (followerCount !== undefined) {
+              await updateCreatorTikTokInfo(creator.id, followerCount, engagementRate, secUid);
+              successCount++;
+            } else {
+              failCount++;
+            }
+          } catch (err) {
+            console.error(`Error actualizando creador ${creator.nombre} ${creator.apellido}:`, err);
+            failCount++;
+          }
+        }
+      }
+      
+      toast.success(`Actualización masiva completada: ${successCount} creadores actualizados, ${failCount} fallidos`);
+      refetch();
+    } catch (error) {
+      console.error("Error en actualización masiva:", error);
+      toast.error(`Error en actualización masiva: ${(error as Error).message}`);
+    } finally {
+      setBulkUpdatingTikTok(false);
+      setBulkUpdateProgress({current: 0, total: 0});
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -255,6 +319,23 @@ export function CreatorsList({
         </div>
         
         <div className="flex gap-2">
+          <Button 
+            variant="secondary"
+            size="sm" 
+            onClick={updateAllTikTokCreators} 
+            disabled={bulkUpdatingTikTok}
+            className="flex items-center gap-1"
+          >
+            {bulkUpdatingTikTok ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-1" />
+            )}
+            {bulkUpdatingTikTok 
+              ? `Actualizando... ${bulkUpdateProgress.current}/${bulkUpdateProgress.total}` 
+              : "Actualizar todos los perfiles TikTok"}
+          </Button>
+          
           <Button 
             variant={activeFilters.tiktokEligible ? "default" : "outline"} 
             size="sm"
