@@ -4,6 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Pencil, Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,20 +20,49 @@ interface CreatorRowProps {
   onCreatorSelect?: (creator: Creator) => void;
   onEdit: (creator: Creator) => void;
   onRefetch: () => void;
+  isSelected?: boolean;
+  onSelectChange?: () => void;
 }
 
-export function CreatorRow({ creator, onCreatorSelect, onEdit, onRefetch }: CreatorRowProps) {
+export function CreatorRow({ 
+  creator, 
+  onCreatorSelect, 
+  onEdit, 
+  onRefetch,
+  isSelected = false,
+  onSelectChange
+}: CreatorRowProps) {
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEdit(creator);
+  };
+
+  const handleRowClick = () => {
+    if (onCreatorSelect) {
+      onCreatorSelect(creator);
+    }
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSelectChange) {
+      onSelectChange();
+    }
   };
 
   return (
     <TableRow 
       key={creator.id}
       className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
-      onClick={onCreatorSelect ? () => onCreatorSelect(creator) : undefined}
+      onClick={onCreatorSelect ? handleRowClick : undefined}
     >
+      <TableCell onClick={handleCheckboxClick}>
+        <Checkbox 
+          checked={isSelected}
+          className="cursor-pointer"
+          aria-label={`Seleccionar ${creator.nombre} ${creator.apellido}`}
+        />
+      </TableCell>
       <TableCell>
         <CreatorBasicInfo creator={creator} />
       </TableCell>

@@ -9,7 +9,7 @@ export interface CreatorsListProps {
 
 export interface CreatorFilter {
   tiktokEligible?: boolean;
-  hasTiktokUsername?: boolean;
+  hasTikTokUsername?: boolean;
 }
 
 export interface TikTokInfoMutationParams {

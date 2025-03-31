@@ -16,6 +16,8 @@ import { CreatorRow } from "./CreatorRow";
 import { CreatorFilters } from "./CreatorFilters";
 import { CreatorPagination } from "./CreatorPagination";
 import { CreatorEditDialog } from "./CreatorEditDialog";
+import { CreatorBatchActions } from "./CreatorBatchActions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function CreatorsList({ 
   onCreatorSelect, 
@@ -27,6 +29,8 @@ export function CreatorsList({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
+  const [selectedCreators, setSelectedCreators] = useState<Creator[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const { 
     data: creatorsData, 
@@ -38,16 +42,22 @@ export function CreatorsList({
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
   });
 
+  const creators = creatorsData?.data || [];
+  const totalCount = creatorsData?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Reset selected creators when page changes
+  useEffect(() => {
+    setSelectedCreators([]);
+    setSelectAll(false);
+  }, [currentPage, pageSize, activeFilters]);
+
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(activeFilters);
     }
     setCurrentPage(1);
   }, [activeFilters, onFilterChange]);
-
-  const creators = creatorsData?.data || [];
-  const totalCount = creatorsData?.count || 0;
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleEdit = (creator: Creator) => {
     if (onCreatorSelect) {
@@ -70,6 +80,31 @@ export function CreatorsList({
 
   const handleFilterChange = (newFilters: CreatorFilter) => {
     setActiveFilters(newFilters);
+  };
+
+  const handleSelectCreator = (creator: Creator) => {
+    setSelectedCreators(prev => {
+      const isSelected = prev.some(c => c.id === creator.id);
+      if (isSelected) {
+        return prev.filter(c => c.id !== creator.id);
+      } else {
+        return [...prev, creator];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedCreators([]);
+    } else {
+      setSelectedCreators([...creators]);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const clearSelection = () => {
+    setSelectedCreators([]);
+    setSelectAll(false);
   };
 
   if (isLoading) {
@@ -102,6 +137,12 @@ export function CreatorsList({
         />
       </div>
       
+      <CreatorBatchActions
+        selectedCreators={selectedCreators}
+        onSuccess={refetch}
+        clearSelection={clearSelection}
+      />
+      
       {creators.length === 0 ? (
         <div className="p-8 text-center text-gray-500 border rounded-md">
           No hay creadores que coincidan con los criterios seleccionados
@@ -112,6 +153,13 @@ export function CreatorsList({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]">
+                    <Checkbox 
+                      checked={selectAll}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Seleccionar todos"
+                    />
+                  </TableHead>
                   <TableHead className="w-[250px]">Creador</TableHead>
                   <TableHead className="w-[300px]">Redes Sociales</TableHead>
                   <TableHead className="w-[180px]">Teléfono</TableHead>
@@ -128,6 +176,8 @@ export function CreatorsList({
                     onCreatorSelect={onCreatorSelect}
                     onEdit={handleEdit}
                     onRefetch={refetch}
+                    isSelected={selectedCreators.some(c => c.id === creator.id)}
+                    onSelectChange={() => handleSelectCreator(creator)}
                   />
                 ))}
               </TableBody>
