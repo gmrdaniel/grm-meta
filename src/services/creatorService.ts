@@ -24,6 +24,23 @@ export const fetchCreators = async (
     if (filters.hasTiktokUsername) {
       query = query.not('usuario_tiktok', 'is', null);
     }
+    
+    if (filters.noEngagement) {
+      query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
+    }
+    
+    if (filters.noVideos) {
+      // We need to use a different approach for this filter since it involves checking a relationship
+      // We'll use a subquery to find creators who don't have any videos
+      const creatorIdsWithVideos = await supabase
+        .from('tiktok_video')
+        .select('creator_id')
+        .then(({ data }) => data?.map(record => record.creator_id) || []);
+      
+      if (creatorIdsWithVideos.length > 0) {
+        query = query.not('id', 'in', creatorIdsWithVideos);
+      }
+    }
   }
   
   // Add pagination
