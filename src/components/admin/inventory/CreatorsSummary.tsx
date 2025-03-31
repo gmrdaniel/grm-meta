@@ -1,20 +1,25 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCreatorsSummary } from "@/services/summaryCreatorService";
+import { fetchCreatorsSummary, SummaryCreator } from "@/services/summaryCreatorService";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, RefreshCw, Filter } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw, Filter, ArrowUp, ArrowDown } from "lucide-react";
 import FechaDesdeTimestamp from "@/components/admin/test/FechaDesdeTimestamp";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
+type SortField = 'engagement' | 'seguidores_tiktok' | 'eligible';
+type SortDirection = 'asc' | 'desc';
+
 export function CreatorsSummary() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [filterEligible, setFilterEligible] = useState(false);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["creators-summary", page, pageSize, filterEligible],
@@ -47,6 +52,48 @@ export function CreatorsSummary() {
     setFilterEligible(checked);
     setPage(1); // Reset to first page when changing filter
   };
+  
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle sort direction if already sorting by this field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new sort field and default to descending order
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+  
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  const getSortedData = () => {
+    if (!data || !data.data || !sortField) return data?.data;
+    
+    return [...data.data].sort((a, b) => {
+      if (sortField === 'engagement') {
+        const valueA = a.engagement || 0;
+        const valueB = b.engagement || 0;
+        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+      
+      if (sortField === 'seguidores_tiktok') {
+        const valueA = a.seguidores_tiktok || 0;
+        const valueB = b.seguidores_tiktok || 0;
+        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+      
+      if (sortField === 'eligible') {
+        const valueA = isEligible(a.seguidores_tiktok, a.engagement) ? 1 : 0;
+        const valueB = isEligible(b.seguidores_tiktok, b.engagement) ? 1 : 0;
+        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
+      
+      return 0;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -66,6 +113,8 @@ export function CreatorsSummary() {
       </div>
     );
   }
+
+  const sortedData = getSortedData();
 
   return (
     <div className="space-y-4">
@@ -114,16 +163,40 @@ export function CreatorsSummary() {
               <TableHead>Nombre</TableHead>
               <TableHead>Correo</TableHead>
               <TableHead>Usuario TikTok</TableHead>
-              <TableHead className="text-right">Seguidores</TableHead>
-              <TableHead className="text-right">Engagement</TableHead>
+              <TableHead 
+                className="text-right cursor-pointer"
+                onClick={() => handleSort('seguidores_tiktok')}
+              >
+                <div className="flex items-center justify-end">
+                  Seguidores
+                  {renderSortIcon('seguidores_tiktok')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-right cursor-pointer"
+                onClick={() => handleSort('engagement')}
+              >
+                <div className="flex items-center justify-end">
+                  Engagement
+                  {renderSortIcon('engagement')}
+                </div>
+              </TableHead>
               <TableHead>Último Post</TableHead>
               <TableHead className="text-right">Duración Promedio</TableHead>
-              <TableHead>Elegible</TableHead>
+              <TableHead 
+                className="cursor-pointer"
+                onClick={() => handleSort('eligible')}
+              >
+                <div className="flex items-center">
+                  Elegible
+                  {renderSortIcon('eligible')}
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data && data.data.length > 0 ? (
-              data.data.map((creator, index) => (
+            {sortedData && sortedData.length > 0 ? (
+              sortedData.map((creator, index) => (
                 <TableRow key={index}>
                   <TableCell>
                     {creator.nombre} {creator.apellido}
