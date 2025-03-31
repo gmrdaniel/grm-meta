@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { supabase } from "@/integrations/supabase/client";
 import { createCreator } from "@/services/creatorService";
@@ -18,7 +17,7 @@ export const createBulkInvitation = async (data: { fileName: string; totalRows: 
       status: "processing",
       total_rows: data.totalRows,
       created_by: userData.user.id
-    })
+    } as any)
     .select("*")
     .single();
 
@@ -39,7 +38,7 @@ export const updateBulkInvitation = async (data: {
       failed_rows: data.failedRows,
       status: data.status,
       updated_at: new Date().toISOString()
-    })
+    } as any)
     .eq("id", data.id);
 
   if (error) throw error;
@@ -60,7 +59,7 @@ export const createBulkInvitationDetail = async (data: {
       email: data.email,
       status: data.status,
       error_message: data.errorMessage || null
-    });
+    } as any);
 
   if (error) throw error;
 };

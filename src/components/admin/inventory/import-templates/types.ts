@@ -13,3 +13,11 @@ export interface ImportError {
   error: string;
   data: CreatorImportData;
 }
+
+export interface CreatorFilter {
+  tiktokEligible?: boolean;
+  hasTikTokUsername?: boolean;
+  withoutEngagement?: boolean;
+  withoutVideos?: boolean;
+  [key: string]: boolean | undefined;
+}

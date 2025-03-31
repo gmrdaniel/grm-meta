@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -60,9 +59,8 @@ export const fetchCreators = async (
     // Find which of these creators have videos
     const { data: videoCountData } = await supabase
       .from('tiktok_video')
-      .select('creator_id, count')
-      .in('creator_id', creatorIds)
-      .group('creator_id');
+      .select('creator_id')
+      .in('creator_id', creatorIds);
     
     if (videoCountData) {
       // Create a Set of creator IDs that have videos

@@ -1,17 +1,17 @@
-
 import { Creator } from "@/types/creator";
-
-export interface CreatorsListProps {
-  onCreatorSelect?: (creator: Creator) => void;
-  filters?: CreatorFilter;
-  onFilterChange?: (filters: CreatorFilter) => void;
-}
 
 export interface CreatorFilter {
   tiktokEligible?: boolean;
   hasTikTokUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
+  [key: string]: boolean | undefined;
+}
+
+export interface CreatorsListProps {
+  onCreatorSelect?: (creator: Creator) => void;
+  filters?: CreatorFilter;
+  onFilterChange?: (filters: CreatorFilter) => void;
 }
 
 export interface TikTokInfoMutationParams {
