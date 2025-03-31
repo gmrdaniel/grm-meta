@@ -11,7 +11,6 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
   const [result, setResult] = useState<any>(null);
@@ -20,23 +19,19 @@ export default function AdminTestPage() {
   const [directLoading, setDirectLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [directError, setDirectError] = useState<string | null>(null);
-  
   const [tiktokUsername, setTiktokUsername] = useState<string>("");
   const [tiktokResult, setTiktokResult] = useState<any>(null);
   const [tiktokLoading, setTiktokLoading] = useState<boolean>(false);
   const [tiktokError, setTiktokError] = useState<string | null>(null);
-  
   const [tiktokVideoUsername, setTiktokVideoUsername] = useState<string>("");
   const [tiktokVideoResult, setTiktokVideoResult] = useState<any>(null);
   const [tiktokVideoLoading, setTiktokVideoLoading] = useState<boolean>(false);
   const [tiktokVideoError, setTiktokVideoError] = useState<string | null>(null);
-
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
       setError("Por favor ingrese un código de invitación");
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
@@ -58,22 +53,21 @@ export default function AdminTestPage() {
       setLoading(false);
     }
   };
-
   const handleDirectTest = async () => {
     if (!invitationCode.trim()) {
       setDirectError("Por favor ingrese un código de invitación");
       return;
     }
-
     setDirectLoading(true);
     setDirectError(null);
     try {
-      const { data, error } = await supabase.rpc('find_invitation_by_code', { 
-        code_param: invitationCode 
+      const {
+        data,
+        error
+      } = await supabase.rpc('find_invitation_by_code', {
+        code_param: invitationCode
       });
-      
       if (error) throw error;
-      
       setDirectResult({
         data,
         success: true,
@@ -91,19 +85,15 @@ export default function AdminTestPage() {
       setDirectLoading(false);
     }
   };
-
   const handleTiktokTest = async () => {
     if (!tiktokUsername.trim()) {
       setTiktokError("Por favor ingrese un nombre de usuario");
       return;
     }
-
     setTiktokLoading(true);
     setTiktokError(null);
-    
     try {
       const data = await fetchTikTokUserInfo(tiktokUsername);
-      
       setTiktokResult({
         data,
         success: true,
@@ -121,16 +111,13 @@ export default function AdminTestPage() {
       setTiktokLoading(false);
     }
   };
-
   const handleTiktokVideoTest = async () => {
     if (!tiktokVideoUsername.trim()) {
       setTiktokVideoError("Por favor ingrese un nombre de usuario");
       return;
     }
-
     setTiktokVideoLoading(true);
     setTiktokVideoError(null);
-    
     try {
       const url = `https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(tiktokVideoUsername)}`;
       const options = {
@@ -140,15 +127,11 @@ export default function AdminTestPage() {
           'x-rapidapi-host': 'tiktok-api6.p.rapidapi.com'
         }
       };
-
       const response = await fetch(url, options);
-      
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
       const data = await response.json();
-      
       setTiktokVideoResult({
         data,
         success: true,
@@ -166,9 +149,7 @@ export default function AdminTestPage() {
       setTiktokVideoLoading(false);
     }
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Panel de Pruebas (Admin)</h1>
         
@@ -186,7 +167,7 @@ export default function AdminTestPage() {
             <TabsTrigger value="service">Usando Servicio</TabsTrigger>
             <TabsTrigger value="direct">Llamada Directa RPC</TabsTrigger>
             <TabsTrigger value="tiktok">TikTok API</TabsTrigger>
-            <TabsTrigger value="tiktok-video">TikTok Video</TabsTrigger>
+            
           </TabsList>
           
           <TabsContent value="service">
@@ -207,38 +188,26 @@ export default function AdminTestPage() {
                       Código de Invitación
                     </label>
                     <div className="flex gap-2">
-                      <Input
-                        id="invitationCode"
-                        placeholder="Ingrese el código"
-                        value={invitationCode}
-                        onChange={(e) => setInvitationCode(e.target.value)}
-                      />
-                      <Button 
-                        onClick={handleTestService} 
-                        disabled={loading}
-                      >
+                      <Input id="invitationCode" placeholder="Ingrese el código" value={invitationCode} onChange={e => setInvitationCode(e.target.value)} />
+                      <Button onClick={handleTestService} disabled={loading}>
                         {loading ? "Procesando..." : "Probar Servicio"}
                       </Button>
                     </div>
-                    {error && (
-                      <Alert variant="destructive" className="mt-2">
+                    {error && <Alert variant="destructive" className="mt-2">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
+                      </Alert>}
                   </div>
 
-                  {result && (
-                    <div className="mt-4">
+                  {result && <div className="mt-4">
                       <h3 className="font-medium mb-2">Resultado ({result.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(result, null, 2)}
                         </pre>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
@@ -265,38 +234,26 @@ export default function AdminTestPage() {
                       Código de Invitación
                     </label>
                     <div className="flex gap-2">
-                      <Input
-                        id="directInvitationCode"
-                        placeholder="Ingrese el código"
-                        value={invitationCode}
-                        onChange={(e) => setInvitationCode(e.target.value)}
-                      />
-                      <Button 
-                        onClick={handleDirectTest} 
-                        disabled={directLoading}
-                      >
+                      <Input id="directInvitationCode" placeholder="Ingrese el código" value={invitationCode} onChange={e => setInvitationCode(e.target.value)} />
+                      <Button onClick={handleDirectTest} disabled={directLoading}>
                         {directLoading ? "Procesando..." : "Llamar RPC"}
                       </Button>
                     </div>
-                    {directError && (
-                      <Alert variant="destructive" className="mt-2">
+                    {directError && <Alert variant="destructive" className="mt-2">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
                         <AlertDescription>{directError}</AlertDescription>
-                      </Alert>
-                    )}
+                      </Alert>}
                   </div>
 
-                  {directResult && (
-                    <div className="mt-4">
+                  {directResult && <div className="mt-4">
                       <h3 className="font-medium mb-2">Resultado RPC ({directResult.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(directResult, null, 2)}
                         </pre>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
@@ -323,38 +280,26 @@ export default function AdminTestPage() {
                       Username
                     </label>
                     <div className="flex gap-2">
-                      <Input
-                        id="tiktokUsername"
-                        placeholder="Ingrese el nombre de usuario"
-                        value={tiktokUsername}
-                        onChange={(e) => setTiktokUsername(e.target.value)}
-                      />
-                      <Button 
-                        onClick={handleTiktokTest} 
-                        disabled={tiktokLoading}
-                      >
+                      <Input id="tiktokUsername" placeholder="Ingrese el nombre de usuario" value={tiktokUsername} onChange={e => setTiktokUsername(e.target.value)} />
+                      <Button onClick={handleTiktokTest} disabled={tiktokLoading}>
                         {tiktokLoading ? "Procesando..." : "Probar Servicio"}
                       </Button>
                     </div>
-                    {tiktokError && (
-                      <Alert variant="destructive" className="mt-2">
+                    {tiktokError && <Alert variant="destructive" className="mt-2">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
                         <AlertDescription>{tiktokError}</AlertDescription>
-                      </Alert>
-                    )}
+                      </Alert>}
                   </div>
 
-                  {tiktokResult && (
-                    <div className="mt-4">
+                  {tiktokResult && <div className="mt-4">
                       <h3 className="font-medium mb-2">Resultado ({tiktokResult.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(tiktokResult, null, 2)}
                         </pre>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
@@ -381,38 +326,26 @@ export default function AdminTestPage() {
                       Username
                     </label>
                     <div className="flex gap-2">
-                      <Input
-                        id="tiktokVideoUsername"
-                        placeholder="Ingrese el nombre de usuario"
-                        value={tiktokVideoUsername}
-                        onChange={(e) => setTiktokVideoUsername(e.target.value)}
-                      />
-                      <Button 
-                        onClick={handleTiktokVideoTest} 
-                        disabled={tiktokVideoLoading}
-                      >
+                      <Input id="tiktokVideoUsername" placeholder="Ingrese el nombre de usuario" value={tiktokVideoUsername} onChange={e => setTiktokVideoUsername(e.target.value)} />
+                      <Button onClick={handleTiktokVideoTest} disabled={tiktokVideoLoading}>
                         {tiktokVideoLoading ? "Procesando..." : "Probar Servicio"}
                       </Button>
                     </div>
-                    {tiktokVideoError && (
-                      <Alert variant="destructive" className="mt-2">
+                    {tiktokVideoError && <Alert variant="destructive" className="mt-2">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
                         <AlertDescription>{tiktokVideoError}</AlertDescription>
-                      </Alert>
-                    )}
+                      </Alert>}
                   </div>
 
-                  {tiktokVideoResult && (
-                    <div className="mt-4">
+                  {tiktokVideoResult && <div className="mt-4">
                       <h3 className="font-medium mb-2">Resultado ({tiktokVideoResult.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(tiktokVideoResult, null, 2)}
                         </pre>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
@@ -422,6 +355,5 @@ export default function AdminTestPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
