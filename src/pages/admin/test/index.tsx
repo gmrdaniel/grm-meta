@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -484,8 +485,27 @@ export default function AdminTestPage() {
                       </Alert>}
                     </div>
 
+                    {facebookPageResult?.success && (
+                      <div className="space-y-3 mt-4 border rounded-md p-4 bg-gray-50">
+                        <h3 className="font-medium">Información de la página:</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="text-sm font-medium">Name:</div>
+                          <div className="text-sm">{facebookPageResult.data?.name || 'No disponible'}</div>
+                          
+                          <div className="text-sm font-medium">Page ID:</div>
+                          <div className="text-sm">{facebookPageResult.data?.page_id || 'No disponible'}</div>
+                          
+                          <div className="text-sm font-medium">Email:</div>
+                          <div className="text-sm">{facebookPageResult.data?.email || 'No disponible'}</div>
+                          
+                          <div className="text-sm font-medium">Followers:</div>
+                          <div className="text-sm">{facebookPageResult.data?.followers || 'No disponible'}</div>
+                        </div>
+                      </div>
+                    )}
+
                     {facebookPageResult && <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado ({facebookPageResult.timestamp}):</h3>
+                      <h3 className="font-medium mb-2">Resultado completo ({facebookPageResult.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(facebookPageResult, null, 2)}
