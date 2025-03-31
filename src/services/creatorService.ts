@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
-import { CreatorFilter } from "@/components/admin/inventory/import-templates/types";
+import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
 
 /**
  * Fetch creators with pagination and filtering
@@ -21,8 +21,18 @@ export const fetchCreators = async (
       query = query.eq('elegible_tiktok', true);
     }
     
-    if (filters.hasTiktokUsername) {
+    if (filters.hasTikTokUsername) {
       query = query.not('usuario_tiktok', 'is', null);
+    }
+
+    // Filter creators without engagement data
+    if (filters.withoutEngagement) {
+      query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
+    }
+    
+    // For withoutVideos filter, we'll use a different approach
+    if (filters.withoutVideos) {
+      // We'll handle this after getting the initial results
     }
   }
   
@@ -38,10 +48,35 @@ export const fetchCreators = async (
     console.error('Error fetching creators:', error);
     throw new Error(error.message);
   }
+
+  let filteredData = data as Creator[];
+  let filteredCount = count || 0;
+  
+  // Special handling for withoutVideos filter
+  if (filters?.withoutVideos && filteredData.length > 0) {
+    // Get the creator IDs from the current result set
+    const creatorIds = filteredData.map(creator => creator.id);
+    
+    // Find which of these creators have videos
+    const { data: videoCountData } = await supabase
+      .from('tiktok_video')
+      .select('creator_id, count')
+      .in('creator_id', creatorIds)
+      .group('creator_id');
+    
+    if (videoCountData) {
+      // Create a Set of creator IDs that have videos
+      const creatorsWithVideos = new Set(videoCountData.map(item => item.creator_id));
+      
+      // Filter out creators that have videos
+      filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
+      filteredCount = filteredData.length;
+    }
+  }
   
   return { 
-    data: data as Creator[], 
-    count: count || 0 
+    data: filteredData, 
+    count: filteredCount 
   };
 };
 

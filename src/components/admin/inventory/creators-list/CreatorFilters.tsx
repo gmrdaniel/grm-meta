@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Filter, X, Check } from "lucide-react";
+import { Filter, X, Check, BarChart2, Video } from "lucide-react";
 import { CreatorFilter } from "./types";
 
 interface CreatorFiltersProps {
@@ -23,7 +23,7 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <Button 
         variant={activeFilters.tiktokEligible ? "default" : "outline"} 
         size="sm"
@@ -35,13 +35,33 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
       </Button>
       
       <Button 
-        variant={activeFilters.hasTiktokUsername ? "default" : "outline"} 
+        variant={activeFilters.hasTikTokUsername ? "default" : "outline"} 
         size="sm"
-        onClick={() => toggleFilter('hasTiktokUsername')}
+        onClick={() => toggleFilter('hasTikTokUsername')}
         className="flex items-center gap-1"
       >
-        {activeFilters.hasTiktokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+        {activeFilters.hasTikTokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
         Usuario TikTok
+      </Button>
+      
+      <Button 
+        variant={activeFilters.withoutEngagement ? "default" : "outline"} 
+        size="sm"
+        onClick={() => toggleFilter('withoutEngagement')}
+        className="flex items-center gap-1"
+      >
+        {activeFilters.withoutEngagement ? <Check className="h-4 w-4" /> : <BarChart2 className="h-4 w-4" />}
+        Sin Engagement
+      </Button>
+      
+      <Button 
+        variant={activeFilters.withoutVideos ? "default" : "outline"} 
+        size="sm"
+        onClick={() => toggleFilter('withoutVideos')}
+        className="flex items-center gap-1"
+      >
+        {activeFilters.withoutVideos ? <Check className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+        Sin Videos
       </Button>
       
       {hasActiveFilters && (

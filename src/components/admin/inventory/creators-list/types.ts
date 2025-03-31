@@ -10,6 +10,8 @@ export interface CreatorsListProps {
 export interface CreatorFilter {
   tiktokEligible?: boolean;
   hasTikTokUsername?: boolean;
+  withoutEngagement?: boolean;
+  withoutVideos?: boolean;
 }
 
 export interface TikTokInfoMutationParams {
