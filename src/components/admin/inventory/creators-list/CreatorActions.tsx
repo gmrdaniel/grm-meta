@@ -28,23 +28,44 @@ export function CreatorActions({ creatorId, username, onSuccess }: CreatorAction
       console.log('Processing TikTok user info result:', userInfo);
       
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
+      const heartCount = userInfo?.userInfo?.stats?.heartCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
       console.log('Extracted follower count:', followerCount);
+      console.log('Extracted heart count:', heartCount);
       console.log('Extracted secUid:', secUid);
       
       if (followerCount !== undefined) {
-        await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
+        // Calculate engagement rate as heart count / follower count * 100 (to get percentage)
+        let engagementRate = null;
+        if (heartCount && followerCount > 0) {
+          engagementRate = (heartCount / followerCount) * 100;
+          console.log('Calculated engagement rate:', engagementRate);
+        }
+        
+        // Update creator with follower count, secUid, and engagement rate
+        await updateCreatorTikTokInfo(creatorId, followerCount, secUid, engagementRate);
         
         const isEligible = followerCount >= 100000;
-        return { followerCount, isEligible, secUid };
+        return { 
+          followerCount, 
+          isEligible, 
+          secUid,
+          engagementRate 
+        };
       }
       
       throw new Error('No se pudo obtener el número de seguidores');
     },
     onSuccess: (data) => {
       const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
-      toast.success(`Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`);
+      let successMessage = `Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`;
+      
+      if (data.engagementRate !== null) {
+        successMessage += `, Engagement: ${data.engagementRate.toFixed(2)}%`;
+      }
+      
+      toast.success(successMessage);
       onSuccess();
     },
     onError: (error) => {

@@ -180,11 +180,16 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
 /**
  * Update creator's TikTok follower count and eligibility status
  */
-export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: number, secUid?: string): Promise<void> => {
+export const updateCreatorTikTokInfo = async (
+  creatorId: string, 
+  followerCount: number, 
+  secUid?: string,
+  engagementRate?: number | null
+): Promise<void> => {
   // Determine eligibility based on follower count
   const isEligible = followerCount >= 100000;
   
-  console.log(`Updating creator ${creatorId} with follower count: ${followerCount}, eligible: ${isEligible}, secUid: ${secUid || 'not provided'}`);
+  console.log(`Updating creator ${creatorId} with follower count: ${followerCount}, eligible: ${isEligible}, secUid: ${secUid || 'not provided'}, engagement: ${engagementRate || 'not calculated'}`);
   
   const updateData: Record<string, any> = { 
     seguidores_tiktok: followerCount,
@@ -194,6 +199,11 @@ export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: 
   // Only include secUid in the update if it's provided
   if (secUid) {
     updateData.secuid_tiktok = secUid;
+  }
+  
+  // Only include engagement rate in the update if it's provided
+  if (engagementRate !== undefined && engagementRate !== null) {
+    updateData.engagement_tiktok = engagementRate;
   }
   
   const { error } = await supabase
