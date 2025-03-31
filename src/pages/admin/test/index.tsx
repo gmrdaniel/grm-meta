@@ -573,14 +573,24 @@ export default function AdminTestPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {facebookReelsResult.data.results.slice(0, 4).map((reel: any, index: number) => (
                             <div key={index} className="border rounded p-3 bg-white">
-                              <div className="text-sm font-medium">Título:</div>
-                              <div className="text-sm mb-2">{reel.title || 'Sin título'}</div>
+                              <div className="text-sm font-medium">Video ID:</div>
+                              <div className="text-sm mb-2">{reel.video_id || 'No disponible'}</div>
                               
-                              <div className="text-sm font-medium">Vistas:</div>
-                              <div className="text-sm mb-2">{reel.views || 'No disponible'}</div>
+                              <div className="text-sm font-medium">URL:</div>
+                              <div className="text-sm mb-2 truncate">
+                                <a href={reel.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                  {reel.url || 'No disponible'}
+                                </a>
+                              </div>
                               
-                              <div className="text-sm font-medium">Fecha:</div>
-                              <div className="text-sm">{reel.date || 'No disponible'}</div>
+                              <div className="text-sm font-medium">Timestamp:</div>
+                              <div className="text-sm mb-2">{reel.timestamp || 'No disponible'}</div>
+                              
+                              <div className="text-sm font-medium">Duración (segundos):</div>
+                              <div className="text-sm mb-2">{reel.length_in_seconds || 'No disponible'}</div>
+                              
+                              <div className="text-sm font-medium">Reproducciones:</div>
+                              <div className="text-sm">{reel.play_count || 'No disponible'}</div>
                             </div>
                           ))}
                         </div>
