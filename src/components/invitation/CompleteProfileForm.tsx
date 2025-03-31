@@ -362,7 +362,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                   </div>
                   <div className="text-sm text-center space-y-2">
                     <p className="text-muted-foreground">
-                      We sent a code to {formData.phoneCountryCode}{"-"}
+                      We sent a code to {formData.phoneCountryCode}{" "}
                       {formData.phoneNumber}
                     </p>
                     {countdown > 0 && (
