@@ -42,60 +42,11 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
 
   return (
     <>
-      {/* Welcome Banner */}
-      <div className="bg-blue-50 p-4 rounded-t-lg border border-blue-100">
-        <div className="flex items-center gap-2 text-blue-600 text-xl font-medium mb-2">
-          <Sparkles className="h-5 w-5" />
-          <span>Welcome, Creator!</span>
-        </div>
-        <div className="flex items-center gap-1 text-red-500 text-sm">
-          <AlertTriangle className="h-4 w-4" />
-          <span>Limited spots available!</span>
-        </div>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="p-4 border-x border-b border-gray-200">
-        <h3 className="font-medium mb-3">Benefits:</h3>
-        <ul className="space-y-2">
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>$5,000 Bonuses (90 days)</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Immediate Facebook Monetization</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Free Meta Verified</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Priority Reach & Insights</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Paid Brand Sponsorships</span>
-          </li>
-        </ul>
-        
-
-      </div>
+     
 
       <CardContent className="space-y-6">
         {/* Join Meta Creator Program Section (Moved from CardHeader) */}
-        <div className="mt-6 border-t border-gray-200 pt-4">
+        <div className="mt-4 border-gray-200 pt-4">
           <h2 className="text-2xl font-bold text-gray-800">Join Meta Creator Program</h2>
           <p className="text-gray-600">
             You've been invited to join Meta's exclusive content creator program

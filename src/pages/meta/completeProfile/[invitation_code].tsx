@@ -93,7 +93,7 @@ const CompleteProfilePage = () => {
     <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Complete Your Profile</CardTitle>
+          <CardTitle className="text-2xl font-bold">Complete Your Application</CardTitle>
           <CardDescription>
             Add additional information to complete your registration
           </CardDescription>

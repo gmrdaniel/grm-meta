@@ -1,12 +1,32 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchInvitations, updateInvitationStatus, deleteInvitation } from "@/services/invitationService";
-import { Check, Copy, MailCheck, RefreshCw, Trash2, X } from "lucide-react";
+import {
+  fetchInvitations,
+  updateInvitationStatus,
+  deleteInvitation,
+  sendCreatorInvitationEmail,
+} from "@/services/invitationService";
+import {
+  Check,
+  Copy,
+  MailCheck,
+  MoreVertical,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -15,29 +35,47 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CreatorInvitation } from "@/types/invitation";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@radix-ui/react-dropdown-menu";
 
 const InvitationsList = () => {
-  const [selectedInvitation, setSelectedInvitation] = useState<string | null>(null);
+  const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
+    null
+  );
   const queryClient = useQueryClient();
 
-  const { data: invitations, isLoading, error } = useQuery({
+  const {
+    data: invitations,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["invitations"],
-    queryFn: fetchInvitations
+    queryFn: fetchInvitations,
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'pending' | 'accepted' | 'rejected' }) => 
-      updateInvitationStatus(id, status),
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: "pending" | "accepted" | "rejected" | 'completed';
+    }) => updateInvitationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       toast.success("Invitation status updated");
     },
     onError: (error: Error) => {
       toast.error(`Error updating invitation: ${error.message}`);
-    }
+    },
   });
 
   const deleteMutation = useMutation({
@@ -48,15 +86,32 @@ const InvitationsList = () => {
     },
     onError: (error: Error) => {
       toast.error(`Error deleting invitation: ${error.message}`);
-    }
+    },
   });
 
-  const handleStatusChange = (id: string, newStatus: 'pending' | 'accepted' | 'rejected') => {
-    updateStatusMutation.mutate({ id, status: newStatus });
-  };
+  const sendEmailMutation = useMutation({
+    mutationFn: ({
+      email,
+      name,
+      invitationUrl,
+    }: {
+      email: string;
+      name?: string;
+      invitationUrl: string;
+    }) => sendCreatorInvitationEmail({ email, name, invitationUrl }),
+    onSuccess: () => {
+      toast.success("Invitation email sent successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error sending email: ${error.message}`);
+    },
+  });
 
-  const handleDelete = (id: string) => {
-    setSelectedInvitation(id);
+  const handleStatusChange = (
+    id: string,
+    newStatus: "pending" | "accepted" | "rejected" | 'completed'
+  ) => {
+    updateStatusMutation.mutate({ id, status: newStatus });
   };
 
   const confirmDelete = () => {
@@ -66,17 +121,24 @@ const InvitationsList = () => {
     }
   };
 
-  const copyInvitationLink = (invitation: CreatorInvitation) => {
+  const createInvitationLink = (invitation: CreatorInvitation) => { 
     const baseUrl = window.location.origin;
     const fullUrl = `${baseUrl}${invitation.invitation_url}`;
+
+    return fullUrl
+  }
+  const copyInvitationLink = (invitation: CreatorInvitation) => {
     
-    navigator.clipboard.writeText(fullUrl)
+
+    navigator.clipboard
+      .writeText(createInvitationLink(invitation))
       .then(() => toast.success("Invitation link copied to clipboard"))
       .catch(() => toast.error("Failed to copy invitation link"));
   };
 
   const copyInvitationCode = (code: string) => {
-    navigator.clipboard.writeText(code)
+    navigator.clipboard
+      .writeText(code)
       .then(() => toast.success("Invitation code copied to clipboard"))
       .catch(() => toast.error("Failed to copy invitation code"));
   };
@@ -88,18 +150,32 @@ const InvitationsList = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+            Pending
+          </Badge>
+        );
       case "accepted":
-        return <Badge variant="outline" className="bg-green-100 text-green-800">Accepted</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            Accepted
+          </Badge>
+        );
       case "rejected":
-        return <Badge variant="outline" className="bg-red-100 text-red-800">Rejected</Badge>;
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800">
+            Rejected
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-4">Loading invitations...</div>;
+    return (
+      <div className="flex justify-center p-4">Loading invitations...</div>
+    );
   }
 
   if (error) {
@@ -127,16 +203,22 @@ const InvitationsList = () => {
         <TableBody>
           {invitations.map((invitation: CreatorInvitation) => (
             <TableRow key={invitation.id}>
-              <TableCell className="font-medium">{invitation.full_name}</TableCell>
+              <TableCell className="font-medium">
+                {invitation.full_name}
+              </TableCell>
               <TableCell>{invitation.email}</TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
-                  <span className="font-mono text-sm">{invitation.invitation_code || 'N/A'}</span>
+                  <span className="font-mono text-sm">
+                    {invitation.invitation_code || "N/A"}
+                  </span>
                   {invitation.invitation_code && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => copyInvitationCode(invitation.invitation_code)}
+                      onClick={() =>
+                        copyInvitationCode(invitation.invitation_code)
+                      }
                       title="Copy invitation code"
                     >
                       <Copy size={16} />
@@ -145,84 +227,124 @@ const InvitationsList = () => {
                 </div>
               </TableCell>
               <TableCell>
-                {invitation.invitation_type === "new_user" ? "New User" : "Existing User"}
+                {invitation.invitation_type === "new_user"
+                  ? "New User"
+                  : "Existing User"}
               </TableCell>
               <TableCell>{getStatusBadge(invitation.status)}</TableCell>
-              <TableCell>{new Date(invitation.created_at).toLocaleDateString()}</TableCell>
+              <TableCell>
+                {new Date(invitation.created_at).toLocaleDateString()}
+              </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => copyInvitationLink(invitation)}
-                    title="Copy invitation link"
-                  >
-                    <Copy size={16} />
-                  </Button>
-                  
-                  {invitation.status === "pending" && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleStatusChange(invitation.id, "accepted")}
-                        className="text-green-600"
-                        title="Mark as accepted"
-                      >
-                        <Check size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleStatusChange(invitation.id, "rejected")}
-                        className="text-red-600"
-                        title="Mark as rejected"
-                      >
-                        <X size={16} />
-                      </Button>
-                    </>
-                  )}
-
-                  {invitation.status !== "pending" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => resetInvitationStatus(invitation.id)}
-                      className="text-blue-600"
-                      title="Reset to pending"
-                    >
-                      <RefreshCw size={16} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical size={16} />
                     </Button>
-                  )}
-                  
-                  <AlertDialog open={selectedInvitation === invitation.id} onOpenChange={(open) => !open && setSelectedInvitation(null)}>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(invitation.id)}
-                        className="text-red-600"
-                        title="Delete invitation"
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    side="bottom"
+                    sideOffset={8}
+                    collisionPadding={16}
+                    className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => copyInvitationLink(invitation)}
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy invitation link
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        sendEmailMutation.mutate({
+                          email: invitation.email,
+                          name: invitation.full_name,
+                          invitationUrl: createInvitationLink(invitation),
+                        })
+                      }
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-indigo-600"
+                    >
+                      <MailCheck className="mr-2 h-4 w-4" />
+                      Send invitation email
+                    </DropdownMenuItem>
+
+                    {invitation.status === "pending" && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleStatusChange(invitation.id, "accepted")
+                          }
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-green-600"
+                        >
+                          <Check className="mr-2 h-4 w-4" />
+                          Mark as accepted
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleStatusChange(invitation.id, "rejected")
+                          }
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Mark as rejected
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
+                    {invitation.status !== "pending" && (
+                      <DropdownMenuItem
+                        onClick={() => resetInvitationStatus(invitation.id)}
+                        className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-blue-600"
                       >
-                        <Trash2 size={16} />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Invitation</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this invitation? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Reset to pending
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    <AlertDialog
+                      open={selectedInvitation === invitation.id}
+                      onOpenChange={(open) =>
+                        !open && setSelectedInvitation(null)
+                      }
+                    >
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setSelectedInvitation(invitation.id);
+                          }}
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete invitation
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Invitation</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this invitation?
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}

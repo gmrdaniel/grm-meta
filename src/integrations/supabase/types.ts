@@ -89,75 +89,6 @@ export type Database = {
         }
         Relationships: []
       }
-      creator_inventory: {
-        Row: {
-          apellido: string
-          correo: string
-          elegible_tiktok: boolean | null
-          elegible_youtube: boolean | null
-          engagement_tiktok: number | null
-          engagement_youtube: number | null
-          estatus: string | null
-          fecha_creacion: string | null
-          id: string
-          lada_telefono: string | null
-          nombre: string
-          page_facebook: string | null
-          secuid_tiktok: string | null
-          seguidores_pinterest: number | null
-          seguidores_tiktok: number | null
-          seguidores_youtube: number | null
-          telefono: string | null
-          usuario_pinterest: string | null
-          usuario_tiktok: string | null
-          usuario_youtube: string | null
-        }
-        Insert: {
-          apellido: string
-          correo: string
-          elegible_tiktok?: boolean | null
-          elegible_youtube?: boolean | null
-          engagement_tiktok?: number | null
-          engagement_youtube?: number | null
-          estatus?: string | null
-          fecha_creacion?: string | null
-          id?: string
-          lada_telefono?: string | null
-          nombre: string
-          page_facebook?: string | null
-          secuid_tiktok?: string | null
-          seguidores_pinterest?: number | null
-          seguidores_tiktok?: number | null
-          seguidores_youtube?: number | null
-          telefono?: string | null
-          usuario_pinterest?: string | null
-          usuario_tiktok?: string | null
-          usuario_youtube?: string | null
-        }
-        Update: {
-          apellido?: string
-          correo?: string
-          elegible_tiktok?: boolean | null
-          elegible_youtube?: boolean | null
-          engagement_tiktok?: number | null
-          engagement_youtube?: number | null
-          estatus?: string | null
-          fecha_creacion?: string | null
-          id?: string
-          lada_telefono?: string | null
-          nombre?: string
-          page_facebook?: string | null
-          secuid_tiktok?: string | null
-          seguidores_pinterest?: number | null
-          seguidores_tiktok?: number | null
-          seguidores_youtube?: number | null
-          telefono?: string | null
-          usuario_pinterest?: string | null
-          usuario_tiktok?: string | null
-          usuario_youtube?: string | null
-        }
-        Relationships: []
-      }
       creator_invitations: {
         Row: {
           created_at: string
@@ -228,6 +159,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      creator_inventory: {
+        Row: {
+          apellido: string
+          correo: string
+          elegible_tiktok: boolean | null
+          elegible_youtube: boolean | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
+          estatus: string | null
+          fecha_creacion: string | null
+          id: string
+          lada_telefono: string | null
+          nombre: string
+          page_facebook: string | null
+          secuid_tiktok: string | null
+          seguidores_pinterest: number | null
+          seguidores_tiktok: number | null
+          seguidores_youtube: number | null
+          telefono: string | null
+          usuario_pinterest: string | null
+          usuario_tiktok: string | null
+          usuario_youtube: string | null
+        }
+        Insert: {
+          apellido: string
+          correo: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre: string
+          page_facebook?: string | null
+          secuid_tiktok?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+          usuario_youtube?: string | null
+        }
+        Update: {
+          apellido?: string
+          correo?: string
+          elegible_tiktok?: boolean | null
+          elegible_youtube?: boolean | null
+          engagement_tiktok?: number | null
+          engagement_youtube?: number | null
+          estatus?: string | null
+          fecha_creacion?: string | null
+          id?: string
+          lada_telefono?: string | null
+          nombre?: string
+          page_facebook?: string | null
+          secuid_tiktok?: string | null
+          seguidores_pinterest?: number | null
+          seguidores_tiktok?: number | null
+          seguidores_youtube?: number | null
+          telefono?: string | null
+          usuario_pinterest?: string | null
+          usuario_tiktok?: string | null
+          usuario_youtube?: string | null
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -623,7 +623,7 @@ export type Database = {
       }
     }
     Enums: {
-      invitation_status: "pending" | "accepted" | "rejected"
+      invitation_status: "pending" | "accepted" | "rejected" | 'completed'
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
