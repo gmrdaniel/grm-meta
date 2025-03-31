@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,6 +188,22 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
         <div>
           <h2 className="text-2xl font-bold">Resumen de Creadores</h2>
           <p className="text-gray-500">Total: {totalCount} creadores</p>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-sm text-gray-500">Resultados por página:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="w-[70px]">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div className="flex gap-2">
@@ -307,24 +324,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
             </Table>
           </div>
           
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Resultados por página:</span>
-              <Select
-                value={pageSize.toString()}
-                onValueChange={handlePageSizeChange}
-              >
-                <SelectTrigger className="w-[70px]">
-                  <SelectValue placeholder="10" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
+          <div className="flex items-center justify-end mt-4">
             {totalPages > 1 && (
               <div className="flex gap-1">
                 <Button
