@@ -70,6 +70,8 @@ export function CreatorsList({
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
   const [bulkUpdatingTikTok, setBulkUpdatingTikTok] = useState(false);
   const [bulkUpdateProgress, setBulkUpdateProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
+  const [bulkDownloadingVideos, setBulkDownloadingVideos] = useState(false);
+  const [bulkVideoProgress, setBulkVideoProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
 
   const { 
     data: creatorsData, 
@@ -294,6 +296,54 @@ export function CreatorsList({
     }
   };
 
+  const downloadAllTikTokVideos = async () => {
+    try {
+      setBulkDownloadingVideos(true);
+      
+      const allCreatorsResponse = await fetchCreators(1, 1000, { hasTiktokUsername: true });
+      const creatorsWithTikTok = allCreatorsResponse.data.filter(creator => creator.usuario_tiktok);
+      
+      if (creatorsWithTikTok.length === 0) {
+        toast.info("No se encontraron creadores con nombre de usuario de TikTok");
+        setBulkDownloadingVideos(false);
+        return;
+      }
+      
+      setBulkVideoProgress({current: 0, total: creatorsWithTikTok.length});
+      
+      let successCount = 0;
+      let failCount = 0;
+      let totalVideos = 0;
+      
+      for (let i = 0; i < creatorsWithTikTok.length; i++) {
+        const creator = creatorsWithTikTok[i];
+        setBulkVideoProgress({current: i + 1, total: creatorsWithTikTok.length});
+        
+        if (creator.usuario_tiktok) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const result = await fetchTikTokUserVideos(creator.usuario_tiktok, creator.id);
+            totalVideos += result.savedCount;
+            successCount++;
+          } catch (err) {
+            console.error(`Error descargando videos para ${creator.nombre} ${creator.apellido}:`, err);
+            failCount++;
+          }
+        }
+      }
+      
+      toast.success(`Descarga masiva completada: ${successCount} creadores procesados, ${totalVideos} videos guardados, ${failCount} errores`);
+      refetch();
+    } catch (error) {
+      console.error("Error en descarga masiva:", error);
+      toast.error(`Error en descarga masiva: ${(error as Error).message}`);
+    } finally {
+      setBulkDownloadingVideos(false);
+      setBulkVideoProgress({current: 0, total: 0});
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -318,12 +368,12 @@ export function CreatorsList({
           <p className="text-gray-500">Total: {totalCount} creadores</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="secondary"
             size="sm" 
             onClick={updateAllTikTokCreators} 
-            disabled={bulkUpdatingTikTok}
+            disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
             className="flex items-center gap-1"
           >
             {bulkUpdatingTikTok ? (
@@ -334,6 +384,23 @@ export function CreatorsList({
             {bulkUpdatingTikTok 
               ? `Actualizando... ${bulkUpdateProgress.current}/${bulkUpdateProgress.total}` 
               : "Actualizar todos los perfiles TikTok"}
+          </Button>
+          
+          <Button 
+            variant="secondary"
+            size="sm" 
+            onClick={downloadAllTikTokVideos} 
+            disabled={bulkUpdatingTikTok || bulkDownloadingVideos}
+            className="flex items-center gap-1"
+          >
+            {bulkDownloadingVideos ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-1" />
+            )}
+            {bulkDownloadingVideos 
+              ? `Descargando... ${bulkVideoProgress.current}/${bulkVideoProgress.total}` 
+              : "Descargar todos los videos TikTok"}
           </Button>
           
           <Button 
