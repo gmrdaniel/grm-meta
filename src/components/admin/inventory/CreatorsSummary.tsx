@@ -18,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, Check, X, Calendar, Users, Clock } from "lucide-react";
+import { Filter, Check, X, Calendar, Users, Clock, ArrowUp, ArrowDown, ListOrdered } from "lucide-react";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface SummaryCreator {
   nombre: string;
@@ -40,6 +41,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tiktokEligibleFilter, setTiktokEligibleFilter] = useState(false);
+  const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
   
   const fetchSummaryCreators = async () => {
     try {
@@ -49,19 +51,36 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
       
       // Apply TikTok eligibility filter if enabled
       if (tiktokEligibleFilter) {
-        query = query.gte('seguidores_tiktok', 100000);
+        query = query
+          .gte('seguidores_tiktok', 100000)
+          .gte('engagement', 4);
+      }
+      
+      // Apply sorting if enabled
+      if (sortByEligible) {
+        // Using a custom sorting logic for eligibility
+        // First sort by seguidores_tiktok and then by engagement
+        if (sortByEligible === 'desc') {
+          query = query.order('seguidores_tiktok', { ascending: false }).order('engagement', { ascending: false });
+        } else {
+          query = query.order('seguidores_tiktok', { ascending: true }).order('engagement', { ascending: true });
+        }
+      } else {
+        // Default sort by followers
+        query = query.order('seguidores_tiktok', { ascending: false });
       }
       
       const { data, error } = await query
-        .range((currentPage - 1) * pageSize, currentPage * pageSize - 1)
-        .order('seguidores_tiktok', { ascending: false });
+        .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
       
       if (error) throw error;
       
       // Get total count for pagination
       const { count: totalCount, error: countError } = await supabase
         .from('summary_creator')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .if(tiktokEligibleFilter, (query) => 
+          query.gte('seguidores_tiktok', 100000).gte('engagement', 4));
         
       if (countError) throw countError;
       
@@ -76,7 +95,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
   };
   
   const { data: creatorsData, isLoading, error, refetch } = useQuery({
-    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter],
+    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, sortByEligible],
     queryFn: fetchSummaryCreators
   });
   
@@ -107,6 +126,11 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     if (!timestamp) return "N/A";
     return format(new Date(timestamp * 1000), "MMM d, yyyy");
   };
+
+  // Function to check if a creator is TikTok eligible
+  const isEligibleForTikTok = (creator: SummaryCreator) => {
+    return creator.seguidores_tiktok >= 100000 && creator.engagement >= 4;
+  };
   
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -120,6 +144,18 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
   
   const toggleTiktokEligibleFilter = () => {
     setTiktokEligibleFilter(prev => !prev);
+    setCurrentPage(1);
+  };
+
+  // Function to toggle sorting by eligible
+  const toggleSortByEligible = () => {
+    if (sortByEligible === null) {
+      setSortByEligible('desc');
+    } else if (sortByEligible === 'desc') {
+      setSortByEligible('asc');
+    } else {
+      setSortByEligible(null);
+    }
     setCurrentPage(1);
   };
   
@@ -149,20 +185,35 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
         
         <div className="flex gap-2">
           <Button 
+            variant={sortByEligible !== null ? "default" : "outline"} 
+            size="sm"
+            onClick={toggleSortByEligible}
+            className="flex items-center gap-1"
+          >
+            {sortByEligible === 'desc' && <ArrowDown className="h-4 w-4" />}
+            {sortByEligible === 'asc' && <ArrowUp className="h-4 w-4" />}
+            {sortByEligible === null && <ListOrdered className="h-4 w-4" />}
+            Ordenar por elegibilidad
+          </Button>
+          
+          <Button 
             variant={tiktokEligibleFilter ? "default" : "outline"} 
             size="sm"
             onClick={toggleTiktokEligibleFilter}
             className="flex items-center gap-1"
           >
             {tiktokEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            TikTok Elegible
+            Elegible x TikTok
           </Button>
           
-          {tiktokEligibleFilter && (
+          {(tiktokEligibleFilter || sortByEligible !== null) && (
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => setTiktokEligibleFilter(false)}
+              onClick={() => {
+                setTiktokEligibleFilter(false);
+                setSortByEligible(null);
+              }}
               className="flex items-center gap-1"
             >
               <X className="h-4 w-4" />
@@ -182,10 +233,12 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px] text-center">#</TableHead>
                   <TableHead className="w-[250px]">Creador</TableHead>
                   <TableHead>TikTok</TableHead>
                   <TableHead>Seguidores</TableHead>
                   <TableHead>Engagement</TableHead>
+                  <TableHead>Elegible x TikTok</TableHead>
                   <TableHead>Duración Prom.</TableHead>
                   <TableHead>Último Post</TableHead>
                 </TableRow>
@@ -193,6 +246,9 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
               <TableBody>
                 {creators.map((creator, index) => (
                   <TableRow key={index}>
+                    <TableCell className="text-center font-medium">
+                      {(currentPage - 1) * pageSize + index + 1}
+                    </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{creator.nombre} {creator.apellido}</div>
@@ -220,6 +276,13 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
                       </div>
                     </TableCell>
                     <TableCell>{formatEngagement(creator.engagement)}</TableCell>
+                    <TableCell>
+                      {isEligibleForTikTok(creator) ? (
+                        <Badge className="bg-green-500">Elegible</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-gray-500">No elegible</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4 text-gray-500" />
