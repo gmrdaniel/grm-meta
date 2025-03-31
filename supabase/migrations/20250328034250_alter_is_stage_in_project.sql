@@ -1,4 +1,4 @@
-ALTER TABLE creator_invitations
+/* ALTER TABLE creator_invitations
 DROP CONSTRAINT IF EXISTS check_stage_belongs_to_project;
 
 DROP FUNCTION IF EXISTS is_stage_in_project(UUID, UUID);
@@ -19,3 +19,4 @@ CHECK (
   current_stage_id IS NULL OR 
   is_stage_in_project(current_stage_id, project_id)
 );
+ */
