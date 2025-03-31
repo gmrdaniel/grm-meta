@@ -7,10 +7,12 @@ import { fetchInvitationByCode } from "@/services/invitationService";
 import { fetchTikTokUserInfo } from "@/services/tiktokVideoService";
 import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Facebook } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
   const [result, setResult] = useState<any>(null);
@@ -27,6 +29,15 @@ export default function AdminTestPage() {
   const [tiktokVideoResult, setTiktokVideoResult] = useState<any>(null);
   const [tiktokVideoLoading, setTiktokVideoLoading] = useState<boolean>(false);
   const [tiktokVideoError, setTiktokVideoError] = useState<string | null>(null);
+  
+  const [facebookPageUrl, setFacebookPageUrl] = useState<string>("");
+  const [facebookPageResult, setFacebookPageResult] = useState<any>(null);
+  const [facebookPageLoading, setFacebookPageLoading] = useState<boolean>(false);
+  const [facebookPageError, setFacebookPageError] = useState<string | null>(null);
+  const [facebookPageValidationResult, setFacebookPageValidationResult] = useState<any>(null);
+  const [facebookPageValidationLoading, setFacebookPageValidationLoading] = useState<boolean>(false);
+  const [facebookPageValidationError, setFacebookPageValidationError] = useState<string | null>(null);
+
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
       setError("Por favor ingrese un código de invitación");
@@ -53,6 +64,7 @@ export default function AdminTestPage() {
       setLoading(false);
     }
   };
+
   const handleDirectTest = async () => {
     if (!invitationCode.trim()) {
       setDirectError("Por favor ingrese un código de invitación");
@@ -85,6 +97,7 @@ export default function AdminTestPage() {
       setDirectLoading(false);
     }
   };
+
   const handleTiktokTest = async () => {
     if (!tiktokUsername.trim()) {
       setTiktokError("Por favor ingrese un nombre de usuario");
@@ -111,6 +124,7 @@ export default function AdminTestPage() {
       setTiktokLoading(false);
     }
   };
+
   const handleTiktokVideoTest = async () => {
     if (!tiktokVideoUsername.trim()) {
       setTiktokVideoError("Por favor ingrese un nombre de usuario");
@@ -149,6 +163,85 @@ export default function AdminTestPage() {
       setTiktokVideoLoading(false);
     }
   };
+
+  const handleFacebookPageTest = async () => {
+    if (!facebookPageUrl.trim()) {
+      setFacebookPageError("Por favor ingrese una URL de página de Facebook");
+      return;
+    }
+    
+    setFacebookPageLoading(true);
+    setFacebookPageError(null);
+    
+    try {
+      const encodedUrl = encodeURIComponent(facebookPageUrl);
+      const url = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedUrl}`;
+      
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'facebook-scraper3.p.rapidapi.com'
+        }
+      };
+      
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      setFacebookPageResult({
+        data,
+        success: true,
+        timestamp: new Date().toLocaleString()
+      });
+    } catch (err) {
+      console.error("Error testing Facebook Page API:", err);
+      setFacebookPageError("Error al consultar la API de Facebook: " + (err instanceof Error ? err.message : String(err)));
+      setFacebookPageResult({
+        success: false,
+        error: err,
+        timestamp: new Date().toLocaleString()
+      });
+    } finally {
+      setFacebookPageLoading(false);
+    }
+  };
+
+  const handleFacebookPageValidationTest = async () => {
+    if (!facebookPageUrl.trim()) {
+      setFacebookPageValidationError("Por favor ingrese una URL de página de Facebook");
+      return;
+    }
+    
+    setFacebookPageValidationLoading(true);
+    setFacebookPageValidationError(null);
+    
+    try {
+      const { validateFacebookPageUrl } = await import("@/utils/validationUtils");
+      
+      const validationResult = validateFacebookPageUrl(facebookPageUrl);
+      
+      setFacebookPageValidationResult({
+        data: validationResult,
+        success: true,
+        timestamp: new Date().toLocaleString()
+      });
+    } catch (err) {
+      console.error("Error validating Facebook Page URL:", err);
+      setFacebookPageValidationError("Error al validar la URL: " + (err instanceof Error ? err.message : String(err)));
+      setFacebookPageValidationResult({
+        success: false,
+        error: err,
+        timestamp: new Date().toLocaleString()
+      });
+    } finally {
+      setFacebookPageValidationLoading(false);
+    }
+  };
+
   return <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Panel de Pruebas (Admin)</h1>
@@ -167,7 +260,8 @@ export default function AdminTestPage() {
             <TabsTrigger value="service">Usando Servicio</TabsTrigger>
             <TabsTrigger value="direct">Llamada Directa RPC</TabsTrigger>
             <TabsTrigger value="tiktok">TikTok API</TabsTrigger>
-            
+            <TabsTrigger value="tiktok-video">TikTok Video API</TabsTrigger>
+            <TabsTrigger value="facebook">Facebook API</TabsTrigger>
           </TabsList>
           
           <TabsContent value="service">
@@ -352,6 +446,108 @@ export default function AdminTestPage() {
                 Este panel permite probar la API de TikTok para obtener videos de usuarios
               </CardFooter>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="facebook">
+            <div className="grid grid-cols-1 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Detalles de Página Facebook
+                    <Badge variant="outline" className="ml-2">API RapidAPI</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Esta prueba consulta detalles de una página de Facebook utilizando RapidAPI
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="facebookPageUrl" className="block text-sm font-medium mb-1">
+                        URL página Facebook
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          id="facebookPageUrl" 
+                          placeholder="https://www.facebook.com/pagina" 
+                          value={facebookPageUrl} 
+                          onChange={e => setFacebookPageUrl(e.target.value)} 
+                        />
+                        <Button onClick={handleFacebookPageTest} disabled={facebookPageLoading}>
+                          {facebookPageLoading ? "Procesando..." : "Probar API"}
+                        </Button>
+                      </div>
+                      {facebookPageError && <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{facebookPageError}</AlertDescription>
+                      </Alert>}
+                    </div>
+
+                    {facebookPageResult && <div className="mt-4">
+                      <h3 className="font-medium mb-2">Resultado ({facebookPageResult.timestamp}):</h3>
+                      <div className="bg-gray-50 p-4 rounded-md border">
+                        <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
+                          {JSON.stringify(facebookPageResult, null, 2)}
+                        </pre>
+                      </div>
+                    </div>}
+                  </div>
+                </CardContent>
+                <CardFooter className="text-sm text-gray-500">
+                  Este panel permite probar la API de Facebook para obtener detalles de una página
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Validación URL Facebook
+                    <Badge variant="outline" className="ml-2">validationUtils</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Esta prueba valida el formato de una URL de página de Facebook
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="facebookPageUrlValidation" className="block text-sm font-medium mb-1">
+                        URL página Facebook
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          id="facebookPageUrlValidation" 
+                          placeholder="https://www.facebook.com/pagina" 
+                          value={facebookPageUrl} 
+                          onChange={e => setFacebookPageUrl(e.target.value)} 
+                        />
+                        <Button onClick={handleFacebookPageValidationTest} disabled={facebookPageValidationLoading}>
+                          {facebookPageValidationLoading ? "Procesando..." : "Validar URL"}
+                        </Button>
+                      </div>
+                      {facebookPageValidationError && <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{facebookPageValidationError}</AlertDescription>
+                      </Alert>}
+                    </div>
+
+                    {facebookPageValidationResult && <div className="mt-4">
+                      <h3 className="font-medium mb-2">Resultado ({facebookPageValidationResult.timestamp}):</h3>
+                      <div className="bg-gray-50 p-4 rounded-md border">
+                        <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
+                          {JSON.stringify(facebookPageValidationResult, null, 2)}
+                        </pre>
+                      </div>
+                    </div>}
+                  </div>
+                </CardContent>
+                <CardFooter className="text-sm text-gray-500">
+                  Este panel permite validar el formato de una URL de página de Facebook
+                </CardFooter>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
