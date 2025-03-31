@@ -5,17 +5,20 @@ import { fetchCreatorsSummary } from "@/services/summaryCreatorService";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw, Filter } from "lucide-react";
 import FechaDesdeTimestamp from "@/components/admin/test/FechaDesdeTimestamp";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function CreatorsSummary() {
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+  const [filterEligible, setFilterEligible] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["creators-summary", page, pageSize],
-    queryFn: () => fetchCreatorsSummary(page, pageSize),
+    queryKey: ["creators-summary", page, pageSize, filterEligible],
+    queryFn: () => fetchCreatorsSummary(page, pageSize, filterEligible),
   });
 
   const handlePreviousPage = () => {
@@ -33,6 +36,16 @@ export function CreatorsSummary() {
   const isEligible = (followers: number | null, engagement: number | null) => {
     if (!followers || !engagement) return false;
     return followers > 100000 && engagement > 4;
+  };
+
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(Number(value));
+    setPage(1); // Reset to first page when changing page size
+  };
+
+  const handleFilterChange = (checked: boolean) => {
+    setFilterEligible(checked);
+    setPage(1); // Reset to first page when changing filter
   };
 
   if (isLoading) {
@@ -61,6 +74,37 @@ export function CreatorsSummary() {
         <Button onClick={() => refetch()} variant="outline" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" /> Actualizar
         </Button>
+      </div>
+      
+      <div className="flex flex-wrap gap-4 items-center justify-between bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-gray-500" />
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="filter-eligible" 
+              checked={filterEligible} 
+              onCheckedChange={handleFilterChange}
+            />
+            <label htmlFor="filter-eligible" className="text-sm font-medium">
+              Solo mostrar TikTok elegibles
+            </label>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Mostrar</span>
+          <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="w-20">
+              <SelectValue placeholder="10" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-gray-500">por página</span>
+        </div>
       </div>
 
       <div className="bg-white rounded-md shadow overflow-hidden">

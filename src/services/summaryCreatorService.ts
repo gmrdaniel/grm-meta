@@ -13,18 +13,28 @@ export interface SummaryCreator {
 }
 
 /**
- * Fetch creator summary data with pagination
+ * Fetch creator summary data with pagination and filtering
  */
 export const fetchCreatorsSummary = async (
   page: number = 1, 
-  pageSize: number = 10
+  pageSize: number = 10,
+  filterEligible: boolean = false
 ): Promise<{ data: SummaryCreator[], count: number }> => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   
-  const { data, error, count } = await supabase
+  let query = supabase
     .from('summary_creator')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'exact' });
+  
+  // Apply eligibility filter if requested
+  if (filterEligible) {
+    query = query
+      .gt('seguidores_tiktok', 100000)
+      .gt('engagement', 4);
+  }
+  
+  const { data, error, count } = await query
     .range(from, to);
   
   if (error) {
