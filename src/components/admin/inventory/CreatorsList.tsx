@@ -96,23 +96,35 @@ export function CreatorsList({
       console.log('Processing TikTok user info result:', userInfo);
       
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
+      const heartCount = userInfo?.userInfo?.stats?.heartCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
       
       console.log('Extracted follower count:', followerCount);
+      console.log('Extracted heart count:', heartCount);
       console.log('Extracted secUid:', secUid);
       
+      let engagementRate: number | undefined = undefined;
+      
+      if (followerCount && heartCount && followerCount > 0) {
+        engagementRate = (heartCount / followerCount) * 100; // Convertir a porcentaje
+        console.log('Calculated engagement rate:', engagementRate);
+      }
+      
       if (followerCount !== undefined) {
-        await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
+        await updateCreatorTikTokInfo(creatorId, followerCount, engagementRate, secUid);
         
         const isEligible = followerCount >= 100000;
-        return { followerCount, isEligible, secUid };
+        return { followerCount, isEligible, secUid, engagementRate };
       }
       
       throw new Error('No se pudo obtener el número de seguidores');
     },
     onSuccess: (data, variables) => {
       const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
-      toast.success(`Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`);
+      const engagementInfo = data.engagementRate !== undefined ? 
+        ` (Engagement: ${data.engagementRate.toFixed(2)}%)` : '';
+      
+      toast.success(`Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} ${engagementInfo} (${eligibilityStatus})`);
       refetch();
     },
     onError: (error) => {

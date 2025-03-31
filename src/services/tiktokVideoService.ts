@@ -162,6 +162,7 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 export const updateCreatorTikTokInfo = async (
   creatorId: string, 
   followerCount: number,
+  engagementRate?: number,
   secUid?: string
 ): Promise<void> => {
   const isEligible = followerCount >= 100000;
@@ -170,6 +171,7 @@ export const updateCreatorTikTokInfo = async (
     seguidores_tiktok: number;
     elegible_tiktok: boolean;
     secuid_tiktok?: string;
+    engagement_tiktok?: number;
   } = {
     seguidores_tiktok: followerCount,
     elegible_tiktok: isEligible
@@ -177,6 +179,10 @@ export const updateCreatorTikTokInfo = async (
   
   if (secUid) {
     updateData.secuid_tiktok = secUid;
+  }
+  
+  if (engagementRate !== undefined) {
+    updateData.engagement_tiktok = engagementRate;
   }
   
   const { error } = await supabase

@@ -161,6 +161,7 @@ export type Database = {
       creator_invitations: {
         Row: {
           created_at: string
+          current_stage_id: string | null
           email: string
           facebook_page: string | null
           full_name: string
@@ -181,6 +182,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_stage_id?: string | null
           email: string
           facebook_page?: string | null
           full_name: string
@@ -201,6 +203,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_stage_id?: string | null
           email?: string
           facebook_page?: string | null
           full_name?: string
@@ -220,6 +223,13 @@ export type Database = {
           youtube_channel?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "creator_invitations_current_stage_id_fkey"
+            columns: ["current_stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "creator_invitations_project_id_fkey"
             columns: ["project_id"]
@@ -543,6 +553,7 @@ export type Database = {
         }
         Returns: {
           created_at: string
+          current_stage_id: string | null
           email: string
           facebook_page: string | null
           full_name: string
@@ -615,6 +626,13 @@ export type Database = {
         }
         Returns: string
       }
+      is_stage_in_project: {
+        Args: {
+          stage_id: string
+          project_id_param: string
+        }
+        Returns: boolean
+      }
       update_stages_order: {
         Args: {
           stages_data: Json[]
@@ -623,7 +641,7 @@ export type Database = {
       }
     }
     Enums: {
-      invitation_status: "pending" | "accepted" | "rejected"
+      invitation_status: "pending" | "accepted" | "rejected" | "completed"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
