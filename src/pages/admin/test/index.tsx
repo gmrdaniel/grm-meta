@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -35,9 +34,11 @@ export default function AdminTestPage() {
   const [facebookPageResult, setFacebookPageResult] = useState<any>(null);
   const [facebookPageLoading, setFacebookPageLoading] = useState<boolean>(false);
   const [facebookPageError, setFacebookPageError] = useState<string | null>(null);
-  const [facebookPageValidationResult, setFacebookPageValidationResult] = useState<any>(null);
-  const [facebookPageValidationLoading, setFacebookPageValidationLoading] = useState<boolean>(false);
-  const [facebookPageValidationError, setFacebookPageValidationError] = useState<string | null>(null);
+  
+  const [facebookPageId, setFacebookPageId] = useState<string>("");
+  const [facebookReelsResult, setFacebookReelsResult] = useState<any>(null);
+  const [facebookReelsLoading, setFacebookReelsLoading] = useState<boolean>(false);
+  const [facebookReelsError, setFacebookReelsError] = useState<string | null>(null);
 
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
@@ -194,7 +195,7 @@ export default function AdminTestPage() {
       const data = await response.json();
       
       setFacebookPageResult({
-        data,
+        data: data.results,
         success: true,
         timestamp: new Date().toLocaleString()
       });
@@ -211,35 +212,48 @@ export default function AdminTestPage() {
     }
   };
 
-  const handleFacebookPageValidationTest = async () => {
-    if (!facebookPageUrl.trim()) {
-      setFacebookPageValidationError("Por favor ingrese una URL de página de Facebook");
+  const handleFacebookReelsTest = async () => {
+    if (!facebookPageId.trim()) {
+      setFacebookReelsError("Por favor ingrese un ID de página de Facebook");
       return;
     }
     
-    setFacebookPageValidationLoading(true);
-    setFacebookPageValidationError(null);
+    setFacebookReelsLoading(true);
+    setFacebookReelsError(null);
     
     try {
-      const { validateFacebookPageUrl } = await import("@/utils/validationUtils");
+      const url = `https://facebook-scraper3.p.rapidapi.com/page/reels?page_id=${facebookPageId}`;
       
-      const validationResult = validateFacebookPageUrl(facebookPageUrl);
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'facebook-scraper3.p.rapidapi.com'
+        }
+      };
       
-      setFacebookPageValidationResult({
-        data: validationResult,
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      setFacebookReelsResult({
+        data,
         success: true,
         timestamp: new Date().toLocaleString()
       });
     } catch (err) {
-      console.error("Error validating Facebook Page URL:", err);
-      setFacebookPageValidationError("Error al validar la URL: " + (err instanceof Error ? err.message : String(err)));
-      setFacebookPageValidationResult({
+      console.error("Error fetching Facebook Reels:", err);
+      setFacebookReelsError("Error al consultar la API de Facebook Reels: " + (err instanceof Error ? err.message : String(err)));
+      setFacebookReelsResult({
         success: false,
         error: err,
         timestamp: new Date().toLocaleString()
       });
     } finally {
-      setFacebookPageValidationLoading(false);
+      setFacebookReelsLoading(false);
     }
   };
 
@@ -522,49 +536,69 @@ export default function AdminTestPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    Validación URL Facebook
-                    <Badge variant="outline" className="ml-2">validationUtils</Badge>
+                    Facebook Reels API
+                    <Badge variant="outline" className="ml-2">Reels API</Badge>
                   </CardTitle>
                   <CardDescription>
-                    Esta prueba valida el formato de una URL de página de Facebook
+                    Esta prueba consulta los Reels de una página de Facebook usando su ID
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="facebookPageUrlValidation" className="block text-sm font-medium mb-1">
-                        URL página Facebook
+                      <Label htmlFor="facebookPageId" className="block text-sm font-medium mb-1">
+                        Page ID
                       </Label>
                       <div className="flex gap-2">
                         <Input 
-                          id="facebookPageUrlValidation" 
-                          placeholder="https://www.facebook.com/pagina" 
-                          value={facebookPageUrl} 
-                          onChange={e => setFacebookPageUrl(e.target.value)} 
+                          id="facebookPageId" 
+                          placeholder="100064860875397" 
+                          value={facebookPageId} 
+                          onChange={e => setFacebookPageId(e.target.value)} 
                         />
-                        <Button onClick={handleFacebookPageValidationTest} disabled={facebookPageValidationLoading}>
-                          {facebookPageValidationLoading ? "Procesando..." : "Validar URL"}
+                        <Button onClick={handleFacebookReelsTest} disabled={facebookReelsLoading}>
+                          {facebookReelsLoading ? "Procesando..." : "Obtener Reels"}
                         </Button>
                       </div>
-                      {facebookPageValidationError && <Alert variant="destructive" className="mt-2">
+                      {facebookReelsError && <Alert variant="destructive" className="mt-2">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Error</AlertTitle>
-                        <AlertDescription>{facebookPageValidationError}</AlertDescription>
+                        <AlertDescription>{facebookReelsError}</AlertDescription>
                       </Alert>}
                     </div>
 
-                    {facebookPageValidationResult && <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado ({facebookPageValidationResult.timestamp}):</h3>
+                    {facebookReelsResult?.success && facebookReelsResult.data?.results?.length > 0 && (
+                      <div className="space-y-3 mt-4 border rounded-md p-4 bg-gray-50">
+                        <h3 className="font-medium">Reels encontrados: {facebookReelsResult.data.results.length}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {facebookReelsResult.data.results.slice(0, 4).map((reel: any, index: number) => (
+                            <div key={index} className="border rounded p-3 bg-white">
+                              <div className="text-sm font-medium">Título:</div>
+                              <div className="text-sm mb-2">{reel.title || 'Sin título'}</div>
+                              
+                              <div className="text-sm font-medium">Vistas:</div>
+                              <div className="text-sm mb-2">{reel.views || 'No disponible'}</div>
+                              
+                              <div className="text-sm font-medium">Fecha:</div>
+                              <div className="text-sm">{reel.date || 'No disponible'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {facebookReelsResult && <div className="mt-4">
+                      <h3 className="font-medium mb-2">Resultado completo ({facebookReelsResult.timestamp}):</h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
-                          {JSON.stringify(facebookPageValidationResult, null, 2)}
+                          {JSON.stringify(facebookReelsResult, null, 2)}
                         </pre>
                       </div>
                     </div>}
                   </div>
                 </CardContent>
                 <CardFooter className="text-sm text-gray-500">
-                  Este panel permite validar el formato de una URL de página de Facebook
+                  Este panel permite obtener los Reels de una página de Facebook usando su ID
                 </CardFooter>
               </Card>
             </div>
