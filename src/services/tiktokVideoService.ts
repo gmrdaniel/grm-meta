@@ -5,41 +5,25 @@ import { TikTokVideo } from "@/types/creator";
 /**
  * Fetch TikTok videos for a specific creator
  */
-export const fetchTikTokVideos = async (
-  creatorId: string,
-  page: number = 1,
-  pageSize: number = 10
-): Promise<{ data: TikTokVideo[], count: number }> => {
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-  
-  const { data, error, count } = await supabase
+export const fetchTikTokVideos = async (creatorId: string): Promise<TikTokVideo[]> => {
+  const { data, error } = await supabase
     .from('tiktok_video')
-    .select('*', { count: 'exact' })
+    .select('*')
     .eq('creator_id', creatorId)
-    .order('created_at', { ascending: false })
-    .range(from, to);
+    .order('create_time', { ascending: false });
   
   if (error) {
     console.error('Error fetching TikTok videos:', error);
     throw new Error(error.message);
   }
   
-  return { 
-    data: data as TikTokVideo[], 
-    count: count || 0 
-  };
+  return data as TikTokVideo[];
 };
 
 /**
- * Add new TikTok video data
+ * Add a TikTok video for a creator
  */
 export const addTikTokVideo = async (video: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'>): Promise<TikTokVideo> => {
-  // Verificar que video_id no sea nulo
-  if (!video.video_id) {
-    throw new Error('El campo video_id es obligatorio');
-  }
-  
   const { data, error } = await supabase
     .from('tiktok_video')
     .insert(video)
@@ -55,7 +39,7 @@ export const addTikTokVideo = async (video: Omit<TikTokVideo, 'id' | 'created_at
 };
 
 /**
- * Delete TikTok video by ID
+ * Delete a TikTok video
  */
 export const deleteTikTokVideo = async (videoId: string): Promise<void> => {
   const { error } = await supabase
@@ -70,86 +54,46 @@ export const deleteTikTokVideo = async (videoId: string): Promise<void> => {
 };
 
 /**
- * Link a creator to existing videos
+ * Update a TikTok video
  */
-export const linkCreatorToVideos = async (
-  creatorId: string, 
-  videoIds: string[]
-): Promise<void> => {
-  // Verificar que ningún videoId sea nulo
-  if (videoIds.some(id => !id)) {
-    throw new Error('Todos los IDs de video deben ser válidos');
-  }
-  
-  const updates = videoIds.map(videoId => ({
-    creator_id: creatorId,
-    video_id: videoId,
-  }));
-  
-  const { error } = await supabase
+export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTokVideo>): Promise<TikTokVideo> => {
+  const { data, error } = await supabase
     .from('tiktok_video')
-    .upsert(updates, {
-      onConflict: 'video_id',
-    });
+    .update(updates)
+    .eq('id', videoId)
+    .select()
+    .single();
   
   if (error) {
-    console.error('Error linking creator to videos:', error);
-    throw new Error(error.message);
-  }
-};
-
-/**
- * Fetch TikTok videos with creator information
- */
-export const fetchTikTokVideosWithCreator = async (
-  page: number = 1,
-  pageSize: number = 10
-): Promise<{ data: (TikTokVideo & { creator: { nombre: string, apellido: string } })[], count: number }> => {
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-  
-  const { data, error, count } = await supabase
-    .from('tiktok_video')
-    .select(`
-      *,
-      creator:creator_id(nombre, apellido)
-    `, { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(from, to);
-  
-  if (error) {
-    console.error('Error fetching TikTok videos with creator:', error);
+    console.error('Error updating TikTok video:', error);
     throw new Error(error.message);
   }
   
-  return { 
-    data: data as (TikTokVideo & { creator: { nombre: string, apellido: string } })[], 
-    count: count || 0 
-  };
+  return data as TikTokVideo;
 };
 
 /**
- * Fetch TikTok user information using RapidAPI
+ * Fetch TikTok user information using the TikTok API
  */
 export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
   try {
-    const url = `https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`;
-    const options = {
+    console.log('Fetching TikTok info for:', username);
+    const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
       method: 'GET',
       headers: {
-        'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-        'x-rapidapi-host': 'tiktok-api23.p.rapidapi.com'
+        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
       }
-    };
-
-    const response = await fetch(url, options);
+    });
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
     
-    const data = await response.json();
-    return data;
+    const responseData = await response.json();
+    console.log('TikTok API response:', responseData);
+    
+    return responseData;
   } catch (error) {
     console.error('Error fetching TikTok user info:', error);
     throw error;
@@ -157,32 +101,99 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 };
 
 /**
- * Update creator's TikTok information
+ * Fetch TikTok videos for a user using the TikTok API and persist them
  */
-export const updateCreatorTikTokInfo = async (
-  creatorId: string, 
-  followerCount: number,
-  engagementRate?: number,
-  secUid?: string
-): Promise<void> => {
+export const fetchTikTokUserVideos = async (username: string, creatorId: string): Promise<any> => {
+  try {
+    console.log('Fetching TikTok videos for:', username);
+    const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'X-RapidAPI-Host': 'tiktok-api6.p.rapidapi.com'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('TikTok Video API response:', responseData);
+    
+    // Check if we have valid video data
+    if (!responseData.videos || !Array.isArray(responseData.videos) || responseData.videos.length === 0) {
+      console.warn('No videos found for user:', username);
+      return { savedCount: 0, totalCount: 0 };
+    }
+    
+    // Process and save videos
+    const videos = responseData.videos;
+    let savedCount = 0;
+    
+    for (const video of videos) {
+      try {
+        // Check if this video already exists in the database
+        const { data: existingVideo } = await supabase
+          .from('tiktok_video')
+          .select('id')
+          .eq('video_id', video.video_id || '')
+          .eq('creator_id', creatorId)
+          .maybeSingle();
+        
+        if (existingVideo) {
+          console.log(`Video ${video.video_id} already exists, skipping`);
+          continue;
+        }
+        
+        // Map video data to database schema
+        const videoData: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'> = {
+          creator_id: creatorId,
+          video_id: video.video_id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Fallback ID if missing
+          description: video.description || '',
+          create_time: video.create_time || Math.floor(Date.now() / 1000),
+          author: username,
+          author_id: video.author_id || '',
+          video_definition: video.video_definition || 'unknown',
+          duration: video.duration || 0,
+          number_of_comments: video.statistics?.comment_count || video.statistics?.number_of_comments || 0,
+          number_of_hearts: video.statistics?.digg_count || video.statistics?.number_of_hearts || 0,
+          number_of_plays: video.statistics?.play_count || video.statistics?.number_of_plays || 0,
+          number_of_reposts: video.statistics?.share_count || video.statistics?.number_of_reposts || 0
+        };
+        
+        await addTikTokVideo(videoData);
+        savedCount++;
+      } catch (error) {
+        console.error(`Error saving video:`, error);
+      }
+    }
+    
+    console.log(`Saved ${savedCount} videos out of ${videos.length}`);
+    return { savedCount, totalCount: videos.length };
+  } catch (error) {
+    console.error('Error fetching TikTok user videos:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update creator's TikTok follower count and eligibility status
+ */
+export const updateCreatorTikTokInfo = async (creatorId: string, followerCount: number, secUid?: string): Promise<void> => {
+  // Determine eligibility based on follower count
   const isEligible = followerCount >= 100000;
   
-  const updateData: {
-    seguidores_tiktok: number;
-    elegible_tiktok: boolean;
-    secuid_tiktok?: string;
-    engagement_tiktok?: number;
-  } = {
+  console.log(`Updating creator ${creatorId} with follower count: ${followerCount}, eligible: ${isEligible}, secUid: ${secUid || 'not provided'}`);
+  
+  const updateData: Record<string, any> = { 
     seguidores_tiktok: followerCount,
     elegible_tiktok: isEligible
   };
   
+  // Only include secUid in the update if it's provided
   if (secUid) {
     updateData.secuid_tiktok = secUid;
-  }
-  
-  if (engagementRate !== undefined) {
-    updateData.engagement_tiktok = engagementRate;
   }
   
   const { error } = await supabase
@@ -197,86 +208,8 @@ export const updateCreatorTikTokInfo = async (
 };
 
 /**
- * Fetch TikTok user videos and save them to the database
+ * Update creator's TikTok follower count (legacy function, kept for compatibility)
  */
-export const fetchTikTokUserVideos = async (
-  username: string,
-  creatorId: string,
-  limit: number = 10
-): Promise<{ savedCount: number, totalCount: number }> => {
-  try {
-    const url = `https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}&limit=${limit}`;
-    const options = {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-        'x-rapidapi-host': 'tiktok-api6.p.rapidapi.com'
-      }
-    };
-
-    const response = await fetch(url, options);
-    
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.videos || !Array.isArray(data.videos)) {
-      throw new Error('Invalid response format from TikTok API');
-    }
-    
-    const videos = data.videos;
-    let savedCount = 0;
-    
-    for (const video of videos) {
-      try {
-        // Verificar que video.id no sea nulo
-        if (!video.video_id) {
-          console.error('Video sin ID encontrado, saltando:', video);
-          continue;
-        }
-        
-        const videoData = {
-          creator_id: creatorId,
-          video_id: video.video_id,
-          description: video.description || '',
-          create_time: video.create_time || Math.floor(Date.now() / 1000),
-          author: video.author_name || '',
-          author_id: video.authorId || '',
-          video_definition: video.video_definition || 'unknown',
-          duration: video.duration || 0,
-          number_of_comments: video.statistics.number_of_comments || 0,
-          number_of_hearts: video.statistics.number_of_hearts || 0,
-          number_of_plays: video.statistics.number_of_plays || 0,
-          number_of_reposts: video.statistics.number_of_reposts || 0
-        };
-        
-        // Verificar todos los campos antes de intentar insertar
-        console.log('Intentando guardar video con datos:', videoData);
-        
-        const { error } = await supabase
-          .from('tiktok_video')
-          .upsert(videoData, {
-            onConflict: 'video_id'
-          });
-          
-        if (error) {
-          console.error('Error guardando video en la base de datos:', error);
-        } else {
-          savedCount++;
-        }
-      } catch (err) {
-        console.error('Error guardando video individual:', err);
-      }
-    }
-    
-    return {
-      savedCount,
-      totalCount: videos.length
-    };
-  } catch (error) {
-    console.error('Error fetching TikTok user videos:', error);
-    throw error;
-  }
+export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
+  return updateCreatorTikTokInfo(creatorId, followerCount);
 };

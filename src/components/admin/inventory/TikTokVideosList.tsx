@@ -7,16 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Trash2, Clock, Play, Heart, MessageCircle, Share, Plus, Link2, ExternalLink } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Trash2, Clock, Play, Heart, MessageCircle, Share, Plus, Link2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -98,14 +89,11 @@ export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
   const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: videosData, isLoading, error } = useQuery({
+  const { data: videos = [], isLoading, error } = useQuery({
     queryKey: ["tiktokVideos", creatorId],
     queryFn: () => fetchTikTokVideos(creatorId),
     enabled: !!creatorId,
   });
-
-  // Extract videos array from the response
-  const videos = videosData?.data || [];
 
   const addVideoMutation = useMutation({
     mutationFn: addTikTokVideo,
@@ -177,12 +165,6 @@ export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const calculateTotalEngagement = (video: TikTokVideo): number => {
-    return (video.number_of_hearts || 0) + 
-           (video.number_of_comments || 0) + 
-           (video.number_of_reposts || 0);
   };
 
   const handleDelete = (videoId: string) => {
@@ -436,92 +418,92 @@ export function TikTokVideosList({ creatorId }: TikTokVideosListProps) {
           No hay videos registrados para este creador.
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableCaption>Lista de videos de TikTok</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[300px]">Descripción</TableHead>
-                <TableHead className="w-[120px]">Fecha</TableHead>
-                <TableHead className="text-right">Reproducciones</TableHead>
-                <TableHead className="text-right">Likes</TableHead>
-                <TableHead className="text-right">Comentarios</TableHead>
-                <TableHead className="text-right">Compartidos</TableHead>
-                <TableHead className="text-right">Engagement Total</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {videos.map((video) => (
-                <TableRow key={video.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="truncate max-w-[280px]">{video.description || `Video ${video.video_id.slice(0, 8)}...`}</span>
-                      <span className="text-xs text-muted-foreground">
-                        @{video.author || "desconocido"}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {videos.map((video) => (
+            <Card key={video.id} className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-base font-medium truncate">
+                      {video.description || `Video ${video.video_id}`}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1 text-xs">
+                      <Clock className="h-3 w-3" /> 
+                      {formatDate(video.create_time)}
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 -mt-1 -mr-2"
+                    onClick={() => handleDelete(video.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pb-3">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      asChild 
+                      className="h-8 text-xs"
+                    >
+                      <a 
+                        href={`https://www.tiktok.com/@${video.author}/video/${video.video_id}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        <Link2 className="h-3 w-3" /> Ver en TikTok
+                      </a>
+                    </Button>
+                    {video.author && (
+                      <span className="text-xs text-gray-500">
+                        @{video.author}
                       </span>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 text-center text-xs text-gray-600">
+                    <div className="flex flex-col items-center">
+                      <Play className="h-4 w-4 mb-1 text-blue-500" />
+                      <span className="font-medium">{formatNumber(video.number_of_plays)}</span>
+                      <span className="text-[10px]">Reproducciones</span>
                     </div>
-                  </TableCell>
-                  <TableCell>{formatDate(video.create_time)}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    <div className="flex items-center justify-end gap-1">
-                      <Play className="h-3 w-3 text-blue-500" />
-                      {formatNumber(video.number_of_plays)}
+                    <div className="flex flex-col items-center">
+                      <Heart className="h-4 w-4 mb-1 text-red-500" />
+                      <span className="font-medium">{formatNumber(video.number_of_hearts)}</span>
+                      <span className="text-[10px]">Likes</span>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    <div className="flex items-center justify-end gap-1">
-                      <Heart className="h-3 w-3 text-red-500" />
-                      {formatNumber(video.number_of_hearts)}
+                    <div className="flex flex-col items-center">
+                      <MessageCircle className="h-4 w-4 mb-1 text-purple-500" />
+                      <span className="font-medium">{formatNumber(video.number_of_comments)}</span>
+                      <span className="text-[10px]">Comentarios</span>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    <div className="flex items-center justify-end gap-1">
-                      <MessageCircle className="h-3 w-3 text-purple-500" />
-                      {formatNumber(video.number_of_comments)}
+                    <div className="flex flex-col items-center">
+                      <Share className="h-4 w-4 mb-1 text-green-500" />
+                      <span className="font-medium">{formatNumber(video.number_of_reposts)}</span>
+                      <span className="text-[10px]">Compartidos</span>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    <div className="flex items-center justify-end gap-1">
-                      <Share className="h-3 w-3 text-green-500" />
-                      {formatNumber(video.number_of_reposts)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatNumber(calculateTotalEngagement(video))}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        asChild
-                        className="h-8 w-8 p-0"
-                      >
-                        <a 
-                          href={`https://www.tiktok.com/@${video.author}/video/${video.video_id}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          title="Ver en TikTok"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleDelete(video.id)}
-                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="pt-0 text-xs text-gray-500 flex justify-between">
+                <div>
+                  {video.video_definition && (
+                    <span className="mr-2">{video.video_definition}</span>
+                  )}
+                  {video.duration && (
+                    <span>{formatDuration(video.duration)}</span>
+                  )}
+                </div>
+                <div>ID: {video.video_id.slice(0, 8)}...</div>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       )}
     </div>

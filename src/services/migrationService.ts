@@ -8,7 +8,7 @@ export const generateMigrationScripts = async (): Promise<{ tableName: string; s
   try {
     // Fetch table definitions from database
     const tables = [
-      'inventario_creadores',
+      'creator_inventory',
       'notifications',
       'profiles',
       'project_stages',

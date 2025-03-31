@@ -12,13 +12,14 @@ export interface CreatorInvitation {
   facebook_page?: string | null;
   invitation_code: string;
   invitation_url: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'accepted' | 'rejected' | 'completed';
   invitation_type: string;
   created_at: string;
   updated_at: string;
   phone_number?: string | null;
   phone_country_code?: string | null;
   phone_verified?: boolean;
+  current_stage_id: string | null;
 }
 
 export type CreateInvitationData = {

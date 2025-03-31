@@ -8,8 +8,8 @@ This document contains all the SQL scripts used in this project for database set
 These SQL scripts define the tables in the database:
 
 ```sql
--- Table: inventario_creadores
-CREATE TABLE public.inventario_creadores (
+-- Table: creator_inventory
+CREATE TABLE public.creator_inventory (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   nombre character varying NOT NULL,
   apellido character varying NOT NULL,
@@ -23,8 +23,8 @@ CREATE TABLE public.inventario_creadores (
   fecha_creacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE public.inventario_creadores
-  ADD CONSTRAINT inventario_creadores_pkey PRIMARY KEY (id);
+ALTER TABLE public.creator_inventory
+  ADD CONSTRAINT creator_inventory_pkey PRIMARY KEY (id);
 
 -- Table: notifications
 CREATE TABLE public.notifications (
@@ -96,18 +96,18 @@ ALTER TABLE public.projects
 ## Row Level Security Policies
 
 ```sql
--- RLS Policies for inventario_creadores
-ALTER TABLE public.inventario_creadores ENABLE ROW LEVEL SECURITY;
+-- RLS Policies for creator_inventory
+ALTER TABLE public.creator_inventory ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all operations for authenticated users" 
-ON public.inventario_creadores
+ON public.creator_inventory
 FOR ALL 
 TO authenticated
 USING (true)
 WITH CHECK (true);
 
 CREATE POLICY "Allow read for anonymous users" 
-ON public.inventario_creadores
+ON public.creator_inventory
 FOR SELECT 
 TO anon
 USING (true);

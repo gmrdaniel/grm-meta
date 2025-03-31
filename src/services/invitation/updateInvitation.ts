@@ -1,88 +1,88 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { createTask } from "../tasksService";
-
-type InvitationStatus = 'pending' | 'accepted' | 'rejected';
-
-interface InvitationUpdateData {
-  id: string;
-  status?: InvitationStatus;
-  phone_verified?: boolean;
-  phone_number?: string;
-  phone_country_code?: string;
-  instagram_user?: string;
-  youtube_channel?: string;
-  facebook_page?: string;
-}
+import { CreatorInvitation } from "@/types/invitation";
 
 /**
- * Update an invitation with new data
+ * Update invitation status
  */
-export const updateInvitation = async (data: InvitationUpdateData) => {
-  const { id, ...updateData } = data;
-  
-  // Start a transaction to update the invitation and potentially create a task
-  const { data: invitation, error } = await supabase
+export const updateInvitationStatus = async (
+  id: string, 
+  status: 'pending' | 'accepted' | 'rejected' | 'completed'
+): Promise<CreatorInvitation> => {
+  const { data, error } = await supabase
     .from('creator_invitations')
-    .update(updateData)
+    .update({ status })
     .eq('id', id)
-    .select('*, projects:project_id(id, name)')
-    .single();
+    .select()
+    .maybeSingle();
   
   if (error) {
-    console.error('Error updating invitation:', error);
+    console.error('Error updating invitation status:', error);
     throw new Error(error.message);
   }
   
-  // If invitation status is changed to 'accepted', create a validation task
-  if (updateData.status === 'accepted') {
-    try {
-      // First, check if a task already exists for this invitation
-      const hasExistingTask = await checkExistingTaskForInvitation(id);
-      
-      if (!hasExistingTask && invitation.project_id) {
-        // Get the appropriate stage for the validation task
-        const { data: stages, error: stageError } = await supabase
-          .from("project_stages")
-          .select("id")
-          .eq("project_id", invitation.project_id)
-          .eq("view", "meta/FbCreation")
-          .limit(1);
-        
-        if (stageError) {
-          console.error('Error finding stage for validation task:', stageError);
-        } else if (stages && stages.length > 0) {
-          // Create the validation task
-          await createTask({
-            title: "Validar registro",
-            project_id: invitation.project_id,
-            stage_id: stages[0].id,
-            creator_invitation_id: id
-          });
-        }
-      }
-    } catch (taskError) {
-      console.error('Error creating validation task:', taskError);
-      // We don't throw here because the invitation update was successful
-    }
+  if (!data) {
+    throw new Error(`Invitation with ID ${id} not found`);
   }
   
-  return invitation;
+  return data as CreatorInvitation;
 };
 
 /**
- * Check if a task already exists for an invitation
+ * Update Facebook page URL
  */
-async function checkExistingTaskForInvitation(invitationId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("id")
-    .eq("creator_invitation_id", invitationId);
-  
-  if (error) {
-    console.error('Error checking for existing task:', error);
-    throw new Error(error.message);
+export const updateFacebookPage = async (
+  invitationId: string,
+  facebookPageUrl: string
+): Promise<CreatorInvitation | null> => {
+  try {
+    // Log details for debugging
+    console.log('------- UPDATE FACEBOOK PAGE -------');
+    console.log(`Updating Facebook page for invitation ID: ${invitationId}`);
+    console.log(`Facebook page URL: ${facebookPageUrl}`);
+    
+    // Verify the invitation exists before updating
+    const { data: invitation } = await supabase
+      .from('creator_invitations')
+      .select('*')
+      .eq('id', invitationId)
+      .maybeSingle();
+      
+    if (!invitation) {
+      console.error(`No invitation found with ID: ${invitationId}`);
+      return null;
+    }
+    
+    console.log(`Found invitation: ${invitation.id} - ${invitation.full_name}`);
+    
+    // Using the ID for the update which is more reliable
+    const { data, error } = await supabase
+      .from('creator_invitations')
+      .update({ 
+        facebook_page: facebookPageUrl,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invitationId)
+      .select('*')  // Make sure we select all columns
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error updating Facebook page:', error);
+      console.error('Error details:', JSON.stringify(error));
+      return null;
+    }
+    
+    if (!data) {
+      console.error('No data returned after update');
+      return null;
+    }
+    
+    console.log(`Successfully updated Facebook page for ${data.full_name}`);
+    console.log(`New Facebook page URL: ${data.facebook_page}`);
+    
+    return data as CreatorInvitation;
+  } catch (err) {
+    console.error('Unexpected error in updateFacebookPage:', err);
+    return null;
   }
-  
-  return data && data.length > 0;
-}
+};

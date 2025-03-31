@@ -24,16 +24,6 @@ export const fetchCreators = async (
     if (filters.hasTiktokUsername) {
       query = query.not('usuario_tiktok', 'is', null);
     }
-    
-    if (filters.noEngagement) {
-      query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
-    }
-    
-    if (filters.noVideos) {
-      // Instead of using a complex subquery, we'll handle this filter separately after fetching creators
-      // We'll fetch all creators for now and filter them in-memory
-      // In a production app with large datasets, this should be optimized with a proper database query
-    }
   }
   
   // Add pagination
@@ -49,33 +39,9 @@ export const fetchCreators = async (
     throw new Error(error.message);
   }
   
-  let filteredData = data as Creator[];
-  
-  // If we need to filter creators without videos, we'll do it separately
-  if (filters?.noVideos) {
-    try {
-      // Get all creator IDs that have videos
-      const { data: videoData } = await supabase
-        .from('tiktok_video')
-        .select('creator_id')
-        .limit(10000);
-      
-      if (videoData) {
-        // Get unique creator IDs that have videos
-        const creatorIdsWithVideos = [...new Set(videoData.map(item => item.creator_id))];
-        
-        // Filter out creators that have videos
-        filteredData = filteredData.filter(creator => !creatorIdsWithVideos.includes(creator.id));
-      }
-    } catch (videoError) {
-      console.error('Error fetching video data for filtering:', videoError);
-      // Continue with unfiltered data if there's an error with the video filtering
-    }
-  }
-  
   return { 
-    data: filteredData, 
-    count: filters?.noVideos ? filteredData.length : (count || 0)
+    data: data as Creator[], 
+    count: count || 0 
   };
 };
 

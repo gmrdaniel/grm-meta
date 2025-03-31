@@ -1,21 +1,4 @@
 
-export interface ColumnMapping {
-  [key: string]: string;
-}
-
-export interface ImportResult {
-  successCount: number;
-  errorCount: number;
-  errors: { row: number; error: string }[];
-}
-
-export interface CreatorFilter {
-  tiktokEligible?: boolean;
-  hasTiktokUsername?: boolean;
-  noEngagement?: boolean;
-  noVideos?: boolean;
-}
-
 export interface CreatorImportData {
   nombre: string;
   apellido: string;
@@ -29,4 +12,9 @@ export interface ImportError {
   row: number;
   error: string;
   data: CreatorImportData;
+}
+
+export interface CreatorFilter {
+  tiktokEligible?: boolean;
+  hasTiktokUsername?: boolean;
 }

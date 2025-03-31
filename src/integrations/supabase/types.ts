@@ -89,6 +89,77 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          facebook_page: string | null
+          full_name: string
+          id: string
+          instagram_user: string | null
+          invitation_code: string
+          invitation_type: string
+          invitation_url: string
+          phone_country_code: string | null
+          phone_number: string | null
+          phone_verified: boolean | null
+          project_id: string | null
+          social_media_handle: string | null
+          social_media_type: string | null
+          status: Database["public"]["Enums"]["invitation_status"]
+          updated_at: string
+          youtube_channel: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          facebook_page?: string | null
+          full_name: string
+          id?: string
+          instagram_user?: string | null
+          invitation_code: string
+          invitation_type: string
+          invitation_url: string
+          phone_country_code?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          project_id?: string | null
+          social_media_handle?: string | null
+          social_media_type?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+          youtube_channel?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          facebook_page?: string | null
+          full_name?: string
+          id?: string
+          instagram_user?: string | null
+          invitation_code?: string
+          invitation_type?: string
+          invitation_url?: string
+          phone_country_code?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          project_id?: string | null
+          social_media_handle?: string | null
+          social_media_type?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+          youtube_channel?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_inventory: {
         Row: {
           apellido: string
@@ -157,87 +228,6 @@ export type Database = {
           usuario_youtube?: string | null
         }
         Relationships: []
-      }
-      creator_invitations: {
-        Row: {
-          created_at: string
-          current_stage_id: string | null
-          email: string
-          facebook_page: string | null
-          full_name: string
-          id: string
-          instagram_user: string | null
-          invitation_code: string
-          invitation_type: string
-          invitation_url: string
-          phone_country_code: string | null
-          phone_number: string | null
-          phone_verified: boolean | null
-          project_id: string | null
-          social_media_handle: string | null
-          social_media_type: string | null
-          status: Database["public"]["Enums"]["invitation_status"]
-          updated_at: string
-          youtube_channel: string | null
-        }
-        Insert: {
-          created_at?: string
-          current_stage_id?: string | null
-          email: string
-          facebook_page?: string | null
-          full_name: string
-          id?: string
-          instagram_user?: string | null
-          invitation_code: string
-          invitation_type: string
-          invitation_url: string
-          phone_country_code?: string | null
-          phone_number?: string | null
-          phone_verified?: boolean | null
-          project_id?: string | null
-          social_media_handle?: string | null
-          social_media_type?: string | null
-          status?: Database["public"]["Enums"]["invitation_status"]
-          updated_at?: string
-          youtube_channel?: string | null
-        }
-        Update: {
-          created_at?: string
-          current_stage_id?: string | null
-          email?: string
-          facebook_page?: string | null
-          full_name?: string
-          id?: string
-          instagram_user?: string | null
-          invitation_code?: string
-          invitation_type?: string
-          invitation_url?: string
-          phone_country_code?: string | null
-          phone_number?: string | null
-          phone_verified?: boolean | null
-          project_id?: string | null
-          social_media_handle?: string | null
-          social_media_type?: string | null
-          status?: Database["public"]["Enums"]["invitation_status"]
-          updated_at?: string
-          youtube_channel?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "creator_invitations_current_stage_id_fkey"
-            columns: ["current_stage_id"]
-            isOneToOne: false
-            referencedRelation: "project_stages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "creator_invitations_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notifications: {
         Row: {
@@ -532,19 +522,7 @@ export type Database = {
       }
     }
     Views: {
-      summary_creator: {
-        Row: {
-          apellido: string | null
-          correo: string | null
-          date_last_post: number | null
-          duration_average: number | null
-          engagement: number | null
-          nombre: string | null
-          seguidores_tiktok: number | null
-          usuario_tiktok: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       find_invitation_by_code: {
@@ -553,7 +531,6 @@ export type Database = {
         }
         Returns: {
           created_at: string
-          current_stage_id: string | null
           email: string
           facebook_page: string | null
           full_name: string
@@ -626,13 +603,6 @@ export type Database = {
         }
         Returns: string
       }
-      is_stage_in_project: {
-        Args: {
-          stage_id: string
-          project_id_param: string
-        }
-        Returns: boolean
-      }
       update_stages_order: {
         Args: {
           stages_data: Json[]
@@ -641,7 +611,7 @@ export type Database = {
       }
     }
     Enums: {
-      invitation_status: "pending" | "accepted" | "rejected" | "completed"
+      invitation_status: "pending" | "accepted" | "rejected" | 'completed'
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
