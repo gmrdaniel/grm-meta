@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
         query = query.gte('seguidores_tiktok', 100000);
       }
       
-      const { data, error, count } = await query
+      const { data, error } = await query
         .range((currentPage - 1) * pageSize, currentPage * pageSize - 1)
         .order('seguidores_tiktok', { ascending: false });
       
@@ -134,7 +134,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
   if (error) {
     return (
       <div className="p-4 bg-red-50 text-red-500 rounded-md">
-        Error al cargar los datos de creadores: {error.message}
+        Error al cargar los datos de creadores: {(error as Error).message}
       </div>
     );
   }

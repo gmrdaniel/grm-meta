@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreatorsList } from "@/components/admin/inventory/CreatorsList";
 import { CreatorForm } from "@/components/admin/inventory/CreatorForm";
 import { Creator } from "@/types/creator";
 import { CreatorDetail } from "@/components/admin/inventory/CreatorDetail";
@@ -12,7 +10,7 @@ import { CreatorsSummary } from "@/components/admin/inventory/CreatorsSummary";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { toast } from "sonner";
-import { CreatorFilter } from "@/components/admin/inventory/import-templates/types";
+import { CreatorFilter, CreatorsList } from "@/components/admin/inventory/creators-list";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
