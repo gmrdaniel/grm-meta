@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AdminTestPage() {
   const [invitationCode, setInvitationCode] = useState<string>("");
@@ -701,38 +702,38 @@ export default function AdminTestPage() {
                   </div>
 
                   {youtubeShortsResult?.success && youtubeShortsResult.data?.contents?.length > 0 && (
-                    <div className="space-y-3 mt-4 border rounded-md p-4 bg-gray-50">
-                      <h3 className="font-medium">Shorts encontrados: {youtubeShortsResult.data.contents.length}</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {youtubeShortsResult.data.contents.slice(0, 4).map((short: any, index: number) => (
-                          <div key={index} className="border rounded p-3 bg-white">
-                            <div className="text-sm font-medium">Video ID:</div>
-                            <div className="text-sm mb-2">{short.video?.videoId || 'No disponible'}</div>
-                            
-                            <div className="text-sm font-medium">Título:</div>
-                            <div className="text-sm mb-2 truncate">{short.video?.title || 'No disponible'}</div>
-                            
-                            <div className="text-sm font-medium">Publicado:</div>
-                            <div className="text-sm mb-2">{short.video?.publishedTimeText || 'No disponible'}</div>
-                            
-                            <div className="text-sm font-medium">Vistas:</div>
-                            <div className="text-sm mb-2">{short.video?.viewCountText || 'No disponible'}</div>
-                            
-                            <div className="text-sm font-medium">URL:</div>
-                            <div className="text-sm truncate">
-                              {short.video?.videoId ? (
-                                <a 
-                                  href={`https://www.youtube.com/shorts/${short.video.videoId}`} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  https://www.youtube.com/shorts/{short.video.videoId}
-                                </a>
-                              ) : 'No disponible'}
-                            </div>
-                          </div>
-                        ))}
+                    <div className="mt-4">
+                      <h3 className="font-medium mb-3">Shorts encontrados: {youtubeShortsResult.data.contents.length}</h3>
+                      <div className="border rounded-lg overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Video ID</TableHead>
+                              <TableHead>Título</TableHead>
+                              <TableHead>URL</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {youtubeShortsResult.data.contents.map((short: any, index: number) => (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium">{short.video?.videoId || 'No disponible'}</TableCell>
+                                <TableCell>{short.video?.title || 'No disponible'}</TableCell>
+                                <TableCell>
+                                  {short.video?.videoId ? (
+                                    <a 
+                                      href={`https://www.youtube.com/shorts/${short.video.videoId}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      https://www.youtube.com/shorts/{short.video.videoId}
+                                    </a>
+                                  ) : 'No disponible'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
                       </div>
                     </div>
                   )}
