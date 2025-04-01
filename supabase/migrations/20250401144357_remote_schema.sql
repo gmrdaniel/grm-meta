@@ -1,4 +1,4 @@
-/* create type "public"."invitation_status" as enum ('pending', 'accepted', 'rejected', 'completed');
+create type "public"."invitation_status" as enum ('pending', 'accepted', 'rejected', 'completed');
 
 create type "public"."task_status" as enum ('pending', 'in_progress', 'completed', 'review');
 
@@ -17,8 +17,6 @@ create table "public"."bulk_creator_invitation_details" (
 );
 
 
-alter table "public"."bulk_creator_invitation_details" enable row level security;
-
 create table "public"."bulk_creator_invitations" (
     "id" uuid not null default gen_random_uuid(),
     "file_name" text not null,
@@ -31,8 +29,6 @@ create table "public"."bulk_creator_invitations" (
     "updated_at" timestamp with time zone not null default now()
 );
 
-
-alter table "public"."bulk_creator_invitations" enable row level security;
 
 create table "public"."creator_inventory" (
     "id" uuid not null default gen_random_uuid(),
@@ -180,7 +176,11 @@ create table "public"."tiktok_video" (
 
 alter table "public"."tiktok_video" enable row level security;
 
+CREATE INDEX bulk_creator_invitation_details_bulk_invitation_id_idx ON public.bulk_creator_invitation_details USING btree (bulk_invitation_id);
+
 CREATE UNIQUE INDEX bulk_creator_invitation_details_pkey ON public.bulk_creator_invitation_details USING btree (id);
+
+CREATE INDEX bulk_creator_invitations_created_by_idx ON public.bulk_creator_invitations USING btree (created_by);
 
 CREATE UNIQUE INDEX bulk_creator_invitations_pkey ON public.bulk_creator_invitations USING btree (id);
 
@@ -1149,46 +1149,6 @@ grant truncate on table "public"."tiktok_video" to "service_role";
 
 grant update on table "public"."tiktok_video" to "service_role";
 
-create policy "Users can insert bulk invitation details"
-on "public"."bulk_creator_invitation_details"
-as permissive
-for insert
-to public
-with check ((auth.uid() IS NOT NULL));
-
-
-create policy "Users can view bulk invitation details"
-on "public"."bulk_creator_invitation_details"
-as permissive
-for select
-to public
-using ((auth.uid() IS NOT NULL));
-
-
-create policy "Users can insert bulk invitations"
-on "public"."bulk_creator_invitations"
-as permissive
-for insert
-to public
-with check ((auth.uid() = created_by));
-
-
-create policy "Users can update bulk invitations"
-on "public"."bulk_creator_invitations"
-as permissive
-for update
-to public
-using ((auth.uid() = created_by));
-
-
-create policy "Users can view bulk invitations"
-on "public"."bulk_creator_invitations"
-as permissive
-for select
-to public
-using ((auth.uid() IS NOT NULL));
-
-
 create policy "Allow admins full access to inventory creators"
 on "public"."creator_inventory"
 as permissive
@@ -1421,4 +1381,3 @@ CREATE TRIGGER create_validation_task_on_invitation_insert_trigger AFTER INSERT 
 CREATE TRIGGER validate_task_roles_trigger BEFORE INSERT OR UPDATE ON public.tasks FOR EACH ROW EXECUTE FUNCTION validate_task_roles();
 
 
- */

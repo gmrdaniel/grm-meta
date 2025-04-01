@@ -1,4 +1,6 @@
-/* create type "public"."invitation_status" as enum ('pending', 'accepted', 'rejected', 'completed');
+SET search_path TO public, auth, storage;
+
+create type "public"."invitation_status" as enum ('pending', 'accepted', 'rejected', 'completed');
 
 create type "public"."task_status" as enum ('pending', 'in_progress', 'completed', 'review');
 
@@ -1421,4 +1423,3 @@ CREATE TRIGGER create_validation_task_on_invitation_insert_trigger AFTER INSERT 
 CREATE TRIGGER validate_task_roles_trigger BEFORE INSERT OR UPDATE ON public.tasks FOR EACH ROW EXECUTE FUNCTION validate_task_roles();
 
 
- */
