@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const senderEmail = new Resend(Deno.env.get("RESEND_SENDER_EMAIL"));
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -14,13 +15,12 @@ const handler = async (req) => {
     });
   }
   try {
-    const { senderEmail, recipientEmail, emailSubject, emailContent } =
-      await req.json();
+    const { email, subject, html } = await req.json();
     const emailResponse = await resend.emails.send({
       from: senderEmail,
-      to: [recipientEmail],
-      subject: emailSubject,
-      html: emailContent,
+      to: [email],
+      subject,
+      html: html,
     });
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

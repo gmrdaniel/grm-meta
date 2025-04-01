@@ -1,18 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const sendEmail = async ({
-  email,
+  senderEmail,
+  recipientEmail,
   subject,
   html,
   environment = "development",
 }: {
-  email: string;
+  senderEmail: string
+  recipientEmail: string
   subject: string;
   html: string;
   environment?: "development" | "production";
 }): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke("send-invitation-email", {
-    body: { email, subject, html },
+  const { data, error } = await supabase.functions.invoke("resend", {
+    body: { senderEmail, recipientEmail, subject, html },
     headers: { "x-environment": environment },
   });
 
