@@ -6,6 +6,7 @@ import TikTokApiTab from "./tabs/TikTokApiTab";
 import TikTokVideoApiTab from "./tabs/TikTokVideoApiTab";
 import FacebookApiTabs from "./tabs/FacebookApiTabs";
 import YouTubeApiTab from "./tabs/YouTubeApiTab";
+import EmailTab from "./tabs/EmailTab";
 
 export default function TestTabs() {
   return (
@@ -17,6 +18,7 @@ export default function TestTabs() {
         <TabsTrigger value="tiktok-video">TikTok Video API</TabsTrigger>
         <TabsTrigger value="facebook">Facebook API</TabsTrigger>
         <TabsTrigger value="youtube">YouTube</TabsTrigger>
+        <TabsTrigger value="email">Correo</TabsTrigger>
       </TabsList>
       
       <TabsContent value="service">
@@ -41,6 +43,10 @@ export default function TestTabs() {
       
       <TabsContent value="youtube">
         <YouTubeApiTab />
+      </TabsContent>
+      
+      <TabsContent value="email">
+        <EmailTab />
       </TabsContent>
     </Tabs>
   );
