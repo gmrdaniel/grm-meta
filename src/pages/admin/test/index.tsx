@@ -7,7 +7,7 @@ import { fetchInvitationByCode } from "@/services/invitationService";
 import { fetchTikTokUserInfo } from "@/services/tiktokVideoService";
 import { CreatorInvitation } from "@/types/invitation";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2, Facebook } from "lucide-react";
+import { AlertCircle, CheckCircle2, Facebook, Youtube } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,11 @@ export default function AdminTestPage() {
   const [facebookReelsResult, setFacebookReelsResult] = useState<any>(null);
   const [facebookReelsLoading, setFacebookReelsLoading] = useState<boolean>(false);
   const [facebookReelsError, setFacebookReelsError] = useState<string | null>(null);
+  
+  const [youtubeChannelId, setYoutubeChannelId] = useState<string>("");
+  const [youtubeShortsResult, setYoutubeShortsResult] = useState<any>(null);
+  const [youtubeShortsLoading, setYoutubeShortsLoading] = useState<boolean>(false);
+  const [youtubeShortsError, setYoutubeShortsError] = useState<string | null>(null);
 
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
@@ -257,6 +262,51 @@ export default function AdminTestPage() {
     }
   };
 
+  const handleYoutubeShortsTest = async () => {
+    if (!youtubeChannelId.trim()) {
+      setYoutubeShortsError("Por favor ingrese un ID de canal de YouTube");
+      return;
+    }
+    
+    setYoutubeShortsLoading(true);
+    setYoutubeShortsError(null);
+    
+    try {
+      const url = `https://youtube-data8.p.rapidapi.com/channel/videos/?id=${youtubeChannelId}&filter=shorts_latest&hl=en&gl=US`;
+      
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'youtube-data8.p.rapidapi.com'
+        }
+      };
+      
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      setYoutubeShortsResult({
+        data,
+        success: true,
+        timestamp: new Date().toLocaleString()
+      });
+    } catch (err) {
+      console.error("Error fetching YouTube Shorts:", err);
+      setYoutubeShortsError("Error al consultar la API de YouTube Shorts: " + (err instanceof Error ? err.message : String(err)));
+      setYoutubeShortsResult({
+        success: false,
+        error: err,
+        timestamp: new Date().toLocaleString()
+      });
+    } finally {
+      setYoutubeShortsLoading(false);
+    }
+  };
+
   return <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6">Panel de Pruebas (Admin)</h1>
@@ -277,6 +327,7 @@ export default function AdminTestPage() {
             <TabsTrigger value="tiktok">TikTok API</TabsTrigger>
             <TabsTrigger value="tiktok-video">TikTok Video API</TabsTrigger>
             <TabsTrigger value="facebook">Facebook API</TabsTrigger>
+            <TabsTrigger value="youtube">YouTube</TabsTrigger>
           </TabsList>
           
           <TabsContent value="service">
@@ -612,6 +663,94 @@ export default function AdminTestPage() {
                 </CardFooter>
               </Card>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="youtube">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Buscar Shorts por channel Id
+                  <Badge variant="outline" className="ml-2">YouTube API</Badge>
+                </CardTitle>
+                <CardDescription>
+                  Esta prueba consulta los shorts de un canal de YouTube utilizando RapidAPI
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="youtubeChannelId" className="block text-sm font-medium mb-1">
+                      Channel ID
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="youtubeChannelId" 
+                        placeholder="UC3Wr0S3cd-y-jMGa0eLTQvw" 
+                        value={youtubeChannelId} 
+                        onChange={e => setYoutubeChannelId(e.target.value)} 
+                      />
+                      <Button onClick={handleYoutubeShortsTest} disabled={youtubeShortsLoading}>
+                        {youtubeShortsLoading ? "Procesando..." : "Buscar Shorts"}
+                      </Button>
+                    </div>
+                    {youtubeShortsError && <Alert variant="destructive" className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription>{youtubeShortsError}</AlertDescription>
+                    </Alert>}
+                  </div>
+
+                  {youtubeShortsResult?.success && youtubeShortsResult.data?.contents?.length > 0 && (
+                    <div className="space-y-3 mt-4 border rounded-md p-4 bg-gray-50">
+                      <h3 className="font-medium">Shorts encontrados: {youtubeShortsResult.data.contents.length}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {youtubeShortsResult.data.contents.slice(0, 4).map((short: any, index: number) => (
+                          <div key={index} className="border rounded p-3 bg-white">
+                            <div className="text-sm font-medium">Video ID:</div>
+                            <div className="text-sm mb-2">{short.video?.videoId || 'No disponible'}</div>
+                            
+                            <div className="text-sm font-medium">Título:</div>
+                            <div className="text-sm mb-2 truncate">{short.video?.title || 'No disponible'}</div>
+                            
+                            <div className="text-sm font-medium">Publicado:</div>
+                            <div className="text-sm mb-2">{short.video?.publishedTimeText || 'No disponible'}</div>
+                            
+                            <div className="text-sm font-medium">Vistas:</div>
+                            <div className="text-sm mb-2">{short.video?.viewCountText || 'No disponible'}</div>
+                            
+                            <div className="text-sm font-medium">URL:</div>
+                            <div className="text-sm truncate">
+                              {short.video?.videoId ? (
+                                <a 
+                                  href={`https://www.youtube.com/shorts/${short.video.videoId}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  https://www.youtube.com/shorts/{short.video.videoId}
+                                </a>
+                              ) : 'No disponible'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {youtubeShortsResult && <div className="mt-4">
+                    <h3 className="font-medium mb-2">Resultado completo ({youtubeShortsResult.timestamp}):</h3>
+                    <div className="bg-gray-50 p-4 rounded-md border">
+                      <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
+                        {JSON.stringify(youtubeShortsResult, null, 2)}
+                      </pre>
+                    </div>
+                  </div>}
+                </div>
+              </CardContent>
+              <CardFooter className="text-sm text-gray-500">
+                Este panel permite buscar shorts de YouTube por ID de canal
+              </CardFooter>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
