@@ -9,6 +9,7 @@ export function useYouTubeShortsApi() {
   const [videoDetails, setVideoDetails] = useState<any>(null);
   const [loadingVideoDetails, setLoadingVideoDetails] = useState<boolean>(false);
   const [videoDetailsError, setVideoDetailsError] = useState<string | null>(null);
+  const [allVideoDetails, setAllVideoDetails] = useState<{[key: string]: any}>({});
 
   const handleTest = async () => {
     if (!channelId.trim()) {
@@ -18,6 +19,7 @@ export function useYouTubeShortsApi() {
     
     setLoading(true);
     setError(null);
+    setAllVideoDetails({});
     
     try {
       const url = `https://youtube-data8.p.rapidapi.com/channel/videos/?id=${channelId}&filter=shorts_latest&hl=en&gl=US`;
@@ -37,11 +39,24 @@ export function useYouTubeShortsApi() {
       
       const data = await response.json();
       
-      setResult({
+      const shortsResult = {
         data,
         success: true,
         timestamp: new Date().toLocaleString()
-      });
+      };
+      
+      setResult(shortsResult);
+      
+      // Automatically fetch details for each short
+      if (data.contents && data.contents.length > 0) {
+        // Fetch details for each video sequentially to avoid rate limiting
+        for (const short of data.contents) {
+          const videoId = short.video?.videoId;
+          if (videoId) {
+            await fetchVideoDetailsForAll(videoId);
+          }
+        }
+      }
     } catch (err) {
       console.error("Error fetching YouTube Shorts:", err);
       setError("Error al consultar la API de YouTube Shorts: " + (err instanceof Error ? err.message : String(err)));
@@ -52,6 +67,46 @@ export function useYouTubeShortsApi() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchVideoDetailsForAll = async (videoId: string) => {
+    try {
+      const url = `https://youtube-data8.p.rapidapi.com/video/details/?id=${videoId}&hl=en&gl=US`;
+      
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+          'x-rapidapi-host': 'youtube-data8.p.rapidapi.com'
+        }
+      };
+      
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      setAllVideoDetails(prev => ({
+        ...prev,
+        [videoId]: {
+          data,
+          success: true,
+          timestamp: new Date().toLocaleString()
+        }
+      }));
+    } catch (err) {
+      console.error("Error fetching YouTube Video Details:", err);
+      setAllVideoDetails(prev => ({
+        ...prev,
+        [videoId]: {
+          success: false,
+          error: err,
+          timestamp: new Date().toLocaleString()
+        }
+      }));
     }
   };
 
@@ -111,6 +166,7 @@ export function useYouTubeShortsApi() {
     videoDetails,
     loadingVideoDetails,
     videoDetailsError,
-    fetchVideoDetails
+    fetchVideoDetails,
+    allVideoDetails
   };
 }

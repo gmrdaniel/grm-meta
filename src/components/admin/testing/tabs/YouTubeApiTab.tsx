@@ -21,7 +21,8 @@ export default function YouTubeApiTab() {
     videoDetails,
     loadingVideoDetails,
     videoDetailsError,
-    fetchVideoDetails
+    fetchVideoDetails,
+    allVideoDetails
   } = useYouTubeShortsApi();
 
   return (
@@ -32,7 +33,7 @@ export default function YouTubeApiTab() {
           <Badge variant="outline" className="ml-2">YouTube API</Badge>
         </CardTitle>
         <CardDescription>
-          Esta prueba consulta los shorts de un canal de YouTube utilizando RapidAPI
+          Esta prueba consulta los shorts de un canal de YouTube utilizando RapidAPI y automáticamente obtiene los detalles de cada video
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,29 +70,30 @@ export default function YouTubeApiTab() {
                       <TableHead>Vistas</TableHead>
                       <TableHead>Duración (seg)</TableHead>
                       <TableHead>URL</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      <TableHead>Estado</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {result.data.contents.map((short: any, index: number) => {
                       const videoId = short.video?.videoId;
-                      const currentVideoDetails = videoDetails?.videoId === videoId && videoDetails.success ? videoDetails.data : null;
+                      const details = allVideoDetails[videoId];
+                      const videoData = details?.success ? details.data : null;
                       
                       return (
                         <TableRow key={index}>
                           <TableCell className="font-medium">{videoId || 'No disponible'}</TableCell>
                           <TableCell>{short.video?.title || 'No disponible'}</TableCell>
                           <TableCell>
-                            {currentVideoDetails ? currentVideoDetails.stats?.comments?.toLocaleString() || 'N/A' : 'N/A'}
+                            {videoData ? videoData.stats?.comments?.toLocaleString() || 'N/A' : 'Cargando...'}
                           </TableCell>
                           <TableCell>
-                            {currentVideoDetails ? currentVideoDetails.stats?.likes?.toLocaleString() || 'N/A' : 'N/A'}
+                            {videoData ? videoData.stats?.likes?.toLocaleString() || 'N/A' : 'Cargando...'}
                           </TableCell>
                           <TableCell>
-                            {currentVideoDetails ? currentVideoDetails.stats?.views?.toLocaleString() || 'N/A' : 'N/A'}
+                            {videoData ? videoData.stats?.views?.toLocaleString() || 'N/A' : 'Cargando...'}
                           </TableCell>
                           <TableCell>
-                            {currentVideoDetails ? currentVideoDetails.lengthSeconds || 'N/A' : 'N/A'}
+                            {videoData ? videoData.lengthSeconds || 'N/A' : 'Cargando...'}
                           </TableCell>
                           <TableCell>
                             {videoId ? (
@@ -106,15 +108,21 @@ export default function YouTubeApiTab() {
                             ) : 'No disponible'}
                           </TableCell>
                           <TableCell>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => fetchVideoDetails(videoId)}
-                              disabled={loadingVideoDetails || (videoDetails?.videoId === videoId && videoDetails.success)}
-                            >
-                              <Youtube className="mr-1 h-4 w-4" />
-                              {videoDetails?.videoId === videoId && videoDetails.success ? "Detalles cargados" : "Ver detalles"}
-                            </Button>
+                            {details ? (
+                              details.success ? (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  Detalles cargados
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                  Error al cargar
+                                </Badge>
+                              )
+                            ) : (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                Cargando...
+                              </Badge>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
@@ -157,7 +165,7 @@ export default function YouTubeApiTab() {
         </div>
       </CardContent>
       <CardFooter className="text-sm text-gray-500">
-        Este panel permite buscar shorts de YouTube por ID de canal
+        Este panel permite buscar shorts de YouTube por ID de canal y muestra automáticamente los detalles de cada video
       </CardFooter>
     </Card>
   );
