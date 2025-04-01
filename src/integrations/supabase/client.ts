@@ -9,7 +9,7 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-console.log('SUPABASE_URL',SUPABASE_URL)
+console.log('SUPABASE_URL: ',SUPABASE_URL)
 // Custom function to handle the find_invitation_by_code function
 export const findInvitationByCode = async (code: string) => {
   const { data, error } = await supabase.rpc('find_invitation_by_code', {
