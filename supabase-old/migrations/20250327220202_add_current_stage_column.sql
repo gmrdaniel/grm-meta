@@ -1,4 +1,4 @@
--- UP Migration: Add stage reference to creator_invitations with project validation
+/* -- UP Migration: Add stage reference to creator_invitations with project validation
 BEGIN;
 
 -- Add new UUID column with foreign key
@@ -42,4 +42,4 @@ ALTER TABLE creator_invitations
 DROP COLUMN IF EXISTS current_stage_id;
 
 COMMIT;
-*/
+*/ */

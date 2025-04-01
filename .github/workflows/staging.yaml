@@ -22,5 +22,10 @@ jobs:
         with:
           version: latest
 
+      - run: |
+          echo "PROJECT_ID is: ${SUPABASE_PROJECT_ID:+set}"
+          echo "ACCESS_TOKEN is: ${SUPABASE_ACCESS_TOKEN:+set}"
+        shell: bash
+        
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push

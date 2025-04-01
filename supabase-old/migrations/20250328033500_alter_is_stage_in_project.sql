@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION is_stage_in_project(stage_id UUID, project_id UUID)
+/* CREATE OR REPLACE FUNCTION is_stage_in_project(stage_id UUID, project_id UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
@@ -7,3 +7,4 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
+ */
