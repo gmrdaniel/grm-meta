@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useYouTubeShortsApi } from "../hooks/useYouTubeShortsApi";
 import ErrorDisplay from "../ErrorDisplay";
 import TestResultDisplay from "../TestResultDisplay";
+import { Youtube } from "lucide-react";
 
 export default function YouTubeApiTab() {
   const {
@@ -16,7 +17,11 @@ export default function YouTubeApiTab() {
     result,
     loading,
     error,
-    handleTest
+    handleTest,
+    videoDetails,
+    loadingVideoDetails,
+    videoDetailsError,
+    fetchVideoDetails
   } = useYouTubeShortsApi();
 
   return (
@@ -60,6 +65,7 @@ export default function YouTubeApiTab() {
                       <TableHead>Video ID</TableHead>
                       <TableHead>Título</TableHead>
                       <TableHead>URL</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -79,11 +85,50 @@ export default function YouTubeApiTab() {
                             </a>
                           ) : 'No disponible'}
                         </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => fetchVideoDetails(short.video?.videoId)}
+                            disabled={loadingVideoDetails}
+                          >
+                            <Youtube className="mr-1 h-4 w-4" />
+                            Ver detalles
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
+            </div>
+          )}
+
+          {videoDetailsError && <ErrorDisplay error={videoDetailsError} />}
+          
+          {videoDetails?.success && (
+            <div className="mt-6 border p-4 rounded-md bg-gray-50">
+              <h3 className="font-medium mb-2 text-lg">Detalles del video: {videoDetails.videoId}</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div className="bg-white p-3 rounded shadow">
+                  <div className="text-sm text-gray-500">Comentarios</div>
+                  <div className="text-lg font-semibold">{videoDetails.data.stats?.comments?.toLocaleString() || "N/A"}</div>
+                </div>
+                <div className="bg-white p-3 rounded shadow">
+                  <div className="text-sm text-gray-500">Likes</div>
+                  <div className="text-lg font-semibold">{videoDetails.data.stats?.likes?.toLocaleString() || "N/A"}</div>
+                </div>
+                <div className="bg-white p-3 rounded shadow">
+                  <div className="text-sm text-gray-500">Vistas</div>
+                  <div className="text-lg font-semibold">{videoDetails.data.stats?.views?.toLocaleString() || "N/A"}</div>
+                </div>
+                <div className="bg-white p-3 rounded shadow">
+                  <div className="text-sm text-gray-500">Duración (segundos)</div>
+                  <div className="text-lg font-semibold">{videoDetails.data.lengthSeconds || "N/A"}</div>
+                </div>
+              </div>
+              
+              <TestResultDisplay result={videoDetails} title="Detalles completos" />
             </div>
           )}
 
