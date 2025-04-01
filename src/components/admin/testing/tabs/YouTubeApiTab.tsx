@@ -64,40 +64,61 @@ export default function YouTubeApiTab() {
                     <TableRow>
                       <TableHead>Video ID</TableHead>
                       <TableHead>Título</TableHead>
+                      <TableHead>Comentarios</TableHead>
+                      <TableHead>Likes</TableHead>
+                      <TableHead>Vistas</TableHead>
+                      <TableHead>Duración (seg)</TableHead>
                       <TableHead>URL</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {result.data.contents.map((short: any, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{short.video?.videoId || 'No disponible'}</TableCell>
-                        <TableCell>{short.video?.title || 'No disponible'}</TableCell>
-                        <TableCell>
-                          {short.video?.videoId ? (
-                            <a 
-                              href={`https://www.youtube.com/shorts/${short.video.videoId}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
+                    {result.data.contents.map((short: any, index: number) => {
+                      const videoId = short.video?.videoId;
+                      const currentVideoDetails = videoDetails?.videoId === videoId && videoDetails.success ? videoDetails.data : null;
+                      
+                      return (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{videoId || 'No disponible'}</TableCell>
+                          <TableCell>{short.video?.title || 'No disponible'}</TableCell>
+                          <TableCell>
+                            {currentVideoDetails ? currentVideoDetails.stats?.comments?.toLocaleString() || 'N/A' : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {currentVideoDetails ? currentVideoDetails.stats?.likes?.toLocaleString() || 'N/A' : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {currentVideoDetails ? currentVideoDetails.stats?.views?.toLocaleString() || 'N/A' : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {currentVideoDetails ? currentVideoDetails.lengthSeconds || 'N/A' : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {videoId ? (
+                              <a 
+                                href={`https://www.youtube.com/shorts/${videoId}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                https://www.youtube.com/shorts/{videoId}
+                              </a>
+                            ) : 'No disponible'}
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => fetchVideoDetails(videoId)}
+                              disabled={loadingVideoDetails || (videoDetails?.videoId === videoId && videoDetails.success)}
                             >
-                              https://www.youtube.com/shorts/{short.video.videoId}
-                            </a>
-                          ) : 'No disponible'}
-                        </TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => fetchVideoDetails(short.video?.videoId)}
-                            disabled={loadingVideoDetails}
-                          >
-                            <Youtube className="mr-1 h-4 w-4" />
-                            Ver detalles
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                              <Youtube className="mr-1 h-4 w-4" />
+                              {videoDetails?.videoId === videoId && videoDetails.success ? "Detalles cargados" : "Ver detalles"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
