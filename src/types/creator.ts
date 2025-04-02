@@ -20,6 +20,7 @@ export interface Creator {
   telefono?: string;
   estatus: 'activo' | 'inactivo' | 'pendiente';
   fecha_creacion: string;
+  fecha_consulta_videos?: string;
 }
 
 export interface TikTokVideo {
