@@ -247,7 +247,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="instagramUser" className="flex items-center gap-2">
-              <Instagram className="h-4 w-4" /> Instagram (Optional)
+              <Instagram className="h-4 w-4" /> Instagram 
             </Label>
             <Input
               id="instagramUser"
@@ -274,7 +274,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               }
             />
             <Label htmlFor="isIGProfessional" className="text-sm">
-              I have a Instagram professional account
+              My account is a professional instagram account
             </Label>
           </div>
 

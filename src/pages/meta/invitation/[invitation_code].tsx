@@ -108,7 +108,7 @@ export default function InvitationStepperPage() {
         }
 
         const invitationData = data[0];
-        
+
         if (invitationData.status === "completed") {
           setError("This invitation has already been accepted");
           return;
@@ -357,31 +357,49 @@ export default function InvitationStepperPage() {
   return (
     <div className="flex flex-col md:flex-row items-center justify-evenly min-h-screen bg-gray-50 p-4 gap-2">
       <div className="text-center max-w-md space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1 className="text-2xl font-semibold text-gray-800 mt-6">
           Meta Monetization Program
         </h1>
         <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
         {/* Benefits Section */}
-      <div className="p-4 ">
-        <h3 className="font-medium mb-3">Benefits:</h3>
-        <ul className="space-y-2">
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>$5,000 Bonuses (90 days)</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Immediate Facebook Monetization</span>
-          </li>
-        </ul>
-        
-
-      </div>
+        <div className="p-4 ">
+          <h3 className="font-medium mb-3 mt-4">Benefits:</h3>
+          <ul className="space-y-2">
+            {/* Mobile-only benefits */}
+            <li className="flex items-center gap-2 lg:hidden">
+              <div className="rounded-full bg-green-100 p-1">
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="whitespace-nowrap">Gain Immediate Facebook monetization</span>
+            </li>
+            <li className="flex items-center gap-2 lg:hidden">
+              <div className="rounded-full bg-green-100 p-1">
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              <span>Up to $5,000 in bonuses (90 days)</span>
+            </li>
+            <li className="flex items-center gap-2 lg:hidden">
+              <div className="rounded-full bg-green-100 p-1">
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              <span>Free trial of Meta Verified</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="rounded-full bg-green-100 p-1">
+                {/* desktop-only benefits */}
+                <Check className="h-4 w-4 text-green-600 hidden lg:flex" />
+              </div>
+              <span className="hidden lg:flex">Increased discoverability</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="rounded-full bg-green-100 p-1">
+                <Check className="h-4 w-4 text-green-600 hidden lg:flex" />
+              </div>
+              <span className="hidden lg:flex">Meta support </span>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div className="h-[400px] hidden lg:block  bg-blue-300 p-[1px]"></div>
@@ -398,6 +416,7 @@ export default function InvitationStepperPage() {
               onCheckboxChange={handleCheckboxChange}
               onContinue={handleContinueWelcome}
               isSubmitting={isSubmitting}
+              
             />
           )}
 
