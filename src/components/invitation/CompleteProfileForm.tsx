@@ -135,8 +135,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     try {
       setIsVerifying(true);
       setError(null);
-
-      const { data, error } = await supabase.functions.invoke("verify-phone", {
+      console.log('phone-verification')
+      const { data, error } = await supabase.functions.invoke("phone-verification", {
         body: {
           action: "send",
           phoneNumber: formData.phoneNumber,
