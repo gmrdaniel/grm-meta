@@ -29,9 +29,27 @@ export const fetchCreators = async (
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
     }
     
-    // For withoutVideos filter, we'll use a different approach
+    // Special handling for withoutVideos filter
+    // We'll use a direct LEFT JOIN query rather than post-processing the results
     if (filters.withoutVideos) {
-      // We'll handle this after getting the initial results
+      const { data: creatorsWithoutVideos, error, count } = await supabase
+        .from('creator_inventory')
+        .select('*', { count: 'exact' })
+        .not('id', 'in', (qb) => {
+          qb.from('tiktok_video')
+            .select('creator_id')
+            .distinct();
+        });
+        
+      if (error) {
+        console.error('Error fetching creators without videos:', error);
+        throw new Error(error.message);
+      }
+      
+      return { 
+        data: filterPaginated(creatorsWithoutVideos, page, pageSize) as Creator[], 
+        count: count || 0 
+      };
     }
   }
   
@@ -48,34 +66,20 @@ export const fetchCreators = async (
     throw new Error(error.message);
   }
 
-  let filteredData = data as Creator[];
-  let filteredCount = count || 0;
-  
-  // Special handling for withoutVideos filter
-  if (filters?.withoutVideos && filteredData.length > 0) {
-    // Get the creator IDs from the current result set
-    const creatorIds = filteredData.map(creator => creator.id);
-    
-    // Find which of these creators have videos
-    const { data: videoCountData } = await supabase
-      .from('tiktok_video')
-      .select('creator_id')
-      .in('creator_id', creatorIds);
-    
-    if (videoCountData) {
-      // Create a Set of creator IDs that have videos
-      const creatorsWithVideos = new Set(videoCountData.map(item => item.creator_id));
-      
-      // Filter out creators that have videos
-      filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
-      filteredCount = filteredData.length;
-    }
-  }
-  
   return { 
-    data: filteredData, 
-    count: filteredCount 
+    data: data as Creator[], 
+    count: count || 0 
   };
+};
+
+/**
+ * Helper function to paginate results client-side
+ * Used for complex queries where server-side pagination is not possible
+ */
+const filterPaginated = (data: any[], page: number, pageSize: number) => {
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  return data.slice(start, end);
 };
 
 /**
