@@ -3,8 +3,9 @@ export interface CreatorImportData {
   nombre: string;
   apellido: string;
   correo: string;
-  usuario_tiktok: string;
+  usuario_tiktok?: string;
   secUid_tiktok?: string;
+  usuario_youtube?: string;
   estatus: 'activo' | 'inactivo' | 'pendiente';
 }
 
@@ -19,5 +20,6 @@ export interface CreatorFilter {
   hasTikTokUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
+  withoutYouTube?: boolean;
   [key: string]: boolean | undefined;
 }

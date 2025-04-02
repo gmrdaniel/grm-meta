@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TikTokImportTemplate } from "./import-templates/TikTokImportTemplate";
+import { YouTubeImportTemplate } from "./import-templates/YouTubeImportTemplate";
 import { BulkInvitationsHistory } from "./BulkInvitationsHistory";
 import { toast } from "sonner";
+import { YouTube } from "lucide-react";
 
 interface ImportCreatorsProps {
   onSuccess?: () => void;
@@ -50,6 +52,27 @@ export function ImportCreators({ onSuccess }: ImportCreatorsProps) {
               </CardContent>
             </Card>
             
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle>Usuario YouTube</CardTitle>
+                <CardDescription>
+                  Importa creadores con sus datos básicos y usuario de YouTube
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-4">
+                  Incluye: nombre, apellido, correo, usuario_youtube
+                </p>
+                <Button 
+                  onClick={() => setActiveTab("youtube-template")}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Usar plantilla
+                </Button>
+              </CardContent>
+            </Card>
+            
             <Card className="bg-gray-50 border-dashed">
               <CardHeader className="pb-2">
                 <CardTitle className="text-gray-400">Próximamente</CardTitle>
@@ -79,6 +102,13 @@ export function ImportCreators({ onSuccess }: ImportCreatorsProps) {
         
         <TabsContent value="tiktok-template" className="pt-4">
           <TikTokImportTemplate onSuccess={() => {
+            setActiveTab("history");
+            if (onSuccess) onSuccess();
+          }} />
+        </TabsContent>
+        
+        <TabsContent value="youtube-template" className="pt-4">
+          <YouTubeImportTemplate onSuccess={() => {
             setActiveTab("history");
             if (onSuccess) onSuccess();
           }} />
