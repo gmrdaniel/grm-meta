@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,9 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, Check, X, Calendar, Users, Clock, ArrowUp, ArrowDown, ListOrdered } from "lucide-react";
+import { Filter, Check, X, Calendar, Users, Clock, ArrowUp, ArrowDown, ListOrdered, Download } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { exportToCsv, formatExportData } from "./export-utils";
 
 interface SummaryCreator {
   nombre: string;
@@ -42,6 +43,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
   const [pageSize, setPageSize] = useState(10);
   const [tiktokEligibleFilter, setTiktokEligibleFilter] = useState(false);
   const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   
   const fetchSummaryCreators = async () => {
     try {
@@ -49,24 +51,19 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
         .from('summary_creator')
         .select('*');
       
-      // Apply TikTok eligibility filter if enabled
       if (tiktokEligibleFilter) {
         query = query
           .gte('seguidores_tiktok', 100000)
           .gte('engagement', 4);
       }
       
-      // Apply sorting if enabled
       if (sortByEligible) {
-        // Using a custom sorting logic for eligibility
-        // First sort by seguidores_tiktok and then by engagement
         if (sortByEligible === 'desc') {
           query = query.order('seguidores_tiktok', { ascending: false }).order('engagement', { ascending: false });
         } else {
           query = query.order('seguidores_tiktok', { ascending: true }).order('engagement', { ascending: true });
         }
       } else {
-        // Default sort by followers
         query = query.order('seguidores_tiktok', { ascending: false });
       }
       
@@ -75,12 +72,10 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
       
       if (error) throw error;
       
-      // Get total count for pagination
       let countQuery = supabase
         .from('summary_creator')
         .select('*', { count: 'exact', head: true });
       
-      // Apply the same filters to the count query if needed
       if (tiktokEligibleFilter) {
         countQuery = countQuery
           .gte('seguidores_tiktok', 100000)
@@ -134,7 +129,6 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     return format(new Date(timestamp * 1000), "MMM d, yyyy");
   };
 
-  // Function to check if a creator is TikTok eligible
   const isEligibleForTikTok = (creator: SummaryCreator) => {
     return creator.seguidores_tiktok >= 100000 && creator.engagement >= 4;
   };
@@ -154,7 +148,6 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     setCurrentPage(1);
   };
 
-  // Function to toggle sorting by eligible
   const toggleSortByEligible = () => {
     if (sortByEligible === null) {
       setSortByEligible('desc');
@@ -164,6 +157,36 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
       setSortByEligible(null);
     }
     setCurrentPage(1);
+  };
+  
+  const exportEligibleCreators = async () => {
+    setIsExporting(true);
+    try {
+      let query = supabase
+        .from('summary_creator')
+        .select('*')
+        .gte('seguidores_tiktok', 100000)
+        .gte('engagement', 4);
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        toast.info("No hay creadores elegibles para exportar");
+        return;
+      }
+      
+      const formattedData = formatExportData(data as SummaryCreator[]);
+      exportToCsv(formattedData, "creadores_elegibles_tiktok");
+      
+      toast.success(`${data.length} creadores elegibles exportados correctamente`);
+    } catch (error) {
+      console.error('Error exporting eligible creators:', error);
+      toast.error("Error al exportar creadores elegibles");
+    } finally {
+      setIsExporting(false);
+    }
   };
   
   if (isLoading) {
@@ -206,43 +229,60 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
           </div>
         </div>
         
-        <div className="flex gap-2">
-          <Button 
-            variant={sortByEligible !== null ? "default" : "outline"} 
-            size="sm"
-            onClick={toggleSortByEligible}
-            className="flex items-center gap-1"
-          >
-            {sortByEligible === 'desc' && <ArrowDown className="h-4 w-4" />}
-            {sortByEligible === 'asc' && <ArrowUp className="h-4 w-4" />}
-            {sortByEligible === null && <ListOrdered className="h-4 w-4" />}
-            Ordenar por elegibilidad
-          </Button>
-          
-          <Button 
-            variant={tiktokEligibleFilter ? "default" : "outline"} 
-            size="sm"
-            onClick={toggleTiktokEligibleFilter}
-            className="flex items-center gap-1"
-          >
-            {tiktokEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            Elegible x TikTok
-          </Button>
-          
-          {(tiktokEligibleFilter || sortByEligible !== null) && (
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
             <Button 
-              variant="ghost" 
+              variant={sortByEligible !== null ? "default" : "outline"} 
               size="sm"
-              onClick={() => {
-                setTiktokEligibleFilter(false);
-                setSortByEligible(null);
-              }}
+              onClick={toggleSortByEligible}
               className="flex items-center gap-1"
             >
-              <X className="h-4 w-4" />
-              Limpiar filtros
+              {sortByEligible === 'desc' && <ArrowDown className="h-4 w-4" />}
+              {sortByEligible === 'asc' && <ArrowUp className="h-4 w-4" />}
+              {sortByEligible === null && <ListOrdered className="h-4 w-4" />}
+              Ordenar por elegibilidad
             </Button>
-          )}
+            
+            <Button 
+              variant={tiktokEligibleFilter ? "default" : "outline"} 
+              size="sm"
+              onClick={toggleTiktokEligibleFilter}
+              className="flex items-center gap-1"
+            >
+              {tiktokEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+              Elegible x TikTok
+            </Button>
+            
+            {(tiktokEligibleFilter || sortByEligible !== null) && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  setTiktokEligibleFilter(false);
+                  setSortByEligible(null);
+                }}
+                className="flex items-center gap-1"
+              >
+                <X className="h-4 w-4" />
+                Limpiar filtros
+              </Button>
+            )}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportEligibleCreators}
+            disabled={isExporting}
+            className="flex items-center gap-1 self-end"
+          >
+            {isExporting ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            Exportar Elegibles TikTok
+          </Button>
         </div>
       </div>
       
