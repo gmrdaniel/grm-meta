@@ -1,7 +1,8 @@
 
-import { ExternalLink, Users } from "lucide-react";
+import { ExternalLink, Users, Youtube } from "lucide-react";
 import { CreatorActions } from "./CreatorActions";
 import { formatFollowers, formatEngagement } from "./utils";
+import { Button } from "@/components/ui/button";
 
 interface SocialNetworksProps {
   usuario_tiktok?: string;
@@ -93,6 +94,18 @@ export function SocialNetworks({
                 <Users className="h-3 w-3 mr-1" /> {formatFollowers(seguidores_youtube)}
               </span>
             )}
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="h-6 rounded-md ml-2 flex items-center gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`https://youtube.com/channel/${usuario_youtube}`, '_blank');
+              }}
+            >
+              <Youtube className="h-3 w-3" />
+              YouTube channel
+            </Button>
           </div>
           <div className="flex gap-3 mt-1 text-xs">
             <span className={`flex items-center ${elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
