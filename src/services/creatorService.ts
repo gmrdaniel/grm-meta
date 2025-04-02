@@ -29,9 +29,9 @@ export const fetchCreators = async (
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
     }
     
-    // For withoutVideos filter, we'll use a different approach
+    // Updated filter to fetch creators where fecha_consulta_videos is null
     if (filters.withoutVideos) {
-      // We'll handle this after getting the initial results
+      query = query.is('fecha_consulta_videos', null);
     }
   }
   
@@ -50,27 +50,6 @@ export const fetchCreators = async (
 
   let filteredData = data as Creator[];
   let filteredCount = count || 0;
-  
-  // Special handling for withoutVideos filter
-  if (filters?.withoutVideos && filteredData.length > 0) {
-    // Get the creator IDs from the current result set
-    const creatorIds = filteredData.map(creator => creator.id);
-    
-    // Find which of these creators have videos
-    const { data: videoCountData } = await supabase
-      .from('tiktok_video')
-      .select('creator_id')
-      .in('creator_id', creatorIds);
-    
-    if (videoCountData) {
-      // Create a Set of creator IDs that have videos
-      const creatorsWithVideos = new Set(videoCountData.map(item => item.creator_id));
-      
-      // Filter out creators that have videos
-      filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
-      filteredCount = filteredData.length;
-    }
-  }
   
   return { 
     data: filteredData, 
