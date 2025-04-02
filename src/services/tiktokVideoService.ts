@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TikTokVideo } from "@/types/creator";
 
@@ -220,7 +221,13 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
       }
     }
     
-    console.log(`Saved ${savedCount} videos out of ${videos.length}`);
+    // Update fecha_consulta_videos after fetching videos
+    await supabase
+      .from('creator_inventory')
+      .update({ fecha_consulta_videos: new Date().toISOString() })
+      .eq('id', creatorId);
+      
+    console.log(`Saved ${savedCount} videos out of ${videos.length} and updated fecha_consulta_videos`);
     return { savedCount, totalCount: videos.length };
   } catch (error) {
     console.error('Error fetching TikTok user videos:', error);

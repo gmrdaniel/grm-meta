@@ -98,6 +98,7 @@ export type Database = {
           engagement_tiktok: number | null
           engagement_youtube: number | null
           estatus: string | null
+          fecha_consulta_videos: string | null
           fecha_creacion: string | null
           id: string
           lada_telefono: string | null
@@ -120,6 +121,7 @@ export type Database = {
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
           estatus?: string | null
+          fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
           id?: string
           lada_telefono?: string | null
@@ -142,6 +144,7 @@ export type Database = {
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
           estatus?: string | null
+          fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
           id?: string
           lada_telefono?: string | null
