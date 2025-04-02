@@ -1,3 +1,4 @@
+
 import { Creator } from "@/types/creator";
 
 export interface CreatorFilter {
@@ -5,6 +6,7 @@ export interface CreatorFilter {
   hasTikTokUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
+  withVideos?: boolean;
   [key: string]: boolean | undefined;
 }
 
