@@ -18,8 +18,6 @@ import { CreatorPagination } from "./CreatorPagination";
 import { CreatorEditDialog } from "./CreatorEditDialog";
 import { CreatorBatchActions } from "./CreatorBatchActions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Check, Filter, Video, X } from "lucide-react";
 
 export function CreatorsList({ 
   onCreatorSelect, 
@@ -109,32 +107,6 @@ export function CreatorsList({
     setSelectAll(false);
   };
 
-  const toggleFilter = (filterName: keyof CreatorFilter) => {
-    setActiveFilters(prev => {
-      // Clear other mutually exclusive filters if needed
-      const newFilters = { ...prev };
-      
-      // If turning on 'withVideos', turn off 'withoutVideos'
-      if (filterName === 'withVideos' && !prev[filterName]) {
-        delete newFilters.withoutVideos;
-      }
-      
-      // If turning on 'withoutVideos', turn off 'withVideos'
-      if (filterName === 'withoutVideos' && !prev[filterName]) {
-        delete newFilters.withVideos;
-      }
-      
-      // Toggle the requested filter
-      newFilters[filterName] = !prev[filterName];
-      
-      if (!newFilters[filterName]) {
-        delete newFilters[filterName];
-      }
-      
-      return newFilters;
-    });
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -159,59 +131,10 @@ export function CreatorsList({
           <p className="text-gray-500">Total: {totalCount} creadores</p>
         </div>
         
-        <div className="flex gap-2">
-          <Button 
-            variant={activeFilters.tiktokEligible ? "default" : "outline"} 
-            size="sm"
-            onClick={() => toggleFilter('tiktokEligible')}
-            className="flex items-center gap-1"
-          >
-            {activeFilters.tiktokEligible ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            TikTok Elegible
-          </Button>
-          
-          <Button 
-            variant={activeFilters.hasTikTokUsername ? "default" : "outline"} 
-            size="sm"
-            onClick={() => toggleFilter('hasTikTokUsername')}
-            className="flex items-center gap-1"
-          >
-            {activeFilters.hasTikTokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            Usuario TikTok
-          </Button>
-          
-          <Button 
-            variant={activeFilters.withVideos ? "default" : "outline"} 
-            size="sm"
-            onClick={() => toggleFilter('withVideos')}
-            className="flex items-center gap-1"
-          >
-            {activeFilters.withVideos ? <Check className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-            Con Videos
-          </Button>
-          
-          <Button 
-            variant={activeFilters.withoutVideos ? "default" : "outline"} 
-            size="sm"
-            onClick={() => toggleFilter('withoutVideos')}
-            className="flex items-center gap-1"
-          >
-            {activeFilters.withoutVideos ? <Check className="h-4 w-4" /> : <Video className="h-4 w-4 line-through" />}
-            Sin Videos
-          </Button>
-          
-          {Object.keys(activeFilters).length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setActiveFilters({})}
-              className="flex items-center gap-1"
-            >
-              <X className="h-4 w-4" />
-              Limpiar filtros
-            </Button>
-          )}
-        </div>
+        <CreatorFilters 
+          activeFilters={activeFilters}
+          onFilterChange={handleFilterChange}
+        />
       </div>
       
       <CreatorBatchActions

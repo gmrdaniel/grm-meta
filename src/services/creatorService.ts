@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -28,22 +27,6 @@ export const fetchCreators = async (
     // Filter creators without engagement data
     if (filters.withoutEngagement) {
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
-    }
-    
-    // Handle "with videos" filter - creators that have TikTok videos
-    if (filters.withVideos) {
-      // We'll use a different approach to fetch creators with videos
-      const { data: creatorsWithVideos } = await supabase
-        .from('tiktok_video')
-        .select('creator_id');
-      
-      if (creatorsWithVideos && creatorsWithVideos.length > 0) {
-        const creatorIds = [...new Set(creatorsWithVideos.map(item => item.creator_id))];
-        query = query.in('id', creatorIds);
-      } else {
-        // If there are no creators with videos, return empty result
-        return { data: [], count: 0 };
-      }
     }
     
     // For withoutVideos filter, we'll use a different approach
