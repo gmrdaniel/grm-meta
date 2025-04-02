@@ -12,9 +12,9 @@ import { FileUploader } from "./components/FileUploader";
 import { ImportMethodSelector } from "./components/ImportMethodSelector";
 import { 
   generateExcelTemplate, 
-  processExcelFile, 
   processImportData 
-} from "./utils/importUtils";
+} from "./utils/tiktokUtils";
+import { processExcelFile } from "./utils/commonUtils";
 
 interface TikTokImportTemplateProps {
   onSuccess?: () => void;

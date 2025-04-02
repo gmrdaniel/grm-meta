@@ -12,9 +12,9 @@ import { FileUploader } from "./components/FileUploader";
 import { ImportMethodSelector } from "./components/ImportMethodSelector";
 import { 
   generateYouTubeExcelTemplate, 
-  processExcelFile, 
   processYouTubeImportData 
-} from "./utils/importUtils";
+} from "./utils/youtubeUtils";
+import { processExcelFile } from "./utils/commonUtils";
 
 interface YouTubeImportTemplateProps {
   onSuccess?: () => void;

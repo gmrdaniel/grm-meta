@@ -7,7 +7,7 @@ import { TikTokImportTemplate } from "./import-templates/TikTokImportTemplate";
 import { YouTubeImportTemplate } from "./import-templates/YouTubeImportTemplate";
 import { BulkInvitationsHistory } from "./BulkInvitationsHistory";
 import { toast } from "sonner";
-import { YouTube } from "lucide-react";
+import { Youtube } from "lucide-react";
 
 interface ImportCreatorsProps {
   onSuccess?: () => void;
