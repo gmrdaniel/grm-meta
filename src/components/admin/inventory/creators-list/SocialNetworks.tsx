@@ -1,4 +1,3 @@
-
 import { ExternalLink, Users, Youtube } from "lucide-react";
 import { CreatorActions } from "./CreatorActions";
 import { formatFollowers, formatEngagement } from "./utils";
@@ -48,13 +47,22 @@ export function SocialNetworks({
     
     try {
       toast.loading("Actualizando datos de YouTube...");
+      
+      console.log('Initiating YouTube update for creator:', creatorId, 'with channel:', channelId);
       const result = await fetchAndUpdateYouTubeInfo(creatorId, channelId);
+      
       console.log('YouTube update result:', result);
-      toast.success(`Información de YouTube actualizada: ${result.subscriberCount} suscriptores`);
-      onRefetch();
+      toast.dismiss();
+      toast.success(`Información de YouTube actualizada: ${result.subscriberCount.toLocaleString()} suscriptores`);
+      
+      // Reload creator data
+      setTimeout(() => {
+        onRefetch();
+      }, 500);
     } catch (error) {
       console.error('Error updating YouTube info:', error);
-      toast.error("Error al actualizar datos de YouTube");
+      toast.dismiss();
+      toast.error("Error al actualizar datos de YouTube: " + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   };
 

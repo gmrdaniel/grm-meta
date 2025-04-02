@@ -8,6 +8,7 @@ import { toast } from "sonner";
  */
 export const fetchYouTubeChannelInfo = async (channelId: string): Promise<any> => {
   try {
+    console.log('Fetching YouTube channel info for:', channelId);
     const response = await fetch(`https://youtube-data8.p.rapidapi.com/channel/details/?id=${channelId}&hl=en&gl=US`, {
       method: 'GET',
       headers: {
@@ -21,6 +22,7 @@ export const fetchYouTubeChannelInfo = async (channelId: string): Promise<any> =
     }
 
     const data = await response.json();
+    console.log('YouTube API raw response:', data);
     return data;
   } catch (error) {
     console.error('Error fetching YouTube channel info:', error);
@@ -45,7 +47,8 @@ export const updateCreatorYouTubeInfo = async (
     .from('creator_inventory')
     .update({
       seguidores_youtube: subscriberCount,
-      elegible_youtube: isEligible
+      elegible_youtube: isEligible,
+      fecha_descarga_yt: new Date().toISOString()
     })
     .eq('id', creatorId)
     .select()
@@ -68,6 +71,8 @@ export const fetchAndUpdateYouTubeInfo = async (
   channelId: string
 ): Promise<{ subscriberCount: number, isEligible: boolean }> => {
   try {
+    console.log('Starting fetchAndUpdateYouTubeInfo for creator:', creatorId, 'channelId:', channelId);
+    
     // Fetch channel info from YouTube API
     const channelInfo = await fetchYouTubeChannelInfo(channelId);
     console.log('YouTube channel info response:', channelInfo);
