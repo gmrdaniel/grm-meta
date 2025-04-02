@@ -536,6 +536,59 @@ export type Database = {
           },
         ]
       }
+      youtube_shorts: {
+        Row: {
+          comments: number | null
+          created_at: string
+          creator_id: string
+          duration: number | null
+          id: string
+          likes: number | null
+          published_date: string | null
+          title: string | null
+          updated_at: string
+          url: string | null
+          video_id: string
+          views: number | null
+        }
+        Insert: {
+          comments?: number | null
+          created_at?: string
+          creator_id: string
+          duration?: number | null
+          id?: string
+          likes?: number | null
+          published_date?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+          video_id: string
+          views?: number | null
+        }
+        Update: {
+          comments?: number | null
+          created_at?: string
+          creator_id?: string
+          duration?: number | null
+          id?: string
+          likes?: number | null
+          published_date?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+          video_id?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_shorts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       summary_creator: {

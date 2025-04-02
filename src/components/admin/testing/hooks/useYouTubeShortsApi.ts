@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { batchSaveYouTubeShorts } from "@/services/youtubeShortsService";
+import { toast } from "sonner";
 
 export function useYouTubeShortsApi() {
   const [channelId, setChannelId] = useState<string>("");
@@ -10,6 +12,7 @@ export function useYouTubeShortsApi() {
   const [loadingVideoDetails, setLoadingVideoDetails] = useState<boolean>(false);
   const [videoDetailsError, setVideoDetailsError] = useState<string | null>(null);
   const [allVideoDetails, setAllVideoDetails] = useState<{[key: string]: any}>({});
+  const [savingToDatabase, setSavingToDatabase] = useState<boolean>(false);
 
   const handleTest = async () => {
     if (!channelId.trim()) {
@@ -156,6 +159,48 @@ export function useYouTubeShortsApi() {
     }
   };
 
+  // New function to save fetched videos to database
+  const saveVideosToDatabase = async (creatorId: string) => {
+    if (!result?.data?.contents || result.data.contents.length === 0) {
+      toast.error("No hay videos para guardar");
+      return;
+    }
+    
+    if (!creatorId) {
+      toast.error("ID del creador no proporcionado");
+      return;
+    }
+    
+    setSavingToDatabase(true);
+    
+    try {
+      // Transform video data to the format required for saving
+      const videosToSave = Object.keys(allVideoDetails).map(videoId => {
+        const videoDetail = allVideoDetails[videoId];
+        if (videoDetail?.success) {
+          return {
+            videoId,
+            title: videoDetail.data.title,
+            stats: videoDetail.data.stats,
+            lengthSeconds: videoDetail.data.lengthSeconds,
+            publishDate: videoDetail.data.publishDate
+          };
+        }
+        return null;
+      }).filter(Boolean);
+      
+      // Save videos to database
+      const result = await batchSaveYouTubeShorts(creatorId, videosToSave);
+      
+      toast.success(`Se guardaron ${result.savedCount} de ${result.totalVideos} videos en la base de datos`);
+    } catch (error) {
+      console.error("Error saving videos to database:", error);
+      toast.error("Error al guardar videos en la base de datos: " + (error instanceof Error ? error.message : String(error)));
+    } finally {
+      setSavingToDatabase(false);
+    }
+  };
+
   return {
     channelId,
     setChannelId,
@@ -167,6 +212,8 @@ export function useYouTubeShortsApi() {
     loadingVideoDetails,
     videoDetailsError,
     fetchVideoDetails,
-    allVideoDetails
+    allVideoDetails,
+    saveVideosToDatabase,
+    savingToDatabase
   };
 }

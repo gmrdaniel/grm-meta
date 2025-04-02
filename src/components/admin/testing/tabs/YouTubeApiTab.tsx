@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useYouTubeShortsApi } from "../hooks/useYouTubeShortsApi";
 import ErrorDisplay from "../ErrorDisplay";
 import TestResultDisplay from "../TestResultDisplay";
-import { Youtube } from "lucide-react";
+import { Youtube, Database, Loader2, DatabaseBackup } from "lucide-react";
+import { useState } from "react";
 
 export default function YouTubeApiTab() {
   const {
@@ -22,8 +23,12 @@ export default function YouTubeApiTab() {
     loadingVideoDetails,
     videoDetailsError,
     fetchVideoDetails,
-    allVideoDetails
+    allVideoDetails,
+    saveVideosToDatabase,
+    savingToDatabase
   } = useYouTubeShortsApi();
+
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string>("");
 
   return (
     <Card>
@@ -58,7 +63,37 @@ export default function YouTubeApiTab() {
 
           {result?.success && result.data?.contents?.length > 0 && (
             <div className="mt-4">
-              <h3 className="font-medium mb-3">Shorts encontrados: {result.data.contents.length}</h3>
+              <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+                <h3 className="font-medium">Shorts encontrados: {result.data.contents.length}</h3>
+                
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Input
+                    placeholder="ID del creador para guardar"
+                    value={selectedCreatorId}
+                    onChange={e => setSelectedCreatorId(e.target.value)}
+                    className="w-64"
+                  />
+                  <Button 
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                    onClick={() => saveVideosToDatabase(selectedCreatorId)}
+                    disabled={savingToDatabase || !selectedCreatorId}
+                  >
+                    {savingToDatabase ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <DatabaseBackup className="h-4 w-4 mr-1" />
+                        Guardar en base de datos
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
               <div className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
@@ -165,7 +200,7 @@ export default function YouTubeApiTab() {
         </div>
       </CardContent>
       <CardFooter className="text-sm text-gray-500">
-        Este panel permite buscar shorts de YouTube por ID de canal y muestra automáticamente los detalles de cada video
+        Este panel permite buscar shorts de YouTube por ID de canal, mostrar los detalles de cada video y guardar los resultados en la base de datos
       </CardFooter>
     </Card>
   );

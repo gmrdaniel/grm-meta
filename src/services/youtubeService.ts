@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
+import { batchSaveYouTubeShorts } from "./youtubeShortsService";
 
 /**
  * Fetch YouTube channel details from RapidAPI
@@ -97,6 +98,90 @@ export const fetchAndUpdateYouTubeInfo = async (
     };
   } catch (error) {
     console.error('Error in fetchAndUpdateYouTubeInfo:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch YouTube shorts for a creator and save them to the database
+ */
+export const fetchAndSaveYouTubeShorts = async (
+  creatorId: string,
+  channelId: string
+): Promise<{ totalVideos: number, savedCount: number }> => {
+  try {
+    console.log('Fetching YouTube shorts for creator:', creatorId, 'channelId:', channelId);
+    
+    // Fetch shorts from YouTube API
+    const response = await fetch(`https://youtube-data8.p.rapidapi.com/channel/videos/?id=${channelId}&filter=shorts_latest&hl=en&gl=US`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+        'x-rapidapi-host': 'youtube-data8.p.rapidapi.com'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching YouTube shorts: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('YouTube shorts API response:', data);
+    
+    if (!data.contents || data.contents.length === 0) {
+      console.log('No YouTube shorts found for this channel');
+      return { totalVideos: 0, savedCount: 0 };
+    }
+    
+    // Fetch details for each short
+    const videoDetails = [];
+    for (const short of data.contents) {
+      const videoId = short.video?.videoId;
+      if (!videoId) continue;
+      
+      try {
+        // Wait a bit to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const detailsResponse = await fetch(`https://youtube-data8.p.rapidapi.com/video/details/?id=${videoId}&hl=en&gl=US`, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+            'x-rapidapi-host': 'youtube-data8.p.rapidapi.com'
+          }
+        });
+        
+        if (!detailsResponse.ok) {
+          console.error(`Error fetching details for video ${videoId}: ${detailsResponse.status}`);
+          continue;
+        }
+        
+        const detailsData = await detailsResponse.json();
+        
+        videoDetails.push({
+          videoId,
+          title: detailsData.title,
+          stats: detailsData.stats,
+          lengthSeconds: detailsData.lengthSeconds,
+          publishDate: detailsData.publishDate
+        });
+      } catch (err) {
+        console.error(`Error fetching details for video ${videoId}:`, err);
+      }
+    }
+    
+    console.log(`Fetched details for ${videoDetails.length} videos`);
+    
+    // Save videos to database
+    if (videoDetails.length === 0) {
+      return { totalVideos: data.contents.length, savedCount: 0 };
+    }
+    
+    const result = await batchSaveYouTubeShorts(creatorId, videoDetails);
+    
+    return result;
+  } catch (error) {
+    console.error('Error in fetchAndSaveYouTubeShorts:', error);
     throw error;
   }
 };
