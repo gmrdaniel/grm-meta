@@ -42,14 +42,14 @@ export const saveYouTubeShort = async (
 
     console.log('Saving YouTube Short:', videoRecord);
 
-    // Insert the video record into the database using type assertion to bypass TypeScript error
-    const { data, error } = await (supabase
-      .from('youtube_shorts' as any)
+    // Insert the video record into the database
+    const { data, error } = await supabase
+      .from('youtube_shorts')
       .upsert(videoRecord, { 
         onConflict: 'creator_id,video_id',
         ignoreDuplicates: false 
       })
-      .select());
+      .select();
 
     if (error) {
       console.error('Error saving YouTube Short:', error);
@@ -107,13 +107,13 @@ export const batchSaveYouTubeShorts = async (
       
       if (videoRecords.length === 0) continue;
       
-      // Insert the batch of video records using type assertion to bypass TypeScript error
-      const { data, error } = await (supabase
-        .from('youtube_shorts' as any)
+      // Insert the batch of video records
+      const { data, error } = await supabase
+        .from('youtube_shorts')
         .upsert(videoRecords, {
           onConflict: 'creator_id,video_id',
           ignoreDuplicates: false
-        }));
+        });
       
       if (error) {
         console.error(`Error saving batch ${i / batchSize + 1}:`, error);
@@ -144,12 +144,11 @@ export const batchSaveYouTubeShorts = async (
  */
 export const fetchYouTubeShorts = async (creatorId: string) => {
   try {
-    // Use type assertion to bypass TypeScript error
-    const { data, error, count } = await (supabase
-      .from('youtube_shorts' as any)
+    const { data, error, count } = await supabase
+      .from('youtube_shorts')
       .select('*', { count: 'exact' })
       .eq('creator_id', creatorId)
-      .order('published_date', { ascending: false })) as any;
+      .order('published_date', { ascending: false });
     
     if (error) {
       throw error;

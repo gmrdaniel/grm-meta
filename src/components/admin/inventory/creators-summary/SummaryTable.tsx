@@ -35,12 +35,13 @@ export function SummaryTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px] text-center">#</TableHead>
-            <TableHead className="w-[200px]">Creador</TableHead>
-            <TableHead className="w-[180px]">Redes Sociales</TableHead>
-            <TableHead className="w-[120px]">Engagement</TableHead>
-            <TableHead className="w-[150px]">Elegibilidad</TableHead>
-            <TableHead className="w-[150px]">Duración Prom.</TableHead>
-            <TableHead className="w-[120px]">Último Post</TableHead>
+            <TableHead className="w-[250px]">Creador</TableHead>
+            <TableHead>TikTok</TableHead>
+            <TableHead>Seguidores</TableHead>
+            <TableHead>Engagement</TableHead>
+            <TableHead>Elegible x TikTok</TableHead>
+            <TableHead>Duración Prom.</TableHead>
+            <TableHead>Último Post</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
