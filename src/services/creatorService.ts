@@ -25,6 +25,11 @@ export const fetchCreators = async (
       query = query.not('usuario_tiktok', 'is', null);
     }
 
+    // New filter for creators with YouTube username
+    if (filters.hasYouTubeUsername) {
+      query = query.not('usuario_youtube', 'is', null);
+    }
+
     // Filter creators without engagement data
     if (filters.withoutEngagement) {
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');

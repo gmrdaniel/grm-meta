@@ -74,6 +74,16 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             </DropdownMenuItem>
             <DropdownMenuItem className="flex items-center gap-2">
               <Checkbox 
+                id="has-youtube"
+                checked={activeFilters.hasYouTubeUsername || false}
+                onCheckedChange={() => handleFilterChange('hasYouTubeUsername')}
+              />
+              <Label htmlFor="has-youtube" className="flex-1 cursor-pointer">
+                Con usuario YouTube
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
                 id="without-engagement"
                 checked={activeFilters.withoutEngagement || false}
                 onCheckedChange={() => handleFilterChange('withoutEngagement')}
