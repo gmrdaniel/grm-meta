@@ -10,6 +10,7 @@ export function useCreatorsSummary() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tiktokEligibleFilter, setTiktokEligibleFilter] = useState(false);
+  const [youtubeEligibleFilter, setYoutubeEligibleFilter] = useState(false);
   const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   
@@ -23,6 +24,11 @@ export function useCreatorsSummary() {
         query = query
           .gte('seguidores_tiktok', 100000)
           .gte('engagement', 4);
+      }
+      
+      if (youtubeEligibleFilter) {
+        query = query
+          .gte('seguidores_youtube', 100000);
       }
       
       if (sortByEligible) {
@@ -50,6 +56,11 @@ export function useCreatorsSummary() {
           .gte('engagement', 4);
       }
       
+      if (youtubeEligibleFilter) {
+        countQuery = countQuery
+          .gte('seguidores_youtube', 100000);
+      }
+      
       const { count: totalCount, error: countError } = await countQuery;
         
       if (countError) throw countError;
@@ -65,7 +76,7 @@ export function useCreatorsSummary() {
   };
   
   const { data: creatorsData, isLoading, error } = useQuery({
-    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, sortByEligible],
+    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, youtubeEligibleFilter, sortByEligible],
     queryFn: fetchSummaryCreators
   });
   
@@ -85,6 +96,11 @@ export function useCreatorsSummary() {
     setCurrentPage(1);
   };
 
+  const toggleYoutubeEligibleFilter = () => {
+    setYoutubeEligibleFilter(prev => !prev);
+    setCurrentPage(1);
+  };
+
   const toggleSortByEligible = () => {
     if (sortByEligible === null) {
       setSortByEligible('desc');
@@ -98,6 +114,7 @@ export function useCreatorsSummary() {
 
   const clearFilters = () => {
     setTiktokEligibleFilter(false);
+    setYoutubeEligibleFilter(false);
     setSortByEligible(null);
   };
   
@@ -106,9 +123,30 @@ export function useCreatorsSummary() {
     try {
       let query = supabase
         .from('summary_creator')
-        .select('*')
-        .gte('seguidores_tiktok', 100000)
-        .gte('engagement', 4);
+        .select('*');
+
+      // If both filters are enabled, use both criteria
+      if (tiktokEligibleFilter && youtubeEligibleFilter) {
+        query = query
+          .gte('seguidores_tiktok', 100000)
+          .gte('engagement', 4)
+          .gte('seguidores_youtube', 100000);
+      }
+      // If only TikTok filter is enabled
+      else if (tiktokEligibleFilter) {
+        query = query
+          .gte('seguidores_tiktok', 100000)
+          .gte('engagement', 4);
+      }
+      // If only YouTube filter is enabled
+      else if (youtubeEligibleFilter) {
+        query = query
+          .gte('seguidores_youtube', 100000);
+      }
+      // If no filters are enabled, export all creators
+      else {
+        query = query.not('id', 'is', null);
+      }
       
       const { data, error } = await query;
       
@@ -120,7 +158,7 @@ export function useCreatorsSummary() {
       }
       
       const formattedData = formatExportData(data as SummaryCreator[]);
-      exportToCsv(formattedData, "creadores_elegibles_tiktok");
+      exportToCsv(formattedData, "creadores_elegibles");
       
       toast.success(`${data.length} creadores elegibles exportados correctamente`);
     } catch (error) {
@@ -139,11 +177,13 @@ export function useCreatorsSummary() {
     isLoading,
     error,
     tiktokEligibleFilter,
+    youtubeEligibleFilter,
     sortByEligible,
     isExporting,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
+    toggleYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
     exportEligibleCreators

@@ -534,6 +534,13 @@ export type Database = {
             referencedRelation: "creator_inventory"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tiktok_video_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "summary_creator"
+            referencedColumns: ["id"]
+          },
         ]
       }
       youtube_shorts: {
@@ -587,6 +594,13 @@ export type Database = {
             referencedRelation: "creator_inventory"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "youtube_shorts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "summary_creator"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -598,9 +612,15 @@ export type Database = {
           date_last_post: number | null
           duration_average: number | null
           engagement: number | null
+          id: string | null
           nombre: string | null
           seguidores_tiktok: number | null
+          seguidores_youtube: number | null
           usuario_tiktok: string | null
+          usuario_youtube: string | null
+          video_id: string | null
+          yt_average_duration: number | null
+          yt_engagement: number | null
         }
         Relationships: []
       }
