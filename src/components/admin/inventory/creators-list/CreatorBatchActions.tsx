@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, RefreshCcw } from "lucide-react";
+import { Loader2, Download, RefreshCcw, Video } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { 
@@ -15,15 +15,18 @@ interface CreatorBatchActionsProps {
   selectedCreators: Creator[];
   onSuccess: () => void;
   clearSelection: () => void;
+  allCreators?: Creator[];
 }
 
 export function CreatorBatchActions({ 
   selectedCreators, 
   onSuccess,
-  clearSelection 
+  clearSelection,
+  allCreators = [] 
 }: CreatorBatchActionsProps) {
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<boolean>(false);
   const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<boolean>(false);
+  const [loadingAllVideos, setLoadingAllVideos] = useState<boolean>(false);
   const [processedCount, setProcessedCount] = useState<number>(0);
   const [totalToProcess, setTotalToProcess] = useState<number>(0);
 
@@ -149,69 +152,135 @@ export function CreatorBatchActions({
     }
   };
 
-  if (selectedCreators.length === 0) return null;
+  // New function to process all creators' videos with delay
+  const handleFetchAllTikTokVideos = async () => {
+    const creatorsWithTikTok = allCreators.filter(creator => creator.usuario_tiktok);
+    
+    if (creatorsWithTikTok.length === 0) {
+      toast.error("Ninguno de los creadores tiene un nombre de usuario de TikTok");
+      return;
+    }
+    
+    setLoadingAllVideos(true);
+    setProcessedCount(0);
+    setTotalToProcess(creatorsWithTikTok.length);
+    
+    // Process creators sequentially with delay
+    for (let i = 0; i < creatorsWithTikTok.length; i++) {
+      const creator = creatorsWithTikTok[i];
+      try {
+        const result = await fetchTikTokUserVideos(creator.usuario_tiktok || '', creator.id);
+        toast.success(`@${creator.usuario_tiktok}: ${result.savedCount} videos guardados (${result.savedCount}/${result.totalCount})`);
+      } catch (error) {
+        toast.error(`Error con videos de @${creator.usuario_tiktok}: ${(error as Error).message}`);
+      }
+      
+      // Update processed count
+      setProcessedCount(i + 1);
+      
+      // Wait 1 second before processing the next creator
+      if (i < creatorsWithTikTok.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    toast.success(`Procesados videos de ${creatorsWithTikTok.length} creadores correctamente`);
+    onSuccess();
+    setLoadingAllVideos(false);
+  };
+
+  // Show fetch all videos button even if no creators are selected
+  const showFetchAllVideosButton = Array.isArray(allCreators) && allCreators.length > 0;
 
   return (
     <div className="bg-slate-50 p-3 rounded-md border mt-4 mb-2">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-medium text-sm">
-            {selectedCreators.length} creadores seleccionados
+            {selectedCreators.length > 0 ? `${selectedCreators.length} creadores seleccionados` : 'Acciones en lote'}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Ejecuta acciones en lote para todos los seleccionados
+            {selectedCreators.length > 0 
+              ? 'Ejecuta acciones en lote para todos los seleccionados' 
+              : 'Ejecuta acciones en lote para todos los creadores'}
           </p>
         </div>
         
-        <div className="flex gap-2">
-          <Button 
-            size="sm"
-            variant="outline"
-            onClick={clearSelection}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
-          >
-            Cancelar selección
-          </Button>
+        <div className="flex flex-wrap gap-2">
+          {selectedCreators.length > 0 && (
+            <>
+              <Button 
+                size="sm"
+                variant="outline"
+                onClick={clearSelection}
+                disabled={loadingTikTokInfo || loadingTikTokVideos || loadingAllVideos}
+              >
+                Cancelar selección
+              </Button>
+              
+              <Button 
+                size="sm"
+                variant="secondary"
+                onClick={handleBatchFetchTikTokInfo}
+                disabled={loadingTikTokInfo || loadingTikTokVideos || loadingAllVideos}
+                className="flex items-center gap-1"
+              >
+                {loadingTikTokInfo ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Procesando ({processedCount}/{totalToProcess})
+                  </>
+                ) : (
+                  <>
+                    <RefreshCcw className="h-3 w-3 mr-1" />
+                    Obtener info TikTok
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                size="sm"
+                variant="secondary"
+                onClick={handleBatchFetchTikTokVideos}
+                disabled={loadingTikTokInfo || loadingTikTokVideos || loadingAllVideos}
+                className="flex items-center gap-1"
+              >
+                {loadingTikTokVideos ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Procesando ({processedCount}/{totalToProcess})
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-3 w-3 mr-1" />
+                    Obtener videos TikTok
+                  </>
+                )}
+              </Button>
+            </>
+          )}
           
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchTikTokInfo}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
-            className="flex items-center gap-1"
-          >
-            {loadingTikTokInfo ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <RefreshCcw className="h-3 w-3 mr-1" />
-                Obtener info TikTok
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchTikTokVideos}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
-            className="flex items-center gap-1"
-          >
-            {loadingTikTokVideos ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <Download className="h-3 w-3 mr-1" />
-                Obtener videos TikTok
-              </>
-            )}
-          </Button>
+          {showFetchAllVideosButton && (
+            <Button 
+              size="sm"
+              variant="default"
+              onClick={handleFetchAllTikTokVideos}
+              disabled={loadingTikTokInfo || loadingTikTokVideos || loadingAllVideos}
+              className="flex items-center gap-1"
+            >
+              {loadingAllVideos ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Procesando videos ({processedCount}/{totalToProcess})
+                </>
+              ) : (
+                <>
+                  <Video className="h-3 w-3 mr-1" />
+                  Obtener videos de todos los creadores
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </div>

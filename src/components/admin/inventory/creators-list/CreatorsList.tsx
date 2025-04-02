@@ -141,6 +141,7 @@ export function CreatorsList({
         selectedCreators={selectedCreators}
         onSuccess={refetch}
         clearSelection={clearSelection}
+        allCreators={creators}
       />
       
       {creators.length === 0 ? (
