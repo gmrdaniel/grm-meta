@@ -1,6 +1,7 @@
 
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
+import { SummaryCreator } from './creators-summary/types';
 
 export interface CreatorExportData {
   nombre: string;
@@ -26,7 +27,7 @@ export const exportToCsv = (data: any[], filename: string) => {
   XLSX.writeFile(workbook, fullFilename);
 };
 
-export const formatExportData = (creators: CreatorExportData[]) => {
+export const formatExportData = (creators: SummaryCreator[]) => {
   return creators.map(creator => {
     // Format data for export
     const formatFollowers = (count?: number) => {
