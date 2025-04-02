@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TikTokVideo } from "@/types/creator";
 
@@ -79,34 +78,6 @@ export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTok
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Fetch TikTok user information using the TikTok API
- */
-export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
-  try {
-    console.log('Fetching TikTok info for:', username);
-    const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-        'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-    
-    const responseData = await response.json();
-    console.log('TikTok API response:', responseData);
-    
-    return responseData;
-  } catch (error) {
-    console.error('Error fetching TikTok user info:', error);
-    throw error;
-  }
-};
-
-/**
  * Adaptive delay function that increases delay time if API rate limits are hit
  * @param baseDelay Base delay in milliseconds
  * @param retryCount Number of retries already attempted
@@ -114,6 +85,75 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
  */
 const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {
   return Math.min(baseDelay * Math.pow(2, retryCount), 10000);
+};
+
+/**
+ * Fetch TikTok user information using the TikTok API
+ * Implements adaptive delays to manage rate limits
+ */
+export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
+  try {
+    console.log('Fetching TikTok info for:', username);
+    
+    let retryCount = 0;
+    let success = false;
+    let responseData;
+    
+    while (!success && retryCount < 5) {
+      try {
+        // Apply a delay before making the request (except for the first attempt)
+        if (retryCount > 0) {
+          const delayTime = getAdaptiveDelay(1500, retryCount - 1);
+          console.log(`Rate limit hit, retrying in ${delayTime}ms (attempt ${retryCount + 1}/5)...`);
+          await sleep(delayTime);
+        } else {
+          // Add a small delay even on first attempt to prevent rapid consecutive requests
+          await sleep(500);
+        }
+        
+        const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+            'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
+          }
+        });
+        
+        if (response.status === 429) {
+          console.warn('Rate limit exceeded for TikTok user info API, will retry with longer delay');
+          retryCount++;
+          continue;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        responseData = await response.json();
+        console.log('TikTok API response:', responseData);
+        success = true;
+      } catch (err) {
+        console.error('Error during TikTok API request:', err);
+        if (err instanceof Error && (err.message.includes('429') || err.message.includes('rate'))) {
+          retryCount++;
+          if (retryCount >= 5) {
+            throw new Error('Maximum retry attempts reached for rate limiting');
+          }
+        } else {
+          throw err;
+        }
+      }
+    }
+    
+    if (!responseData) {
+      throw new Error('Failed to fetch TikTok user info after multiple attempts');
+    }
+    
+    return responseData;
+  } catch (error) {
+    console.error('Error fetching TikTok user info:', error);
+    throw error;
+  }
 };
 
 /**
