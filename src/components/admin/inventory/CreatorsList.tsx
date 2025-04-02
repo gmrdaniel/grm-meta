@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
 import { fetchTikTokUserInfo, updateCreatorTikTokInfo, fetchTikTokUserVideos } from "@/services/tiktokVideoService";
+import { fetchAndUpdateYouTubeInfo } from "@/services/youtubeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -66,6 +67,7 @@ export function CreatorsList({
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
   const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(null);
+  const [loadingYouTubeInfo, setLoadingYouTubeInfo] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
@@ -140,6 +142,24 @@ export function CreatorsList({
     }
   });
 
+  const updateYouTubeInfoMutation = useMutation({
+    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+      const result = await fetchAndUpdateYouTubeInfo(creatorId, username);
+      return result;
+    },
+    onSuccess: (data, variables) => {
+      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
+      toast.success(`Información de YouTube actualizada. Seguidores: ${data.subscriberCount.toLocaleString()} (${eligibilityStatus})`);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Error al obtener información de YouTube: ${(error as Error).message}`);
+    },
+    onSettled: () => {
+      setLoadingYouTubeInfo(null);
+    }
+  });
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -203,6 +223,16 @@ export function CreatorsList({
     
     setLoadingTikTokVideos(creatorId);
     fetchTikTokVideosMutation.mutate({ creatorId, username });
+  };
+
+  const handleFetchYouTubeInfo = (creatorId: string, username: string) => {
+    if (!username) {
+      toast.error("Este creador no tiene un nombre de usuario de YouTube");
+      return;
+    }
+    
+    setLoadingYouTubeInfo(creatorId);
+    updateYouTubeInfoMutation.mutate({ creatorId, username });
   };
 
   const toggleFilter = (filterName: keyof CreatorFilter) => {
@@ -404,6 +434,31 @@ export function CreatorsList({
                                   <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
                                 </span>
                               )}
+                              <div className="flex gap-1 ml-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="secondary" 
+                                  className="h-6 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFetchYouTubeInfo(creator.id, creator.usuario_youtube || '');
+                                  }}
+                                  disabled={loadingYouTubeInfo === creator.id}
+                                >
+                                  {loadingYouTubeInfo === creator.id ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <svg 
+                                      viewBox="0 0 24 24"
+                                      className="h-3 w-3 mr-1"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                                    </svg>
+                                  )}
+                                  Info
+                                </Button>
+                              </div>
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
                               <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
