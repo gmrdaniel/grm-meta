@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +27,8 @@ export function useCreatorsSummary() {
       
       if (youtubeEligibleFilter) {
         query = query
-          .gte('seguidores_youtube', 100000);
+          .gte('seguidores_youtube', 100000)
+          .gte('yt_engagement', 4);
       }
       
       if (sortByEligible) {
@@ -58,7 +58,8 @@ export function useCreatorsSummary() {
       
       if (youtubeEligibleFilter) {
         countQuery = countQuery
-          .gte('seguidores_youtube', 100000);
+          .gte('seguidores_youtube', 100000)
+          .gte('yt_engagement', 4);
       }
       
       const { count: totalCount, error: countError } = await countQuery;
@@ -125,25 +126,23 @@ export function useCreatorsSummary() {
         .from('summary_creator')
         .select('*');
 
-      // If both filters are enabled, use both criteria
       if (tiktokEligibleFilter && youtubeEligibleFilter) {
         query = query
           .gte('seguidores_tiktok', 100000)
           .gte('engagement', 4)
-          .gte('seguidores_youtube', 100000);
+          .gte('seguidores_youtube', 100000)
+          .gte('yt_engagement', 4);
       }
-      // If only TikTok filter is enabled
       else if (tiktokEligibleFilter) {
         query = query
           .gte('seguidores_tiktok', 100000)
           .gte('engagement', 4);
       }
-      // If only YouTube filter is enabled
       else if (youtubeEligibleFilter) {
         query = query
-          .gte('seguidores_youtube', 100000);
+          .gte('seguidores_youtube', 100000)
+          .gte('yt_engagement', 4);
       }
-      // If no filters are enabled, export all creators
       else {
         query = query.not('id', 'is', null);
       }

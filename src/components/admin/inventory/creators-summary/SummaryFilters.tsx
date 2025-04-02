@@ -46,6 +46,7 @@ export function SummaryFilters({
         size="sm"
         onClick={onToggleYoutubeEligibleFilter}
         className="flex items-center gap-1"
+        title="Seguidores > 100.000 y Engagement > 4%"
       >
         <Youtube className="h-4 w-4" />
         YouTube Elegible
