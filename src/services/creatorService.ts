@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -36,8 +35,7 @@ export const fetchCreators = async (
       // First get all creator IDs that have videos
       const { data: creatorsWithVideos } = await supabase
         .from('tiktok_video')
-        .select('creator_id')
-        .distinct();
+        .select('creator_id', { distinct: true });
       
       // If we have creators with videos, exclude them from the results
       if (creatorsWithVideos && creatorsWithVideos.length > 0) {
