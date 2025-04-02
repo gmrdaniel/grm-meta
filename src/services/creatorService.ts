@@ -29,37 +29,9 @@ export const fetchCreators = async (
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
     }
     
-    // Special handling for withoutVideos filter
-    // We'll use a direct query rather than a subquery builder
+    // For withoutVideos filter, we'll use a different approach
     if (filters.withoutVideos) {
-      // First get all creator IDs that have videos
-      const { data: creatorsWithVideos } = await supabase
-        .from('tiktok_video')
-        .select('creator_id');
-      
-      // If we have creators with videos, exclude them from the results
-      if (creatorsWithVideos && creatorsWithVideos.length > 0) {
-        const creatorIdsWithVideos = creatorsWithVideos.map(item => item.creator_id);
-        query = query.not('id', 'in', creatorIdsWithVideos);
-      }
-      
-      // Add pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      
-      const { data, error, count } = await query
-        .order('fecha_creacion', { ascending: false })
-        .range(from, to);
-      
-      if (error) {
-        console.error('Error fetching creators without videos:', error);
-        throw new Error(error.message);
-      }
-      
-      return { 
-        data: data as Creator[], 
-        count: count || 0 
-      };
+      // We'll handle this after getting the initial results
     }
   }
   
@@ -76,20 +48,34 @@ export const fetchCreators = async (
     throw new Error(error.message);
   }
 
+  let filteredData = data as Creator[];
+  let filteredCount = count || 0;
+  
+  // Special handling for withoutVideos filter
+  if (filters?.withoutVideos && filteredData.length > 0) {
+    // Get the creator IDs from the current result set
+    const creatorIds = filteredData.map(creator => creator.id);
+    
+    // Find which of these creators have videos
+    const { data: videoCountData } = await supabase
+      .from('tiktok_video')
+      .select('creator_id')
+      .in('creator_id', creatorIds);
+    
+    if (videoCountData) {
+      // Create a Set of creator IDs that have videos
+      const creatorsWithVideos = new Set(videoCountData.map(item => item.creator_id));
+      
+      // Filter out creators that have videos
+      filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
+      filteredCount = filteredData.length;
+    }
+  }
+  
   return { 
-    data: data as Creator[], 
-    count: count || 0 
+    data: filteredData, 
+    count: filteredCount 
   };
-};
-
-/**
- * Helper function to paginate results client-side
- * Used for complex queries where server-side pagination is not possible
- */
-const filterPaginated = (data: any[], page: number, pageSize: number) => {
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  return data.slice(start, end);
 };
 
 /**
