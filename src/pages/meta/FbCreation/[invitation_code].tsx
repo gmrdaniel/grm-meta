@@ -132,7 +132,7 @@ const FbCreationPage = () => {
         console.log("Facebook page URL successfully updated!");
         
         console.log("Updating invitation status to accepted");
-        const updatedInvitation = await updateInvitationStatus(invitation.id, 'accepted');
+        const updatedInvitation = await updateInvitationStatus(invitation.id, 'completed');
         console.log("Invitation status updated:", updatedInvitation);
         
         toast.success("Your submission has been received for validation");
