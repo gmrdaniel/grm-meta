@@ -4,13 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 // 🧱 UI Components
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Stepper } from "@/components/ui/stepper";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -290,7 +284,6 @@ export default function InvitationStepperPage() {
         return;
       }
 
-      await updateInvitationStatus(invitation.id, "completed");
       toast.success("Your submission has been received");
       setSubmissionComplete(true);
     } catch (err) {
@@ -328,6 +321,8 @@ export default function InvitationStepperPage() {
 
       if (error) throw error;
 
+      updateInvitationStatus(invitation.id, "completed");
+
       toast.success("Account created! You can now log in.");
       setTimeout(() => navigate("/auth"), 2000);
     } catch (err) {
@@ -357,46 +352,26 @@ export default function InvitationStepperPage() {
   return (
     <div className="flex flex-col md:flex-row items-center justify-evenly min-h-screen bg-gray-50 p-4 gap-2">
       <div className="text-center max-w-md space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mt-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
           Meta Monetization Program
         </h1>
         <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
         {/* Benefits Section */}
         <div className="p-4 ">
-          <h3 className="font-medium mb-3 mt-4">Benefits:</h3>
+          <h3 className="font-medium mb-3">Benefits:</h3>
           <ul className="space-y-2">
-            {/* Mobile-only benefits */}
-            <li className="flex items-center gap-2 lg:hidden">
+            <li className="flex items-center gap-2">
               <div className="rounded-full bg-green-100 p-1">
                 <Check className="h-4 w-4 text-green-600" />
               </div>
-              <span className="whitespace-nowrap">Gain Immediate Facebook monetization</span>
-            </li>
-            <li className="flex items-center gap-2 lg:hidden">
-              <div className="rounded-full bg-green-100 p-1">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <span>Up to $5,000 in bonuses (90 days)</span>
-            </li>
-            <li className="flex items-center gap-2 lg:hidden">
-              <div className="rounded-full bg-green-100 p-1">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <span>Free trial of Meta Verified</span>
+              <span>$5,000 Bonuses (90 days)</span>
             </li>
             <li className="flex items-center gap-2">
               <div className="rounded-full bg-green-100 p-1">
-                {/* desktop-only benefits */}
-                <Check className="h-4 w-4 text-green-600 hidden lg:flex" />
+                <Check className="h-4 w-4 text-green-600" />
               </div>
-              <span className="hidden lg:flex">Increased discoverability</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <div className="rounded-full bg-green-100 p-1">
-                <Check className="h-4 w-4 text-green-600 hidden lg:flex" />
-              </div>
-              <span className="hidden lg:flex">Meta support </span>
+              <span>Immediate Facebook Monetization</span>
             </li>
           </ul>
         </div>
@@ -416,7 +391,6 @@ export default function InvitationStepperPage() {
               onCheckboxChange={handleCheckboxChange}
               onContinue={handleContinueWelcome}
               isSubmitting={isSubmitting}
-              
             />
           )}
 
@@ -429,7 +403,7 @@ export default function InvitationStepperPage() {
           )}
 
           {currentStep.id === "fbcreation" &&
-            (submissionComplete ? (
+            (submissionComplete || invitation.fb_step_completed) && (
               <SubmissionCompleteScreen
                 showPasswordForm={showPasswordForm}
                 passwordData={passwordData}
@@ -438,7 +412,11 @@ export default function InvitationStepperPage() {
                 onSetPassword={handleSetPassword}
                 onShowPasswordForm={() => setShowPasswordForm(true)}
               />
-            ) : (
+            )}
+
+          {currentStep.id === "fbcreation" &&
+            !submissionComplete &&
+            !invitation.fb_step_completed && (
               <FacebookPageForm
                 formData={facebookFormData}
                 submitting={submitting}
@@ -447,7 +425,7 @@ export default function InvitationStepperPage() {
                 onCheckboxChange={handleCheckboxFacebookChange}
                 onSubmit={handleSubmit}
               />
-            ))}
+            )}
         </CardContent>
       </Card>
     </div>

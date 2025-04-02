@@ -20,6 +20,7 @@ export interface CreatorInvitation {
   phone_country_code?: string | null;
   phone_verified?: boolean;
   current_stage_id: string | null;
+  fb_step_completed: boolean
 }
 
 export type CreateInvitationData = {
