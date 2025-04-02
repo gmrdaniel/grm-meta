@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,13 @@ import { validateFacebookPageUrl } from "@/utils/validationUtils";
 interface FacebookPageFormProps {
   formData: {
     facebookPageUrl: string;
-    verifyOwnership: boolean;
+    verifyOwnership: {
+      verifyOwnership1: boolean;
+      verifyOwnership2: boolean;
+      verifyOwnership3: boolean;
+      verifyOwnership4: boolean;
+      verifyOwnership5: boolean;
+    };
     linkInstagram: boolean;
   };
   submitting: boolean;
@@ -30,50 +35,43 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   onSubmit
 }) => {
   const { isValid, errorMessage } = validateFacebookPageUrl(formData.facebookPageUrl);
-  const isSubmitDisabled = submitting || !formData.facebookPageUrl.trim() || !formData.verifyOwnership || !isValid;
+  const isSubmitDisabled =
+    submitting ||
+    !formData.facebookPageUrl.trim() ||
+    !Object.values(formData.verifyOwnership).every((value) => value) || // Verifica que todos los checkboxes estén marcados
+    !isValid;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Facebook Page Creation & Instagram Linking</h1>
         <div className="flex items-center text-red-500 mt-2">
-          <span className="mr-2">📌</span>
-          <p className="text-orange-500 font-medium">Important: Set Up Your Facebook Page!</p>
+          <p className="text-gray-500 font-medium">Important: Set Up Your Facebook Page!</p>
         </div>
       </div>
-      
+
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       <div className="space-y-6">
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">1. Share your Facebook Page</h2>
-          <a 
-            href="https://www.facebook.com/business/help/104002523024878" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://www.facebook.com/business/help/104002523024878"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center text-blue-500 hover:underline"
           >
-            <span className="mr-2 inline-flex items-center">
-              <span className="mr-1">▶️</span>
-              Watch How
-            </span>
+            <span className="mr-2 inline-flex items-center">Watch How</span>
             <ExternalLink className="h-4 w-4" />
           </a>
-          
+
           <div className="space-y-2">
             <Label htmlFor="facebookPageUrl">Facebook Page URL</Label>
             <div className="flex items-center">
-              <div className="bg-gray-100 p-2 rounded-l-md border-y border-l border-gray-300">
-                <span className="text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                  </svg>
-                </span>
-              </div>
               <Input
                 id="facebookPageUrl"
                 name="facebookPageUrl"
@@ -84,44 +82,93 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               />
             </div>
             {errorMessage && (
-              <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
+              <p className="text-sm font-semibold text-gray-700 mt-1">{errorMessage}</p>
             )}
             <p className="text-xs text-gray-500">
               Page name must be 5-30 characters long. Only letters, numbers, periods, and underscores are allowed.
             </p>
           </div>
-          
+
+          {/* Checkboxes con identificadores únicos */}
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership"
-              checked={formData.verifyOwnership}
-              onCheckedChange={(checked) => 
-                onCheckboxChange("verifyOwnership", checked as boolean)
+              id="verifyOwnership1"
+              checked={formData.verifyOwnership.verifyOwnership1}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyOwnership1", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership" className="text-sm">
+            <Label htmlFor="verifyOwnership1" className="text-sm">
               I verify that this is my Facebook page
             </Label>
           </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verifyOwnership2"
+              checked={formData.verifyOwnership.verifyOwnership2}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyOwnership2", checked as boolean)
+              }
+            />
+            <Label htmlFor="verifyOwnership2" className="text-sm">
+              I’m based in the US and 18 years of age or older
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verifyOwnership3"
+              checked={formData.verifyOwnership.verifyOwnership3}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyOwnership3", checked as boolean)
+              }
+            />
+            <Label htmlFor="verifyOwnership3" className="text-sm">
+              I’ve never monetize on Facebook before
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verifyOwnership4"
+              checked={formData.verifyOwnership.verifyOwnership4}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyOwnership4", checked as boolean)
+              }
+            />
+            <Label htmlFor="verifyOwnership4" className="text-sm">
+              I’m not participating in any other Facebook monetization program
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verifyOwnership5"
+              checked={formData.verifyOwnership.verifyOwnership5}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyOwnership5", checked as boolean)
+              }
+            />
+            <Label htmlFor="verifyOwnership5" className="text-sm">
+              I’ve linked my Instagram professional account and my Facebook Page
+            </Label>
+          </div>
         </div>
-        
+
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">2. Link Instagram Professional Account and  Facebook Page:</h2>
-          <a 
-            href="https://www.facebook.com/help/1148909221857370" 
-            target="_blank" 
+          <h2 className="text-lg font-semibold">2. Link Instagram Professional Account and Facebook Page:</h2>
+          <a
+            href="https://www.facebook.com/help/1148909221857370"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center text-blue-500 hover:underline"
           >
             <span>Instructions here</span>
             <ExternalLink className="h-4 w-4 ml-1" />
           </a>
-          
+
           <div className="flex items-center space-x-2">
             <Checkbox
               id="linkInstagram"
               checked={formData.linkInstagram}
-              onCheckedChange={(checked) => 
+              onCheckedChange={(checked) =>
                 onCheckboxChange("linkInstagram", checked as boolean)
               }
             />
@@ -130,7 +177,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             </Label>
           </div>
         </div>
-        
+
         <div className="bg-blue-50 p-4 rounded-md border border-blue-100 flex items-center">
           <div className="rounded-full bg-green-100 p-1 mr-2">
             <Check className="h-4 w-4 text-green-600" />
@@ -140,8 +187,8 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button 
-          onClick={onSubmit} 
+        <Button
+          onClick={onSubmit}
           disabled={isSubmitDisabled}
           className="min-w-[200px]"
         >
