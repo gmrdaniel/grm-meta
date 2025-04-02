@@ -7,7 +7,8 @@ import { useMutation } from "@tanstack/react-query";
 import { 
   fetchTikTokUserInfo, 
   updateCreatorTikTokInfo, 
-  fetchTikTokUserVideos 
+  fetchTikTokUserVideos,
+  sleep
 } from "@/services/tiktokVideoService";
 import { Creator } from "@/types/creator";
 
@@ -26,6 +27,7 @@ export function CreatorBatchActions({
   const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<boolean>(false);
   const [processedCount, setProcessedCount] = useState<number>(0);
   const [totalToProcess, setTotalToProcess] = useState<number>(0);
+  const [currentCreator, setCurrentCreator] = useState<string>("");
 
   const updateTikTokInfoMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
@@ -83,6 +85,7 @@ export function CreatorBatchActions({
 
   const fetchTikTokVideosMutation = useMutation({
     mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+      setCurrentCreator(username);
       const result = await fetchTikTokUserVideos(username, creatorId);
       return { ...result, username };
     },
@@ -93,6 +96,7 @@ export function CreatorBatchActions({
       if (processedCount + 1 === totalToProcess) {
         onSuccess();
         setLoadingTikTokVideos(false);
+        setCurrentCreator("");
         clearSelection();
         toast.success(`Procesados videos de ${totalToProcess} creadores correctamente`);
       }
@@ -104,6 +108,7 @@ export function CreatorBatchActions({
       if (processedCount + 1 === totalToProcess) {
         onSuccess();
         setLoadingTikTokVideos(false);
+        setCurrentCreator("");
         clearSelection();
       }
     }
@@ -129,7 +134,7 @@ export function CreatorBatchActions({
     }
   };
 
-  const handleBatchFetchTikTokVideos = () => {
+  const handleBatchFetchTikTokVideos = async () => {
     const creatorsWithTikTok = selectedCreators.filter(creator => creator.usuario_tiktok);
     
     if (creatorsWithTikTok.length === 0) {
@@ -141,11 +146,25 @@ export function CreatorBatchActions({
     setProcessedCount(0);
     setTotalToProcess(creatorsWithTikTok.length);
     
-    for (const creator of creatorsWithTikTok) {
-      fetchTikTokVideosMutation.mutate({ 
-        creatorId: creator.id, 
-        username: creator.usuario_tiktok || '' 
-      });
+    // Process creators sequentially with delay between each to avoid rate limiting
+    for (let i = 0; i < creatorsWithTikTok.length; i++) {
+      const creator = creatorsWithTikTok[i];
+      
+      try {
+        // Wait for completion before moving to next creator
+        await fetchTikTokVideosMutation.mutateAsync({ 
+          creatorId: creator.id, 
+          username: creator.usuario_tiktok || '' 
+        });
+        
+        // Add delay between creators to avoid rate limiting
+        if (i < creatorsWithTikTok.length - 1) {
+          await sleep(2500); // 2.5 second delay between creators
+        }
+      } catch (error) {
+        console.error(`Error processing creator ${creator.usuario_tiktok}:`, error);
+        // Continue with next creator even if this one fails
+      }
     }
   };
 
@@ -161,6 +180,11 @@ export function CreatorBatchActions({
           <p className="text-xs text-muted-foreground">
             Ejecuta acciones en lote para todos los seleccionados
           </p>
+          {currentCreator && (
+            <p className="text-xs font-medium text-blue-600 mt-1">
+              Procesando actualmente: @{currentCreator}
+            </p>
+          )}
         </div>
         
         <div className="flex gap-2">

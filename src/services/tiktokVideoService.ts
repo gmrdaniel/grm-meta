@@ -73,6 +73,12 @@ export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTok
 };
 
 /**
+ * Sleep utility function to pause execution
+ * @param ms Time to sleep in milliseconds
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
  * Fetch TikTok user information using the TikTok API
  */
 export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
@@ -101,25 +107,75 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
 };
 
 /**
+ * Adaptive delay function that increases delay time if API rate limits are hit
+ * @param baseDelay Base delay in milliseconds
+ * @param retryCount Number of retries already attempted
+ * @returns Calculated delay time in milliseconds
+ */
+const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {
+  // Exponential backoff starting at baseDelay milliseconds
+  // and increasing based on retry count (2^retryCount * baseDelay)
+  return Math.min(baseDelay * Math.pow(2, retryCount), 10000); // Cap at 10 seconds
+};
+
+/**
  * Fetch TikTok videos for a user using the TikTok API and persist them
+ * Implements adaptive rate limiting to handle API restrictions
  */
 export const fetchTikTokUserVideos = async (username: string, creatorId: string): Promise<any> => {
   try {
     console.log('Fetching TikTok videos for:', username);
-    const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-        'X-RapidAPI-Host': 'tiktok-api6.p.rapidapi.com'
-      }
-    });
     
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+    let retryCount = 0;
+    let success = false;
+    let responseData;
+    
+    // Retry logic with exponential backoff
+    while (!success && retryCount < 5) {
+      try {
+        // Apply an initial delay on retries
+        if (retryCount > 0) {
+          const delayTime = getAdaptiveDelay(1500, retryCount - 1);
+          console.log(`Rate limit hit, retrying in ${delayTime}ms (attempt ${retryCount + 1}/5)...`);
+          await sleep(delayTime);
+        }
+        
+        const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
+            'X-RapidAPI-Host': 'tiktok-api6.p.rapidapi.com'
+          }
+        });
+        
+        if (response.status === 429) {
+          console.warn('Rate limit exceeded, will retry with longer delay');
+          retryCount++;
+          continue;
+        }
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        responseData = await response.json();
+        console.log('TikTok Video API response:', responseData);
+        success = true;
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('429')) {
+          retryCount++;
+          if (retryCount >= 5) {
+            throw new Error('Maximum retry attempts reached for rate limiting');
+          }
+        } else {
+          throw err;
+        }
+      }
     }
     
-    const responseData = await response.json();
-    console.log('TikTok Video API response:', responseData);
+    if (!responseData) {
+      throw new Error('Failed to fetch TikTok videos after multiple attempts');
+    }
     
     // Check if we have valid video data
     if (!responseData.videos || !Array.isArray(responseData.videos) || responseData.videos.length === 0) {
@@ -133,6 +189,11 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
     
     for (const video of videos) {
       try {
+        // Add delay between database operations to not overwhelm the database
+        if (savedCount > 0) {
+          await sleep(200);
+        }
+        
         // Check if this video already exists in the database
         const { data: existingVideo } = await supabase
           .from('tiktok_video')
@@ -223,3 +284,4 @@ export const updateCreatorTikTokInfo = async (
 export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
   return updateCreatorTikTokInfo(creatorId, followerCount);
 };
+

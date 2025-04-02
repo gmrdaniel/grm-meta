@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTikTokVideoApi } from "../hooks/useTikTokVideoApi";
 import ErrorDisplay from "../ErrorDisplay";
 import TestResultDisplay from "../TestResultDisplay";
+import { Loader2 } from "lucide-react";
 
 export default function TikTokVideoApiTab() {
   const {
@@ -14,6 +15,7 @@ export default function TikTokVideoApiTab() {
     result,
     loading,
     error,
+    retryCount,
     handleTest
   } = useTikTokVideoApi();
 
@@ -42,17 +44,31 @@ export default function TikTokVideoApiTab() {
                 onChange={e => setUsername(e.target.value)} 
               />
               <Button onClick={handleTest} disabled={loading}>
-                {loading ? "Procesando..." : "Probar Servicio"}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {retryCount > 0 ? `Reintentando (${retryCount}/5)` : "Procesando..."}
+                  </>
+                ) : (
+                  "Probar Servicio"
+                )}
               </Button>
             </div>
             <ErrorDisplay error={error} />
           </div>
 
+          {retryCount > 0 && loading && (
+            <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 border border-yellow-200">
+              <p className="font-medium">Límite de velocidad detectado</p>
+              <p className="mt-1">Reintentando conexión con retraso exponencial ({retryCount}/5)</p>
+            </div>
+          )}
+
           <TestResultDisplay result={result} />
         </div>
       </CardContent>
       <CardFooter className="text-sm text-gray-500">
-        Este panel permite probar la API de TikTok para obtener videos de usuarios
+        Este panel permite probar la API de TikTok para obtener videos de usuarios. Incluye manejo inteligente de límites de velocidad.
       </CardFooter>
     </Card>
   );
