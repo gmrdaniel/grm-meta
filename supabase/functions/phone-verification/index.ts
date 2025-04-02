@@ -6,7 +6,7 @@ const TWILIO_SERVICE_SID = Deno.env.get('TWILIO_SERVICE_SID');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Origin, Authorization, X-Client-Info, apikey, Content-Type, Accept',
+  'Access-Control-Allow-Headers': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
