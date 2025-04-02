@@ -174,6 +174,7 @@ export function CreatorBatchActions({
       } catch (error) {
         toast.error(`Error con videos de @${creator.usuario_tiktok}: ${(error as Error).message}`);
       }
+        await sleep(1000);
       
       // Update processed count
       setProcessedCount(i + 1);
