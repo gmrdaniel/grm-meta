@@ -3,6 +3,7 @@ import { ExternalLink, Users, Youtube } from "lucide-react";
 import { CreatorActions } from "./CreatorActions";
 import { formatFollowers, formatEngagement } from "./utils";
 import { Button } from "@/components/ui/button";
+import { fetchYouTubeChannelInfo } from "@/services/youtubeService";
 
 interface SocialNetworksProps {
   usuario_tiktok?: string;
@@ -40,6 +41,15 @@ export function SocialNetworks({
   if (!hasSocialNetworks) {
     return <span className="text-sm text-gray-500">Sin redes sociales</span>;
   }
+
+  const handleYouTubeInfo = async (channelId: string) => {
+    try {
+      const channelInfo = await fetchYouTubeChannelInfo(channelId);
+      console.log('YouTube channel info:', channelInfo);
+    } catch (error) {
+      console.error('Error fetching YouTube channel info:', error);
+    }
+  };
 
   return (
     <div className="space-y-1">
@@ -100,11 +110,11 @@ export function SocialNetworks({
               className="h-6 rounded-md ml-2 flex items-center gap-1"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`https://youtube.com/channel/${usuario_youtube}`, '_blank');
+                handleYouTubeInfo(usuario_youtube);
               }}
             >
               <Youtube className="h-3 w-3" />
-              YouTube channel
+              YouTube
             </Button>
           </div>
           <div className="flex gap-3 mt-1 text-xs">
