@@ -41,7 +41,7 @@ export const fetchCreators = async (
     const { data: creatorIdsWithVideos } = await supabase
       .from('tiktok_video')
       .select('creator_id')
-      .is('creator_id', 'not.null'); 
+      .not('creator_id', 'is', null); // Corregido: usar not con is null en lugar de is not.null
 
     if (creatorIdsWithVideos && creatorIdsWithVideos.length > 0) {
       // Get unique creator IDs
