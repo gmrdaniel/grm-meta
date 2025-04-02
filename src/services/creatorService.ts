@@ -35,7 +35,7 @@ export const fetchCreators = async (
       // First get all creator IDs that have videos
       const { data: creatorsWithVideos } = await supabase
         .from('tiktok_video')
-        .select('creator_id', { distinct: true });
+        .select('creator_id');
       
       // If we have creators with videos, exclude them from the results
       if (creatorsWithVideos && creatorsWithVideos.length > 0) {
