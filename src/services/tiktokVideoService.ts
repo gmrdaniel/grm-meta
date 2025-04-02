@@ -104,8 +104,9 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
  * Fetch TikTok videos for a user using the TikTok API and persist them
  */
 export const fetchTikTokUserVideos = async (username: string, creatorId: string): Promise<any> => {
-  try {
+  try {git
     console.log('Fetching TikTok videos for:', username);
+    await sleep(2000);
     const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
       method: 'GET',
       headers: {

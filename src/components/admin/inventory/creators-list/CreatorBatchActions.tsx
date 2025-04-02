@@ -169,12 +169,13 @@ export function CreatorBatchActions({
     for (let i = 0; i < creatorsWithTikTok.length; i++) {
       const creator = creatorsWithTikTok[i];
       try {
+
         const result = await fetchTikTokUserVideos(creator.usuario_tiktok || '', creator.id);
         toast.success(`@${creator.usuario_tiktok}: ${result.savedCount} videos guardados (${result.savedCount}/${result.totalCount})`);
       } catch (error) {
         toast.error(`Error con videos de @${creator.usuario_tiktok}: ${(error as Error).message}`);
       }
-        await sleep(1000);
+
       
       // Update processed count
       setProcessedCount(i + 1);
