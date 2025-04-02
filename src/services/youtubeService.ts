@@ -6,9 +6,9 @@ import { toast } from "sonner";
 /**
  * Fetch YouTube channel details from RapidAPI
  */
-export const fetchYouTubeChannelInfo = async (channelUsername: string): Promise<any> => {
+export const fetchYouTubeChannelInfo = async (channelId: string): Promise<any> => {
   try {
-    const response = await fetch(`https://youtube-data8.p.rapidapi.com/channel/details/?id=${channelUsername}&hl=en&gl=US`, {
+    const response = await fetch(`https://youtube-data8.p.rapidapi.com/channel/details/?id=${channelId}&hl=en&gl=US`, {
       method: 'GET',
       headers: {
         'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
@@ -63,11 +63,11 @@ export const updateCreatorYouTubeInfo = async (
  */
 export const fetchAndUpdateYouTubeInfo = async (
   creatorId: string,
-  username: string
+  channelId: string
 ): Promise<{ subscriberCount: number, isEligible: boolean }> => {
   try {
     // Fetch channel info from YouTube API
-    const channelInfo = await fetchYouTubeChannelInfo(username);
+    const channelInfo = await fetchYouTubeChannelInfo(channelId);
     console.log('YouTube channel info response:', channelInfo);
     
     // Extract subscriber count

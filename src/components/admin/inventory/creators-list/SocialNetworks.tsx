@@ -81,11 +81,11 @@ export function SocialNetworks({
         <div className="text-sm">
           <div className="flex items-center gap-1">
             <span className="font-medium">YouTube:</span> 
-            <a href={`https://youtube.com/@${usuario_youtube}`} 
+            <a href={`https://youtube.com/channel/${usuario_youtube}`} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-blue-600 hover:underline">
-              @{usuario_youtube}
+              {usuario_youtube}
               <ExternalLink className="h-3 w-3" />
             </a>
             {seguidores_youtube && (
