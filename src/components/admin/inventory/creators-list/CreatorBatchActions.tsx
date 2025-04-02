@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, RefreshCcw } from "lucide-react";
+import { Loader2, Download, RefreshCcw, Youtube } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { 
@@ -11,6 +10,7 @@ import {
   sleep
 } from "@/services/tiktokVideoService";
 import { Creator } from "@/types/creator";
+import { fetchAndUpdateYouTubeInfo } from "@/services/youtubeService";
 
 interface CreatorBatchActionsProps {
   selectedCreators: Creator[];
@@ -25,6 +25,7 @@ export function CreatorBatchActions({
 }: CreatorBatchActionsProps) {
   const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<boolean>(false);
   const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<boolean>(false);
+  const [loadingYouTubeInfo, setLoadingYouTubeInfo] = useState<boolean>(false);
   const [processedCount, setProcessedCount] = useState<number>(0);
   const [totalToProcess, setTotalToProcess] = useState<number>(0);
   const [currentCreator, setCurrentCreator] = useState<string>("");
@@ -38,13 +39,11 @@ export function CreatorBatchActions({
       const secUid = userInfo?.userInfo?.user?.secUid;
       
       if (followerCount !== undefined) {
-        // Calculate engagement rate as heart count / follower count * 100 (to get percentage)
         let engagementRate = null;
         if (heartCount && followerCount > 0) {
           engagementRate = (heartCount / followerCount) * 100;
         }
         
-        // Update creator with follower count, secUid, and engagement rate
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid, engagementRate);
         
         const isEligible = followerCount >= 100000;
@@ -114,6 +113,38 @@ export function CreatorBatchActions({
     }
   });
 
+  const updateYouTubeInfoMutation = useMutation({
+    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+      setCurrentCreator(username);
+      const result = await fetchAndUpdateYouTubeInfo(creatorId, username);
+      return { ...result, username };
+    },
+    onSuccess: (data) => {
+      setProcessedCount(prev => prev + 1);
+      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
+      toast.success(`@${data.username}: ${data.subscriberCount.toLocaleString()} suscriptores (${eligibilityStatus})`);
+      
+      if (processedCount + 1 === totalToProcess) {
+        onSuccess();
+        setLoadingYouTubeInfo(false);
+        setCurrentCreator("");
+        clearSelection();
+        toast.success(`Procesados datos de YouTube de ${totalToProcess} creadores correctamente`);
+      }
+    },
+    onError: (error, variables) => {
+      toast.error(`Error con YouTube de @${variables.username}: ${(error as Error).message}`);
+      setProcessedCount(prev => prev + 1);
+      
+      if (processedCount + 1 === totalToProcess) {
+        onSuccess();
+        setLoadingYouTubeInfo(false);
+        setCurrentCreator("");
+        clearSelection();
+      }
+    }
+  });
+
   const handleBatchFetchTikTokInfo = () => {
     const creatorsWithTikTok = selectedCreators.filter(creator => creator.usuario_tiktok);
     
@@ -146,24 +177,52 @@ export function CreatorBatchActions({
     setProcessedCount(0);
     setTotalToProcess(creatorsWithTikTok.length);
     
-    // Process creators sequentially with delay between each to avoid rate limiting
     for (let i = 0; i < creatorsWithTikTok.length; i++) {
       const creator = creatorsWithTikTok[i];
       
       try {
-        // Wait for completion before moving to next creator
         await fetchTikTokVideosMutation.mutateAsync({ 
           creatorId: creator.id, 
           username: creator.usuario_tiktok || '' 
         });
         
-        // Add delay between creators to avoid rate limiting
         if (i < creatorsWithTikTok.length - 1) {
-          await sleep(2500); // 2.5 second delay between creators
+          await sleep(2500);
         }
       } catch (error) {
         console.error(`Error processing creator ${creator.usuario_tiktok}:`, error);
-        // Continue with next creator even if this one fails
+        setProcessedCount(prev => prev + 1);
+      }
+    }
+  };
+
+  const handleBatchFetchYouTubeInfo = async () => {
+    const creatorsWithYouTube = selectedCreators.filter(creator => creator.usuario_youtube);
+    
+    if (creatorsWithYouTube.length === 0) {
+      toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de YouTube");
+      return;
+    }
+    
+    setLoadingYouTubeInfo(true);
+    setProcessedCount(0);
+    setTotalToProcess(creatorsWithYouTube.length);
+    
+    for (let i = 0; i < creatorsWithYouTube.length; i++) {
+      const creator = creatorsWithYouTube[i];
+      
+      try {
+        await updateYouTubeInfoMutation.mutateAsync({ 
+          creatorId: creator.id, 
+          username: creator.usuario_youtube || '' 
+        });
+        
+        if (i < creatorsWithYouTube.length - 1) {
+          await sleep(1500);
+        }
+      } catch (error) {
+        console.error(`Error processing creator ${creator.usuario_youtube}:`, error);
+        setProcessedCount(prev => prev + 1);
       }
     }
   };
@@ -192,7 +251,7 @@ export function CreatorBatchActions({
             size="sm"
             variant="outline"
             onClick={clearSelection}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
+            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo}
           >
             Cancelar selección
           </Button>
@@ -201,7 +260,7 @@ export function CreatorBatchActions({
             size="sm"
             variant="secondary"
             onClick={handleBatchFetchTikTokInfo}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
+            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo}
             className="flex items-center gap-1"
           >
             {loadingTikTokInfo ? (
@@ -221,7 +280,7 @@ export function CreatorBatchActions({
             size="sm"
             variant="secondary"
             onClick={handleBatchFetchTikTokVideos}
-            disabled={loadingTikTokInfo || loadingTikTokVideos}
+            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo}
             className="flex items-center gap-1"
           >
             {loadingTikTokVideos ? (
@@ -233,6 +292,26 @@ export function CreatorBatchActions({
               <>
                 <Download className="h-3 w-3 mr-1" />
                 Obtener videos TikTok
+              </>
+            )}
+          </Button>
+          
+          <Button 
+            size="sm"
+            variant="secondary"
+            onClick={handleBatchFetchYouTubeInfo}
+            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo}
+            className="flex items-center gap-1"
+          >
+            {loadingYouTubeInfo ? (
+              <>
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                Procesando YouTube ({processedCount}/{totalToProcess})
+              </>
+            ) : (
+              <>
+                <Youtube className="h-3 w-3 mr-1" />
+                Actualizar YouTube
               </>
             )}
           </Button>
