@@ -36,11 +36,6 @@ export const updateFacebookPage = async (
   facebookPageUrl: string
 ): Promise<CreatorInvitation | null> => {
   try {
-    // Log details for debugging
-    console.log('------- UPDATE FACEBOOK PAGE -------');
-    console.log(`Updating Facebook page for invitation ID: ${invitationId}`);
-    console.log(`Facebook page URL: ${facebookPageUrl}`);
-    
     // Verify the invitation exists before updating
     const { data: invitation } = await supabase
       .from('creator_invitations')
@@ -60,7 +55,8 @@ export const updateFacebookPage = async (
       .from('creator_invitations')
       .update({ 
         facebook_page: facebookPageUrl,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        fb_step_completed: true
       })
       .eq('id', invitationId)
       .select('*')  // Make sure we select all columns

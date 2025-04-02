@@ -7,9 +7,6 @@ import { toast } from "sonner";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Stepper } from "@/components/ui/stepper";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -290,7 +287,6 @@ export default function InvitationStepperPage() {
         return;
       }
 
-      await updateInvitationStatus(invitation.id, "completed");
       toast.success("Your submission has been received");
       setSubmissionComplete(true);
     } catch (err) {
@@ -327,6 +323,8 @@ export default function InvitationStepperPage() {
       });
 
       if (error) throw error;
+
+      updateInvitationStatus(invitation.id, "completed")
 
       toast.success("Account created! You can now log in.");
       setTimeout(() => navigate("/auth"), 2000);
@@ -411,6 +409,27 @@ export default function InvitationStepperPage() {
 
           {currentStep.id === "fbcreation" &&
             (submissionComplete ? (
+              <SubmissionCompleteScreen
+                showPasswordForm={showPasswordForm}
+                passwordData={passwordData}
+                submitting={submitting}
+                onPasswordChange={handlePasswordChange}
+                onSetPassword={handleSetPassword}
+                onShowPasswordForm={() => setShowPasswordForm(true)}
+              />
+            ) : (
+              <FacebookPageForm
+                formData={facebookFormData}
+                submitting={submitting}
+                error={error}
+                onInputChange={handleFacebookInputChange}
+                onCheckboxChange={handleCheckboxFacebookChange}
+                onSubmit={handleSubmit}
+              />
+            ))}
+
+            {currentStep.id === "fbcreation" &&
+            (submissionComplete || invitation.fb_step_completed ? (
               <SubmissionCompleteScreen
                 showPasswordForm={showPasswordForm}
                 passwordData={passwordData}
