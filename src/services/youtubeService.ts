@@ -71,7 +71,7 @@ export const fetchAndUpdateYouTubeInfo = async (
     
     // Extract subscriber count
     const subscriberCount = channelInfo.stats?.subscribers;
-    console.log('YouTube channel subscriberCount ', subscriberCount);
+    
     if (!subscriberCount && subscriberCount !== 0) {
       throw new Error('Could not retrieve subscriber count from YouTube API');
     }
