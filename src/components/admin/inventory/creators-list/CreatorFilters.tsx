@@ -1,7 +1,19 @@
 
 import { Button } from "@/components/ui/button";
-import { Filter, X, Check, BarChart2, Video } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Filter } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CreatorFilter } from "./types";
+import { Badge } from "@/components/ui/badge";
 
 interface CreatorFiltersProps {
   activeFilters: CreatorFilter;
@@ -9,10 +21,10 @@ interface CreatorFiltersProps {
 }
 
 export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFiltersProps) {
-  const toggleFilter = (filterName: keyof CreatorFilter) => {
+  const handleFilterChange = (filterKey: keyof CreatorFilter) => {
     onFilterChange({
       ...activeFilters,
-      [filterName]: !activeFilters[filterName],
+      [filterKey]: !activeFilters[filterKey],
     });
   };
 
@@ -20,61 +32,87 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
     onFilterChange({});
   };
 
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+  const activeFiltersCount = Object.values(activeFilters).filter(Boolean).length;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button 
-        variant={activeFilters.tiktokEligible ? "default" : "outline"} 
-        size="sm"
-        onClick={() => toggleFilter('tiktokEligible')}
-        className="flex items-center gap-1"
-      >
-        {activeFilters.tiktokEligible ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-        TikTok Elegible
-      </Button>
-      
-      <Button 
-        variant={activeFilters.hasTikTokUsername ? "default" : "outline"} 
-        size="sm"
-        onClick={() => toggleFilter('hasTikTokUsername')}
-        className="flex items-center gap-1"
-      >
-        {activeFilters.hasTikTokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-        Usuario TikTok
-      </Button>
-      
-      <Button 
-        variant={activeFilters.withoutEngagement ? "default" : "outline"} 
-        size="sm"
-        onClick={() => toggleFilter('withoutEngagement')}
-        className="flex items-center gap-1"
-      >
-        {activeFilters.withoutEngagement ? <Check className="h-4 w-4" /> : <BarChart2 className="h-4 w-4" />}
-        Sin Engagement
-      </Button>
-      
-      <Button 
-        variant={activeFilters.withoutVideos ? "default" : "outline"} 
-        size="sm"
-        onClick={() => toggleFilter('withoutVideos')}
-        className="flex items-center gap-1"
-      >
-        {activeFilters.withoutVideos ? <Check className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-        Sin Videos
-      </Button>
-      
-      {hasActiveFilters && (
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={clearFilters}
-          className="flex items-center gap-1"
-        >
-          <X className="h-4 w-4" />
-          Limpiar filtros
-        </Button>
-      )}
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Filtros
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="ml-1 text-xs">
+                {activeFiltersCount}
+              </Badge>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Filtros</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="elegible-tiktok"
+                checked={activeFilters.tiktokEligible || false}
+                onCheckedChange={() => handleFilterChange('tiktokEligible')}
+              />
+              <Label htmlFor="elegible-tiktok" className="flex-1 cursor-pointer">
+                Elegibles TikTok
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="has-tiktok"
+                checked={activeFilters.hasTikTokUsername || false}
+                onCheckedChange={() => handleFilterChange('hasTikTokUsername')}
+              />
+              <Label htmlFor="has-tiktok" className="flex-1 cursor-pointer">
+                Con usuario TikTok
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="without-engagement"
+                checked={activeFilters.withoutEngagement || false}
+                onCheckedChange={() => handleFilterChange('withoutEngagement')}
+              />
+              <Label htmlFor="without-engagement" className="flex-1 cursor-pointer">
+                Sin engagement
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="without-videos"
+                checked={activeFilters.withoutVideos || false}
+                onCheckedChange={() => handleFilterChange('withoutVideos')}
+              />
+              <Label htmlFor="without-videos" className="flex-1 cursor-pointer">
+                Sin videos descargados
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="without-youtube"
+                checked={activeFilters.withoutYouTube || false}
+                onCheckedChange={() => handleFilterChange('withoutYouTube')}
+              />
+              <Label htmlFor="without-youtube" className="flex-1 cursor-pointer">
+                Sin datos YouTube
+              </Label>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            onClick={clearFilters}
+            disabled={activeFiltersCount === 0}
+            className="justify-center text-center"
+          >
+            Limpiar filtros
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

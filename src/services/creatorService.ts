@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -32,6 +33,11 @@ export const fetchCreators = async (
     // Updated filter to fetch creators where fecha_consulta_videos is null
     if (filters.withoutVideos) {
       query = query.is('fecha_consulta_videos', null);
+    }
+
+    // Add filter for creators without YouTube data
+    if (filters.withoutYouTube) {
+      query = query.is('fecha_descarga_yt', null);
     }
   }
   

@@ -21,6 +21,7 @@ export interface Creator {
   estatus: 'activo' | 'inactivo' | 'pendiente';
   fecha_creacion: string;
   fecha_consulta_videos?: string;
+  fecha_descarga_yt?: string;
 }
 
 export interface TikTokVideo {

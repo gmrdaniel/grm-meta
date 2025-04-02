@@ -100,6 +100,7 @@ export type Database = {
           estatus: string | null
           fecha_consulta_videos: string | null
           fecha_creacion: string | null
+          fecha_descarga_yt: string | null
           id: string
           lada_telefono: string | null
           nombre: string
@@ -123,6 +124,7 @@ export type Database = {
           estatus?: string | null
           fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
+          fecha_descarga_yt?: string | null
           id?: string
           lada_telefono?: string | null
           nombre: string
@@ -146,6 +148,7 @@ export type Database = {
           estatus?: string | null
           fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
+          fecha_descarga_yt?: string | null
           id?: string
           lada_telefono?: string | null
           nombre?: string
