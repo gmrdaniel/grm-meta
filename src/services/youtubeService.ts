@@ -35,6 +35,8 @@ export const updateCreatorYouTubeInfo = async (
   creatorId: string, 
   subscriberCount: number
 ): Promise<Creator> => {
+  console.log('Updating creator YouTube info:', { creatorId, subscriberCount });
+  
   // Calculate eligibility - creators with 100k+ subscribers are eligible
   const isEligible = subscriberCount >= 100000;
   
@@ -54,6 +56,7 @@ export const updateCreatorYouTubeInfo = async (
     throw new Error(error.message);
   }
   
+  console.log('Creator YouTube info updated successfully:', data);
   return data as Creator;
 };
 
@@ -71,6 +74,7 @@ export const fetchAndUpdateYouTubeInfo = async (
     
     // Extract subscriber count
     const subscriberCount = channelInfo.stats?.subscribers;
+    console.log('YouTube subscriberCount:', subscriberCount);
     
     if (!subscriberCount && subscriberCount !== 0) {
       throw new Error('Could not retrieve subscriber count from YouTube API');

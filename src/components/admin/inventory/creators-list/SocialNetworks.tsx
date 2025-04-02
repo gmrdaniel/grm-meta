@@ -3,7 +3,8 @@ import { ExternalLink, Users, Youtube } from "lucide-react";
 import { CreatorActions } from "./CreatorActions";
 import { formatFollowers, formatEngagement } from "./utils";
 import { Button } from "@/components/ui/button";
-import { fetchYouTubeChannelInfo } from "@/services/youtubeService";
+import { fetchAndUpdateYouTubeInfo } from "@/services/youtubeService";
+import { toast } from "sonner";
 
 interface SocialNetworksProps {
   usuario_tiktok?: string;
@@ -42,12 +43,18 @@ export function SocialNetworks({
     return <span className="text-sm text-gray-500">Sin redes sociales</span>;
   }
 
-  const handleYouTubeInfo = async (channelId: string) => {
+  const handleYouTubeUpdate = async (channelId: string) => {
+    if (!channelId) return;
+    
     try {
-      const channelInfo = await fetchYouTubeChannelInfo(channelId);
-      console.log('YouTube channel info:', channelInfo);
+      toast.loading("Actualizando datos de YouTube...");
+      const result = await fetchAndUpdateYouTubeInfo(creatorId, channelId);
+      console.log('YouTube update result:', result);
+      toast.success(`Información de YouTube actualizada: ${result.subscriberCount} suscriptores`);
+      onRefetch();
     } catch (error) {
-      console.error('Error fetching YouTube channel info:', error);
+      console.error('Error updating YouTube info:', error);
+      toast.error("Error al actualizar datos de YouTube");
     }
   };
 
@@ -110,11 +117,11 @@ export function SocialNetworks({
               className="h-6 rounded-md ml-2 flex items-center gap-1"
               onClick={(e) => {
                 e.stopPropagation();
-                handleYouTubeInfo(usuario_youtube);
+                handleYouTubeUpdate(usuario_youtube);
               }}
             >
               <Youtube className="h-3 w-3" />
-              YouTube
+              Actualizar YouTube
             </Button>
           </div>
           <div className="flex gap-3 mt-1 text-xs">
