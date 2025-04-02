@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -7,7 +6,7 @@ import { CreatorForm } from "@/components/admin/inventory/CreatorForm";
 import { Creator } from "@/types/creator";
 import { CreatorDetail } from "@/components/admin/inventory/CreatorDetail";
 import { ImportCreators } from "@/components/admin/inventory/ImportCreators";
-import { CreatorsSummary } from "@/components/admin/inventory/CreatorsSummary";
+import { CreatorsSummary } from "@/components/admin/inventory/creators-summary";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { toast } from "sonner";
