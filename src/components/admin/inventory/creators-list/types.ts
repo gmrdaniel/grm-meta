@@ -6,7 +6,11 @@ export interface CreatorFilter {
   hasTikTokUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
-  [key: string]: boolean | undefined;
+  withVideos?: boolean;
+  email?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  [key: string]: boolean | string | undefined;
 }
 
 export interface CreatorsListProps {
