@@ -11,7 +11,7 @@ export const sendEmail = async ({
   html: string;
   environment?: "development" | "production";
 }): Promise<void> => {
-  const { data, error } = await supabase.functions.invoke("send-invitation-email", {
+  const { data, error } = await supabase.functions.invoke("resend", {
     body: { email, subject, html },
     headers: { "x-environment": environment },
   });
