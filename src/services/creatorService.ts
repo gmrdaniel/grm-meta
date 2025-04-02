@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -28,11 +29,23 @@ export const fetchCreators = async (
     if (filters.withoutEngagement) {
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
     }
-    
-    // For withoutVideos filter, we'll use a different approach
-    if (filters.withoutVideos) {
-      // We'll handle this after getting the initial results
+
+    // Filter by email
+    if (filters.email) {
+      query = query.ilike('correo', `%${filters.email}%`);
     }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      query = query.gte('fecha_creacion', `${filters.dateFrom}T00:00:00`);
+    }
+
+    if (filters.dateTo) {
+      query = query.lte('fecha_creacion', `${filters.dateTo}T23:59:59`);
+    }
+    
+    // Handle withVideos and withoutVideos filters after getting the initial results
+    // We'll process these separately
   }
   
   // Add pagination
@@ -51,8 +64,8 @@ export const fetchCreators = async (
   let filteredData = data as Creator[];
   let filteredCount = count || 0;
   
-  // Special handling for withoutVideos filter
-  if (filters?.withoutVideos && filteredData.length > 0) {
+  // Special handling for video-related filters
+  if ((filters?.withoutVideos || filters?.withVideos) && filteredData.length > 0) {
     // Get the creator IDs from the current result set
     const creatorIds = filteredData.map(creator => creator.id);
     
@@ -66,8 +79,13 @@ export const fetchCreators = async (
       // Create a Set of creator IDs that have videos
       const creatorsWithVideos = new Set(videoCountData.map(item => item.creator_id));
       
-      // Filter out creators that have videos
-      filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
+      // Filter based on whether we want creators with or without videos
+      if (filters?.withoutVideos) {
+        filteredData = filteredData.filter(creator => !creatorsWithVideos.has(creator.id));
+      } else if (filters?.withVideos) {
+        filteredData = filteredData.filter(creator => creatorsWithVideos.has(creator.id));
+      }
+      
       filteredCount = filteredData.length;
     }
   }
