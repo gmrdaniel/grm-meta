@@ -1,67 +1,94 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchTikTokUserInfo } from "@/services/tiktokVideoService";
 
 export type EmailType = "invitación" | "bienvenida" | "recordatorio";
 
 export function useEmailCustomization() {
   const [name, setName] = useState<string>("");
-  const [tiktokUrl, setTiktokUrl] = useState<string>("");
+  const [tiktokUsername, setTiktokUsername] = useState<string>("");
   const [emailType, setEmailType] = useState<EmailType>("invitación");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedEmail, setGeneratedEmail] = useState<string | null>(null);
+  const [tiktokProfileData, setTiktokProfileData] = useState<any>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(false);
 
-  const handleGenerateEmail = () => {
+  const fetchTikTokProfile = async () => {
+    if (!tiktokUsername) return;
+    
+    setIsLoadingProfile(true);
+    try {
+      // Remove @ if present
+      const cleanUsername = tiktokUsername.startsWith('@') 
+        ? tiktokUsername.substring(1) 
+        : tiktokUsername;
+        
+      const profileData = await fetchTikTokUserInfo(cleanUsername);
+      setTiktokProfileData(profileData);
+      toast.success(`Perfil de TikTok cargado: @${cleanUsername}`);
+      return profileData;
+    } catch (error) {
+      console.error("Error al cargar perfil de TikTok:", error);
+      toast.error("No se pudo cargar el perfil de TikTok");
+      return null;
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  const handleGenerateEmail = async () => {
     if (!name.trim()) {
       toast.error("Por favor ingrese un nombre");
       return;
     }
     
-    if (!tiktokUrl.trim()) {
-      toast.error("Por favor ingrese una URL de TikTok");
+    if (!tiktokUsername.trim()) {
+      toast.error("Por favor ingrese un nombre de usuario de TikTok");
       return;
     }
     
     setIsGenerating(true);
     
-    // Simulamos la generación del correo
-    setTimeout(() => {
-      const emailTemplates = {
-        invitación: `
-          <h1>Invitación para ${name}</h1>
-          <p>Hola ${name},</p>
-          <p>Te invitamos a unirte a nuestra plataforma como creador de contenido.</p>
-          <p>Hemos visto tu talento en <a href="${tiktokUrl}" target="_blank">TikTok</a> y nos encantaría colaborar contigo.</p>
-          <p>¡Esperamos tu respuesta!</p>
-          <p>Equipo de La Neta</p>
-        `,
-        bienvenida: `
-          <h1>Bienvenido/a ${name}</h1>
-          <p>Hola ${name},</p>
-          <p>Estamos muy contentos de que te hayas unido a nuestra plataforma.</p>
-          <p>Hemos visto tu contenido en <a href="${tiktokUrl}" target="_blank">TikTok</a> y estamos emocionados de trabajar contigo.</p>
-          <p>¡Bienvenido/a al equipo!</p>
-          <p>Equipo de La Neta</p>
-        `,
-        recordatorio: `
-          <h1>Recordatorio importante</h1>
-          <p>Hola ${name},</p>
-          <p>Te recordamos que aún no has completado tu perfil en nuestra plataforma.</p>
-          <p>Valoramos mucho tu contenido en <a href="${tiktokUrl}" target="_blank">TikTok</a> y queremos ayudarte a monetizarlo.</p>
-          <p>¡No pierdas esta oportunidad!</p>
-          <p>Equipo de La Neta</p>
-        `
-      };
-
-      setGeneratedEmail(emailTemplates[emailType]);
+    try {
+      // Fetch TikTok profile if not already loaded
+      const profile = tiktokProfileData || await fetchTikTokProfile();
+      
+      // Clean username (remove @ if present)
+      const cleanUsername = tiktokUsername.startsWith('@') 
+        ? tiktokUsername.substring(1) 
+        : tiktokUsername;
+      
+      // Call the edge function to generate the email content
+      const { data, error } = await supabase.functions.invoke("generate-email-content", {
+        body: {
+          name,
+          tiktokUsername: cleanUsername,
+          emailType,
+          tiktokProfileData: profile
+        },
+      });
+      
+      if (error) throw error;
+      
+      if (data?.emailContent) {
+        setGeneratedEmail(data.emailContent);
+      } else {
+        throw new Error("No se recibió contenido de correo");
+      }
+    } catch (error) {
+      console.error("Error al generar correo:", error);
+      toast.error("Error al generar el correo electrónico");
+    } finally {
       setIsGenerating(false);
-    }, 1000);
+    }
   };
   
   const handleCopyToClipboard = () => {
     if (!generatedEmail) return;
     
-    // Creamos un elemento temporal para copiar el HTML
+    // Create a temporary element to copy the HTML
     const tempElement = document.createElement("div");
     tempElement.innerHTML = generatedEmail;
     
@@ -77,12 +104,15 @@ export function useEmailCustomization() {
   return {
     name,
     setName,
-    tiktokUrl,
-    setTiktokUrl,
+    tiktokUsername,
+    setTiktokUsername,
     emailType,
     setEmailType,
     isGenerating,
     generatedEmail,
+    isLoadingProfile,
+    tiktokProfileData,
+    fetchTikTokProfile,
     handleGenerateEmail,
     handleCopyToClipboard
   };
