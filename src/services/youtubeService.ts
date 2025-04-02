@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
@@ -43,8 +42,7 @@ export const updateCreatorYouTubeInfo = async (
     .from('creator_inventory')
     .update({
       seguidores_youtube: subscriberCount,
-      elegible_youtube: isEligible,
-      fecha_descarga_yt: new Date().toISOString()
+      elegible_youtube: isEligible
     })
     .eq('id', creatorId)
     .select()
