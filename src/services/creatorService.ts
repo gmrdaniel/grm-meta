@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -30,24 +31,35 @@ export const fetchCreators = async (
     }
     
     // Special handling for withoutVideos filter
-    // We'll use a direct LEFT JOIN query rather than post-processing the results
+    // We'll use a direct query rather than a subquery builder
     if (filters.withoutVideos) {
-      const { data: creatorsWithoutVideos, error, count } = await supabase
-        .from('creator_inventory')
-        .select('*', { count: 'exact' })
-        .not('id', 'in', (qb) => {
-          qb.from('tiktok_video')
-            .select('creator_id')
-            .distinct();
-        });
-        
+      // First get all creator IDs that have videos
+      const { data: creatorsWithVideos } = await supabase
+        .from('tiktok_video')
+        .select('creator_id')
+        .distinct();
+      
+      // If we have creators with videos, exclude them from the results
+      if (creatorsWithVideos && creatorsWithVideos.length > 0) {
+        const creatorIdsWithVideos = creatorsWithVideos.map(item => item.creator_id);
+        query = query.not('id', 'in', creatorIdsWithVideos);
+      }
+      
+      // Add pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      
+      const { data, error, count } = await query
+        .order('fecha_creacion', { ascending: false })
+        .range(from, to);
+      
       if (error) {
         console.error('Error fetching creators without videos:', error);
         throw new Error(error.message);
       }
       
       return { 
-        data: filterPaginated(creatorsWithoutVideos, page, pageSize) as Creator[], 
+        data: data as Creator[], 
         count: count || 0 
       };
     }
