@@ -1,4 +1,3 @@
-
 import { Creator } from "@/types/creator";
 
 export interface CreatorFilter {
@@ -6,11 +5,7 @@ export interface CreatorFilter {
   hasTikTokUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
-  withVideos?: boolean;
-  email?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  [key: string]: boolean | string | undefined;
+  [key: string]: boolean | undefined;
 }
 
 export interface CreatorsListProps {
@@ -22,11 +17,4 @@ export interface CreatorsListProps {
 export interface TikTokInfoMutationParams {
   creatorId: string;
   username: string;
-}
-
-export interface CreatorBatchActionsProps {
-  selectedCreators: Creator[];
-  onSuccess: () => void;
-  clearSelection: () => void;
-  allCreators?: Creator[];
 }
