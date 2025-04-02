@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { sleep } from "@/services/tiktokVideoService";
 
 export function useTikTokVideoApi() {
   const [username, setUsername] = useState<string>("");
@@ -7,9 +8,6 @@ export function useTikTokVideoApi() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
-
-  // Sleep utility function
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // Get adaptive delay based on retry count
   const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {

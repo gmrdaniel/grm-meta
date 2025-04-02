@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TikTokVideo } from "@/types/creator";
 
@@ -76,7 +75,7 @@ export const updateTikTokVideo = async (videoId: string, updates: Partial<TikTok
  * Sleep utility function to pause execution
  * @param ms Time to sleep in milliseconds
  */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Fetch TikTok user information using the TikTok API
@@ -113,9 +112,7 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
  * @returns Calculated delay time in milliseconds
  */
 const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {
-  // Exponential backoff starting at baseDelay milliseconds
-  // and increasing based on retry count (2^retryCount * baseDelay)
-  return Math.min(baseDelay * Math.pow(2, retryCount), 10000); // Cap at 10 seconds
+  return Math.min(baseDelay * Math.pow(2, retryCount), 10000);
 };
 
 /**
@@ -130,10 +127,8 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
     let success = false;
     let responseData;
     
-    // Retry logic with exponential backoff
     while (!success && retryCount < 5) {
       try {
-        // Apply an initial delay on retries
         if (retryCount > 0) {
           const delayTime = getAdaptiveDelay(1500, retryCount - 1);
           console.log(`Rate limit hit, retrying in ${delayTime}ms (attempt ${retryCount + 1}/5)...`);
@@ -177,24 +172,20 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
       throw new Error('Failed to fetch TikTok videos after multiple attempts');
     }
     
-    // Check if we have valid video data
     if (!responseData.videos || !Array.isArray(responseData.videos) || responseData.videos.length === 0) {
       console.warn('No videos found for user:', username);
       return { savedCount: 0, totalCount: 0 };
     }
     
-    // Process and save videos
     const videos = responseData.videos;
     let savedCount = 0;
     
     for (const video of videos) {
       try {
-        // Add delay between database operations to not overwhelm the database
         if (savedCount > 0) {
           await sleep(200);
         }
         
-        // Check if this video already exists in the database
         const { data: existingVideo } = await supabase
           .from('tiktok_video')
           .select('id')
@@ -207,10 +198,9 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
           continue;
         }
         
-        // Map video data to database schema
         const videoData: Omit<TikTokVideo, 'id' | 'created_at' | 'updated_at'> = {
           creator_id: creatorId,
-          video_id: video.video_id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Fallback ID if missing
+          video_id: video.video_id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           description: video.description || '',
           create_time: video.create_time || Math.floor(Date.now() / 1000),
           author: username,
@@ -247,7 +237,6 @@ export const updateCreatorTikTokInfo = async (
   secUid?: string,
   engagementRate?: number | null
 ): Promise<void> => {
-  // Determine eligibility based on follower count
   const isEligible = followerCount >= 100000;
   
   console.log(`Updating creator ${creatorId} with follower count: ${followerCount}, eligible: ${isEligible}, secUid: ${secUid || 'not provided'}, engagement: ${engagementRate || 'not calculated'}`);
@@ -257,12 +246,10 @@ export const updateCreatorTikTokInfo = async (
     elegible_tiktok: isEligible
   };
   
-  // Only include secUid in the update if it's provided
   if (secUid) {
     updateData.secuid_tiktok = secUid;
   }
   
-  // Only include engagement rate in the update if it's provided
   if (engagementRate !== undefined && engagementRate !== null) {
     updateData.engagement_tiktok = engagementRate;
   }
@@ -284,4 +271,3 @@ export const updateCreatorTikTokInfo = async (
 export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
   return updateCreatorTikTokInfo(creatorId, followerCount);
 };
-
