@@ -6,7 +6,7 @@ export interface Task {
   title: string;
   description: string | null;
   status: 'pending' | 'in_progress' | 'completed' | 'review';
-  project_id: string;
+  project_id: string | null;
   stage_id: string;
   creator_id: string | null;
   admin_id: string | null;
@@ -151,7 +151,7 @@ export async function checkExistingTask(
 export async function createTask(taskData: {
   title: string;
   description?: string;
-  project_id?: string;
+  project_id?: string | null;
   stage_id: string;
   creator_id?: string | null;
   admin_id?: string | null;
@@ -170,13 +170,26 @@ export async function createTask(taskData: {
     }
   }
   
+  // Make sure stage_id is set properly
+  if (!taskData.stage_id) {
+    taskData.stage_id = "00000000-0000-0000-0000-000000000000"; // Default stage ID
+  }
+  
+  const taskToInsert = {
+    title: taskData.title,
+    description: taskData.description,
+    status: taskData.status || 'pending',
+    project_id: taskData.project_id || null,
+    stage_id: taskData.stage_id,
+    creator_id: taskData.creator_id || null,
+    admin_id: taskData.admin_id || null,
+    creator_invitation_id: taskData.creator_invitation_id || null,
+    updated_at: new Date().toISOString()
+  };
+  
   const { data, error } = await supabase
     .from('tasks')
-    .insert({
-      ...taskData,
-      status: taskData.status || 'pending',
-      updated_at: new Date().toISOString()
-    })
+    .insert(taskToInsert)
     .select()
     .single();
   

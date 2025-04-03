@@ -23,6 +23,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TaskFormProps {
   onSuccess?: () => void;
@@ -30,6 +31,7 @@ interface TaskFormProps {
 
 interface FormValues {
   title: string;
+  description?: string;
   project_id?: string;
   status: 'pending' | 'in_progress' | 'completed' | 'review';
   creator_invitation_id?: string;
@@ -41,6 +43,7 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
   const form = useForm<FormValues>({
     defaultValues: {
       title: "",
+      description: "",
       status: "pending",
       project_id: undefined,
       creator_invitation_id: undefined
@@ -58,23 +61,11 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
     setIsSubmitting(true);
     
     try {
-      // If there's no project_id, don't send the project_id field
-      const dataToSubmit = {
-        ...values,
-        project_id: values.project_id || undefined,
-        creator_invitation_id: values.creator_invitation_id || undefined,
-      };
-      
+      // Include stage_id with a default value for now
       const taskData = {
-        ...dataToSubmit,
+        ...values,
         stage_id: "00000000-0000-0000-0000-000000000000" // This will be replaced with actual stage_id when project_id is provided
       };
-      
-      if (taskData.project_id) {
-        // If we have a project, we need to fetch the first stage for it
-        // For now we're skipping this part but in a real implementation
-        // you would fetch the first stage from the project and use its ID
-      }
       
       await createTask(taskData);
       toast.success("Tarea creada exitosamente");
@@ -104,6 +95,25 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
                   <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input placeholder="Ingrese el título de la tarea" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción (Opcional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Ingrese una descripción para la tarea"
+                      className="resize-none"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
