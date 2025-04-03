@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,7 @@ export function useCreatorsSummary() {
   const [tiktokOrYoutubeEligibleFilter, setTiktokOrYoutubeEligibleFilter] = useState(false);
   const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingYouTube, setIsExportingYouTube] = useState(false);
   
   const fetchSummaryCreators = async () => {
     try {
@@ -34,7 +34,6 @@ export function useCreatorsSummary() {
       }
 
       if (tiktokOrYoutubeEligibleFilter) {
-        // Use OR filter for either TikTok or YouTube eligibility
         query = query.or(
           'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
         );
@@ -72,7 +71,6 @@ export function useCreatorsSummary() {
       }
 
       if (tiktokOrYoutubeEligibleFilter) {
-        // Use OR filter for either TikTok or YouTube eligibility
         countQuery = countQuery.or(
           'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
         );
@@ -110,7 +108,6 @@ export function useCreatorsSummary() {
   
   const toggleTiktokEligibleFilter = () => {
     setTiktokEligibleFilter(prev => !prev);
-    // Reset the "OR" filter if enabling a specific filter
     if (!tiktokEligibleFilter) {
       setTiktokOrYoutubeEligibleFilter(false);
     }
@@ -119,7 +116,6 @@ export function useCreatorsSummary() {
 
   const toggleYoutubeEligibleFilter = () => {
     setYoutubeEligibleFilter(prev => !prev);
-    // Reset the "OR" filter if enabling a specific filter
     if (!youtubeEligibleFilter) {
       setTiktokOrYoutubeEligibleFilter(false);
     }
@@ -128,7 +124,6 @@ export function useCreatorsSummary() {
 
   const toggleTiktokOrYoutubeEligibleFilter = () => {
     setTiktokOrYoutubeEligibleFilter(prev => !prev);
-    // Reset individual filters if enabling the "OR" filter
     if (!tiktokOrYoutubeEligibleFilter) {
       setTiktokEligibleFilter(false);
       setYoutubeEligibleFilter(false);
@@ -159,46 +154,58 @@ export function useCreatorsSummary() {
     try {
       let query = supabase
         .from('summary_creator')
-        .select('*');
-
-      // Apply filters for export
-      if (tiktokEligibleFilter) {
-        query = query
-          .gte('seguidores_tiktok', 100000)
-          .gte('engagement_tiktok', 4);
-      }
-
-      if (youtubeEligibleFilter) {
-        query = query
-          .gte('seguidores_youtube', 100000)
-          .gte('engagement_youtube', 4);
-      }
-
-      if (tiktokOrYoutubeEligibleFilter) {
-        // Use OR filter for either TikTok or YouTube eligibility
-        query = query.or(
-          'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
-        );
-      }
+        .select('*')
+        .gte('seguidores_tiktok', 100000)
+        .gte('engagement_tiktok', 4);
       
       const { data, error } = await query;
       
       if (error) throw error;
       
       if (!data || data.length === 0) {
-        toast.info("No hay creadores elegibles para exportar");
+        toast.info("No hay creadores elegibles para exportar por TikTok");
         return;
       }
       
       const formattedData = formatExportData(data as SummaryCreator[]);
-      exportToCsv(formattedData, "creadores_elegibles");
+      exportToCsv(formattedData, "creadores_elegibles_tiktok");
       
-      toast.success(`${data.length} creadores elegibles exportados correctamente`);
+      toast.success(`${data.length} creadores elegibles para TikTok exportados correctamente`);
     } catch (error) {
       console.error('Error exporting eligible creators:', error);
-      toast.error("Error al exportar creadores elegibles");
+      toast.error("Error al exportar creadores elegibles para TikTok");
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const exportEligibleYouTubeCreators = async () => {
+    setIsExportingYouTube(true);
+    try {
+      let query = supabase
+        .from('summary_creator')
+        .select('*')
+        .gte('seguidores_youtube', 100000)
+        .gte('engagement_youtube', 4);
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        toast.info("No hay creadores elegibles para exportar por YouTube");
+        return;
+      }
+      
+      const formattedData = formatExportData(data as SummaryCreator[]);
+      exportToCsv(formattedData, "creadores_elegibles_youtube");
+      
+      toast.success(`${data.length} creadores elegibles para YouTube exportados correctamente`);
+    } catch (error) {
+      console.error('Error exporting eligible YouTube creators:', error);
+      toast.error("Error al exportar creadores elegibles para YouTube");
+    } finally {
+      setIsExportingYouTube(false);
     }
   };
 
@@ -214,6 +221,7 @@ export function useCreatorsSummary() {
     tiktokOrYoutubeEligibleFilter,
     sortByEligible,
     isExporting,
+    isExportingYouTube,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
@@ -221,6 +229,7 @@ export function useCreatorsSummary() {
     toggleTiktokOrYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
-    exportEligibleCreators
+    exportEligibleCreators,
+    exportEligibleYouTubeCreators
   };
 }

@@ -22,6 +22,7 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     tiktokOrYoutubeEligibleFilter,
     sortByEligible,
     isExporting,
+    isExportingYouTube,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
@@ -29,7 +30,8 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     toggleTiktokOrYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
-    exportEligibleCreators
+    exportEligibleCreators,
+    exportEligibleYouTubeCreators
   } = useCreatorsSummary();
   
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -59,6 +61,8 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
           onPageSizeChange={handlePageSizeChange}
           isExporting={isExporting}
           onExport={exportEligibleCreators}
+          isExportingYouTube={isExportingYouTube}
+          onExportYouTube={exportEligibleYouTubeCreators}
         />
         
         <SummaryFilters

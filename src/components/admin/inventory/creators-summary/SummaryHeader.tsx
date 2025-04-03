@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -10,6 +10,8 @@ interface SummaryHeaderProps {
   onPageSizeChange: (value: string) => void;
   isExporting: boolean;
   onExport: () => Promise<void>;
+  isExportingYouTube: boolean;
+  onExportYouTube: () => Promise<void>;
 }
 
 export function SummaryHeader({
@@ -17,7 +19,9 @@ export function SummaryHeader({
   pageSize,
   onPageSizeChange,
   isExporting,
-  onExport
+  onExport,
+  isExportingYouTube,
+  onExportYouTube
 }: SummaryHeaderProps) {
   return (
     <div className="flex justify-between items-start mb-4">
@@ -45,20 +49,37 @@ export function SummaryHeader({
         </div>
       </div>
       
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onExport}
-        disabled={isExporting}
-        className="flex items-center gap-1 self-end"
-      >
-        {isExporting ? (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
-        Exportar Elegibles TikTok
-      </Button>
+      <div className="flex gap-2 self-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onExport}
+          disabled={isExporting || isExportingYouTube}
+          className="flex items-center gap-1"
+        >
+          {isExporting ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          Exportar Elegibles TikTok
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onExportYouTube}
+          disabled={isExporting || isExportingYouTube}
+          className="flex items-center gap-1"
+        >
+          {isExportingYouTube ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
+          ) : (
+            <Youtube className="h-4 w-4" />
+          )}
+          Exportar Elegibles YouTube
+        </Button>
+      </div>
     </div>
   );
 }
