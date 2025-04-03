@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Task {
@@ -158,7 +157,6 @@ export async function createTask(taskData: {
   creator_invitation_id?: string | null;
   status?: 'pending' | 'in_progress' | 'completed' | 'review';
 }): Promise<Task> {
-  // Only check for existing task if creatorId or creatorInvitationId is provided
   if (taskData.creator_id || taskData.creator_invitation_id) {
     const hasExistingTask = await checkExistingTask(
       taskData.creator_id, 
@@ -170,9 +168,8 @@ export async function createTask(taskData: {
     }
   }
   
-  // Make sure stage_id is set properly
   if (!taskData.stage_id) {
-    taskData.stage_id = "00000000-0000-0000-0000-000000000000"; // Default stage ID
+    taskData.stage_id = "00000000-0000-0000-0000-000000000000";
   }
   
   const taskToInsert = {
@@ -199,4 +196,17 @@ export async function createTask(taskData: {
   }
   
   return data as Task;
+}
+
+export async function executeTaskSearch(query: string): Promise<any> {
+  const { data, error } = await supabase.rpc('execute_task_search', { 
+    query_text: query
+  });
+  
+  if (error) {
+    console.error('Error executing task search:', error);
+    throw new Error(error.message);
+  }
+  
+  return data;
 }

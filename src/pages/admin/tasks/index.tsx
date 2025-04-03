@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TasksList } from "@/components/admin/tasks/TasksList";
 import { TaskDetail } from "@/components/admin/tasks/TaskDetail";
+import { TaskSearch } from "@/components/admin/tasks/TaskSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -39,7 +40,7 @@ export default function AdminTasks() {
           <div className="bg-white rounded-lg shadow p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="mb-6">
-                <TabsList className="w-full max-w-xs">
+                <TabsList className="w-full max-w-md">
                   <TabsTrigger value="list" className="flex-1">Task List</TabsTrigger>
                   <TabsTrigger 
                     value="detail" 
@@ -47,6 +48,9 @@ export default function AdminTasks() {
                     disabled={!selectedTaskId}
                   >
                     Task Detail
+                  </TabsTrigger>
+                  <TabsTrigger value="search" className="flex-1">
+                    SQL Search
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -69,6 +73,10 @@ export default function AdminTasks() {
                     Select a task to view details
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="search">
+                <TaskSearch />
               </TabsContent>
             </Tabs>
           </div>
