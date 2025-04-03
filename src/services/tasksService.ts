@@ -202,16 +202,20 @@ export async function createTask(taskData: {
 export async function executeTaskSearch(query: string): Promise<any[]> {
   try {
     // Using raw SQL via rpc with the function we created
-    const { data, error } = await supabase.rpc('execute_task_search', { 
-      query_text: query 
-    });
+    // We need to use the any generic type parameter to avoid TypeScript errors
+    // since the execute_task_search function is not in the generated types
+    const { data, error } = await supabase.rpc(
+      'execute_task_search' as any, 
+      { query_text: query }
+    );
     
     if (error) {
       console.error('Error executing task search:', error);
       throw new Error(error.message);
     }
     
-    return data || [];
+    // Ensure we return an array even if data is null
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Unexpected error in executeTaskSearch:', error);
     throw error;
