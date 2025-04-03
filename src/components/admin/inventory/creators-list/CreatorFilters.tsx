@@ -112,6 +112,16 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
                 Sin datos YouTube
               </Label>
             </DropdownMenuItem>
+            <DropdownMenuItem className="flex items-center gap-2">
+              <Checkbox 
+                id="without-youtube-engagement"
+                checked={activeFilters.withoutYouTubeEngagement || false}
+                onCheckedChange={() => handleFilterChange('withoutYouTubeEngagement')}
+              />
+              <Label htmlFor="without-youtube-engagement" className="flex-1 cursor-pointer">
+                Sin engagement YouTube
+              </Label>
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem 

@@ -44,6 +44,11 @@ export const fetchCreators = async (
     if (filters.withoutYouTube) {
       query = query.is('fecha_descarga_yt', null);
     }
+    
+    // New filter for creators without YouTube engagement
+    if (filters.withoutYouTubeEngagement) {
+      query = query.is('engagement_youtube', null);
+    }
   }
   
   // Add pagination
