@@ -37,9 +37,10 @@ export const fetchYouTubeChannelInfo = async (channelId: string): Promise<any> =
 export const updateCreatorYouTubeInfo = async (
   creatorId: string, 
   subscriberCount: number,
-  viewCount: number
+  viewCount: number,
+  engagementRate: number
 ): Promise<Creator> => {
-  console.log('Updating creator YouTube info:', { creatorId, subscriberCount, viewCount });
+  console.log('Updating creator YouTube info:', { creatorId, subscriberCount, viewCount, engagementRate });
   
   // Calculate eligibility - creators with 100k+ subscribers are eligible
   const isEligible = subscriberCount >= 100000;
@@ -50,6 +51,7 @@ export const updateCreatorYouTubeInfo = async (
     .update({
       seguidores_youtube: subscriberCount,
       views_youtube: viewCount,
+      engagement_youtube: engagementRate,
       elegible_youtube: isEligible,
       fecha_descarga_yt: new Date().toISOString()
     })
@@ -72,7 +74,7 @@ export const updateCreatorYouTubeInfo = async (
 export const fetchAndUpdateYouTubeInfo = async (
   creatorId: string,
   channelId: string
-): Promise<{ subscriberCount: number, viewCount: number, isEligible: boolean }> => {
+): Promise<{ subscriberCount: number, viewCount: number, engagementRate: number, isEligible: boolean }> => {
   try {
     console.log('Starting fetchAndUpdateYouTubeInfo for creator:', creatorId, 'channelId:', channelId);
     
@@ -90,15 +92,21 @@ export const fetchAndUpdateYouTubeInfo = async (
       throw new Error('Could not retrieve subscriber count from YouTube API');
     }
     
+    // Calculate engagement rate as views divided by subscribers
+    // Avoid division by zero by checking if subscriberCount is zero
+    const engagementRate = subscriberCount > 0 ? (viewCount / subscriberCount) : 0;
+    console.log('YouTube engagementRate:', engagementRate);
+    
     // Calculate eligibility
     const isEligible = subscriberCount >= 100000;
     
-    // Update creator record with subscriber count and view count
-    await updateCreatorYouTubeInfo(creatorId, subscriberCount, viewCount);
+    // Update creator record with all YouTube metrics
+    await updateCreatorYouTubeInfo(creatorId, subscriberCount, viewCount, engagementRate);
     
     return {
       subscriberCount,
       viewCount,
+      engagementRate,
       isEligible
     };
   } catch (error) {
