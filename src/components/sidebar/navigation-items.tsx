@@ -1,5 +1,5 @@
 
-import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare } from "lucide-react";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus } from "lucide-react";
 
 export const adminNavigationItems = [
   {
@@ -31,6 +31,12 @@ export const adminNavigationItems = [
     shortLabel: "Tasks",
     icon: <CheckSquare size={24} />,
     to: "/admin/tasks",
+  },
+  {
+    label: "Create Task",
+    shortLabel: "New Task",
+    icon: <Plus size={24} />,
+    to: "/admin/tasks/create",
   },
   {
     label: "Test Services",

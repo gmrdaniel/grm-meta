@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Task {
@@ -150,20 +151,23 @@ export async function checkExistingTask(
 export async function createTask(taskData: {
   title: string;
   description?: string;
-  project_id: string;
+  project_id?: string;
   stage_id: string;
   creator_id?: string | null;
   admin_id?: string | null;
   creator_invitation_id?: string | null;
   status?: 'pending' | 'in_progress' | 'completed' | 'review';
 }): Promise<Task> {
-  const hasExistingTask = await checkExistingTask(
-    taskData.creator_id, 
-    taskData.creator_invitation_id
-  );
-  
-  if (hasExistingTask) {
-    throw new Error("A task already exists for this user");
+  // Only check for existing task if creatorId or creatorInvitationId is provided
+  if (taskData.creator_id || taskData.creator_invitation_id) {
+    const hasExistingTask = await checkExistingTask(
+      taskData.creator_id, 
+      taskData.creator_invitation_id
+    );
+    
+    if (hasExistingTask) {
+      throw new Error("A task already exists for this user");
+    }
   }
   
   const { data, error } = await supabase

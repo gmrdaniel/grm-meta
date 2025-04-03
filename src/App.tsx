@@ -14,6 +14,7 @@ import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
 import AdminInvitations from "./pages/admin/invitations";
 import AdminTasks from "./pages/admin/tasks";
+import AdminTaskCreate from "./pages/admin/tasks/create";
 import AdminTest from "./pages/admin/test";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
@@ -90,6 +91,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminTasks />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/tasks/create"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminTaskCreate />
                   </ProtectedRoute>
                 }
               />

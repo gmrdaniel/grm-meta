@@ -5,6 +5,9 @@ import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TasksList } from "@/components/admin/tasks/TasksList";
 import { TaskDetail } from "@/components/admin/tasks/TaskDetail";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function AdminTasks() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,6 +27,13 @@ export default function AdminTasks() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <h1 className="text-2xl font-bold">Tasks Management</h1>
+            <div className="mt-4 md:mt-0">
+              <Button asChild>
+                <Link to="/admin/tasks/create" className="flex items-center gap-1">
+                  <Plus className="w-4 h-4" /> Create Task
+                </Link>
+              </Button>
+            </div>
           </div>
           
           <div className="bg-white rounded-lg shadow p-6">
