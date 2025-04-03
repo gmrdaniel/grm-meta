@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { CreatorForm } from "@/components/admin/inventory/CreatorForm";
 import { TikTokVideosList } from "@/components/admin/inventory/TikTokVideosList";
+import { YouTubeShortsVideosList } from "@/components/admin/inventory/YouTubeShortsVideosList";
 
 interface CreatorDetailProps {
   creator: Creator;
@@ -36,6 +37,7 @@ export function CreatorDetail({ creator, onBack, onUpdate }: CreatorDetailProps)
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Perfil</TabsTrigger>
           <TabsTrigger value="tiktok-videos">Videos TikTok</TabsTrigger>
+          <TabsTrigger value="youtube-shorts">YouTube Shorts</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">
@@ -50,6 +52,10 @@ export function CreatorDetail({ creator, onBack, onUpdate }: CreatorDetailProps)
         
         <TabsContent value="tiktok-videos" className="space-y-6">
           <TikTokVideosList creatorId={creator.id} />
+        </TabsContent>
+
+        <TabsContent value="youtube-shorts" className="space-y-6">
+          <YouTubeShortsVideosList creatorId={creator.id} />
         </TabsContent>
       </Tabs>
     </div>
