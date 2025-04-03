@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Task {
@@ -198,15 +199,21 @@ export async function createTask(taskData: {
   return data as Task;
 }
 
-export async function executeTaskSearch(query: string): Promise<any> {
-  const { data, error } = await supabase.rpc('execute_task_search', { 
-    query_text: query
-  });
-  
-  if (error) {
-    console.error('Error executing task search:', error);
-    throw new Error(error.message);
+export async function executeTaskSearch(query: string): Promise<any[]> {
+  try {
+    // Using raw SQL via rpc with the function we created
+    const { data, error } = await supabase.rpc('execute_task_search', { 
+      query_text: query 
+    });
+    
+    if (error) {
+      console.error('Error executing task search:', error);
+      throw new Error(error.message);
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Unexpected error in executeTaskSearch:', error);
+    throw error;
   }
-  
-  return data;
 }

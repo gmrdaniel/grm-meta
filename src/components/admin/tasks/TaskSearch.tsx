@@ -1,13 +1,13 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { executeTaskSearch } from "@/services/tasksService";
 
 interface SearchFormValues {
   sqlQuery: string;
@@ -47,36 +47,25 @@ export function TaskSearch() {
           error: "Solo se permiten consultas SELECT para garantizar la seguridad de los datos.",
           columns: []
         });
+        setIsLoading(false);
         return;
       }
       
-      // Execute the SQL query
-      const { data, error } = await supabase.rpc('execute_task_search', {
-        query_text: values.sqlQuery
+      // Execute the SQL query using our service
+      const data = await executeTaskSearch(values.sqlQuery);
+      
+      // Extract column names from the first result
+      const columns = data && data.length > 0 
+        ? Object.keys(data[0]) 
+        : [];
+      
+      setQueryResult({
+        data: data,
+        error: null,
+        columns
       });
       
-      if (error) {
-        console.error("Error ejecutando la consulta:", error);
-        setQueryResult({
-          data: null,
-          error: error.message,
-          columns: []
-        });
-        toast.error("Error en la consulta SQL");
-      } else {
-        // Extract column names from the first result
-        const columns = data && data.length > 0 
-          ? Object.keys(data[0]) 
-          : [];
-        
-        setQueryResult({
-          data: data,
-          error: null,
-          columns
-        });
-        
-        toast.success("Consulta ejecutada correctamente");
-      }
+      toast.success("Consulta ejecutada correctamente");
     } catch (error) {
       console.error("Error inesperado:", error);
       setQueryResult({

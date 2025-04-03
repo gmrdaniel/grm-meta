@@ -627,6 +627,12 @@ export type Database = {
       }
     }
     Functions: {
+      execute_task_search: {
+        Args: {
+          query_text: string
+        }
+        Returns: Json
+      }
       find_invitation_by_code: {
         Args: {
           code_param: string
