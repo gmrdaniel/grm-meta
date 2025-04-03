@@ -36,9 +36,10 @@ export const fetchYouTubeChannelInfo = async (channelId: string): Promise<any> =
  */
 export const updateCreatorYouTubeInfo = async (
   creatorId: string, 
-  subscriberCount: number
+  subscriberCount: number,
+  viewCount: number
 ): Promise<Creator> => {
-  console.log('Updating creator YouTube info:', { creatorId, subscriberCount });
+  console.log('Updating creator YouTube info:', { creatorId, subscriberCount, viewCount });
   
   // Calculate eligibility - creators with 100k+ subscribers are eligible
   const isEligible = subscriberCount >= 100000;
@@ -48,6 +49,7 @@ export const updateCreatorYouTubeInfo = async (
     .from('creator_inventory')
     .update({
       seguidores_youtube: subscriberCount,
+      views_youtube: viewCount,
       elegible_youtube: isEligible,
       fecha_descarga_yt: new Date().toISOString()
     })
@@ -70,7 +72,7 @@ export const updateCreatorYouTubeInfo = async (
 export const fetchAndUpdateYouTubeInfo = async (
   creatorId: string,
   channelId: string
-): Promise<{ subscriberCount: number, isEligible: boolean }> => {
+): Promise<{ subscriberCount: number, viewCount: number, isEligible: boolean }> => {
   try {
     console.log('Starting fetchAndUpdateYouTubeInfo for creator:', creatorId, 'channelId:', channelId);
     
@@ -78,9 +80,11 @@ export const fetchAndUpdateYouTubeInfo = async (
     const channelInfo = await fetchYouTubeChannelInfo(channelId);
     console.log('YouTube channel info response:', channelInfo);
     
-    // Extract subscriber count
+    // Extract subscriber and view count
     const subscriberCount = channelInfo.stats?.subscribers;
+    const viewCount = channelInfo.stats?.views;
     console.log('YouTube subscriberCount:', subscriberCount);
+    console.log('YouTube viewCount:', viewCount);
     
     if (!subscriberCount && subscriberCount !== 0) {
       throw new Error('Could not retrieve subscriber count from YouTube API');
@@ -89,11 +93,12 @@ export const fetchAndUpdateYouTubeInfo = async (
     // Calculate eligibility
     const isEligible = subscriberCount >= 100000;
     
-    // Update creator record
-    await updateCreatorYouTubeInfo(creatorId, subscriberCount);
+    // Update creator record with subscriber count and view count
+    await updateCreatorYouTubeInfo(creatorId, subscriberCount, viewCount);
     
     return {
       subscriberCount,
+      viewCount,
       isEligible
     };
   } catch (error) {
