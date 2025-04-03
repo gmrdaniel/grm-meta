@@ -92,6 +92,30 @@ export function YouTubeFields({ form }: YouTubeFieldsProps) {
           )}
         />
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="views_youtube"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vistas YouTube</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  placeholder="50000" 
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                    field.onChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   );
 }

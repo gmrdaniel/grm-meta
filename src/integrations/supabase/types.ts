@@ -113,6 +113,7 @@ export type Database = {
           usuario_pinterest: string | null
           usuario_tiktok: string | null
           usuario_youtube: string | null
+          views_youtube: number | null
         }
         Insert: {
           apellido: string
@@ -137,6 +138,7 @@ export type Database = {
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
+          views_youtube?: number | null
         }
         Update: {
           apellido?: string
@@ -161,6 +163,7 @@ export type Database = {
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
+          views_youtube?: number | null
         }
         Relationships: []
       }

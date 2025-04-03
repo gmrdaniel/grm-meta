@@ -2,35 +2,21 @@
 import { z } from "zod";
 
 export const creatorFormSchema = z.object({
-  nombre: z.string().min(2, "El nombre es requerido"),
-  apellido: z.string().min(2, "El apellido es requerido"),
-  correo: z.string().email("Ingrese un correo electrónico válido"),
-  usuario_tiktok: z.string().min(1, "El usuario de TikTok es requerido"),
+  nombre: z.string().min(1, "El nombre es requerido"),
+  apellido: z.string().min(1, "El apellido es requerido"),
+  correo: z.string().email("Correo electrónico inválido").min(1, "El correo es requerido"),
+  usuario_tiktok: z.string().optional(),
   secUid_tiktok: z.string().optional(),
-  seguidores_tiktok: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
-  elegible_tiktok: z.boolean().optional(),
-  engagement_tiktok: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().positive("Debe ser un número positivo").optional()
-  ),
+  seguidores_tiktok: z.number().optional(),
+  elegible_tiktok: z.boolean().default(false),
+  engagement_tiktok: z.number().optional(),
   usuario_pinterest: z.string().optional(),
-  seguidores_pinterest: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
+  seguidores_pinterest: z.number().optional(),
   usuario_youtube: z.string().optional(),
-  seguidores_youtube: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().int().positive("Debe ser un número positivo").optional()
-  ),
-  elegible_youtube: z.boolean().optional(),
-  engagement_youtube: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().positive("Debe ser un número positivo").optional()
-  ),
+  seguidores_youtube: z.number().optional(),
+  elegible_youtube: z.boolean().default(false),
+  engagement_youtube: z.number().optional(),
+  views_youtube: z.number().optional(),
   page_facebook: z.string().optional(),
   lada_telefono: z.string().optional(),
   telefono: z.string().optional(),

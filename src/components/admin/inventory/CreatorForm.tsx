@@ -45,6 +45,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       seguidores_youtube: initialData?.seguidores_youtube || undefined,
       elegible_youtube: initialData?.elegible_youtube || false,
       engagement_youtube: initialData?.engagement_youtube || undefined,
+      views_youtube: initialData?.views_youtube || undefined,
       page_facebook: initialData?.page_facebook || "",
       lada_telefono: initialData?.lada_telefono || "",
       telefono: initialData?.telefono || "",

@@ -15,6 +15,7 @@ export interface Creator {
   seguidores_youtube?: number;
   elegible_youtube?: boolean;
   engagement_youtube?: number;
+  views_youtube?: number; // New field for YouTube views
   page_facebook?: string;
   lada_telefono?: string;
   telefono?: string;
