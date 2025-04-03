@@ -36,12 +36,25 @@ export function SummaryTable({
           <TableRow>
             <TableHead className="w-[50px] text-center">#</TableHead>
             <TableHead className="w-[250px]">Creador</TableHead>
-            <TableHead>TikTok</TableHead>
-            <TableHead>Seguidores</TableHead>
-            <TableHead>Engagement</TableHead>
-            <TableHead>Elegible x TikTok</TableHead>
-            <TableHead>Duración Prom.</TableHead>
-            <TableHead>Último Post</TableHead>
+            <TableHead colSpan={6} className="text-center bg-gray-50">TikTok</TableHead>
+            <TableHead colSpan={4} className="text-center bg-gray-100">YouTube</TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead className="w-[50px]"></TableHead>
+            <TableHead className="w-[250px]"></TableHead>
+            {/* TikTok Columns */}
+            <TableHead className="bg-gray-50">Usuario</TableHead>
+            <TableHead className="bg-gray-50">Seguidores</TableHead>
+            <TableHead className="bg-gray-50">Engagement</TableHead>
+            <TableHead className="bg-gray-50">Elegible</TableHead>
+            <TableHead className="bg-gray-50">Duración Prom.</TableHead>
+            <TableHead className="bg-gray-50">Último Post</TableHead>
+            {/* YouTube Columns */}
+            <TableHead className="bg-gray-100">Usuario</TableHead>
+            <TableHead className="bg-gray-100">Seguidores</TableHead>
+            <TableHead className="bg-gray-100">Engagement</TableHead>
+            <TableHead className="bg-gray-100">Elegible</TableHead>
+            <TableHead className="bg-gray-100">Duración Prom.</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

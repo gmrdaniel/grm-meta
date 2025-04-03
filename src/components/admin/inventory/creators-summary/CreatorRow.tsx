@@ -43,7 +43,11 @@ export function CreatorRow({
   };
 
   const isEligibleForTikTok = (creator: SummaryCreator) => {
-    return creator.seguidores_tiktok >= 100000 && creator.engagement >= 4;
+    return creator.seguidores_tiktok >= 100000 && creator.engagement_tiktok >= 4;
+  };
+
+  const isEligibleForYouTube = (creator: SummaryCreator) => {
+    return creator.seguidores_youtube >= 100000 && creator.engagement_youtube >= 4;
   };
 
   return (
@@ -77,7 +81,7 @@ export function CreatorRow({
           {formatFollowers(creator.seguidores_tiktok)}
         </div>
       </TableCell>
-      <TableCell>{formatEngagement(creator.engagement)}</TableCell>
+      <TableCell>{formatEngagement(creator.engagement_tiktok)}</TableCell>
       <TableCell>
         {isEligibleForTikTok(creator) ? (
           <Badge className="bg-green-500">Elegible</Badge>
@@ -88,13 +92,47 @@ export function CreatorRow({
       <TableCell>
         <div className="flex items-center gap-1">
           <Clock className="h-4 w-4 text-gray-500" />
-          {formatDuration(creator.duration_average)}
+          {formatDuration(creator.average_duration_tiktok)}
         </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
           <Calendar className="h-4 w-4 text-gray-500" />
-          {formatDate(creator.date_last_post)}
+          {formatDate(creator.date_last_post_tiktok)}
+        </div>
+      </TableCell>
+      <TableCell>
+        {creator.usuario_youtube ? (
+          <a 
+            href={`https://youtube.com/@${creator.usuario_youtube}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-red-600 hover:underline"
+          >
+            @{creator.usuario_youtube}
+          </a>
+        ) : (
+          <span className="text-gray-500">-</span>
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <Users className="h-4 w-4 text-gray-500" />
+          {formatFollowers(creator.seguidores_youtube)}
+        </div>
+      </TableCell>
+      <TableCell>{formatEngagement(creator.engagement_youtube)}</TableCell>
+      <TableCell>
+        {isEligibleForYouTube(creator) ? (
+          <Badge className="bg-green-500">Elegible</Badge>
+        ) : (
+          <Badge variant="outline" className="text-gray-500">No elegible</Badge>
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <Clock className="h-4 w-4 text-gray-500" />
+          {formatDuration(creator.average_duration_youtube)}
         </div>
       </TableCell>
     </TableRow>

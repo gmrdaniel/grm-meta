@@ -4,16 +4,20 @@ import { Button } from "@/components/ui/button";
 
 interface SummaryFiltersProps {
   tiktokEligibleFilter: boolean;
+  youtubeEligibleFilter: boolean;
   sortByEligible: 'asc' | 'desc' | null;
   onToggleTiktokEligibleFilter: () => void;
+  onToggleYoutubeEligibleFilter: () => void;
   onToggleSortByEligible: () => void;
   onClearFilters: () => void;
 }
 
 export function SummaryFilters({
   tiktokEligibleFilter,
+  youtubeEligibleFilter,
   sortByEligible,
   onToggleTiktokEligibleFilter,
+  onToggleYoutubeEligibleFilter,
   onToggleSortByEligible,
   onClearFilters
 }: SummaryFiltersProps) {
@@ -41,8 +45,18 @@ export function SummaryFilters({
           {tiktokEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
           Elegible x TikTok
         </Button>
+
+        <Button 
+          variant={youtubeEligibleFilter ? "default" : "outline"} 
+          size="sm"
+          onClick={onToggleYoutubeEligibleFilter}
+          className="flex items-center gap-1"
+        >
+          {youtubeEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+          Elegible x YouTube
+        </Button>
         
-        {(tiktokEligibleFilter || sortByEligible !== null) && (
+        {(tiktokEligibleFilter || youtubeEligibleFilter || sortByEligible !== null) && (
           <Button 
             variant="ghost" 
             size="sm"

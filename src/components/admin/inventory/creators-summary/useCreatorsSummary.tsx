@@ -10,6 +10,7 @@ export function useCreatorsSummary() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tiktokEligibleFilter, setTiktokEligibleFilter] = useState(false);
+  const [youtubeEligibleFilter, setYoutubeEligibleFilter] = useState(false);
   const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   
@@ -22,14 +23,20 @@ export function useCreatorsSummary() {
       if (tiktokEligibleFilter) {
         query = query
           .gte('seguidores_tiktok', 100000)
-          .gte('engagement', 4);
+          .gte('engagement_tiktok', 4);
+      }
+
+      if (youtubeEligibleFilter) {
+        query = query
+          .gte('seguidores_youtube', 100000)
+          .gte('engagement_youtube', 4);
       }
       
       if (sortByEligible) {
         if (sortByEligible === 'desc') {
-          query = query.order('seguidores_tiktok', { ascending: false }).order('engagement', { ascending: false });
+          query = query.order('seguidores_tiktok', { ascending: false }).order('engagement_tiktok', { ascending: false });
         } else {
-          query = query.order('seguidores_tiktok', { ascending: true }).order('engagement', { ascending: true });
+          query = query.order('seguidores_tiktok', { ascending: true }).order('engagement_tiktok', { ascending: true });
         }
       } else {
         query = query.order('seguidores_tiktok', { ascending: false });
@@ -47,7 +54,13 @@ export function useCreatorsSummary() {
       if (tiktokEligibleFilter) {
         countQuery = countQuery
           .gte('seguidores_tiktok', 100000)
-          .gte('engagement', 4);
+          .gte('engagement_tiktok', 4);
+      }
+
+      if (youtubeEligibleFilter) {
+        countQuery = countQuery
+          .gte('seguidores_youtube', 100000)
+          .gte('engagement_youtube', 4);
       }
       
       const { count: totalCount, error: countError } = await countQuery;
@@ -65,7 +78,7 @@ export function useCreatorsSummary() {
   };
   
   const { data: creatorsData, isLoading, error } = useQuery({
-    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, sortByEligible],
+    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, youtubeEligibleFilter, sortByEligible],
     queryFn: fetchSummaryCreators
   });
   
@@ -85,6 +98,11 @@ export function useCreatorsSummary() {
     setCurrentPage(1);
   };
 
+  const toggleYoutubeEligibleFilter = () => {
+    setYoutubeEligibleFilter(prev => !prev);
+    setCurrentPage(1);
+  };
+
   const toggleSortByEligible = () => {
     if (sortByEligible === null) {
       setSortByEligible('desc');
@@ -98,6 +116,7 @@ export function useCreatorsSummary() {
 
   const clearFilters = () => {
     setTiktokEligibleFilter(false);
+    setYoutubeEligibleFilter(false);
     setSortByEligible(null);
   };
   
@@ -106,9 +125,20 @@ export function useCreatorsSummary() {
     try {
       let query = supabase
         .from('summary_creator')
-        .select('*')
-        .gte('seguidores_tiktok', 100000)
-        .gte('engagement', 4);
+        .select('*');
+
+      // Apply filters for export
+      if (tiktokEligibleFilter) {
+        query = query
+          .gte('seguidores_tiktok', 100000)
+          .gte('engagement_tiktok', 4);
+      }
+
+      if (youtubeEligibleFilter) {
+        query = query
+          .gte('seguidores_youtube', 100000)
+          .gte('engagement_youtube', 4);
+      }
       
       const { data, error } = await query;
       
@@ -120,7 +150,7 @@ export function useCreatorsSummary() {
       }
       
       const formattedData = formatExportData(data as SummaryCreator[]);
-      exportToCsv(formattedData, "creadores_elegibles_tiktok");
+      exportToCsv(formattedData, "creadores_elegibles");
       
       toast.success(`${data.length} creadores elegibles exportados correctamente`);
     } catch (error) {
@@ -139,11 +169,13 @@ export function useCreatorsSummary() {
     isLoading,
     error,
     tiktokEligibleFilter,
+    youtubeEligibleFilter,
     sortByEligible,
     isExporting,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
+    toggleYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
     exportEligibleCreators

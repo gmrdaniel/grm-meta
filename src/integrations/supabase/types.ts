@@ -594,13 +594,34 @@ export type Database = {
       summary_creator: {
         Row: {
           apellido: string | null
+          average_duration_tiktok: number | null
+          average_duration_youtube: number | null
           correo: string | null
-          date_last_post: number | null
-          duration_average: number | null
-          engagement: number | null
+          date_last_post_tiktok: number | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
           nombre: string | null
           seguidores_tiktok: number | null
+          seguidores_youtube: number | null
           usuario_tiktok: string | null
+          usuario_youtube: string | null
+        }
+        Relationships: []
+      }
+      yt_summary_creator: {
+        Row: {
+          apellido: string | null
+          average_duration_tiktok: number | null
+          average_duration_youtube: number | null
+          correo: string | null
+          date_last_post_tiktok: number | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
+          nombre: string | null
+          seguidores_tiktok: number | null
+          seguidores_youtube: number | null
+          usuario_tiktok: string | null
+          usuario_youtube: string | null
         }
         Relationships: []
       }

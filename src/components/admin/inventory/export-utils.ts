@@ -9,9 +9,13 @@ export interface CreatorExportData {
   correo: string;
   usuario_tiktok: string;
   seguidores_tiktok: number;
-  engagement: number;
-  duration_average: number;
-  date_last_post: number;
+  engagement_tiktok: number;
+  average_duration_tiktok: number;
+  date_last_post_tiktok: number;
+  usuario_youtube: string;
+  seguidores_youtube: number;
+  engagement_youtube: number;
+  average_duration_youtube: number;
 }
 
 export const exportToCsv = (data: any[], filename: string) => {
@@ -52,16 +56,24 @@ export const formatExportData = (creators: SummaryCreator[]) => {
       return format(new Date(timestamp * 1000), "yyyy-MM-dd");
     };
     
+    const isEligibleForTikTok = creator.seguidores_tiktok >= 100000 && creator.engagement_tiktok >= 4;
+    const isEligibleForYouTube = creator.seguidores_youtube >= 100000 && creator.engagement_youtube >= 4;
+    
     return {
       "Nombre": creator.nombre || '',
       "Apellido": creator.apellido || '',
       "Correo": creator.correo || '',
       "Usuario TikTok": creator.usuario_tiktok ? `@${creator.usuario_tiktok}` : '',
-      "Seguidores": formatFollowers(creator.seguidores_tiktok),
-      "Engagement": formatEngagement(creator.engagement),
-      "Duración Promedio": formatDuration(creator.duration_average),
-      "Último Post": formatDate(creator.date_last_post),
-      "Elegible": creator.seguidores_tiktok >= 100000 && creator.engagement >= 4 ? 'Sí' : 'No'
+      "Seguidores TikTok": formatFollowers(creator.seguidores_tiktok),
+      "Engagement TikTok": formatEngagement(creator.engagement_tiktok),
+      "Duración Prom. TikTok": formatDuration(creator.average_duration_tiktok),
+      "Último Post TikTok": formatDate(creator.date_last_post_tiktok),
+      "Elegible TikTok": isEligibleForTikTok ? 'Sí' : 'No',
+      "Usuario YouTube": creator.usuario_youtube ? `@${creator.usuario_youtube}` : '',
+      "Seguidores YouTube": formatFollowers(creator.seguidores_youtube),
+      "Engagement YouTube": formatEngagement(creator.engagement_youtube),
+      "Duración Prom. YouTube": formatDuration(creator.average_duration_youtube),
+      "Elegible YouTube": isEligibleForYouTube ? 'Sí' : 'No'
     };
   });
 };
