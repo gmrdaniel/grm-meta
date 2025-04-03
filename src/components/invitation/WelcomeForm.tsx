@@ -118,14 +118,14 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             </label>
           </div>
           <div className="flex items-center space-x-2">
-  <Checkbox id="us-based-checkbox" />
-  <label
-    htmlFor="us-based-checkbox"
-    className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
-  >
-    I’m not participating in any other Facebook monetization program
-  </label>
-</div>
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
+            >
+              I’m not participating in any other Facebook monetization program
+            </label>
+          </div>
 
           <TermsCheckbox
             formData={formData}
