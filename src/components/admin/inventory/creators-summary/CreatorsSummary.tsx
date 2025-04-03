@@ -19,12 +19,14 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
     error,
     tiktokEligibleFilter,
     youtubeEligibleFilter,
+    tiktokOrYoutubeEligibleFilter,
     sortByEligible,
     isExporting,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
     toggleYoutubeEligibleFilter,
+    toggleTiktokOrYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
     exportEligibleCreators
@@ -62,9 +64,11 @@ export function CreatorsSummary({}: CreatorsSummaryProps) {
         <SummaryFilters
           tiktokEligibleFilter={tiktokEligibleFilter}
           youtubeEligibleFilter={youtubeEligibleFilter}
+          tiktokOrYoutubeEligibleFilter={tiktokOrYoutubeEligibleFilter}
           sortByEligible={sortByEligible}
           onToggleTiktokEligibleFilter={toggleTiktokEligibleFilter}
           onToggleYoutubeEligibleFilter={toggleYoutubeEligibleFilter}
+          onToggleTiktokOrYoutubeEligibleFilter={toggleTiktokOrYoutubeEligibleFilter}
           onToggleSortByEligible={toggleSortByEligible}
           onClearFilters={clearFilters}
         />

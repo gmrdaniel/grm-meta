@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 interface SummaryFiltersProps {
   tiktokEligibleFilter: boolean;
   youtubeEligibleFilter: boolean;
+  tiktokOrYoutubeEligibleFilter: boolean;
   sortByEligible: 'asc' | 'desc' | null;
   onToggleTiktokEligibleFilter: () => void;
   onToggleYoutubeEligibleFilter: () => void;
+  onToggleTiktokOrYoutubeEligibleFilter: () => void;
   onToggleSortByEligible: () => void;
   onClearFilters: () => void;
 }
@@ -15,15 +17,17 @@ interface SummaryFiltersProps {
 export function SummaryFilters({
   tiktokEligibleFilter,
   youtubeEligibleFilter,
+  tiktokOrYoutubeEligibleFilter,
   sortByEligible,
   onToggleTiktokEligibleFilter,
   onToggleYoutubeEligibleFilter,
+  onToggleTiktokOrYoutubeEligibleFilter,
   onToggleSortByEligible,
   onClearFilters
 }: SummaryFiltersProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button 
           variant={sortByEligible !== null ? "default" : "outline"} 
           size="sm"
@@ -55,8 +59,18 @@ export function SummaryFilters({
           {youtubeEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
           Elegible x YouTube
         </Button>
+
+        <Button 
+          variant={tiktokOrYoutubeEligibleFilter ? "default" : "outline"} 
+          size="sm"
+          onClick={onToggleTiktokOrYoutubeEligibleFilter}
+          className="flex items-center gap-1"
+        >
+          {tiktokOrYoutubeEligibleFilter ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+          Elegible x TikTok o YouTube
+        </Button>
         
-        {(tiktokEligibleFilter || youtubeEligibleFilter || sortByEligible !== null) && (
+        {(tiktokEligibleFilter || youtubeEligibleFilter || tiktokOrYoutubeEligibleFilter || sortByEligible !== null) && (
           <Button 
             variant="ghost" 
             size="sm"

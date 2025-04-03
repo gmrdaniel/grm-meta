@@ -11,6 +11,7 @@ export function useCreatorsSummary() {
   const [pageSize, setPageSize] = useState(10);
   const [tiktokEligibleFilter, setTiktokEligibleFilter] = useState(false);
   const [youtubeEligibleFilter, setYoutubeEligibleFilter] = useState(false);
+  const [tiktokOrYoutubeEligibleFilter, setTiktokOrYoutubeEligibleFilter] = useState(false);
   const [sortByEligible, setSortByEligible] = useState<'asc' | 'desc' | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   
@@ -30,6 +31,13 @@ export function useCreatorsSummary() {
         query = query
           .gte('seguidores_youtube', 100000)
           .gte('engagement_youtube', 4);
+      }
+
+      if (tiktokOrYoutubeEligibleFilter) {
+        // Use OR filter for either TikTok or YouTube eligibility
+        query = query.or(
+          'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
+        );
       }
       
       if (sortByEligible) {
@@ -62,6 +70,13 @@ export function useCreatorsSummary() {
           .gte('seguidores_youtube', 100000)
           .gte('engagement_youtube', 4);
       }
+
+      if (tiktokOrYoutubeEligibleFilter) {
+        // Use OR filter for either TikTok or YouTube eligibility
+        countQuery = countQuery.or(
+          'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
+        );
+      }
       
       const { count: totalCount, error: countError } = await countQuery;
         
@@ -78,7 +93,7 @@ export function useCreatorsSummary() {
   };
   
   const { data: creatorsData, isLoading, error } = useQuery({
-    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, youtubeEligibleFilter, sortByEligible],
+    queryKey: ['summary-creators', currentPage, pageSize, tiktokEligibleFilter, youtubeEligibleFilter, tiktokOrYoutubeEligibleFilter, sortByEligible],
     queryFn: fetchSummaryCreators
   });
   
@@ -95,11 +110,29 @@ export function useCreatorsSummary() {
   
   const toggleTiktokEligibleFilter = () => {
     setTiktokEligibleFilter(prev => !prev);
+    // Reset the "OR" filter if enabling a specific filter
+    if (!tiktokEligibleFilter) {
+      setTiktokOrYoutubeEligibleFilter(false);
+    }
     setCurrentPage(1);
   };
 
   const toggleYoutubeEligibleFilter = () => {
     setYoutubeEligibleFilter(prev => !prev);
+    // Reset the "OR" filter if enabling a specific filter
+    if (!youtubeEligibleFilter) {
+      setTiktokOrYoutubeEligibleFilter(false);
+    }
+    setCurrentPage(1);
+  };
+
+  const toggleTiktokOrYoutubeEligibleFilter = () => {
+    setTiktokOrYoutubeEligibleFilter(prev => !prev);
+    // Reset individual filters if enabling the "OR" filter
+    if (!tiktokOrYoutubeEligibleFilter) {
+      setTiktokEligibleFilter(false);
+      setYoutubeEligibleFilter(false);
+    }
     setCurrentPage(1);
   };
 
@@ -117,6 +150,7 @@ export function useCreatorsSummary() {
   const clearFilters = () => {
     setTiktokEligibleFilter(false);
     setYoutubeEligibleFilter(false);
+    setTiktokOrYoutubeEligibleFilter(false);
     setSortByEligible(null);
   };
   
@@ -138,6 +172,13 @@ export function useCreatorsSummary() {
         query = query
           .gte('seguidores_youtube', 100000)
           .gte('engagement_youtube', 4);
+      }
+
+      if (tiktokOrYoutubeEligibleFilter) {
+        // Use OR filter for either TikTok or YouTube eligibility
+        query = query.or(
+          'and(seguidores_tiktok.gte.100000,engagement_tiktok.gte.4),and(seguidores_youtube.gte.100000,engagement_youtube.gte.4)'
+        );
       }
       
       const { data, error } = await query;
@@ -170,12 +211,14 @@ export function useCreatorsSummary() {
     error,
     tiktokEligibleFilter,
     youtubeEligibleFilter,
+    tiktokOrYoutubeEligibleFilter,
     sortByEligible,
     isExporting,
     handlePageChange,
     handlePageSizeChange,
     toggleTiktokEligibleFilter,
     toggleYoutubeEligibleFilter,
+    toggleTiktokOrYoutubeEligibleFilter,
     toggleSortByEligible,
     clearFilters,
     exportEligibleCreators
