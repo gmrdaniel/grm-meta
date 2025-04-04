@@ -261,6 +261,8 @@ export default function InvitationStepperPage() {
     const { isValid, errorMessage } = validateFacebookPageUrl(
       facebookFormData.facebookPageUrl
     );
+
+    console.log(isValid, error)
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -278,6 +280,8 @@ export default function InvitationStepperPage() {
       const details = await fetchFacebookPageDetails(
         facebookFormData.facebookPageUrl.trim()
       );
+
+      console.log(details)
 
       if (details.type !== "page") {
         toast.error("The provided URL does not correspond to a Facebook Page.");
