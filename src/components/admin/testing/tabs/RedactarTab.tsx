@@ -19,6 +19,7 @@ export default function RedactarTab() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [formattedResponseText, setFormattedResponseText] = useState("");
   
   // Process the prompt by replacing placeholders with actual values
   // but NOT replacing {link_invitacion}
@@ -29,6 +30,17 @@ export default function RedactarTab() {
     // We don't replace {link_invitacion} in the processed prompt
     setProcessedPrompt(prompt);
   }, [name, socialLink, description, invitationLink]);
+  
+  // Format response text when result changes
+  useEffect(() => {
+    if (result && result.choices && result.choices[0]?.message?.content) {
+      // Replace \n\n with actual line breaks for display
+      const content = result.choices[0].message.content.replace(/\\n\\n/g, '\n');
+      setFormattedResponseText(content);
+    } else {
+      setFormattedResponseText("");
+    }
+  }, [result]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,10 +188,23 @@ export default function RedactarTab() {
           </Button>
 
           {result && (
-            <TestResultDisplay 
-              result={result} 
-              title="Mensaje de invitación generado" 
-            />
+            <>
+              <div className="space-y-2 mt-6 border-t pt-4">
+                <Label htmlFor="formattedResponse">Mensaje generado</Label>
+                <Textarea 
+                  id="formattedResponse" 
+                  value={formattedResponseText}
+                  className="min-h-[150px]"
+                  readOnly
+                  rows={6}
+                />
+              </div>
+              
+              <TestResultDisplay 
+                result={result} 
+                title="Mensaje de invitación generado" 
+              />
+            </>
           )}
         </form>
       </CardContent>
