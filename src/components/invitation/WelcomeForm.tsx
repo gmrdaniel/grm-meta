@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CardContent, CardFooter } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CreatorInvitation } from "@/types/invitation";
 import { AlertTriangle, Sparkles, Check } from "lucide-react";
+import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
@@ -42,12 +42,12 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
 
   return (
     <>
-     
-
       <CardContent className="space-y-6">
         {/* Join Meta Creator Program Section (Moved from CardHeader) */}
         <div className="mt-4 border-gray-200 pt-4">
-          <h2 className="text-2xl font-bold text-gray-800">Join Meta Creator Program</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Join Meta Creator Program
+          </h2>
           <p className="text-gray-600">
             You've been invited to join Meta's exclusive content creator program
           </p>
@@ -80,7 +80,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
           {invitation.social_media_type && (
             <div className="space-y-2">
               <Label htmlFor="socialMediaHandle">
-                {invitation.social_media_type === 'tiktok' ? 'TikTok Username' : 'Pinterest Username'}
+                {invitation.social_media_type === "tiktok"
+                  ? "TikTok Username"
+                  : "Pinterest Username"}
               </Label>
               <Input
                 id="socialMediaHandle"
@@ -88,30 +90,53 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
                 value={formData.socialMediaHandle}
                 readOnly
                 className="bg-gray-50"
-                placeholder={invitation.social_media_type === 'tiktok' ? '@username' : 'username'}
+                placeholder={
+                  invitation.social_media_type === "tiktok"
+                    ? "@username"
+                    : "username"
+                }
               />
             </div>
           )}
 
-          <div className="flex items-center space-x-2 pt-4">
-            <Checkbox
-              id="termsAccepted"
-              checked={formData.termsAccepted}
-              onCheckedChange={onCheckboxChange}
-            />
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
             <label
-              htmlFor="termsAccepted"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700"
             >
-              I accept the <a href="#" className="text-blue-600 hover:underline">terms and conditions</a>
+              I’m based in the US and 18 years of age or older
             </label>
           </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700"
+            >
+              I’ve never monetize on Facebook before
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
+            >
+              I’m not participating in any other Facebook monetization program
+            </label>
+          </div>
+
+          <TermsCheckbox
+            formData={formData}
+            onCheckboxChange={onCheckboxChange}
+          />
         </div>
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button 
-          onClick={handleContinue} 
+        <Button
+          onClick={handleContinue}
           disabled={!formData.termsAccepted || isSubmitting}
         >
           {isSubmitting ? "Processing..." : "Continue"}
@@ -120,4 +145,3 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
     </>
   );
 };
-

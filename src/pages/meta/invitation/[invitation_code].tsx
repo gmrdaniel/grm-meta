@@ -2,15 +2,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import Footer from "../../../components/Footer";
 
 // 🧱 UI Components
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Stepper } from "@/components/ui/stepper";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -40,6 +35,7 @@ import { validateFacebookPageUrl } from "@/utils/validationUtils";
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
 import { Check } from "lucide-react";
+import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 
 // 🧭 Steps
 const stepList = [
@@ -108,7 +104,7 @@ export default function InvitationStepperPage() {
         }
 
         const invitationData = data[0];
-        
+
         if (invitationData.status === "completed") {
           setError("This invitation has already been accepted");
           return;
@@ -256,7 +252,7 @@ export default function InvitationStepperPage() {
     setSaving(false);
   };
 
-  const handleSubmit = async () => {
+  const handleFacebookSubmit = async () => {
     if (!facebookFormData.verifyOwnership) {
       toast.error("Please verify that you own this Facebook page");
       return;
@@ -265,6 +261,8 @@ export default function InvitationStepperPage() {
     const { isValid, errorMessage } = validateFacebookPageUrl(
       facebookFormData.facebookPageUrl
     );
+
+    console.log(isValid, error)
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -277,6 +275,20 @@ export default function InvitationStepperPage() {
 
     try {
       setSubmitting(true);
+
+      // Validate that the Facebook page exists and is of type "page"
+      const details = await fetchFacebookPageDetails(
+        facebookFormData.facebookPageUrl.trim()
+      );
+
+      console.log(details)
+
+      if (details.type !== "page") {
+        toast.error("The provided URL does not correspond to a Facebook Page.");
+        return;
+      }
+
+      // Proceed with update if validation passed
       const result = await updateFacebookPage(
         invitation.id,
         facebookFormData.facebookPageUrl.trim()
@@ -290,11 +302,11 @@ export default function InvitationStepperPage() {
         return;
       }
 
-      await updateInvitationStatus(invitation.id, "completed");
       toast.success("Your submission has been received");
       setSubmissionComplete(true);
     } catch (err) {
       toast.error("Error submitting your info");
+      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -328,6 +340,8 @@ export default function InvitationStepperPage() {
 
       if (error) throw error;
 
+      updateInvitationStatus(invitation.id, "completed");
+
       toast.success("Account created! You can now log in.");
       setTimeout(() => navigate("/auth"), 2000);
     } catch (err) {
@@ -355,82 +369,96 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-evenly min-h-screen bg-gray-50 p-4 gap-2">
-      <div className="text-center max-w-md space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Meta Monetization Program
-        </h1>
-        <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Contenido principal con flex-grow */}
+      <div className="flex flex-col md:flex-row items-center justify-evenly flex-grow p-4 gap-2">
+        <div className="text-center max-w-md space-y-1 mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800 mt-4">
+            Join Meta Creator Breakthrough Bonus Program
+          </h1>
+          <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
-        {/* Benefits Section */}
-      <div className="p-4 ">
-        <h3 className="font-medium mb-3">Benefits:</h3>
-        <ul className="space-y-2">
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>$5,000 Bonuses (90 days)</span>
-          </li>
-          <li className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Immediate Facebook Monetization</span>
-          </li>
-        </ul>
-        
+          {/* Benefits Section */}
+          <div className="p-4">
+            <h3 className="font-medium mb-3">Benefits:</h3>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2">
+                <div className="rounded-full bg-green-100 p-1">
+                  <Check className="h-4 w-4 text-green-600" />
+                </div>
+                <span className="whitespace-nowrap">
+                  Gain Immediate Facebook monetization
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="rounded-full bg-green-100 p-1">
+                  <Check className="h-4 w-4 text-green-600" />
+                </div>
+                <span>
+                  Up to $5,000 <span className="font-semibold">"in extra"</span>
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="rounded-full bg-green-100 p-1">
+                  <Check className="h-4 w-4 text-green-600" />
+                </div>
+                <span>Free trial of Meta Verified</span>
+              </li>
+            </ul>
+          </div>
+        </div>
 
-      </div>
-      </div>
+        <div className="h-[400px] hidden lg:block bg-blue-300 p-[1px]"></div>
 
-      <div className="h-[400px] hidden lg:block  bg-blue-300 p-[1px]"></div>
-
-      <Card className="w-full max-w-lg min-h-lg">
-        <CardContent className="pt-6">
-          <Stepper steps={stepList} currentStep={currentStep.id} />
-          <hr />
-          {currentStep.id === "welcome" && (
-            <WelcomeForm
-              invitation={invitation}
-              formData={formData}
-              onInputChange={handleInputChange}
-              onCheckboxChange={handleCheckboxChange}
-              onContinue={handleContinueWelcome}
-              isSubmitting={isSubmitting}
-            />
-          )}
-
-          {currentStep.id === "completeProfile" && (
-            <CompleteProfileForm
-              onSubmit={handleCompleteProfileSubmit}
-              isSubmitting={saving}
-              invitationId={invitation.id}
-            />
-          )}
-
-          {currentStep.id === "fbcreation" &&
-            (submissionComplete ? (
-              <SubmissionCompleteScreen
-                showPasswordForm={showPasswordForm}
-                passwordData={passwordData}
-                submitting={submitting}
-                onPasswordChange={handlePasswordChange}
-                onSetPassword={handleSetPassword}
-                onShowPasswordForm={() => setShowPasswordForm(true)}
+        <Card className="w-full max-w-lg min-h-lg">
+          <CardContent className="pt-6">
+            <Stepper steps={stepList} currentStep={currentStep.id} />
+            <hr />
+            {currentStep.id === "welcome" && (
+              <WelcomeForm
+                invitation={invitation}
+                formData={formData}
+                onInputChange={handleInputChange}
+                onCheckboxChange={handleCheckboxChange}
+                onContinue={handleContinueWelcome}
+                isSubmitting={isSubmitting}
               />
-            ) : (
-              <FacebookPageForm
-                formData={facebookFormData}
-                submitting={submitting}
-                error={error}
-                onInputChange={handleFacebookInputChange}
-                onCheckboxChange={handleCheckboxFacebookChange}
-                onSubmit={handleSubmit}
+            )}
+            {currentStep.id === "completeProfile" && (
+              <CompleteProfileForm
+                onSubmit={handleCompleteProfileSubmit}
+                isSubmitting={saving}
+                invitationId={invitation.id}
               />
-            ))}
-        </CardContent>
-      </Card>
+            )}
+            {currentStep.id === "fbcreation" &&
+              (submissionComplete || invitation.fb_step_completed) && (
+                <SubmissionCompleteScreen
+                  showPasswordForm={showPasswordForm}
+                  passwordData={passwordData}
+                  submitting={submitting}
+                  onPasswordChange={handlePasswordChange}
+                  onSetPassword={handleSetPassword}
+                  onShowPasswordForm={() => setShowPasswordForm(true)}
+                />
+              )}
+            {currentStep.id === "fbcreation" &&
+              !submissionComplete &&
+              !invitation.fb_step_completed && (
+                <FacebookPageForm
+                  formData={facebookFormData}
+                  submitting={submitting}
+                  error={error}
+                  onInputChange={handleFacebookInputChange}
+                  onCheckboxChange={handleCheckboxFacebookChange}
+                  onSubmit={handleFacebookSubmit}
+                />
+              )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Footer />
     </div>
   );
 }
