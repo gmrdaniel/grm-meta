@@ -11,11 +11,11 @@ interface FacebookPageFormProps {
   formData: {
     facebookPageUrl: string;
     verifyOwnership: {
-      verifyOwnership1: boolean;
-      verifyOwnership2: boolean;
-      verifyOwnership3: boolean;
-      verifyOwnership4: boolean;
-      verifyOwnership5: boolean;
+      ownership: boolean;
+      usAndAdult: boolean;
+      neverNonetize: boolean;
+      notParticipating: boolean;
+      linkedAccounts: boolean;
     };
     linkInstagram: boolean;
   };
@@ -92,61 +92,61 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           {/* Checkboxes con identificadores únicos */}
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership1"
-              checked={formData.verifyOwnership.verifyOwnership1}
+              id="verifyOwnership"
+              checked={formData.verifyOwnership.ownership}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership1", checked as boolean)
+                onCheckboxChange("verifyOwnership", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership1" className="text-sm">
+            <Label htmlFor="verifyOwnership" className="text-sm">
               I verify that this is my Facebook page
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership2"
-              checked={formData.verifyOwnership.verifyOwnership2}
+              id="verifyUsAndAdult"
+              checked={formData.verifyOwnership.usAndAdult}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership2", checked as boolean)
+                onCheckboxChange("verifyUsAndAdult", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership2" className="text-sm">
+            <Label htmlFor="verifyUsAndAdult" className="text-sm">
               I’m based in the US and 18 years of age or older
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership3"
-              checked={formData.verifyOwnership.verifyOwnership3}
+              id="neverNonetize"
+              checked={formData.verifyOwnership.neverNonetize}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership3", checked as boolean)
+                onCheckboxChange("neverNonetize", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership3" className="text-sm">
+            <Label htmlFor="neverNonetize" className="text-sm">
               I’ve never monetize on Facebook before
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership4"
-              checked={formData.verifyOwnership.verifyOwnership4}
+              id="notParticipating"
+              checked={formData.verifyOwnership.notParticipating}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership4", checked as boolean)
+                onCheckboxChange("notParticipating", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership4" className="text-sm">
+            <Label htmlFor="notParticipating" className="text-sm">
               I’m not participating in any other Facebook monetization program
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership5"
-              checked={formData.verifyOwnership.verifyOwnership5}
+              id="linkedAccounts"
+              checked={formData.verifyOwnership.linkedAccounts}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership5", checked as boolean)
+                onCheckboxChange("linkedAccounts", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership5" className="text-sm">
+            <Label htmlFor="linkedAccounts" className="text-sm">
               I’ve linked my Instagram professional account and my Facebook Page
             </Label>
           </div>
