@@ -35,9 +35,9 @@ export default function RedactarTab() {
     setError(null);
     setResult(null);
     
-    // Validation
-    if (!name || !socialLink || !description || !invitationLink) {
-      setError("Todos los campos son obligatorios");
+    // Validation - make invitation link optional
+    if (!name || !socialLink || !description) {
+      setError("Los campos Nombre, Link de red social y Descripción son obligatorios");
       return;
     }
     
@@ -140,7 +140,7 @@ export default function RedactarTab() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="invitationLink">Link de invitación</Label>
+            <Label htmlFor="invitationLink">Link de invitación (opcional)</Label>
             <Input 
               id="invitationLink" 
               value={invitationLink} 
