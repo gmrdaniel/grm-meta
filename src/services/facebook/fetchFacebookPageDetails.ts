@@ -13,15 +13,13 @@ export const fetchFacebookPageDetails = async (
     },
   });
 
-  const parsed = JSON.parse(data);
-
   if (error) {
     throw new Error(error.message);
   }
 
-  if (parsed?.error) {
+  if (data?.error) {
     throw new Error(data.error.message || "Unknown error from facebook-page-details");
   }
   
-  return parsed.data as FacebookPageDetails
+  return data.data as FacebookPageDetails
 };

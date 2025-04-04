@@ -13,7 +13,7 @@ export default function CreatorProfile() {
   const isMobile = useIsMobile();
 
   const [isLoading, setIsLoading] = useState(false);
-
+  console.log(user)
   return (
     <div className="flex h-screen bg-gray-50/50">
       <Sidebar />
