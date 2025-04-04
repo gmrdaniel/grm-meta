@@ -238,7 +238,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           {/* Campo requerido: Instagram */}
           <div className="space-y-2">
             <Label htmlFor="instagramUser" className="flex items-center gap-2">
-              Instagram <span className="text-red-500">*</span> 
+              Instagram <span className="text-red-500">*</span>
             </Label>
 
             <div className="relative">
@@ -282,7 +282,15 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               }
             />
             <Label htmlFor="isIGProfessional" className="text-sm">
-              My account is a professional Instagram account
+              My account is a{" "}
+              <a
+                href="https://help.instagram.com/502981923235522"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                professional instagram account
+              </a>
             </Label>
           </div>
 
@@ -290,7 +298,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              Phone Number <span className="text-red-500">*</span> 
+              Phone Number <span className="text-red-500">*</span>
               {formData.phoneVerified && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                   <Shield className="mr-1 h-3 w-3" />
