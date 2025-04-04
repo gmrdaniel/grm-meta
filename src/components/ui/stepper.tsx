@@ -56,6 +56,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
           );
         })}
       </div>
+      <hr className="my-4"/>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { CheckCheck, Instagram, Phone, Shield } from "lucide-react";
+import { Phone, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
+import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
@@ -233,35 +234,42 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   return (
     <>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="youtubeChannel">YouTube Channel (Optional)</Label>
-            <Input
-              id="youtubeChannel"
-              name="youtubeChannel"
-              value={formData.youtubeChannel}
-              onChange={handleInputChange}
-              placeholder="@channelname"
-            />
-          </div>
-
+        <div className="space-y-6">
+          {/* Campo requerido: Instagram */}
           <div className="space-y-2">
             <Label htmlFor="instagramUser" className="flex items-center gap-2">
-              <Instagram className="h-4 w-4" /> Instagram 
+              Instagram <span className="text-red-500">*</span> 
             </Label>
-            <Input
-              id="instagramUser"
-              name="instagramUser"
-              value={formData.instagramUser}
-              onChange={handleInputChange}
-              placeholder="@username"
-            />
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-slate-500 text-sm">@</span>
+              </div>
+              <Input
+                id="instagramUser"
+                name="instagramUser"
+                value={formData.instagramUser}
+                onChange={(e) => {
+                  const sanitizedValue = sanitizeInputBeforeUpdate(
+                    e.target.value
+                  );
+                  setFormData((prev) => ({
+                    ...prev,
+                    instagramUser: sanitizedValue,
+                  }));
+                }}
+                placeholder="username"
+                className="pl-8"
+              />
+            </div>
+
             {instagramError && (
               <p className="text-sm text-red-500 mt-1">{instagramError}</p>
             )}
+
             <p className="text-xs text-gray-500">
-              Must be 5-30 characters long. Only letters, numbers, periods, and
-              underscores are allowed.
+              Must be 5–30 characters long. Only letters, numbers, periods, and
+              underscores are allowed. Do not include @ or links.
             </p>
           </div>
 
@@ -286,9 +294,11 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   </Label>
           </div>
 
+          {/* Campo requerido: Teléfono */}
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> Phone Number
+              <Phone className="h-4 w-4" />
+              Phone Number <span className="text-red-500">*</span> 
               {formData.phoneVerified && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                   <Shield className="mr-1 h-3 w-3" />
@@ -297,6 +307,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               )}
             </Label>
 
+            {/* Teléfono con verificación */}
             {verificationStep === "input" ? (
               <div>
                 <div className="flex gap-2 mb-2">
@@ -370,7 +381,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                   </div>
                   <div className="text-sm text-center space-y-2">
                     <p className="text-muted-foreground">
-                      We sent a code to {formData.phoneCountryCode}{"-"}
+                      We sent a code to {formData.phoneCountryCode}-
                       {formData.phoneNumber}
                     </p>
                     {countdown > 0 && (
@@ -401,7 +412,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={handleResendCode}
-                      disabled={isVerifying || countdown > 540} // Disable if less than 1 minute has passed
+                      disabled={isVerifying || countdown > 540}
                     >
                       Resend Code
                     </Button>
@@ -417,6 +428,32 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               </div>
             )}
           </div>
+
+          {/* Campo opcional: YouTube */}
+          <div className="space-y-2">
+            <Label htmlFor="youtubeChannel">YouTube Channel (Optional)</Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-slate-500 text-sm">@</span>
+              </div>
+              <Input
+                id="youtubeChannel"
+                name="youtubeChannel"
+                value={formData.youtubeChannel}
+                onChange={(e) => {
+                  const sanitizedValue = sanitizeInputBeforeUpdate(
+                    e.target.value
+                  );
+                  setFormData((prev) => ({
+                    ...prev,
+                    youtubeChannel: sanitizedValue,
+                  }));
+                }}
+                placeholder="channelname"
+                className="pl-8"
+              />
+            </div>
+          </div>
         </div>
       </CardContent>
 
@@ -428,10 +465,11 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       !formData.phoneVerified ||
       !formData.phoneNumber ||
       !formData.isIGProfessional ||
+            !formData.instagramUser ||
       !!instagramError
     }
   >
-    {isSubmitting ? "Saving..." : "Complete Registration"}
+    {isSubmitting ? "Saving..." : "Continue to final step"}
   </Button>
 </CardFooter>
     </>

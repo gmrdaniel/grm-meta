@@ -29,13 +29,15 @@ import { fetchProjectStages } from "@/services/projectService";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
-import { validateFacebookPageUrl } from "@/utils/validationUtils";
+import { validateFacebookPageUrl } from "@/utils/validateFacebookPageUrl";
 
 // 🗃️ Types
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
 import { Check } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
+import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
+import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
 
 // 🧭 Steps
 const stepList = [
@@ -229,12 +231,57 @@ export default function InvitationStepperPage() {
     if (!invitation) return;
     setSaving(true);
 
+    const instagramUsername = formData.instagramUser?.trim();
+
+    // Validación 1: campo obligatorio
+    if (!instagramUsername) {
+      toast.error("Instagram username is required.");
+      setSaving(false);
+      return;
+    }
+
+    // Validación 2: formato correcto (sin arrobas, links, espacios, etc.)
+    if (!isValidInstagramUsernameFormat(instagramUsername)) {
+      toast.error(
+        "Please enter only the Instagram username without @ or links."
+      );
+      setSaving(false);
+      return;
+    }
+
+    let isBusinessAccount: boolean | null = null;
+    let isProfessionalAccount: boolean | null = null;
+
+    // Validación 3: existencia del usuario
+    try {
+      const result = await fetchInstagramUser(instagramUsername);
+      const user = result?.data?.user;
+
+      if (
+        !user?.username ||
+        user.username.toLowerCase() !== instagramUsername.toLowerCase()
+      ) {
+        toast.error("Instagram user does not exist or is inaccessible.");
+        setSaving(false);
+        return;
+      }
+
+      isBusinessAccount = user.is_business_account;
+      isProfessionalAccount = user.is_professional_account;
+    } catch (error) {
+      toast.error("Failed to verify Instagram user.");
+      setSaving(false);
+      return;
+    }
+
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
-      instagram_user: formData.instagramUser || null,
+      instagram_user: instagramUsername,
       phone_country_code: formData.phoneCountryCode || null,
       phone_number: formData.phoneNumber || null,
       phone_verified: formData.phoneVerified,
+      is_business_account: isBusinessAccount,
+      is_professional_account: isProfessionalAccount,
     };
 
     const { error } = await supabase
@@ -415,7 +462,6 @@ export default function InvitationStepperPage() {
         <Card className="w-full max-w-lg min-h-lg">
           <CardContent className="pt-6">
             <Stepper steps={stepList} currentStep={currentStep.id} />
-            <hr />
             {currentStep.id === "welcome" && (
               <WelcomeForm
                 invitation={invitation}
