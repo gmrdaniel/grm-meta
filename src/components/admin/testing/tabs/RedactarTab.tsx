@@ -190,7 +190,7 @@ export default function RedactarTab() {
           {result && (
             <>
               <div className="space-y-2 mt-6 border-t pt-4">
-                <Label htmlFor="formattedResponse">Result</Label>
+                <Label htmlFor="formattedResponse">Mensaje generado</Label>
                 <Textarea 
                   id="formattedResponse" 
                   value={formattedResponseText}
