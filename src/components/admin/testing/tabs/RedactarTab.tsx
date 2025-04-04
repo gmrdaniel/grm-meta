@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,11 +13,21 @@ import { Loader2 } from "lucide-react";
 export default function RedactarTab() {
   const [name, setName] = useState("");
   const [socialLink, setSocialLink] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState("genera un mensaje de 1 parrafo en ingles: sobre el contenido de {link_red_social} para invitarlo a trabajar en un programa de meta, el mensaje debe ser divertido, amigable enfocado a la generación z, al mensaje personaliza el mensaje con su nombre {nombre} y {descripcion}, al final agrega el siguiente link: {link_invitacion} esta invitación debe ser amigable y tener varias veces el CTA");
   const [invitationLink, setInvitationLink] = useState("");
+  const [processedPrompt, setProcessedPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  
+  // Process the prompt by replacing placeholders with actual values
+  useEffect(() => {
+    let prompt = description;
+    prompt = prompt.replace(/{nombre}/g, name || "{nombre}");
+    prompt = prompt.replace(/{link_red_social}/g, socialLink || "{link_red_social}");
+    prompt = prompt.replace(/{link_invitacion}/g, invitationLink || "{link_invitacion}");
+    setProcessedPrompt(prompt);
+  }, [name, socialLink, description, invitationLink]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +43,8 @@ export default function RedactarTab() {
     setLoading(true);
     
     try {
-      // Prepare the prompt using the form values
-      const prompt = `genera un mensaje de 1 parrafo en ingles: sobre el contenido de ${socialLink} para invitarlo a trabajar en un programa de meta, el mensaje debe ser divertido, amigable enfocado a la generación z, al mensaje personaliza el mensaje con su nombre ${name} y ${description}, al final agrega el siguiente link: ${invitationLink} esta invitación debe ser amigable y tener varias veces el CTA`;
+      // Use the processed prompt for the API call
+      const prompt = processedPrompt;
       
       // API call to RapidAPI ChatGPT
       const response = await fetch('https://chatgpt-42.p.rapidapi.com/gpt4o', {
@@ -122,7 +132,7 @@ export default function RedactarTab() {
               id="description" 
               value={description} 
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripción o instrucciones para la invitación"
+              placeholder="Utiliza {nombre}, {link_red_social} y {link_invitacion} como variables"
               rows={4}
               disabled={loading}
             />
@@ -135,6 +145,18 @@ export default function RedactarTab() {
               value={invitationLink} 
               onChange={(e) => setInvitationLink(e.target.value)}
               placeholder="https://example.com/invite/code"
+              disabled={loading}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="processedPrompt">Prompt generado</Label>
+            <Textarea 
+              id="processedPrompt" 
+              value={processedPrompt}
+              readOnly
+              className="bg-gray-50"
+              rows={3}
               disabled={loading}
             />
           </div>
