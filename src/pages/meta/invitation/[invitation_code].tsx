@@ -262,7 +262,7 @@ export default function InvitationStepperPage() {
       facebookFormData.facebookPageUrl
     );
 
-    console.log(isValid, error)
+    console.log(isValid, error);
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -281,7 +281,7 @@ export default function InvitationStepperPage() {
         facebookFormData.facebookPageUrl.trim()
       );
 
-      console.log(details)
+      console.log(details);
 
       if (details.type !== "page") {
         toast.error("The provided URL does not correspond to a Facebook Page.");
@@ -373,40 +373,42 @@ export default function InvitationStepperPage() {
       {/* Contenido principal con flex-grow */}
       <div className="flex flex-col md:flex-row items-center justify-evenly flex-grow p-4 gap-2">
         <div className="text-center max-w-md space-y-1 mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mt-4">
-            Join Meta Creator Breakthrough Bonus Program
-          </h1>
+        <h1 className="text-2xl font-semibold text-gray-800 mt-4">
+    {currentStep.id === "completeProfile"
+      ? "Complete Your Profile"
+      : "Join Meta Creator Breakthrough Bonus Program"}
+  </h1>
           <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
           {/* Benefits Section */}
-          <div className="p-4">
-            <h3 className="font-medium mb-3">Benefits:</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span className="whitespace-nowrap">
-                  Gain Immediate Facebook monetization
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span>
-                  Up to $5,000 <span className="font-semibold">"in extra"</span>
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span>Free trial of Meta Verified</span>
-              </li>
-            </ul>
+          {currentStep.id === "welcome" && (
+    <div className="p-4">
+      <h3 className="font-medium mb-3">Benefits:</h3>
+      <ul className="space-y-2">
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
           </div>
-        </div>
+          <span className="whitespace-nowrap">
+            Gain Immediate Facebook monetization
+          </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+          <span>Up to $5,000 in extra bonuses (90 days)</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+          <span>Free trial of Meta Verified</span>
+        </li>
+      </ul>
+    </div>
+  )}
+</div>
 
         <div className="h-[400px] hidden lg:block bg-blue-300 p-[1px]"></div>
 

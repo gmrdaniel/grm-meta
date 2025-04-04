@@ -100,19 +100,19 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    // For phone numbers, only allow digits
+  
     if (name === "phoneNumber") {
       setFormData({
         ...formData,
         [name]: value.replace(/[^0-9]/g, ""),
       });
     } else if (name === "instagramUser") {
+      const formattedValue = value.startsWith("@") ? value : `@${value}`;
       setFormData({
         ...formData,
-        [name]: value,
+        [name]: formattedValue,
       });
-      validateInstagramUsername(value);
+      validateInstagramUsername(formattedValue);
     } else {
       setFormData({
         ...formData,
@@ -273,9 +273,17 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                 handleCheckboxChange("isIGProfessional", checked as boolean)
               }
             />
-            <Label htmlFor="isIGProfessional" className="text-sm">
-              My account is a professional instagram account
-            </Label>
+             <Label htmlFor="isIGProfessional" className="text-sm">
+    My account is a{" "}
+    <a
+      href="https://help.instagram.com/502981923235522"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 underline"
+    >
+      professional instagram account
+    </a>
+  </Label>
           </div>
 
           <div className="space-y-2">
@@ -412,20 +420,20 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end">
-        <Button
-          onClick={handleSubmit}
-          disabled={
-            isSubmitting ||
-            !formData.phoneVerified ||
-            !formData.phoneNumber ||
-            !formData.isIGProfessional ||
-            !!instagramError
-          }
-        >
-          {isSubmitting ? "Saving..." : "Complete Registration"}
-        </Button>
-      </CardFooter>
+      <CardFooter className="flex justify-center md:justify-end">
+  <Button
+    onClick={handleSubmit}
+    disabled={
+      isSubmitting ||
+      !formData.phoneVerified ||
+      !formData.phoneNumber ||
+      !formData.isIGProfessional ||
+      !!instagramError
+    }
+  >
+    {isSubmitting ? "Saving..." : "Complete Registration"}
+  </Button>
+</CardFooter>
     </>
   );
 };
