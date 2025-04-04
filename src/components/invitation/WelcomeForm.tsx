@@ -123,7 +123,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
               checked={hasNotMonetized}
               onCheckedChange={(checked) => setHasNotMonetized(checked === true)}/>
             <label
-              htmlFor="us-based-checkbox"
+              htmlFor="not-monetized-checkbox"
               className="text-sm font-medium text-gray-700"
             >
               I’ve never monetize on Facebook before
@@ -134,7 +134,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
               checked={notInOtherProgram}
               onCheckedChange={(checked) => setNotInOtherProgram(checked === true)} />
             <label
-              htmlFor="us-based-checkbox"
+              htmlFor="not-other-program-checkbox"
               className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
             >
               I’m not participating in any other Facebook monetization program
