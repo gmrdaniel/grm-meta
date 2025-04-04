@@ -14,9 +14,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 export function TermsCheckbox({
   formData,
   onCheckboxChange,
+  onAcceptTerms,
 }: {
   formData: { termsAccepted: boolean };
   onCheckboxChange: (checked: boolean) => void;
+  onAcceptTerms: () => void;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
@@ -174,7 +176,10 @@ export function TermsCheckbox({
                 exploring exciting opportunities.
                 <br />
                 <div className="flex justify-center">
-                  <button className="text-blue-800 hover:font-semibold mt-4" onClick={() => setIsDialogOpen(false)}>
+                  <button className="text-blue-800 hover:font-semibold mt-4"  onClick={() => {
+                      setIsDialogOpen(false);
+                      onAcceptTerms(); // Llama al callback para marcar el checkbox
+                    }}>
                     Accept Terms & Complete My Onboarding
                   </button>
                 </div>
