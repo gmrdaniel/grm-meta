@@ -12,7 +12,7 @@ type StepperProps = {
 
 export const Stepper = ({ steps, currentStep }: StepperProps) => {
   return (
-    <div className="mb-8">
+    <div className="">
       <div className="flex md:justify-between gap-4 overflow-x-auto no-scrollbar px-1">
         {steps.map((step, index) => {
           const isActive = currentStep === step.id;
@@ -46,6 +46,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
           );
         })}
       </div>
+      <hr className="my-4"/>
     </div>
   );
 };

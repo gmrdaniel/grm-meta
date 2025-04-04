@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PersonalData {
   first_name: string | null;
@@ -38,10 +39,9 @@ interface PersonalInfoCardProps {
 }
 
 export function PersonalInfoCard({ personalData, isLoading = false }: PersonalInfoCardProps) {
-  // Debug log to see what's in the personal data
-  console.log("PersonalInfoCard - personalData:", personalData);
-  console.log("Primary social network:", personalData?.primary_social_network);
   
+  const { user } = useAuth()
+  console.log(user)
   // Get all social networks with their usernames and followers
   const socialNetworks = !isLoading && personalData ? [
     { name: "instagram", label: "Instagram", username: personalData?.instagram_username, followers: personalData?.instagram_followers },
@@ -96,8 +96,8 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
         <div className="space-y-6">
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <dt className="font-medium text-gray-500">First Name</dt>
-              <dd>{personalData?.first_name || "Not set"}</dd>
+              <dt className="font-medium text-gray-500">Full Name</dt>
+              <dd>{user.user_metadata.full_name || "Not set"}</dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500">Last Name</dt>
@@ -117,7 +117,7 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
             </div>
             <div>
               <dt className="font-medium text-gray-500">Phone Number</dt>
-              <dd>{personalData?.country_code ? `${personalData.country_code} ${personalData.phone_number || ""}` : (personalData?.phone_number || "Not set")}</dd>
+              <dd>{user.user_metadata.phone || ""}</dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500">Gender</dt>
