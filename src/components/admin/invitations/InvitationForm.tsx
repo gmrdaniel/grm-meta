@@ -32,7 +32,19 @@ const formSchema = z.object({
     .string()
     .min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  social_media_handle: z.string().optional(),
+  social_media_handle: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val ||
+        (!val.includes("@") &&
+          !/^https?:\/\//i.test(val) &&
+          !/instagram\.com|tiktok\.com|pinterest\.com/i.test(val)),
+      {
+        message: "Do not include @ or links in the handle",
+      }
+    ),
   social_media_type: z.enum(["tiktok", "pinterest"]).optional(),
   project_id: z.string().uuid({ message: "Please select a project" }),
   invitation_type: z.enum(["new_user", "existing_user"]),
@@ -107,18 +119,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     });
   };
 
-  const handleSendEmail = () => {
-    if (!createdInvitation || sendEmail.isPending) return;
-
-    const invitationUrl = `${window.location.origin}/invitation/${createdInvitation.invitation_code}`;
-
-    sendEmail.mutate({
-      email: createdInvitation.email,
-      name: createdInvitation.full_name,
-      invitationUrl,
-    });
-  };
-
   const hasSocialMedia = form.watch("social_media_handle") !== "";
 
   return (
@@ -164,10 +164,21 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
               <FormItem>
                 <FormLabel>Social Media Handle</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter social media handle" />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                      <span className="text-slate-500 text-sm">@</span>
+                    </div>
+                    <Input
+                      {...field}
+                      className="pl-8"
+                      placeholder="creatorname123"
+                    />
+                  </div>
                 </FormControl>
                 <FormDescription>
-                  Optional: Creator's username on social media
+                  <span className="text-muted-foreground text-xs">
+                    Example: <code>creatorname123</code>
+                  </span>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
