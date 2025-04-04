@@ -12,13 +12,16 @@ export const fetchFacebookPageDetails = async (
       pageUrl: pageUrl
     },
   });
+
+  const parsed = JSON.parse(data);
+
   if (error) {
     throw new Error(error.message);
   }
 
-  if (data?.error) {
+  if (parsed?.error) {
     throw new Error(data.error.message || "Unknown error from facebook-page-details");
   }
-
-  return data.data as FacebookPageDetails
+  
+  return parsed.data as FacebookPageDetails
 };
