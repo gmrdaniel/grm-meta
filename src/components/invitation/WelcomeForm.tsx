@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { CreatorInvitation } from "@/types/invitation";
 import { AlertTriangle, Sparkles, Check } from "lucide-react";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
+import { useState } from "react";
 
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
@@ -32,14 +33,22 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
   onContinue,
   isSubmitting = false,
 }) => {
-  const handleContinue = () => {
-    if (!formData.termsAccepted) {
-      toast.error("You must accept the terms and conditions to continue");
-      return;
-    }
-    onContinue();
-  };
+ // Estado para cada checkbox
+ const [isUSBased, setIsUSBased] = useState(false);
+ const [hasNotMonetized, setHasNotMonetized] = useState(false);
+ const [notInOtherProgram, setNotInOtherProgram] = useState(false);
 
+ // Función para verificar si todos los checkboxes están marcados
+ const allChecked =
+   isUSBased && hasNotMonetized && notInOtherProgram && formData.termsAccepted;
+
+ const handleContinue = () => {
+   if (!allChecked) {
+     toast.error("You must accept all conditions to continue");
+     return;
+   }
+   onContinue();
+ };
   return (
     <>
       <CardContent className="space-y-6">
@@ -100,7 +109,8 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
           )}
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="us-based-checkbox" />
+            <Checkbox id="us-based-checkbox" checked={isUSBased}
+              onCheckedChange={(checked) => setIsUSBased(checked === true)} />
             <label
               htmlFor="us-based-checkbox"
               className="text-sm font-medium text-gray-700"
@@ -109,18 +119,22 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             </label>
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox id="us-based-checkbox" />
+            <Checkbox id="not-monetized-checkbox"
+              checked={hasNotMonetized}
+              onCheckedChange={(checked) => setHasNotMonetized(checked === true)}/>
             <label
-              htmlFor="us-based-checkbox"
+              htmlFor="not-monetized-checkbox"
               className="text-sm font-medium text-gray-700"
             >
               I’ve never monetize on Facebook before
             </label>
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox id="us-based-checkbox" />
+            <Checkbox  id="not-other-program-checkbox"
+              checked={notInOtherProgram}
+              onCheckedChange={(checked) => setNotInOtherProgram(checked === true)} />
             <label
-              htmlFor="us-based-checkbox"
+              htmlFor="not-other-program-checkbox"
               className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
             >
               I’m not participating in any other Facebook monetization program
@@ -135,12 +149,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button
-          onClick={handleContinue}
-          disabled={!formData.termsAccepted || isSubmitting}
-        >
+      <Button onClick={handleContinue} disabled={!allChecked || isSubmitting}>
           {isSubmitting ? "Processing..." : "Continue"}
-        </Button>
+        </Button> 
       </CardFooter>
     </>
   );
