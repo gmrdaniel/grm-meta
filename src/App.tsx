@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -29,92 +29,97 @@ function App() {
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Navigate to="/auth" replace />} />
-              <Route path="/auth" element={<Auth />} />
-              
-              {/* Public routes */}
-              <Route path="/meta/invitation/:invitation_code?" element={<InvitationStepperPage />} />
-              
-              
-              {/* Admin routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/projects"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminProjects />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/projects/:id"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminProjectDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/inventory"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminInventory />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/invitations"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminInvitations />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/tasks"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminTasks />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/test"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminTest />
-                  </ProtectedRoute>
-                }
-              />
+            <>
+              <Routes>
+                <Route path="/" element={<Navigate to="/auth" replace />} />
+                <Route path="/auth" element={<Auth />} />
 
-              {/* Creator routes */}
-              <Route
-                path="/creator/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={["creator"]}>
-                    <CreatorDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/creator/profile"
-                element={
-                  <ProtectedRoute allowedRoles={["creator"]}>
-                    <CreatorProfile />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Public routes */}
+                <Route
+                  path="/meta/invitation/:invitation_code?"
+                  element={<InvitationStepperPage />}
+                />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Admin routes */}
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/projects"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminProjects />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/projects/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminProjectDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/inventory"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminInventory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/invitations"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminInvitations />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/tasks"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminTasks />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/test"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminTest />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Creator routes */}
+                <Route
+                  path="/creator/dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={["creator"]}>
+                      <CreatorDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/creator/profile"
+                  element={
+                    <ProtectedRoute allowedRoles={["creator"]}>
+                      <CreatorProfile />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              
+            </>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
