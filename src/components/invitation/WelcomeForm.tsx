@@ -99,6 +99,34 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             </div>
           )}
 
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700"
+            >
+              I’m based in the US and 18 years of age or older
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700"
+            >
+              I’ve never monetize on Facebook before
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="us-based-checkbox" />
+            <label
+              htmlFor="us-based-checkbox"
+              className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
+            >
+              I’m not participating in any other Facebook monetization program
+            </label>
+          </div>
+
           <TermsCheckbox
             formData={formData}
             onCheckboxChange={onCheckboxChange}
@@ -114,7 +142,6 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
           {isSubmitting ? "Processing..." : "Continue"}
         </Button>
       </CardFooter>
-
     </>
   );
 };
