@@ -35,6 +35,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
     submitting ||
     !formData.facebookPageUrl.trim() ||
     !formData.verifyOwnership ||
+    !formData.linkInstagram ||
     !isValid;
 
   return (
