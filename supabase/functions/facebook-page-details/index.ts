@@ -27,7 +27,7 @@ serve(async (req) => {
     console.log('pageUrl', pageUrl)
     const encodedUrl = encodeURIComponent(pageUrl);
     const url = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedUrl}`;
-    const rapidApiKey = Deno.env.get("SUPABASE_RAPIDAPI_KEY");
+    const rapidApiKey = Deno.env.get("RAPIDAPI_KEY");
    
     const response = await fetch(url, {
       method: "GET",
