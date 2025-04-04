@@ -101,19 +101,19 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-  
+
+    // For phone numbers, only allow digits
     if (name === "phoneNumber") {
       setFormData({
         ...formData,
         [name]: value.replace(/[^0-9]/g, ""),
       });
     } else if (name === "instagramUser") {
-      const formattedValue = value.startsWith("@") ? value : `@${value}`;
       setFormData({
         ...formData,
-        [name]: formattedValue,
+        [name]: value,
       });
-      validateInstagramUsername(formattedValue);
+      validateInstagramUsername(value);
     } else {
       setFormData({
         ...formData,
@@ -238,7 +238,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           {/* Campo requerido: Instagram */}
           <div className="space-y-2">
             <Label htmlFor="instagramUser" className="flex items-center gap-2">
-              Instagram <span className="text-red-500">*</span> 
+              Instagram <span className="text-red-500">*</span>
             </Label>
 
             <div className="relative">
@@ -281,24 +281,24 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                 handleCheckboxChange("isIGProfessional", checked as boolean)
               }
             />
-             <Label htmlFor="isIGProfessional" className="text-sm">
-    My account is a{" "}
-    <a
-      href="https://help.instagram.com/502981923235522"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-500 underline"
-    >
-      professional instagram account
-    </a>
-  </Label>
+            <Label htmlFor="isIGProfessional" className="text-sm">
+              My account is a{" "}
+              <a
+                href="https://help.instagram.com/502981923235522"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                professional instagram account
+              </a>
+            </Label>
           </div>
 
           {/* Campo requerido: Teléfono */}
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              Phone Number <span className="text-red-500">*</span> 
+              Phone Number <span className="text-red-500">*</span>
               {formData.phoneVerified && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                   <Shield className="mr-1 h-3 w-3" />
@@ -457,21 +457,21 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-center md:justify-end">
-  <Button
-    onClick={handleSubmit}
-    disabled={
-      isSubmitting ||
-      !formData.phoneVerified ||
-      !formData.phoneNumber ||
-      !formData.isIGProfessional ||
+      <CardFooter className="flex justify-end">
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting ||
+            !formData.phoneVerified ||
+            !formData.phoneNumber ||
+            !formData.isIGProfessional ||
             !formData.instagramUser ||
-      !!instagramError
-    }
-  >
-    {isSubmitting ? "Saving..." : "Continue to final step"}
-  </Button>
-</CardFooter>
+            !!instagramError
+          }
+        >
+          {isSubmitting ? "Saving..." : "Continue to final step"}
+        </Button>
+      </CardFooter>
     </>
   );
 };
