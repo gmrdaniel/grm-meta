@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CopyCheck } from "lucide-react";
 
 export default function RedactarTab() {
   const [name, setName] = useState("");
@@ -35,7 +35,7 @@ export default function RedactarTab() {
   useEffect(() => {
     if (result && result.choices && result.choices[0]?.message?.content) {
       // Replace \n\n with actual line breaks for display
-      const content = result.choices[0].message.content.replace(/\\n\\n/g, '\n');
+      const content = result.choices[0].message.content;
       setFormattedResponseText(content);
     } else {
       setFormattedResponseText("");
@@ -107,6 +107,19 @@ export default function RedactarTab() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFormatText = () => {
+    if (formattedResponseText) {
+      // Replace \n\n with actual line breaks
+      const formattedText = formattedResponseText.replace(/\\n\\n/g, '\n');
+      setFormattedResponseText(formattedText);
+      
+      toast({
+        title: "Texto formateado",
+        description: "Se han reemplazado los saltos de línea correctamente."
+      });
     }
   };
   
@@ -190,7 +203,19 @@ export default function RedactarTab() {
           {result && (
             <>
               <div className="space-y-2 mt-6 border-t pt-4">
-                <Label htmlFor="formattedResponse">Mensaje generado</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="formattedResponse">Result</Label>
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleFormatText}
+                    className="ml-2"
+                  >
+                    <CopyCheck className="mr-2 h-4 w-4" />
+                    Formatear texto
+                  </Button>
+                </div>
                 <Textarea 
                   id="formattedResponse" 
                   value={formattedResponseText}
