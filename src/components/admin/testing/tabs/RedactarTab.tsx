@@ -21,11 +21,12 @@ export default function RedactarTab() {
   const [result, setResult] = useState<any>(null);
   
   // Process the prompt by replacing placeholders with actual values
+  // but NOT replacing {link_invitacion}
   useEffect(() => {
     let prompt = description;
     prompt = prompt.replace(/{nombre}/g, name || "{nombre}");
     prompt = prompt.replace(/{link_red_social}/g, socialLink || "{link_red_social}");
-    prompt = prompt.replace(/{link_invitacion}/g, invitationLink || "{link_invitacion}");
+    // We don't replace {link_invitacion} in the processed prompt
     setProcessedPrompt(prompt);
   }, [name, socialLink, description, invitationLink]);
   
