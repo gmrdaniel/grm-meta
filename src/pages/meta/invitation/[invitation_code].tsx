@@ -35,6 +35,7 @@ import { validateFacebookPageUrl } from "@/utils/validationUtils";
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
 import { Check } from "lucide-react";
+import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 
 // 🧭 Steps
 const stepList = [
@@ -251,7 +252,7 @@ export default function InvitationStepperPage() {
     setSaving(false);
   };
 
-  const handleSubmit = async () => {
+  const handleFacebookSubmit = async () => {
     if (!facebookFormData.verifyOwnership) {
       toast.error("Please verify that you own this Facebook page");
       return;
@@ -272,6 +273,18 @@ export default function InvitationStepperPage() {
 
     try {
       setSubmitting(true);
+
+      // Validate that the Facebook page exists and is of type "page"
+      const details = await fetchFacebookPageDetails(
+        facebookFormData.facebookPageUrl.trim()
+      );
+
+      if (details.type !== "page") {
+        toast.error("The provided URL does not correspond to a Facebook Page.");
+        return;
+      }
+
+      // Proceed with update if validation passed
       const result = await updateFacebookPage(
         invitation.id,
         facebookFormData.facebookPageUrl.trim()
@@ -289,6 +302,7 @@ export default function InvitationStepperPage() {
       setSubmissionComplete(true);
     } catch (err) {
       toast.error("Error submitting your info");
+      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -433,7 +447,7 @@ export default function InvitationStepperPage() {
                   error={error}
                   onInputChange={handleFacebookInputChange}
                   onCheckboxChange={handleCheckboxFacebookChange}
-                  onSubmit={handleSubmit}
+                  onSubmit={handleFacebookSubmit}
                 />
               )}
           </CardContent>

@@ -10,8 +10,8 @@ import { validateFacebookPageUrl } from "@/utils/validationUtils";
 interface FacebookPageFormProps {
   formData: {
     facebookPageUrl: string;
-    verifyOwnership: boolean;
-    linkInstagram: boolean;
+    verifyOwnership: boolean
+    linkInstagram: boolean
   };
   submitting: boolean;
   error: string | null;
@@ -35,6 +35,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
     submitting ||
     !formData.facebookPageUrl.trim() ||
     !formData.verifyOwnership ||
+    !formData.linkInstagram ||
     !isValid;
 
   return (
