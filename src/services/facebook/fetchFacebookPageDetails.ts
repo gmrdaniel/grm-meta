@@ -20,5 +20,5 @@ export const fetchFacebookPageDetails = async (
     throw new Error(data.error.message || "Unknown error from facebook-page-details");
   }
 
-  return data as FacebookPageDetails
+  return data.data as FacebookPageDetails
 };

@@ -5,13 +5,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ExternalLink, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { validateFacebookPageUrl } from "@/utils/validationUtils";
 
 interface FacebookPageFormProps {
   formData: {
     facebookPageUrl: string;
-    verifyOwnership: boolean
-    linkInstagram: boolean
+    verifyOwnership: boolean;
+    linkInstagram: boolean;
   };
   submitting: boolean;
   error: string | null;
@@ -28,15 +27,11 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   onCheckboxChange,
   onSubmit,
 }) => {
-  const { isValid, errorMessage } = validateFacebookPageUrl(
-    formData.facebookPageUrl
-  );
   const isSubmitDisabled =
     submitting ||
     !formData.facebookPageUrl.trim() ||
     !formData.verifyOwnership ||
-    !formData.linkInstagram ||
-    !isValid;
+    !formData.linkInstagram;
 
   return (
     <div className="space-y-6">
@@ -87,13 +82,12 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 placeholder="https://www.facebook.com/yourpage"
               />
             </div>
-            {errorMessage && (
-              <p className="text-sm font-semibold text-gray-700 mt-1">
-                {errorMessage}
-              </p>
-            )}
             <p className="text-xs text-gray-500">
-              Page name must be 5-30 characters long. Only letters, numbers,
+              <span className="text-gray-900 font-semibold">
+                Example: <code>https://www.facebook.com/yourpage</code>
+              </span>
+              <br />
+              Page name must be 5–30 characters long. Only letters, numbers,
               periods, and underscores are allowed.
             </p>
           </div>
