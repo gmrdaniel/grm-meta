@@ -88,7 +88,7 @@ export default function RedactarTab() {
         timestamp: new Date().toLocaleString()
       };
       
-      setResult(timestampedResult);
+      setResult(timestampedResult.result);
       toast({
         title: "Mensaje generado correctamente",
         description: "El mensaje de invitación ha sido generado exitosamente."
