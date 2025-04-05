@@ -14,7 +14,6 @@ export default function RedactarTab() {
   const [name, setName] = useState("");
   const [socialLink, setSocialLink] = useState("");
   const [description, setDescription] = useState("genera un mensaje de 1 parrafo en ingles: sobre el contenido de {link_red_social} para invitarlo a trabajar en un programa de meta, el mensaje debe ser divertido, amigable enfocado a la generación z, al mensaje personaliza el mensaje con su nombre {nombre} y {descripcion}, al final agrega el siguiente link: {link_invitacion} esta invitación debe ser amigable y tener varias veces el CTA");
-  const [invitationLink, setInvitationLink] = useState("");
   const [processedPrompt, setProcessedPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,20 +21,18 @@ export default function RedactarTab() {
   const [formattedResponseText, setFormattedResponseText] = useState("");
   
   // Process the prompt by replacing placeholders with actual values
-  // but NOT replacing {link_invitacion}
   useEffect(() => {
     let prompt = description;
     prompt = prompt.replace(/{nombre}/g, name || "{nombre}");
     prompt = prompt.replace(/{link_red_social}/g, socialLink || "{link_red_social}");
-    // We don't replace {link_invitacion} in the processed prompt
     setProcessedPrompt(prompt);
-  }, [name, socialLink, description, invitationLink]);
+  }, [name, socialLink, description]);
   
-  // Format response text when result changes
+  // Format response text when result changes - automatically replace \n\n with line breaks
   useEffect(() => {
     if (result && result.choices && result.choices[0]?.message?.content) {
       // Replace \n\n with actual line breaks for display
-      const content = result.choices[0].message.content;
+      const content = result.choices[0].message.content.replace(/\\n\\n/g, '\n');
       setFormattedResponseText(content);
     } else {
       setFormattedResponseText("");
@@ -47,7 +44,7 @@ export default function RedactarTab() {
     setError(null);
     setResult(null);
     
-    // Validation - make invitation link optional
+    // Validation
     if (!name || !socialLink || !description) {
       setError("Los campos Nombre, Link de red social y Descripción son obligatorios");
       return;
@@ -158,19 +155,8 @@ export default function RedactarTab() {
               id="description" 
               value={description} 
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Utiliza {nombre}, {link_red_social} y {link_invitacion} como variables"
+              placeholder="Utiliza {nombre}, {link_red_social} como variables"
               rows={4}
-              disabled={loading}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="invitationLink">Link de invitación (opcional)</Label>
-            <Input 
-              id="invitationLink" 
-              value={invitationLink} 
-              onChange={(e) => setInvitationLink(e.target.value)}
-              placeholder="https://example.com/invite/code"
               disabled={loading}
             />
           </div>
