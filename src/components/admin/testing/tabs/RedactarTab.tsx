@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, CopyCheck } from "lucide-react";
+import { Loader2, CopyCheck, AlignLeft } from "lucide-react";
 
 export default function RedactarTab() {
   const [name, setName] = useState("");
@@ -122,6 +122,43 @@ export default function RedactarTab() {
     }
   };
   
+  const extractPlainText = () => {
+    if (!result) return;
+    
+    try {
+      // Extract the plain text from the result
+      let plainText = "";
+      
+      if (result.choices && result.choices[0]?.message?.content) {
+        plainText = result.choices[0].message.content;
+        
+        // Replace escaped newlines with actual newlines
+        plainText = plainText.replace(/\\n/g, '\n');
+        
+        // Set the formatted text
+        setFormattedText(plainText);
+        
+        toast({
+          title: "Texto extraído",
+          description: "Se ha extraído el texto plano con formato."
+        });
+      } else {
+        toast({
+          title: "Error al extraer texto",
+          description: "No se pudo encontrar el contenido del mensaje.",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error("Error extracting text:", err);
+      toast({
+        title: "Error al extraer texto",
+        description: "Ocurrió un error al procesar el texto.",
+        variant: "destructive"
+      });
+    }
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -192,15 +229,26 @@ export default function RedactarTab() {
             <div className="mt-6 border-t pt-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Mensaje de invitación generado</h3>
-                <Button 
-                  type="button" 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={handleFormatText}
-                >
-                  <CopyCheck className="mr-2 h-4 w-4" />
-                  Formatear texto
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleFormatText}
+                  >
+                    <CopyCheck className="mr-2 h-4 w-4" />
+                    Formatear texto
+                  </Button>
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={extractPlainText}
+                  >
+                    <AlignLeft className="mr-2 h-4 w-4" />
+                    Extraer texto plano
+                  </Button>
+                </div>
               </div>
               
               <TestResultDisplay 
