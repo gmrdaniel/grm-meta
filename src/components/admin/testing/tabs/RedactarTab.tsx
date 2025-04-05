@@ -19,6 +19,7 @@ export default function RedactarTab() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [formattedResult, setFormattedResult] = useState<any>(null);
+  const [formattedText, setFormattedText] = useState<string>("");
   
   // Process the prompt by replacing placeholders with actual values
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function RedactarTab() {
     setError(null);
     setResult(null);
     setFormattedResult(null);
+    setFormattedText("");
     
     // Validation
     if (!name || !socialLink || !description) {
@@ -105,7 +107,11 @@ export default function RedactarTab() {
       // Check if it has the expected structure
       if (formatted.choices && formatted.choices[0]?.message?.content) {
         // Replace \n\n with actual line breaks
-        formatted.choices[0].message.content = formatted.choices[0].message.content.replace(/\\n\\n/g, '\n');
+        const content = formatted.choices[0].message.content;
+        formatted.choices[0].message.content = content.replace(/\\n\\n/g, '\n');
+        
+        // Set the formatted text for the textarea
+        setFormattedText(formatted.choices[0].message.content);
       }
       
       setFormattedResult(formatted);
@@ -201,6 +207,19 @@ export default function RedactarTab() {
                 result={formattedResult || result} 
                 title="Mensaje de invitación generado" 
               />
+              
+              {formattedText && (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="formattedText">Texto formateado</Label>
+                  <Textarea
+                    id="formattedText"
+                    value={formattedText}
+                    readOnly
+                    className="bg-gray-50 min-h-[150px]"
+                    rows={6}
+                  />
+                </div>
+              )}
             </div>
           )}
         </form>
