@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CopyCheck } from "lucide-react";
 
 export default function RedactarTab() {
   const [name, setName] = useState("");
@@ -18,6 +18,7 @@ export default function RedactarTab() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [formattedResult, setFormattedResult] = useState<any>(null);
   
   // Process the prompt by replacing placeholders with actual values
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function RedactarTab() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setFormattedResult(null);
     
     // Validation
     if (!name || !socialLink || !description) {
@@ -92,6 +94,25 @@ export default function RedactarTab() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleFormatText = () => {
+    if (result) {
+      // Create a formatted copy of the result
+      const formatted = JSON.parse(JSON.stringify(result));
+      
+      // Check if it has the expected structure
+      if (formatted.choices && formatted.choices[0]?.message?.content) {
+        // Replace \n\n with actual line breaks
+        formatted.choices[0].message.content = formatted.choices[0].message.content.replace(/\\n\\n/g, '\n');
+      }
+      
+      setFormattedResult(formatted);
+      toast({
+        title: "Texto formateado",
+        description: "Se han reemplazado los saltos de línea correctamente."
+      });
     }
   };
   
@@ -163,8 +184,21 @@ export default function RedactarTab() {
 
           {result && (
             <div className="mt-6 border-t pt-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Mensaje de invitación generado</h3>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleFormatText}
+                >
+                  <CopyCheck className="mr-2 h-4 w-4" />
+                  Formatear texto
+                </Button>
+              </div>
+              
               <TestResultDisplay 
-                result={result} 
+                result={formattedResult || result} 
                 title="Mensaje de invitación generado" 
               />
             </div>
