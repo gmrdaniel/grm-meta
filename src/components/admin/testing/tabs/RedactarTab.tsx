@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, CopyCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function RedactarTab() {
   const [name, setName] = useState("");
@@ -18,7 +18,6 @@ export default function RedactarTab() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [formattedResponseText, setFormattedResponseText] = useState("");
   
   // Process the prompt by replacing placeholders with actual values
   useEffect(() => {
@@ -27,17 +26,6 @@ export default function RedactarTab() {
     prompt = prompt.replace(/{link_red_social}/g, socialLink || "{link_red_social}");
     setProcessedPrompt(prompt);
   }, [name, socialLink, description]);
-  
-  // Format response text when result changes - automatically replace \n\n with line breaks
-  useEffect(() => {
-    if (result && result.choices && result.choices[0]?.message?.content) {
-      // Replace \n\n with actual line breaks for display
-      const content = result.choices[0].message.content.replace(/\\n\\n/g, '\n');
-      setFormattedResponseText(content);
-    } else {
-      setFormattedResponseText("");
-    }
-  }, [result]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,19 +92,6 @@ export default function RedactarTab() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleFormatText = () => {
-    if (formattedResponseText) {
-      // Replace \n\n with actual line breaks
-      const formattedText = formattedResponseText.replace(/\\n\\n/g, '\n');
-      setFormattedResponseText(formattedText);
-      
-      toast({
-        title: "Texto formateado",
-        description: "Se han reemplazado los saltos de línea correctamente."
-      });
     }
   };
   
@@ -187,35 +162,12 @@ export default function RedactarTab() {
           </Button>
 
           {result && (
-            <>
-              <div className="space-y-2 mt-6 border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="formattedResponse">Result</Label>
-                  <Button 
-                    type="button" 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={handleFormatText}
-                    className="ml-2"
-                  >
-                    <CopyCheck className="mr-2 h-4 w-4" />
-                    Formatear texto
-                  </Button>
-                </div>
-                <Textarea 
-                  id="formattedResponse" 
-                  value={formattedResponseText}
-                  className="min-h-[150px]"
-                  readOnly
-                  rows={6}
-                />
-              </div>
-              
+            <div className="mt-6 border-t pt-4">
               <TestResultDisplay 
                 result={result} 
                 title="Mensaje de invitación generado" 
               />
-            </>
+            </div>
           )}
         </form>
       </CardContent>
