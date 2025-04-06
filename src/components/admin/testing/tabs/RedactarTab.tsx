@@ -129,31 +129,35 @@ export default function RedactarTab() {
       // Extract the plain text from the result
       let plainText = "";
       
-      if (result.choices && result.choices[0]?.message?.content) {
+      // Check if the API response has result property (which is used by the ChatGPT-42 API)
+      if (result.result) {
+        plainText = result.result;
+      } 
+      // Fallback to the standard OpenAI format
+      else if (result.choices && result.choices[0]?.message?.content) {
         plainText = result.choices[0].message.content;
-        
-        // Replace escaped newlines with actual newlines
-        plainText = plainText.replace(/\\n/g, '\n');
-        
-        // Set the formatted text
-        setFormattedText(plainText);
-        
-        toast({
-          title: "Texto extraído",
-          description: "Se ha extraído el texto plano con formato."
-        });
-      } else {
-        toast({
-          title: "Error al extraer texto",
-          description: "No se pudo encontrar el contenido del mensaje.",
-          variant: "destructive"
-        });
+      } 
+      // If neither format is found, throw an error
+      else {
+        console.error("Unexpected API response format:", result);
+        throw new Error("No se pudo encontrar el contenido del mensaje");
       }
+      
+      // Replace escaped newlines with actual newlines
+      plainText = plainText.replace(/\\n/g, '\n');
+      
+      // Set the formatted text
+      setFormattedText(plainText);
+      
+      toast({
+        title: "Texto extraído",
+        description: "Se ha extraído el texto plano con formato."
+      });
     } catch (err) {
       console.error("Error extracting text:", err);
       toast({
         title: "Error al extraer texto",
-        description: "Ocurrió un error al procesar el texto.",
+        description: "No se pudo encontrar el contenido del mensaje.",
         variant: "destructive"
       });
     }
