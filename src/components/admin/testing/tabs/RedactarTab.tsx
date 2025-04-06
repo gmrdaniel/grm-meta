@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, CopyCheck, AlignLeft } from "lucide-react";
+import { Loader2, CopyCheck, AlignLeft, FileText } from "lucide-react";
 
 export default function RedactarTab() {
   const [name, setName] = useState("");
@@ -20,6 +20,7 @@ export default function RedactarTab() {
   const [result, setResult] = useState<any>(null);
   const [formattedResult, setFormattedResult] = useState<any>(null);
   const [formattedText, setFormattedText] = useState<string>("");
+  const [extractedText, setExtractedText] = useState<string>("");
   
   // Process the prompt by replacing placeholders with actual values
   useEffect(() => {
@@ -129,25 +130,44 @@ export default function RedactarTab() {
       // Extract the plain text from the result
       let plainText = "";
       
-      // Check if the API response has result property (which is used by the ChatGPT-42 API)
-      if (result.result) {
+      // Inspect the structure of the result object for debugging
+      console.log("Result structure:", JSON.stringify(result, null, 2));
+      
+      // First check for the direct content in the result itself (common in some APIs)
+      if (typeof result === 'string') {
+        plainText = result;
+      }
+      // Check if the API response has content at the top level (used by some APIs)
+      else if (result.content) {
+        plainText = result.content;
+      }
+      // Check if the API response has result property (ChatGPT-42 API format)
+      else if (result.result) {
         plainText = result.result;
-      } 
-      // Fallback to the standard OpenAI format
+      }
+      // Check for standard OpenAI format
       else if (result.choices && result.choices[0]?.message?.content) {
         plainText = result.choices[0].message.content;
       } 
-      // If neither format is found, throw an error
+      // If we have a response but none of the above formats match
       else {
-        console.error("Unexpected API response format:", result);
-        throw new Error("No se pudo encontrar el contenido del mensaje");
+        // Try to find any string property that might contain the message content
+        const resultStr = JSON.stringify(result);
+        const contentMatch = resultStr.match(/"content":"([^"]+)"/);
+        if (contentMatch && contentMatch[1]) {
+          plainText = contentMatch[1];
+        } else {
+          console.error("Unexpected API response format:", result);
+          throw new Error("No se pudo encontrar el contenido del mensaje");
+        }
       }
       
       // Replace escaped newlines with actual newlines
       plainText = plainText.replace(/\\n/g, '\n');
       
-      // Set the formatted text
+      // Set both formatted text and extracted text
       setFormattedText(plainText);
+      setExtractedText(plainText);
       
       toast({
         title: "Texto extraído",
@@ -270,6 +290,18 @@ export default function RedactarTab() {
                     className="bg-gray-50 min-h-[150px]"
                     rows={6}
                   />
+                </div>
+              )}
+              
+              {extractedText && (
+                <div className="mt-6 p-4 border rounded-md bg-green-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    <h4 className="font-medium text-green-800">Texto extraído</h4>
+                  </div>
+                  <div className="bg-white p-4 rounded border border-green-200 whitespace-pre-wrap">
+                    {extractedText}
+                  </div>
                 </div>
               )}
             </div>
