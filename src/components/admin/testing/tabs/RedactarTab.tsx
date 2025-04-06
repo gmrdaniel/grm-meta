@@ -8,10 +8,11 @@ import ErrorDisplay from "@/components/admin/testing/ErrorDisplay";
 import TestResultDisplay from "@/components/admin/testing/TestResultDisplay";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2, CopyCheck, AlignLeft, FileText } from "lucide-react";
+
 export default function RedactarTab() {
   const [name, setName] = useState("");
   const [socialLink, setSocialLink] = useState("");
-  const [description, setDescription] = useState("genera un mensaje de 1 parrafo en ingles: sobre el contenido de {link_red_social} para invitarlo a trabajar en un programa de meta, el mensaje debe ser divertido, amigable enfocado a la generación z, al mensaje personaliza el mensaje con su nombre {nombre} y {descripcion}, al final agrega el siguiente link: {link_invitacion} esta invitación debe ser amigable y tener varias veces el CTA");
+  const [description, setDescription] = useState("Write a personalized outreach email in the voice of Lauren Guschmer, an executive at La Neta (a partner agency working with Meta), inviting a specific TikTok creator to apply for the Meta Creator Breakthrough Program. The tone should be clear, professional, and neutral—leaning toward corporate, without emojis or slang.\n\n-No include Subject, \n-no include sing mail Lauren\n\nStructure:\nShort introduction: Lauren introduces herself, her role, and La Neta's relationship with Meta\n\nPersonalization: Include 1–2 specific, thoughtful lines about the creator's TikTok content and how it aligns with Meta's goals based on the creator's profile \n\nBullet point list of program benefits:\n\n• Monthly cash bonuses for Reels on Facebook or Instagram\n• Increased visibility and reach through Meta's discovery tools\n• Direct support from Meta's creator partnerships team\n• Opportunities for future collaborations and platform features\n\nClosing line: Encourage the creator to apply\n\nClear CTA without link placeholder\n\nUse this TikTok profile as the source for personalization: {link_red_social}\n\nInclude the creator's name {nombre} in your greeting.");
   const [processedPrompt, setProcessedPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,13 +21,13 @@ export default function RedactarTab() {
   const [formattedText, setFormattedText] = useState<string>("");
   const [extractedText, setExtractedText] = useState<string>("");
 
-  // Process the prompt by replacing placeholders with actual values
   useEffect(() => {
     let prompt = description;
     prompt = prompt.replace(/{nombre}/g, name || "{nombre}");
     prompt = prompt.replace(/{link_red_social}/g, socialLink || "{link_red_social}");
     setProcessedPrompt(prompt);
   }, [name, socialLink, description]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -34,17 +35,13 @@ export default function RedactarTab() {
     setFormattedResult(null);
     setFormattedText("");
 
-    // Validation
     if (!name || !socialLink || !description) {
       setError("Los campos Nombre, Link de red social y Descripción son obligatorios");
       return;
     }
     setLoading(true);
     try {
-      // Use the processed prompt for the API call
       const prompt = processedPrompt;
-
-      // API call to RapidAPI ChatGPT
       const response = await fetch('https://chatgpt-42.p.rapidapi.com/gpt4o', {
         method: 'POST',
         headers: {
@@ -65,8 +62,6 @@ export default function RedactarTab() {
         throw new Error(`API error: ${errorData}`);
       }
       const data = await response.json();
-
-      // Store result with timestamp for display
       const timestampedResult = {
         ...data,
         timestamp: new Date().toLocaleString()
@@ -88,18 +83,13 @@ export default function RedactarTab() {
       setLoading(false);
     }
   };
+
   const handleFormatText = () => {
     if (result) {
-      // Create a formatted copy of the result
       const formatted = JSON.parse(JSON.stringify(result));
-
-      // Check if it has the expected structure
       if (formatted.choices && formatted.choices[0]?.message?.content) {
-        // Replace \n\n with actual line breaks
         const content = formatted.choices[0].message.content;
         formatted.choices[0].message.content = content.replace(/\\n\\n/g, '\n');
-
-        // Set the formatted text for the textarea
         setFormattedText(formatted.choices[0].message.content);
       }
       setFormattedResult(formatted);
@@ -109,34 +99,21 @@ export default function RedactarTab() {
       });
     }
   };
+
   const extractPlainText = () => {
     if (!result) return;
     try {
-      // Extract the plain text from the result
       let plainText = "";
-
-      // Inspect the structure of the result object for debugging
       console.log("Result structure:", JSON.stringify(result, null, 2));
-
-      // First check for the direct content in the result itself (common in some APIs)
       if (typeof result === 'string') {
         plainText = result;
-      }
-      // Check if the API response has content at the top level (used by some APIs)
-      else if (result.content) {
+      } else if (result.content) {
         plainText = result.content;
-      }
-      // Check if the API response has result property (ChatGPT-42 API format)
-      else if (result.result) {
+      } else if (result.result) {
         plainText = result.result;
-      }
-      // Check for standard OpenAI format
-      else if (result.choices && result.choices[0]?.message?.content) {
+      } else if (result.choices && result.choices[0]?.message?.content) {
         plainText = result.choices[0].message.content;
-      }
-      // If we have a response but none of the above formats match
-      else {
-        // Try to find any string property that might contain the message content
+      } else {
         const resultStr = JSON.stringify(result);
         const contentMatch = resultStr.match(/"content":"([^"]+)"/);
         if (contentMatch && contentMatch[1]) {
@@ -146,11 +123,7 @@ export default function RedactarTab() {
           throw new Error("No se pudo encontrar el contenido del mensaje");
         }
       }
-
-      // Replace escaped newlines with actual newlines
       plainText = plainText.replace(/\\n/g, '\n');
-
-      // Set both formatted text and extracted text
       setFormattedText(plainText);
       setExtractedText(plainText);
       toast({
@@ -166,6 +139,7 @@ export default function RedactarTab() {
       });
     }
   };
+
   return <Card>
       <CardHeader>
         <CardTitle>Redactar invitación</CardTitle>
@@ -184,7 +158,7 @@ export default function RedactarTab() {
           
           <div className="space-y-2">
             <Label htmlFor="description">Descripción / Prompt</Label>
-            <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Utiliza {nombre}, {link_red_social} como variables" rows={4} disabled={loading} />
+            <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Utiliza {nombre}, {link_red_social} como variables" rows={8} disabled={loading} />
           </div>
           
           <div className="space-y-2">
@@ -218,7 +192,19 @@ export default function RedactarTab() {
               
               <TestResultDisplay result={formattedResult || result} title="Mensaje de invitación generado" />
               
-              {formattedText}
+              {formattedText && (
+                <div className="mt-4 p-4 border rounded-md bg-blue-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <h4 className="font-medium text-blue-800">Texto formateado</h4>
+                  </div>
+                  <Textarea 
+                    value={formattedText} 
+                    readOnly 
+                    className="bg-white border-blue-200 min-h-[200px]" 
+                  />
+                </div>
+              )}
               
               {extractedText && <div className="mt-6 p-4 border rounded-md bg-green-50">
                   <div className="flex items-center gap-2 mb-3">
