@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { Loader2, CopyCheck, AlignLeft, FileText } from "lucide-react";
 export default function RedactarTab() {
   const [name, setName] = useState("");
   const [socialLink, setSocialLink] = useState("");
-  const [description, setDescription] = useState("Write a personalized outreach email in the voice of Lauren Guschmer, an executive at La Neta (a partner agency working with Meta), inviting a specific TikTok creator to apply for the Meta Creator Breakthrough Program. The tone should be clear, professional, and neutral—leaning toward corporate, without emojis or slang.\n\n-No include Subject, \n-no include sing mail Lauren\n\nStructure:\nShort introduction: Lauren introduces herself, her role, and La Neta's relationship with Meta\n\nPersonalization: Include 1–2 specific, thoughtful lines about the creator's TikTok content and how it aligns with Meta's goals based on the creator's profile \n\nBullet point list of program benefits:\n\n• Monthly cash bonuses for Reels on Facebook or Instagram\n• Increased visibility and reach through Meta's discovery tools\n• Direct support from Meta's creator partnerships team\n• Opportunities for future collaborations and platform features\n\nClosing line: Encourage the creator to apply\n\nClear CTA without link placeholder\n\nUse this TikTok profile as the source for personalization: {link_red_social}\n\nInclude the creator's name {nombre} in your greeting.");
+  const [description, setDescription] = useState("Write a personalized outreach email in the voice of Lauren Guschmer, an executive at La Neta (a partner agency working with Meta), inviting a specific TikTok creator to apply for the Meta Creator Breakthrough Program. The tone should be clear, professional, and neutral—leaning toward corporate, without emojis or slang.\n\n-No include Subject, \n-no include Best regards by Lauren\n-use emoticos \n-el mensaje debe ser divertido, amigable enfocado a la generación z\n-Targeted toward a Gen Z audience, Clear but casual (you can use expressions like \"yep,\" \"chill,\" \"no need to change your vibe\"), Avoid overly corporate or formal language\n\nStructure:\nShort introduction: Lauren introduces herself, her role, and La Neta's relationship with Meta\n\nPersonalization: Include 1–2 specific, thoughtful lines about the creator's TikTok content and how it aligns with Meta's goals based on the creator's profile \n\nBullet point list of program benefits:\n\n• Monthly cash bonuses for Reels on Facebook or Instagram\n• Increased visibility and reach through Meta's discovery tools\n• Direct support from Meta's creator partnerships team\n• Opportunities for future collaborations and platform features\n\nClosing line: Encourage the creator to apply\n\nUse this TikTok profile as the source for personalization: {link_red_social}\n\nInclude the creator's name {nombre} in your greeting.");
   const [processedPrompt, setProcessedPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -105,6 +106,7 @@ export default function RedactarTab() {
     try {
       let plainText = "";
       console.log("Result structure:", JSON.stringify(result, null, 2));
+      
       if (typeof result === 'string') {
         plainText = result;
       } else if (result.content) {
@@ -114,6 +116,7 @@ export default function RedactarTab() {
       } else if (result.choices && result.choices[0]?.message?.content) {
         plainText = result.choices[0].message.content;
       } else {
+        // Try to find content in any nested structure
         const resultStr = JSON.stringify(result);
         const contentMatch = resultStr.match(/"content":"([^"]+)"/);
         if (contentMatch && contentMatch[1]) {
@@ -123,9 +126,12 @@ export default function RedactarTab() {
           throw new Error("No se pudo encontrar el contenido del mensaje");
         }
       }
+      
+      // Replace escaped newlines with actual newlines
       plainText = plainText.replace(/\\n/g, '\n');
       setFormattedText(plainText);
       setExtractedText(plainText);
+      
       toast({
         title: "Texto extraído",
         description: "Se ha extraído el texto plano con formato."
