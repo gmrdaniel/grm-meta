@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { FacebookPageDetails } from "@/types/FacebookPageDetails";
+import { FacebookPageDetails } from "@/types/facebookPageDetails";
 
 /**
  * Fetch creators with pagination and filtering

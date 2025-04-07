@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,17 +18,15 @@ export const useFacebookPageApi = (): UseFacebookPageApiResult => {
     setError(null);
 
     try {
-      const { data, error: functionError } = await supabase.functions.invoke('facebook-page-details', {
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('facebook-page-details', {
         body: {
           pageUrl: pageUrl
         },
       });
 
-      const data = result;
-
       if (functionError) {
-        setError(error);
-        console.error('Error in useCreateFacebookPage:', error);
+        setError(functionError);
+        console.error('Error in useCreateFacebookPage:', functionError);
         toast.error('Failed to create Facebook Page. Please try again.');
         return;
       }

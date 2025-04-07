@@ -1,4 +1,3 @@
-
 // 🧩 Libs
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -45,7 +44,7 @@ import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsername
 const stepList = [
   { id: "welcome", label: "Accept Invitation" },
   { id: "completeProfile", label: "Complete Your Profile" },
-  { id: "fbcreation", label: "Connect Facebook Page" },
+  { id: "fbcreation", label: "Connect Facebook Page" }
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -100,7 +99,7 @@ export default function InvitationStepperPage() {
           return;
         }
 
-        const { data, error } = await findInvitationByCode(invitation_code);
+        const { data, error } = await supabase.rpc('find_invitation_by_code', { code_param: invitation_code });
 
         if (error || !data?.length) {
           setError("Invalid invitation code or invitation not found");

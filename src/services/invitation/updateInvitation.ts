@@ -7,7 +7,7 @@ import { CreatorInvitation } from "@/types/invitation";
  */
 export const updateInvitationStatus = async (
   id: string, 
-  status: 'pending' | 'rejected' | 'completed' | 'in process' | 'sended'
+  status: 'pending' | 'rejected' | 'completed' | 'in process' | 'sended' | 'accepted'
 ): Promise<CreatorInvitation> => {
   const { data, error } = await supabase
     .from('creator_invitations')

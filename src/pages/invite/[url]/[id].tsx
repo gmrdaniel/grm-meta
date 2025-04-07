@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/router';
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 
@@ -18,8 +18,8 @@ import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
 
 export default function InvitationPage() {
-  const router = useRouter();
-  const { url, id } = router.query;
+  const { url, id } = useParams<{ url: string; id: string }>();
+  const navigate = useNavigate();
 
   // 📦 State
   const [invitationData, setInvitationData] = useState<CreatorInvitation | null>(null);
@@ -108,7 +108,7 @@ export default function InvitationPage() {
       <Card className="w-full max-w-md">
         <CardContent className="p-8">
           <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-            Welcome to {projectStages && projectStages[0]?.projects?.name}!
+            Welcome to {projectStages && projectStages[0]?.name}!
           </h1>
           <p className="text-gray-600 mb-4">
             You have been invited to join this project.
