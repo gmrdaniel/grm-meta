@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { supabase } from "@/integrations/supabase/client";
 import { createCreator } from "@/services/creatorService";
@@ -173,7 +172,7 @@ export const processImportData = async (
       });
       
       await createBulkInvitationDetail({
-        bulkInvitationId: bulkInvitation.id,
+        bulkInvitationId: bulkInvitation?.id || "",
         fullName: `${rowData.nombre || ''} ${rowData.apellido || ''}`.trim() || 'Sin nombre',
         email: rowData.correo || 'Sin correo',
         status: 'failed',
@@ -193,7 +192,7 @@ export const processImportData = async (
       });
       
       await createBulkInvitationDetail({
-        bulkInvitationId: bulkInvitation.id,
+        bulkInvitationId: bulkInvitation?.id || "",
         fullName: `${rowData.nombre} ${rowData.apellido}`,
         email: rowData.correo,
         status: 'completed'
@@ -209,7 +208,7 @@ export const processImportData = async (
       });
       
       await createBulkInvitationDetail({
-        bulkInvitationId: bulkInvitation.id,
+        bulkInvitationId: bulkInvitation?.id || "",
         fullName: `${rowData.nombre} ${rowData.apellido}`,
         email: rowData.correo,
         status: 'failed',
@@ -219,7 +218,7 @@ export const processImportData = async (
   }
   
   await updateBulkInvitation({
-    id: bulkInvitation.id,
+    id: bulkInvitation?.id || "",
     processedRows: successCount,
     failedRows: errors.length,
     status: errors.length === 0 ? 'completed' : (successCount > 0 ? 'completed' : 'failed')
@@ -237,7 +236,7 @@ export const processImportData = async (
   }
 
   return {
-    bulkInvitationId: bulkInvitation.id,
+    bulkInvitationId: bulkInvitation?.id || "",
     successCount,
     errors
   };

@@ -1,219 +1,134 @@
-
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/router';
 import { toast } from "sonner";
+import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 
-const InvitationPage = () => {
-  const { url, id } = useParams();
-  const navigate = useNavigate();
-  const [invitation, setInvitation] = useState<any>(null);
-  const [project, setProject] = useState<any>(null);
+// 🧱 UI Components
+import { Card, CardContent } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { InvitationError } from "@/components/invitation/InvitationError";
+
+// 🛠️ Services
+import { supabase } from "@/integrations/supabase/client";
+import { fetchProjectStages } from "@/services/projectService";
+import { updateInvitationStatus } from "@/services/invitation/updateInvitation";
+
+// 🗃️ Types
+import { CreatorInvitation } from "@/types/invitation";
+import { ProjectStage } from "@/types/project";
+
+export default function InvitationPage() {
+  const router = useRouter();
+  const { url, id } = router.query;
+
+  // 📦 State
+  const [invitationData, setInvitationData] = useState<CreatorInvitation | null>(null);
+  const [projectStages, setProjectStages] = useState<ProjectStage[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔄 Fetch invitation on component mount
   useEffect(() => {
-    const fetchInvitationDetails = async () => {
+    const fetchInvitation = async () => {
       try {
         setLoading(true);
-        
-        if (!url || !id) {
-          throw new Error("Missing URL or invitation code parameters");
+        setError(null);
+
+        if (!id) {
+          setError("No invitation ID provided");
+          return;
         }
 
-        console.log('InvitationPage - Fetching with URL and code:', { url, id });
+        // Fetch invitation by ID
+        const invitation = await fetchInvitationByCode(id as string);
 
-        // Try multiple approaches to find the invitation
-        
-        // Method 1: Try exact match first
-        const { data: exactData, error: exactError } = await supabase
-          .from('creator_invitations')
-          .select('*, projects:project_id(*)')
-          .eq('invitation_code', id)
-          .maybeSingle();
-          
-        console.log('InvitationPage - Exact match query result:', { data: exactData, error: exactError });
-
-        // Method 2: If exact match fails, try case-insensitive match
-        let invitationData = exactData;
-        if (!invitationData && !exactError) {
-          console.log('InvitationPage - Trying case-insensitive match');
-          const { data: caseInsensitiveData, error: caseInsensitiveError } = await supabase
-            .from('creator_invitations')
-            .select('*, projects:project_id(*)')
-            .ilike('invitation_code', id)
-            .maybeSingle();
-            
-          console.log('InvitationPage - Case-insensitive match result:', { 
-            data: caseInsensitiveData, 
-            error: caseInsensitiveError 
-          });
-            
-          invitationData = caseInsensitiveData;
+        if (!invitation) {
+          setError("Invalid invitation ID or invitation not found");
+          return;
         }
 
-        // Method 3: Try custom RPC function as last resort
-        if (!invitationData) {
-          console.log('InvitationPage - Trying custom RPC function');
-          const { data: rpcData, error: rpcError } = await findInvitationByCode(id);
-          
-          console.log('InvitationPage - Custom RPC function result:', { data: rpcData, error: rpcError });
-          
-          if (rpcData && rpcData.length > 0) {
-            // Fetch project details separately since RPC doesn't support joins
-            const { data: projectData } = await supabase
-              .from('projects')
-              .select('*')
-              .eq('id', rpcData[0].project_id)
-              .maybeSingle();
-              
-            invitationData = rpcData[0];
-            if (projectData) {
-              invitationData.projects = projectData;
-            }
-          }
-        }
+        setInvitationData(invitation);
 
-        if (!invitationData) {
-          console.error('No invitation found with code:', id);
-          throw new Error("Invitation not found");
-        }
-
-        console.log('InvitationPage - Invitation data:', invitationData);
-
-        // Verify that the stage URL matches
-        const { data: stageData, error: stageError } = await supabase
-          .from('project_stages')
-          .select('*')
-          .eq('url', url)
-          .eq('project_id', invitationData.project_id)
-          .maybeSingle();
-
-        if (stageError) {
-          console.error('Error fetching stage:', stageError);
-          throw new Error("Invalid invitation URL");
-        }
-
-        if (!stageData) {
-          console.error('No matching stage found for URL:', url);
-          throw new Error("Invalid stage URL");
-        }
-
-        console.log('InvitationPage - Stage data:', stageData);
-
-        setInvitation(invitationData);
-        setProject(invitationData.projects);
-        
-      } catch (err: any) {
-        console.error('Error fetching invitation details:', err);
-        setError(err.message || 'Failed to load invitation details');
+        // Fetch project stages
+        const stages = await fetchProjectStages(invitation.project_id);
+        setProjectStages(stages);
+      } catch (err) {
+        console.error("Error loading invitation:", err);
+        setError("Failed to load invitation details");
       } finally {
         setLoading(false);
       }
     };
 
-    if (url && id) {
-      fetchInvitationDetails();
-    }
-  }, [url, id]);
+    fetchInvitation();
+  }, [id]);
 
-  const handleAccept = async () => {
+  // ✅ Accept invitation handler
+  const handleAcceptInvitation = async () => {
+    if (!invitationData) return;
+
     try {
-      if (!invitation) return;
+      setLoading(true);
+      setError(null);
 
-      // If this is for a new user, redirect to sign up
-      if (invitation.invitation_type === 'new_user') {
-        navigate('/auth?signup=true&email=' + encodeURIComponent(invitation.email));
-      } else {
-        // For existing users, update the invitation status and redirect to login
-        await supabase
-          .from('creator_invitations')
-          .update({ status: 'accepted' })
-          .eq('id', invitation.id);
-          
-        navigate('/auth');
-      }
-    } catch (err: any) {
-      console.error('Error accepting invitation:', err);
-      toast.error('Failed to process your invitation');
+      // Update invitation status to "accepted"
+      await updateInvitationStatus(invitationData.id, "in process");
+
+      toast.success("Invitation accepted successfully!");
+      // Redirect user to the project URL
+      window.location.href = projectStages && projectStages[0]?.url || '/';
+    } catch (err) {
+      console.error("Error accepting invitation:", err);
+      setError("Failed to accept invitation");
+      toast.error("Failed to accept invitation");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // 🖼️ Render
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <p className="text-lg">Loading invitation details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !invitation) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-xl text-center text-red-600">
-              Invitation Not Found
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center">
-              Sorry, we couldn't find the invitation you're looking for. It may have expired or been removed.
-            </p>
+          <CardContent className="text-center">
+            <LoadingSpinner />
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button onClick={() => navigate('/auth')}>
-              Go to Login
-            </Button>
-          </CardFooter>
         </Card>
       </div>
     );
   }
 
+  if (error || !invitationData) {
+    return <InvitationError message={error || "Invitation not found"} />;
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            You've Been Invited!
-          </CardTitle>
-          <CardDescription className="text-center">
-            {invitation.full_name}, you've been invited to join as a creator
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center space-y-2">
-            <p className="text-lg font-medium">Project: {project?.name || 'N/A'}</p>
-            <p>Email: {invitation.email}</p>
-            {invitation.social_media_handle && (
-              <p>
-                {invitation.social_media_type}: {invitation.social_media_handle}
-              </p>
-            )}
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <p className="text-sm text-gray-600">
-              By accepting this invitation, you'll be able to access the creator dashboard and manage your content.
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-8">
+          <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+            Welcome to {projectStages && projectStages[0]?.projects?.name}!
+          </h1>
+          <p className="text-gray-600 mb-4">
+            You have been invited to join this project.
+          </p>
+          <div className="mb-4">
+            <p className="text-gray-700">
+              <strong>Name:</strong> {invitationData.full_name}
+            </p>
+            <p className="text-gray-700">
+              <strong>Email:</strong> {invitationData.email}
             </p>
           </div>
-        </CardContent>
-        <CardFooter className="flex justify-center gap-4">
-          <Button variant="default" onClick={handleAccept}>
+          <button
+            className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-500 transition-colors"
+            onClick={handleAcceptInvitation}
+          >
             Accept Invitation
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            Not Now
-          </Button>
-        </CardFooter>
+          </button>
+        </CardContent>
       </Card>
     </div>
   );
-};
-
-export default InvitationPage;
+}

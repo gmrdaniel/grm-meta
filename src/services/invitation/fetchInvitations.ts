@@ -1,5 +1,5 @@
 
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 
 /**
@@ -8,7 +8,7 @@ import { CreatorInvitation } from "@/types/invitation";
 export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation | null> => {
   try {
     // Use the RPC function to find invitation by code (fuzzy matching)
-    const { data, error } = await findInvitationByCode(code);
+    const { data, error } = await supabase.rpc('find_invitation_by_code', { code_param: code });
     
     if (error) {
       console.error('Error fetching invitation by code:', error);

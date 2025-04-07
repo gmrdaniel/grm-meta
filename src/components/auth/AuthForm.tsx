@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,9 +39,9 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
           .eq('id', authData.user?.id)
           .single();
         
-        if (profileError) {
+        if (profileError || !profileData) {
           console.error("Profile error:", profileError);
-          throw profileError;
+          throw profileError || new Error("Failed to fetch profile data");
         }
         
         console.log("Profile data:", profileData);

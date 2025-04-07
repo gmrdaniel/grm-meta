@@ -1,3 +1,4 @@
+
 // 🧩 Libs
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -20,13 +21,14 @@ import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionComple
 import { InvitationError } from "@/components/invitation/InvitationError";
 
 // 🛠️ Services
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import {
   updateFacebookPage,
   updateInvitationStatus,
 } from "@/services/invitation";
 import { fetchProjectStages } from "@/services/projectService";
 import { checkExistingTask } from "@/services/tasksService";
+import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 
 // 🧠 Utils
 import { validateFacebookPageUrl } from "@/utils/validateFacebookPageUrl";
