@@ -14,11 +14,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
+import { CreatorInvitation } from "@/types/invitation";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
   isSubmitting: boolean;
-  invitationId?: string;
+  invitation: CreatorInvitation;
 }
 
 export interface ProfileFormData {
@@ -33,7 +34,7 @@ export interface ProfileFormData {
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
   isSubmitting,
-  invitationId,
+  invitation,
 }) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     youtubeChannel: "",
@@ -54,6 +55,17 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   const [instagramError, setInstagramError] = useState<string | null>(null);
   const [needsInstagramRevalidation, setNeedsInstagramRevalidation] =
     useState(false);
+
+  useEffect(() => {
+    setFormData({
+      youtubeChannel: invitation.youtube_channel,
+      instagramUser: invitation.instagram_user,
+      phoneCountryCode: invitation.phone_country_code,
+      phoneNumber: invitation.phone_number,
+      phoneVerified: invitation.phone_verified,
+      isIGProfessional: invitation.is_professional_account,
+    });
+  }, [invitation]);
 
   // Handle countdown timer for OTP expiration
   useEffect(() => {
@@ -80,16 +92,16 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       setNeedsInstagramRevalidation(false);
       return true;
     }
-  
+
     const cleanUsername = username.startsWith("@")
       ? username.substring(1)
       : username;
-  
+
     if (cleanUsername.length < 5 || cleanUsername.length > 30) {
       setInstagramError("Username must be between 5 and 30 characters long");
       return false;
     }
-  
+
     const validRegex = /^[a-zA-Z0-9._]+$/;
     if (!validRegex.test(cleanUsername)) {
       setInstagramError(
@@ -97,12 +109,11 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       );
       return false;
     }
-  
+
     setInstagramError(null);
     setNeedsInstagramRevalidation(false);
     return true;
   };
-  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -118,7 +129,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         ...formData,
         [name]: value,
       });
-      setNeedsInstagramRevalidation(true)
+      setNeedsInstagramRevalidation(true);
     } else {
       setFormData({
         ...formData,
@@ -190,7 +201,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           phoneNumber: formData.phoneNumber,
           countryCode: formData.phoneCountryCode,
           verificationCode,
-          invitationId,
+          invitationId: invitation.id,
         },
       });
 
