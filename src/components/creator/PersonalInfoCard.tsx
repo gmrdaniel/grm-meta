@@ -5,9 +5,6 @@ import { User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 
-
-
-
 interface PersonalData {
   first_name: string | null;
   last_name: string | null;
@@ -45,13 +42,6 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
   
   const { user } = useAuth()
   console.log(user)
-
-  // Obtener y dividir el full name desde user_metadata
-  const fullName = user?.user_metadata?.full_name || "";
-  const nameParts = fullName.trim().split(" ");
-  const firstName = nameParts[0] || "Not set";
-  const lastName = nameParts.slice(1).join(" ") || "Not set";
-
   // Get all social networks with their usernames and followers
   const socialNetworks = !isLoading && personalData ? [
     { name: "instagram", label: "Instagram", username: personalData?.instagram_username, followers: personalData?.instagram_followers },
@@ -106,12 +96,8 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
         <div className="space-y-6">
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <dt className="font-medium text-gray-500">First Name</dt>
-              <dd>{firstName}</dd>
-            </div>
-            <div>
-              <dt className="font-medium text-gray-500">Last Name</dt>
-              <dd>{lastName}</dd>
+              <dt className="font-medium text-gray-500">Full Name</dt>
+              <dd>{user.user_metadata.full_name || "Not set"}</dd>
             </div>
             {/* <div>
               <dt className="font-medium text-gray-500">Birth Date</dt>
@@ -124,12 +110,12 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
             <div>
               <dt className="font-medium text-gray-500">State</dt>
               <dd>{personalData?.state_of_residence || "Not set"}</dd>
-            </div>
+            </div> */}
             <div>
               <dt className="font-medium text-gray-500">Phone Number</dt>
-              <dd>{user?.user_metadata?.phone || "Not set"}</dd>
+              <dd>{user.user_metadata.phone || ""}</dd>
             </div>
-            <div>
+            {/* <div>
               <dt className="font-medium text-gray-500">Gender</dt>
               <dd>{personalData?.gender || "Not set"}</dd>
             </div>
@@ -138,7 +124,7 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
               <dd>{personalData?.categories?.name || "Not set"}</dd>
             </div> */}
           </dl>
-
+          
           <div>
             <h3 className="text-lg font-medium mb-2">Social Networks</h3>
             <Table>
