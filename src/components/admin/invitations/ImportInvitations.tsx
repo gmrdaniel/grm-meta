@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProjects } from "@/services/projectService";
@@ -11,6 +11,9 @@ import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 import { FileUploader } from "@/components/admin/inventory/import-templates/components/FileUploader";
 import { ImportResultCard } from "@/components/admin/invitations/ImportResultCard";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface ImportInvitationsProps {
   onSuccess?: () => void;
@@ -27,26 +30,35 @@ interface ImportError {
   error: string;
 }
 
+// Define form schema
+const formSchema = z.object({
+  projectId: z.string().min(1, "Project is required")
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
-  const [projectId, setProjectId] = useState<string>("");
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(0);
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
+
+  // Initialize form
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      projectId: ""
+    }
+  });
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: fetchProjects,
   });
 
-  const handleImport = async () => {
+  const handleImport = async (values: FormValues) => {
     if (!file) {
       toast.error("Please select a file to import");
-      return;
-    }
-
-    if (!projectId) {
-      toast.error("Please select a project");
       return;
     }
 
@@ -125,7 +137,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             email: email,
             social_media_handle: socialMediaHandle || null,
             social_media_type: socialMediaType || null,
-            project_id: projectId,
+            project_id: values.projectId,
             invitation_type: "creator"
           };
 
@@ -168,40 +180,52 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <FormItem>
-          <FormLabel>Select Project</FormLabel>
-          <Select value={projectId} onValueChange={setProjectId}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a project" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects?.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormItem>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleImport)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="projectId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Project</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={isImporting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects?.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Upload Excel File</p>
-          <p className="text-sm text-gray-500 mb-2">
-            The Excel file should have the following headers: <br />
-            <code className="text-xs bg-gray-100 p-1 rounded">Creator Name, Email Address, Social Media Handle, Social Media Platform</code>
-          </p>
-          <FileUploader file={file} setFile={setFile} />
-        </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Upload Excel File</p>
+            <p className="text-sm text-gray-500 mb-2">
+              The Excel file should have the following headers: <br />
+              <code className="text-xs bg-gray-100 p-1 rounded">Creator Name, Email Address, Social Media Handle, Social Media Platform</code>
+            </p>
+            <FileUploader file={file} setFile={setFile} />
+          </div>
 
-        <Button 
-          onClick={handleImport} 
-          disabled={!file || !projectId || isImporting}
-          className="w-full mt-4"
-        >
-          {isImporting ? "Importing..." : "Import Invitations"}
-        </Button>
-      </div>
+          <Button 
+            type="submit" 
+            disabled={!file || isImporting}
+            className="w-full mt-4"
+          >
+            {isImporting ? "Importing..." : "Import Invitations"}
+          </Button>
+        </form>
+      </Form>
 
       {(importSuccess > 0 || importErrors.length > 0) && (
         <ImportResultCard importErrors={importErrors} importSuccess={importSuccess} />
