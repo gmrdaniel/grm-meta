@@ -33,7 +33,8 @@ interface ImportError {
 
 // Define form schema
 const formSchema = z.object({
-  projectId: z.string().min(1, "Project is required")
+  projectId: z.string().min(1, "Project is required"),
+  invitationType: z.string().min(1, "Invitation type is required")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -48,7 +49,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectId: ""
+      projectId: "",
+      invitationType: "creator" // Set default value to "creator"
     }
   });
 
@@ -139,12 +141,15 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             social_media_handle: socialMediaHandle || null,
             social_media_type: socialMediaType || null,
             project_id: values.projectId,
-            invitation_type: "creator"
+            invitation_type: values.invitationType // Use the value from the form
           };
 
+          console.log("Creating invitation with data:", invitationData);
+          
           await createInvitation(invitationData);
           successCount++;
         } catch (error) {
+          console.error("Error creating invitation:", error);
           const errorMessage = error instanceof Error ? error.message : "Unknown error";
           errors.push({
             row: rowNumber,
@@ -224,6 +229,30 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
                         {project.name}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="invitationType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invitation Type</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={isImporting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select invitation type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="creator">Creator</SelectItem>
+                    <SelectItem value="brand">Brand</SelectItem>
+                    <SelectItem value="agency">Agency</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
