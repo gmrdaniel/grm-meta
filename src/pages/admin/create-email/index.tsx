@@ -1,21 +1,37 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmailCreatorsList } from "@/components/admin/email-creator/EmailCreatorsList";
 import { ImportEmailCreators } from "@/components/admin/email-creator/ImportEmailCreators";
 import { getEmailCreators } from "@/services/emailCreatorService";
+import { EmailCreator } from "@/types/email-creator";
 
 export default function AdminCreateEmail() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [creators, setCreators] = useState<EmailCreator[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleImportComplete = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  // This will re-fetch the creators whenever the refreshTrigger changes
-  const emailCreators = getEmailCreators();
+  useEffect(() => {
+    const fetchCreators = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getEmailCreators();
+        setCreators(data);
+      } catch (error) {
+        console.error("Error fetching creators:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCreators();
+  }, [refreshTrigger]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -31,7 +47,13 @@ export default function AdminCreateEmail() {
             </TabsList>
             
             <TabsContent value="list" className="space-y-4">
-              <EmailCreatorsList creators={emailCreators} />
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-b-transparent"></div>
+                </div>
+              ) : (
+                <EmailCreatorsList creators={creators} />
+              )}
             </TabsContent>
             
             <TabsContent value="import" className="space-y-4">

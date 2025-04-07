@@ -58,9 +58,9 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
     // Create a workbook with a sample template
     const wb = XLSX.utils.book_new();
     const data = [
-      ["Nombre", "Link de TikTok"],
-      ["John Doe", "https://www.tiktok.com/@johndoe"],
-      ["Jane Smith", "https://www.tiktok.com/@janesmith"]
+      ["Nombre", "Correo", "Link de TikTok"],
+      ["John Doe", "john.doe@example.com", "https://www.tiktok.com/@johndoe"],
+      ["Jane Smith", "jane.smith@example.com", "https://www.tiktok.com/@janesmith"]
     ];
     
     const ws = XLSX.utils.aoa_to_sheet(data);
@@ -92,7 +92,7 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
           <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-md p-6">
             <FileSpreadsheet className="h-10 w-10 text-gray-400 mb-2" />
             <p className="text-sm text-gray-500 text-center mb-4">
-              Upload an Excel file with columns "Nombre" and "Link de TikTok"
+              Upload an Excel file with columns "Nombre", "Correo", and "Link de TikTok"
             </p>
             <input
               type="file"

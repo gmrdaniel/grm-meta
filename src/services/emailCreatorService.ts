@@ -2,12 +2,27 @@
 import * as XLSX from 'xlsx';
 import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult } from '@/types/email-creator';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-// Simulated data store (would be replaced with actual DB calls)
-const emailCreators: EmailCreator[] = [];
-
-export const getEmailCreators = (): EmailCreator[] => {
-  return emailCreators;
+// Fetch email creators from the database
+export const getEmailCreators = async (): Promise<EmailCreator[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('email_creators')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error("Error fetching email creators:", error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getEmailCreators:", error);
+    toast.error("Failed to load email creators");
+    return [];
+  }
 };
 
 export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCreatorImportResult> => {
@@ -25,11 +40,16 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
     const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
 
     // Process each row
-    jsonData.forEach((row, index) => {
+    for (let i = 0; i < jsonData.length; i++) {
+      const row = jsonData[i];
       try {
         // Validate the row data
         if (!row['Nombre'] || typeof row['Nombre'] !== 'string') {
           throw new Error('Missing or invalid "Nombre" field');
+        }
+
+        if (!row['Correo'] || typeof row['Correo'] !== 'string') {
+          throw new Error('Missing or invalid "Correo" field');
         }
 
         if (!row['Link de TikTok'] || typeof row['Link de TikTok'] !== 'string') {
@@ -37,25 +57,31 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
         }
 
         // Create a new email creator
-        const newCreator: EmailCreator = {
-          id: crypto.randomUUID(),
+        const newCreator: Omit<EmailCreator, 'id' | 'created_at'> = {
           full_name: row['Nombre'],
+          email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
-          created_at: new Date().toISOString(),
           status: 'active'
         };
 
-        // Add to the data store
-        emailCreators.push(newCreator);
+        // Insert into the database
+        const { error } = await supabase
+          .from('email_creators')
+          .insert([newCreator]);
+
+        if (error) {
+          throw new Error(`Database error: ${error.message}`);
+        }
+
         result.successful++;
       } catch (error: any) {
         result.failed++;
         result.errors.push({
-          row: index + 2, // +2 because Excel starts at 1 and we have header row
+          row: i + 2, // +2 because Excel starts at 1 and we have header row
           message: error.message
         });
       }
-    });
+    }
 
     return result;
   } catch (error) {

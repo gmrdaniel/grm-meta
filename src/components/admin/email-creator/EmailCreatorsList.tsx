@@ -36,6 +36,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators }
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>TikTok Link</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Status</TableHead>
@@ -45,6 +46,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators }
             {creators.map((creator) => (
               <TableRow key={creator.id}>
                 <TableCell>{creator.full_name}</TableCell>
+                <TableCell>{creator.email}</TableCell>
                 <TableCell>
                   <a 
                     href={creator.tiktok_link} 

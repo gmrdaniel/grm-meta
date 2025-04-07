@@ -248,6 +248,42 @@ export type Database = {
           },
         ]
       }
+      email_creators: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          prompt: string | null
+          prompt_output: string | null
+          status: string
+          tiktok_link: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          prompt?: string | null
+          prompt_output?: string | null
+          status?: string
+          tiktok_link: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          prompt?: string | null
+          prompt_output?: string | null
+          status?: string
+          tiktok_link?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
