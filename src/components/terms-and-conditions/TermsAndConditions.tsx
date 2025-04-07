@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-
-
 import {
   Dialog,
   DialogTrigger,
@@ -157,29 +155,16 @@ export function TermsCheckbox({
                 By clicking "Complete My Onboarding", you acknowledge and agree
                 to these terms in their entirety.
               </p>
+
               <p className="text-justify">
-                <strong>Quick Summary (Plain Language):</strong>
-                <br />
-                Meta handles payments & bonuses directly. We aren't responsible
-                for changes by Meta.
-                <br />
-                You permit us to contact you for creator opportunities and share
-                your information with third parties.
-                <br />
-                You’re responsible for ensuring your content has proper rights
-                and clearances.
-                <br />
-                Tips we provide are for guidance only.
-              </p>
-              <p className="text-justify">
-                You're all set! Complete your onboarding to start monetizing and
-                exploring exciting opportunities.
-                <br />
                 <div className="flex justify-center">
-                  <button className="text-blue-800 hover:font-semibold mt-4"  onClick={() => {
+                  <button
+                    className="text-blue-800 hover:font-semibold mt-4"
+                    onClick={() => {
                       setIsDialogOpen(false);
                       onAcceptTerms(); // Llama al callback para marcar el checkbox
-                    }}>
+                    }}
+                  >
                     Accept Terms & Complete My Onboarding
                   </button>
                 </div>

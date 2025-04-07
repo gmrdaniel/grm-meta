@@ -64,7 +64,7 @@ export default function CreatorDashboard() {
                 <h2 className=" flex text-xl gap-1 font-semibold text-center text-gray-800 mb-4    whitespace-nowrap">
                   {verificationStatus === "review" && (
                     <>
-                      <EyeIcon className="h-4 w-4 text-black mt-2" />
+                     
                       <span className="whitespace-normal md:whitespace-nowrap">
                         Your Submission is Under Review!
                       </span>
