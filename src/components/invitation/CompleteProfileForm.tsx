@@ -14,11 +14,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
+import { CreatorInvitation } from "@/types/invitation";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
   isSubmitting: boolean;
-  invitationId?: string;
+  invitation: CreatorInvitation;
 }
 
 export interface ProfileFormData {
@@ -33,7 +34,7 @@ export interface ProfileFormData {
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
   isSubmitting,
-  invitationId,
+  invitation,
 }) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     youtubeChannel: "",
@@ -52,6 +53,19 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [instagramError, setInstagramError] = useState<string | null>(null);
+  const [needsInstagramRevalidation, setNeedsInstagramRevalidation] =
+    useState(false);
+
+  useEffect(() => {
+    setFormData({
+      youtubeChannel: invitation.youtube_channel,
+      instagramUser: invitation.instagram_user,
+      phoneCountryCode: invitation.phone_country_code,
+      phoneNumber: invitation.phone_number,
+      phoneVerified: invitation.phone_verified,
+      isIGProfessional: invitation.is_professional_account,
+    });
+  }, [invitation]);
 
   // Handle countdown timer for OTP expiration
   useEffect(() => {
@@ -73,20 +87,21 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   };
 
   const validateInstagramUsername = (username: string): boolean => {
-    if (!username) return true; // Allow empty value as it's optional
+    if (!username) {
+      setInstagramError(null);
+      setNeedsInstagramRevalidation(false);
+      return true;
+    }
 
-    // Remove @ if present at the beginning
     const cleanUsername = username.startsWith("@")
       ? username.substring(1)
       : username;
 
-    // Check length (5-30 characters)
     if (cleanUsername.length < 5 || cleanUsername.length > 30) {
       setInstagramError("Username must be between 5 and 30 characters long");
       return false;
     }
 
-    // Check allowed characters: letters, numbers, periods, and underscores
     const validRegex = /^[a-zA-Z0-9._]+$/;
     if (!validRegex.test(cleanUsername)) {
       setInstagramError(
@@ -96,6 +111,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     }
 
     setInstagramError(null);
+    setNeedsInstagramRevalidation(false);
     return true;
   };
 
@@ -106,14 +122,14 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     if (name === "phoneNumber") {
       setFormData({
         ...formData,
-        [name]: value.replace(/[^0-9]/g, ""),
+        [name]: value.replace(/\D/g, ""),
       });
     } else if (name === "instagramUser") {
       setFormData({
         ...formData,
         [name]: value,
       });
-      validateInstagramUsername(value);
+      setNeedsInstagramRevalidation(true);
     } else {
       setFormData({
         ...formData,
@@ -185,7 +201,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           phoneNumber: formData.phoneNumber,
           countryCode: formData.phoneCountryCode,
           verificationCode,
-          invitationId,
+          invitationId: invitation.id,
         },
       });
 
@@ -264,7 +280,21 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
             </div>
 
             {instagramError && (
-              <p className="text-sm text-red-500 mt-1">{instagramError}</p>
+              <>
+                <p className="text-sm text-red-500 mt-1">{instagramError}</p>
+                {needsInstagramRevalidation && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => {
+                      validateInstagramUsername(formData.instagramUser);
+                    }}
+                  >
+                    Validate Instagram again
+                  </Button>
+                )}
+              </>
             )}
 
             <p className="text-xs text-gray-500">

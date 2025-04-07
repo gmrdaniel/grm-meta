@@ -214,7 +214,7 @@ export default function InvitationStepperPage() {
 
     const { error } = await supabase
       .from("creator_invitations")
-      .update({ status: "accepted", updated_at: new Date().toISOString() })
+      .update({ status: "in process", updated_at: new Date().toISOString() })
       .eq("id", invitation.id);
 
     if (error) {
@@ -277,11 +277,12 @@ export default function InvitationStepperPage() {
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
       instagram_user: instagramUsername,
-      phone_country_code: formData.phoneCountryCode || null,
+      /* phone_country_code: formData.phoneCountryCode || null,
       phone_number: formData.phoneNumber || null,
-      phone_verified: formData.phoneVerified,
+      phone_verified: formData.phoneVerified, */
       is_business_account: isBusinessAccount,
       is_professional_account: isProfessionalAccount,
+      status: 'in process' as const
     };
 
     const { error } = await supabase
@@ -309,7 +310,6 @@ export default function InvitationStepperPage() {
       facebookFormData.facebookPageUrl
     );
 
-    console.log(isValid, error);
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -380,7 +380,7 @@ export default function InvitationStepperPage() {
         options: {
           data: {
             full_name: invitation.full_name,
-            phone: invitation.phone_number || null,
+            phone_number: invitation.phone_number || null,
           },
         },
       });
@@ -476,7 +476,7 @@ export default function InvitationStepperPage() {
               <CompleteProfileForm
                 onSubmit={handleCompleteProfileSubmit}
                 isSubmitting={saving}
-                invitationId={invitation.id}
+                invitation={invitation}
               />
             )}
             {currentStep.id === "fbcreation" &&
