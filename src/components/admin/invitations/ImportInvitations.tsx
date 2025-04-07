@@ -14,6 +14,7 @@ import { ImportResultCard } from "@/components/admin/invitations/ImportResultCar
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Download } from "lucide-react";
 
 interface ImportInvitationsProps {
   onSuccess?: () => void;
@@ -178,6 +179,27 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     }
   };
 
+  const generateExcelTemplate = () => {
+    // Create template data with headers and example row
+    const templateData = [
+      ["Creator Name", "Email Address", "Social Media Handle", "Social Media Platform"],
+      ["John Doe", "john@example.com", "@johndoe", "tiktok"],
+      ["Jane Smith", "jane@example.com", "@janesmith", "instagram"]
+    ];
+    
+    // Create new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Invitations Template");
+    
+    // Write and download the file
+    XLSX.writeFile(wb, "creator_invitations_template.xlsx");
+    
+    toast.success("Template downloaded successfully");
+  };
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -209,7 +231,19 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           />
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">Upload Excel File</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Upload Excel File</p>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={generateExcelTemplate}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Template
+              </Button>
+            </div>
             <p className="text-sm text-gray-500 mb-2">
               The Excel file should have the following headers: <br />
               <code className="text-xs bg-gray-100 p-1 rounded">Creator Name, Email Address, Social Media Handle, Social Media Platform</code>
