@@ -1,10 +1,13 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  fetchInvitations,
+  fetchInvitationsWithPagination,
+  fetchAllInvitations,
   updateInvitationStatus,
   deleteInvitation,
   sendCreatorInvitationEmail,
+  exportInvitationsToExcel,
 } from "@/services/invitationService";
 import {
   Check,
@@ -14,6 +17,7 @@ import {
   RefreshCw,
   Trash2,
   X,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,21 +49,29 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@radix-ui/react-dropdown-menu";
+import InvitationsPagination from "./InvitationsPagination";
 
 const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [isExporting, setIsExporting] = useState(false);
   const queryClient = useQueryClient();
 
   const {
-    data: invitations,
+    data,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["invitations"],
-    queryFn: fetchInvitations,
+    queryKey: ["invitations", { page: currentPage, pageSize }],
+    queryFn: () => fetchInvitationsWithPagination(currentPage, pageSize),
   });
+
+  const invitations = data?.data || [];
+  const totalCount = data?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -107,6 +119,31 @@ const InvitationsList = () => {
     },
   });
 
+  const handleExportInvitations = async () => {
+    try {
+      setIsExporting(true);
+      // Fetch all invitations for export
+      const allInvitations = await fetchAllInvitations();
+      // Export to Excel
+      exportInvitationsToExcel(allInvitations);
+    } catch (error) {
+      console.error("Error exporting invitations:", error);
+      toast.error("Failed to export invitations");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   const handleStatusChange = (
     id: string,
     newStatus: "pending" | "accepted" | "rejected" | 'completed'
@@ -127,9 +164,8 @@ const InvitationsList = () => {
 
     return fullUrl
   }
+  
   const copyInvitationLink = (invitation: CreatorInvitation) => {
-    
-
     navigator.clipboard
       .writeText(createInvitationLink(invitation))
       .then(() => toast.success("Invitation link copied to clipboard"))
@@ -188,6 +224,18 @@ const InvitationsList = () => {
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <Button 
+          onClick={handleExportInvitations} 
+          disabled={isExporting}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Download size={16} />
+          {isExporting ? "Exporting..." : "Export All Invitations"}
+        </Button>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -350,6 +398,16 @@ const InvitationsList = () => {
           ))}
         </TableBody>
       </Table>
+
+      {totalCount > 0 && (
+        <InvitationsPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
     </div>
   );
 };
