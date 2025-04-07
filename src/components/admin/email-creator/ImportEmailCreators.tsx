@@ -7,6 +7,7 @@ import { importEmailCreatorsFromExcel } from "@/services/emailCreatorService";
 import { EmailCreatorImportResult } from "@/types/email-creator";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
+import { FileUploader } from "@/components/admin/inventory/import-templates/components/FileUploader";
 
 interface ImportEmailCreatorsProps {
   onImportComplete: () => void;
@@ -16,13 +17,6 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<EmailCreatorImportResult | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setImportResult(null);
-    }
-  };
 
   const handleImport = async () => {
     if (!file) {
@@ -89,24 +83,8 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-md p-6">
-            <FileSpreadsheet className="h-10 w-10 text-gray-400 mb-2" />
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Upload an Excel file with columns "Nombre", "Correo", and "Link de TikTok"
-            </p>
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              accept=".xlsx, .xls"
-              onChange={handleFileChange}
-            />
-            <label htmlFor="file-upload">
-              <Button variant="outline" className="cursor-pointer" disabled={isImporting}>
-                {file ? file.name : "Select File"}
-              </Button>
-            </label>
-          </div>
+          {/* Replace the old file input with FileUploader component */}
+          <FileUploader file={file} setFile={setFile} />
 
           {file && (
             <div className="flex justify-center">

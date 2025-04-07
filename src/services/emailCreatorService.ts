@@ -34,16 +34,27 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
   };
 
   try {
+    console.log("Starting import process with file:", file.name);
+    
     // Read the file
     const data = await file.arrayBuffer();
     const workbook = XLSX.read(data);
+    
+    if (!workbook.SheetNames.length) {
+      throw new Error("No sheets found in Excel file");
+    }
+    
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+    
+    console.log("Parsed Excel data:", jsonData.length, "rows");
 
     // Process each row
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
       try {
+        console.log("Processing row:", row);
+        
         // Validate the row data
         if (!row['Nombre'] || typeof row['Nombre'] !== 'string') {
           throw new Error('Missing or invalid "Nombre" field');
@@ -65,17 +76,21 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
           status: 'active'
         };
 
+        console.log("Inserting new creator:", newCreator);
+
         // Insert into the database with type assertion
         const { error } = await supabase
           .from('email_creators')
           .insert([newCreator]) as { error: any };
 
         if (error) {
+          console.error("Database insertion error:", error);
           throw new Error(`Database error: ${error.message}`);
         }
 
         result.successful++;
       } catch (error: any) {
+        console.error("Error processing row", i + 2, ":", error.message);
         result.failed++;
         result.errors.push({
           row: i + 2, // +2 because Excel starts at 1 and we have header row
@@ -84,6 +99,7 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
       }
     }
 
+    console.log("Import completed:", result);
     return result;
   } catch (error) {
     console.error("Error importing email creators:", error);
