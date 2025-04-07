@@ -84,6 +84,8 @@ serve(async (req)=>{
         });
         // Update the invitation with verified status
         const { error } = await supabaseAdmin.from('creator_invitations').update({
+          phone_country_code: countryCode,
+          phone_number: phoneNumber,
           phone_verified: true
         }).eq('id', invitationId);
         if (error) {

@@ -214,7 +214,7 @@ export default function InvitationStepperPage() {
 
     const { error } = await supabase
       .from("creator_invitations")
-      .update({ status: "accepted", updated_at: new Date().toISOString() })
+      .update({ status: "in process", updated_at: new Date().toISOString() })
       .eq("id", invitation.id);
 
     if (error) {
@@ -277,11 +277,12 @@ export default function InvitationStepperPage() {
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
       instagram_user: instagramUsername,
-      phone_country_code: formData.phoneCountryCode || null,
+      /* phone_country_code: formData.phoneCountryCode || null,
       phone_number: formData.phoneNumber || null,
-      phone_verified: formData.phoneVerified,
+      phone_verified: formData.phoneVerified, */
       is_business_account: isBusinessAccount,
       is_professional_account: isProfessionalAccount,
+      status: 'in process' as const
     };
 
     const { error } = await supabase
@@ -380,7 +381,8 @@ export default function InvitationStepperPage() {
         options: {
           data: {
             full_name: invitation.full_name,
-            phone: invitation.phone_number || null,
+            phone_country_code: invitation.phone_country_code || null,
+            phone_number: invitation.phone_number || null,
           },
         },
       });
