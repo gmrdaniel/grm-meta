@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Upload } from "lucide-react";
+import { FileSpreadsheet, Upload, Download } from "lucide-react";
 import { importEmailCreatorsFromExcel } from "@/services/emailCreatorService";
 import { EmailCreatorImportResult } from "@/types/email-creator";
 import { toast } from "sonner";
+import * as XLSX from 'xlsx';
 
 interface ImportEmailCreatorsProps {
   onImportComplete: () => void;
@@ -53,10 +54,38 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
     }
   };
 
+  const downloadTemplate = () => {
+    // Create a workbook with a sample template
+    const wb = XLSX.utils.book_new();
+    const data = [
+      ["Nombre", "Link de TikTok"],
+      ["John Doe", "https://www.tiktok.com/@johndoe"],
+      ["Jane Smith", "https://www.tiktok.com/@janesmith"]
+    ];
+    
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    
+    // Generate and download the Excel file
+    XLSX.writeFile(wb, "email_creators_template.xlsx");
+    toast.success("Template downloaded successfully");
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Import Email Creators</CardTitle>
+        <CardTitle className="flex justify-between items-center">
+          <span>Import Email Creators</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={downloadTemplate}
+            className="flex gap-2 items-center"
+          >
+            <Download size={16} />
+            Download Template
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
