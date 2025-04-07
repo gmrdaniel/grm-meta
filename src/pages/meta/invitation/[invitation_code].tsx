@@ -310,7 +310,6 @@ export default function InvitationStepperPage() {
       facebookFormData.facebookPageUrl
     );
 
-    console.log(isValid, error);
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -381,7 +380,6 @@ export default function InvitationStepperPage() {
         options: {
           data: {
             full_name: invitation.full_name,
-            phone_country_code: invitation.phone_country_code || null,
             phone_number: invitation.phone_number || null,
           },
         },
@@ -478,7 +476,7 @@ export default function InvitationStepperPage() {
               <CompleteProfileForm
                 onSubmit={handleCompleteProfileSubmit}
                 isSubmitting={saving}
-                invitationId={invitation.id}
+                invitation={invitation}
               />
             )}
             {currentStep.id === "fbcreation" &&

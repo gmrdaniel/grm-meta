@@ -21,6 +21,7 @@ export interface CreatorInvitation {
   phone_verified?: boolean;
   current_stage_id: string | null;
   fb_step_completed: boolean
+  is_professional_account?: boolean
 }
 
 export type CreateInvitationData = {
