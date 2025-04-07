@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -50,7 +49,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectId: "",
-      invitationType: "creator" // Set default value to "creator"
+      invitationType: "New User" // Set default value to "New User"
     }
   });
 
@@ -141,7 +140,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             social_media_handle: socialMediaHandle || null,
             social_media_type: socialMediaType || null,
             project_id: values.projectId,
-            invitation_type: values.invitationType // Use the value from the form
+            invitation_type: values.invitationType // Use the updated invitation type value
           };
 
           console.log("Creating invitation with data:", invitationData);
@@ -250,9 +249,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
                     <SelectValue placeholder="Select invitation type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="creator">Creator</SelectItem>
-                    <SelectItem value="brand">Brand</SelectItem>
-                    <SelectItem value="agency">Agency</SelectItem>
+                    <SelectItem value="New User">New User</SelectItem>
+                    <SelectItem value="Existing User">Existing User</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
