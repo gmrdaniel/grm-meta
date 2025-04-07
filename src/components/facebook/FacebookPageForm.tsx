@@ -41,7 +41,8 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
         </h1>
         <div className="flex items-center text-red-500 mt-2">
           <p className="text-gray-500 font-medium mt-4">
-            Important: Set Up Your Facebook Page!
+          <p className="text-gray-600 text-xs ">
+          Important: On this step, please share/create a Facebook Page and make sure to connect it with your Instagram account to complete your application and send it for validation to Meta!          </p>
           </p>
         </div>
       </div>
@@ -101,7 +102,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               }
             />
             <Label htmlFor="verifyOwnership" className="text-sm">
-              I verify that this is my Facebook page
+            I verify this Facebook Page is mine
             </Label>
           </div>
         </div>
@@ -139,7 +140,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             <Check className="h-4 w-4 text-green-600" />
           </div>
           <span className="text-blue-700">
-            Submit for validation (1-3 business days).
+            Submit for validation (3-7 business days).
           </span>
         </div>
       </div>
