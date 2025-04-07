@@ -1,28 +1,58 @@
 
 import * as XLSX from 'xlsx';
-import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult } from '@/types/email-creator';
+import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse } from '@/types/email-creator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-// Fetch email creators from the database
-export const getEmailCreators = async (): Promise<EmailCreator[]> => {
+// Fetch email creators from the database with pagination
+export const getEmailCreators = async (params?: PaginationParams): Promise<PaginatedResponse<EmailCreator>> => {
   try {
-    // Using type assertion to handle the typing issue
+    // Default values for pagination
+    const page = params?.page || 1;
+    const pageSize = params?.pageSize || 10;
+    const startIndex = (page - 1) * pageSize;
+
+    // Get total count for pagination
+    const { count, error: countError } = await supabase
+      .from('email_creators')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error("Error counting email creators:", countError);
+      throw countError;
+    }
+    
+    // Get paginated data
     const { data, error } = await supabase
       .from('email_creators')
       .select('*')
-      .order('created_at', { ascending: false }) as { data: EmailCreator[] | null, error: any };
+      .order('created_at', { ascending: false })
+      .range(startIndex, startIndex + pageSize - 1) as { data: EmailCreator[] | null, error: any };
       
     if (error) {
       console.error("Error fetching email creators:", error);
       throw error;
     }
     
-    return data || [];
+    const total = count || 0;
+    
+    return {
+      data: data || [],
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
   } catch (error) {
     console.error("Error in getEmailCreators:", error);
     toast.error("Failed to load email creators");
-    return [];
+    return {
+      data: [],
+      total: 0,
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 10,
+      totalPages: 0
+    };
   }
 };
 

@@ -7,7 +7,7 @@ export interface EmailCreator {
   created_at: string;
   prompt?: string;
   prompt_output?: string;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'completed';
 }
 
 export type EmailCreatorImportRow = {
@@ -21,3 +21,16 @@ export type EmailCreatorImportResult = {
   failed: number;
   errors: { row: number; message: string }[];
 };
+
+export interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}

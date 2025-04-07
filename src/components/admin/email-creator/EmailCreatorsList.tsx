@@ -4,21 +4,55 @@ import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2 } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
   onRefresh: () => void;
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+  total: number;
 }
 
-export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators, onRefresh }) => {
+export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ 
+  creators, 
+  onRefresh, 
+  page, 
+  totalPages, 
+  pageSize, 
+  onPageChange, 
+  onPageSizeChange,
+  total
+}) => {
   const [selectedCreator, setSelectedCreator] = useState<EmailCreator | null>(null);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
     setIsGenerateModalOpen(true);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === creators.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(creators.map(creator => creator.id));
+    }
+  };
+
+  const toggleSelectItem = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(itemId => itemId !== id));
+    } else {
+      setSelectedItems([...selectedItems, id]);
+    }
   };
   
   if (creators.length === 0) {
@@ -41,61 +75,124 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators, 
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Email Creator List</CardTitle>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">
+              Showing {creators.length} of {total} items
+            </span>
+            <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 per page</SelectItem>
+                <SelectItem value="50">50 per page</SelectItem>
+                <SelectItem value="100">100 per page</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>TikTok Link</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {creators.map((creator) => (
-                <TableRow key={creator.id}>
-                  <TableCell>{creator.full_name}</TableCell>
-                  <TableCell>{creator.email}</TableCell>
-                  <TableCell>
-                    <a 
-                      href={creator.tiktok_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {creator.tiktok_link}
-                    </a>
-                  </TableCell>
-                  <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      creator.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                      creator.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {creator.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleGenerateClick(creator)}
-                      className="flex items-center gap-1"
-                      disabled={creator.status === 'completed'}
-                    >
-                      <Wand2 className="h-4 w-4" />
-                      {creator.status === 'completed' ? 'Already Generated' : 'Create Text Notification'}
-                    </Button>
-                  </TableCell>
+          <div className="rounded-md border mb-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox 
+                      checked={selectedItems.length === creators.length && creators.length > 0}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>TikTok Link</TableHead>
+                  <TableHead>Created At</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {creators.map((creator) => (
+                  <TableRow key={creator.id}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedItems.includes(creator.id)}
+                        onCheckedChange={() => toggleSelectItem(creator.id)}
+                        aria-label={`Select ${creator.full_name}`}
+                      />
+                    </TableCell>
+                    <TableCell>{creator.full_name}</TableCell>
+                    <TableCell>{creator.email}</TableCell>
+                    <TableCell>
+                      <a 
+                        href={creator.tiktok_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {creator.tiktok_link}
+                      </a>
+                    </TableCell>
+                    <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        creator.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                        creator.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {creator.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleGenerateClick(creator)}
+                        className="flex items-center gap-1"
+                        disabled={creator.status === 'completed'}
+                      >
+                        <Wand2 className="h-4 w-4" />
+                        {creator.status === 'completed' ? 'Already Generated' : 'Create Text Notification'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              {selectedItems.length > 0 && (
+                <span>{selectedItems.length} item(s) selected</span>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(page - 1)}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(page + 1)}
+                disabled={page === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

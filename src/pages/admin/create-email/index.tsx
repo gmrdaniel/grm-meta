@@ -12,6 +12,10 @@ export default function AdminCreateEmail() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [creators, setCreators] = useState<EmailCreator[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   
   const handleImportComplete = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -21,12 +25,23 @@ export default function AdminCreateEmail() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset to first page when changing page size
+  };
+
   useEffect(() => {
     const fetchCreators = async () => {
       setIsLoading(true);
       try {
-        const data = await getEmailCreators();
-        setCreators(data);
+        const response = await getEmailCreators({ page, pageSize });
+        setCreators(response.data);
+        setTotalPages(response.totalPages);
+        setTotal(response.total);
       } catch (error) {
         console.error("Error fetching creators:", error);
       } finally {
@@ -35,7 +50,7 @@ export default function AdminCreateEmail() {
     };
 
     fetchCreators();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, page, pageSize]);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -57,8 +72,14 @@ export default function AdminCreateEmail() {
                 </div>
               ) : (
                 <EmailCreatorsList 
-                  creators={creators} 
+                  creators={creators}
                   onRefresh={handleRefresh}
+                  page={page}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  total={total}
                 />
               )}
             </TabsContent>
