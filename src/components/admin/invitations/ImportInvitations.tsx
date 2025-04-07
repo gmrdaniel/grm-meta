@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -49,7 +50,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectId: "",
-      invitationType: "New User" // Set default value to "New User"
+      invitationType: "new_user" // Set default value to "new_user"
     }
   });
 
@@ -249,8 +250,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
                     <SelectValue placeholder="Select invitation type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="New User">New User</SelectItem>
-                    <SelectItem value="Existing User">Existing User</SelectItem>
+                    <SelectItem value="new_user">New User</SelectItem>
+                    <SelectItem value="existing_user">Existing User</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
