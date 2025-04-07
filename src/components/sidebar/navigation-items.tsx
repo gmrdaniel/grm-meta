@@ -27,6 +27,12 @@ export const adminNavigationItems = [
     to: "/admin/invitations",
   },
   {
+    label: "Email Creator",
+    shortLabel: "Email",
+    icon: <Mail size={24} />,
+    to: "/admin/create-email",
+  },
+  {
     label: "Tasks",
     shortLabel: "Tasks",
     icon: <CheckSquare size={24} />,
