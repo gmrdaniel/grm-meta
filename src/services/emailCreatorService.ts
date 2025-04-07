@@ -7,10 +7,11 @@ import { supabase } from '@/integrations/supabase/client';
 // Fetch email creators from the database
 export const getEmailCreators = async (): Promise<EmailCreator[]> => {
   try {
+    // Using type assertion to handle the typing issue
     const { data, error } = await supabase
       .from('email_creators')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }) as { data: EmailCreator[] | null, error: any };
       
     if (error) {
       console.error("Error fetching email creators:", error);
@@ -57,17 +58,17 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
         }
 
         // Create a new email creator
-        const newCreator: Omit<EmailCreator, 'id' | 'created_at'> = {
+        const newCreator = {
           full_name: row['Nombre'],
           email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
           status: 'active'
         };
 
-        // Insert into the database
+        // Insert into the database with type assertion
         const { error } = await supabase
           .from('email_creators')
-          .insert([newCreator]);
+          .insert([newCreator]) as { error: any };
 
         if (error) {
           throw new Error(`Database error: ${error.message}`);
