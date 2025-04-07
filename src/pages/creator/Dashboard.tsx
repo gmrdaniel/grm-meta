@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { StatsCard } from "@/components/StatsCard";
-import { Button } from "@/components/ui/button";
 import { Image, Star, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 import { EyeIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@supabase/supabase-js";
 
@@ -19,7 +17,6 @@ const supabase = createClient(
 export default function CreatorDashboard() {
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState("review");
 
   useEffect(() => {
