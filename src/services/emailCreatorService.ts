@@ -26,6 +26,33 @@ export const getEmailCreators = async (): Promise<EmailCreator[]> => {
   }
 };
 
+// Update an email creator's prompt and prompt output
+export const updateEmailCreatorPrompt = async (
+  id: string,
+  prompt: string,
+  promptOutput: string
+): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('email_creators')
+      .update({
+        prompt,
+        prompt_output: promptOutput,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id) as { error: any };
+
+    if (error) {
+      console.error("Error updating email creator prompt:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error in updateEmailCreatorPrompt:", error);
+    toast.error("Failed to update email creator prompt");
+    throw error;
+  }
+};
+
 export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCreatorImportResult> => {
   const result: EmailCreatorImportResult = {
     successful: 0,

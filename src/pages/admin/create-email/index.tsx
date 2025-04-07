@@ -17,6 +17,10 @@ export default function AdminCreateEmail() {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   useEffect(() => {
     const fetchCreators = async () => {
       setIsLoading(true);
@@ -52,7 +56,10 @@ export default function AdminCreateEmail() {
                   <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-b-transparent"></div>
                 </div>
               ) : (
-                <EmailCreatorsList creators={creators} />
+                <EmailCreatorsList 
+                  creators={creators} 
+                  onRefresh={handleRefresh}
+                />
               )}
             </TabsContent>
             
