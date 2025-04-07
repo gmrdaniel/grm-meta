@@ -139,7 +139,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             social_media_handle: socialMediaHandle || null,
             social_media_type: socialMediaType || null,
             project_id: values.projectId,
-            invitation_type: "creator" // Ensure this is valid according to the DB constraint
+            invitation_type: "creator"
           };
 
           await createInvitation(invitationData);
