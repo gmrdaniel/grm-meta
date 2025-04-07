@@ -5,10 +5,14 @@ import {
   updateInvitationStatus,
   deleteInvitation,
   sendCreatorInvitationEmail,
+  fetchInvitationsWithPagination,
+  fetchAllInvitations,
+  exportInvitationsToExcel,
 } from "@/services/invitationService";
 import {
   Check,
   Copy,
+  Download,
   MailCheck,
   MoreVertical,
   RefreshCw,
@@ -45,29 +49,41 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@radix-ui/react-dropdown-menu";
+import InvitationsPagination from "./InvitationsPagination";
 
 const InvitationsList = () => {
+
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [isExporting, setIsExporting] = useState(false);
+
   const queryClient = useQueryClient();
 
   const {
-    data: invitations,
+    data,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["invitations"],
-    queryFn: fetchInvitations,
+    queryKey: ["invitations", { page: currentPage, pageSize }],
+    queryFn: () => fetchInvitationsWithPagination(currentPage, pageSize),
   });
 
+  const invitations = data?.data || [];
+  const totalCount = data?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
       status,
     }: {
       id: string;
-      status: "pending" | "accepted" | "rejected" | 'completed';
+      status: "pending" | "rejected" | 'completed' | 'sended' | 'in process';
     }) => updateInvitationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
@@ -109,7 +125,7 @@ const InvitationsList = () => {
 
   const handleStatusChange = (
     id: string,
-    newStatus: "pending" | "accepted" | "rejected" | 'completed'
+    newStatus: "pending" | "rejected" | 'completed' | 'sended' | 'in process'
   ) => {
     updateStatusMutation.mutate({ id, status: newStatus });
   };
@@ -172,6 +188,31 @@ const InvitationsList = () => {
     }
   };
 
+  const handleExportInvitations = async () => {
+    try {
+      setIsExporting(true);
+      // Fetch all invitations for export
+      const allInvitations = await fetchAllInvitations();
+      // Export to Excel
+      exportInvitationsToExcel(allInvitations);
+    } catch (error) {
+      console.error("Error exporting invitations:", error);
+      toast.error("Failed to export invitations");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center p-4">Loading invitations...</div>
@@ -186,8 +227,20 @@ const InvitationsList = () => {
     return <div className="text-center p-4">No invitations found</div>;
   }
 
+
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <Button 
+          onClick={handleExportInvitations} 
+          disabled={isExporting}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Download size={16} />
+          {isExporting ? "Exporting..." : "Export All Invitations"}
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -273,15 +326,15 @@ const InvitationsList = () => {
 
                     {invitation.status === "pending" && (
                       <>
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                           onClick={() =>
-                            handleStatusChange(invitation.id, "accepted")
+                            handleStatusChange(invitation.id, "completed" as const)
                           }
                           className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-green-600"
                         >
                           <Check className="mr-2 h-4 w-4" />
                           Mark as accepted
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem
                           onClick={() =>
                             handleStatusChange(invitation.id, "rejected")
@@ -350,6 +403,15 @@ const InvitationsList = () => {
           ))}
         </TableBody>
       </Table>
+      {totalCount > 0 && (
+        <InvitationsPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
     </div>
   );
 };

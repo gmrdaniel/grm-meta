@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Eye, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,20 +17,32 @@ interface SubmissionCompleteScreenProps {
   onShowPasswordForm: () => void;
 }
 
-export const SubmissionCompleteScreen: React.FC<SubmissionCompleteScreenProps> = ({
+export const SubmissionCompleteScreen: React.FC<
+  SubmissionCompleteScreenProps
+> = ({
   showPasswordForm,
   passwordData,
   submitting,
   onPasswordChange,
   onSetPassword,
-  onShowPasswordForm
+  onShowPasswordForm,
 }) => {
   return (
     <div className="pt-8 pb-8 flex flex-col items-center">
       <div className="bg-blue-100 p-6 rounded-full mb-4">
         {showPasswordForm ? (
           <div className="text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
@@ -40,7 +51,7 @@ export const SubmissionCompleteScreen: React.FC<SubmissionCompleteScreenProps> =
           <Eye className="h-12 w-12 text-blue-600" />
         )}
       </div>
-      
+
       {showPasswordForm ? (
         <>
           <CardTitle className="text-2xl font-bold text-center mb-2">
@@ -49,23 +60,25 @@ export const SubmissionCompleteScreen: React.FC<SubmissionCompleteScreenProps> =
           <p className="text-gray-600 text-center mb-6">
             Set a secure password for your creator account
           </p>
-          
+
           <div className="w-full space-y-6">
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 value={passwordData.password}
                 onChange={onPasswordChange}
               />
-              <p className="text-sm text-gray-500">Must be at least 8 characters</p>
+              <p className="text-sm text-gray-500">
+                Must be at least 8 characters
+              </p>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input 
+              <Input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
@@ -73,10 +86,14 @@ export const SubmissionCompleteScreen: React.FC<SubmissionCompleteScreenProps> =
                 onChange={onPasswordChange}
               />
             </div>
-            
+
             <Button
               onClick={onSetPassword}
-              disabled={submitting || passwordData.password.length < 8 || passwordData.password !== passwordData.confirmPassword}
+              disabled={
+                submitting ||
+                passwordData.password.length < 8 ||
+                passwordData.password !== passwordData.confirmPassword
+              }
               className="w-full"
             >
               {submitting ? "Creating Account..." : "Set Password & Continue"}
@@ -86,18 +103,19 @@ export const SubmissionCompleteScreen: React.FC<SubmissionCompleteScreenProps> =
       ) : (
         <>
           <CardTitle className="text-2xl font-bold text-center mb-2">
-            <Eye className="inline mr-2" /> Your Submission is Under Review!
+            Your Submission is Under Review!
           </CardTitle>
-          <p className="text-gray-600 text-center mb-4">
-            We've received your details and are currently verifying your information (takes 1-3 business days).
+          <p className="text-gray-600 text-center mb-4 text-sm">
+            Congrats! Our team is now validating your info (3–7 business days).
+            Finish setting your password now to access your account and track
+            your application status anytime
           </p>
           <p className="text-gray-600 text-center mb-8">
-            <Mail className="inline mr-2 text-blue-500" /> You'll be notified via email/SMS once approved.
+            <Mail className="inline mr-2 text-blue-500" /> You'll be notified
+            via email/SMS once approved.
           </p>
-          
-          <Button onClick={onShowPasswordForm}>
-            Set a Password
-          </Button>
+
+          <Button onClick={onShowPasswordForm}>Set a Password</Button>
         </>
       )}
     </div>

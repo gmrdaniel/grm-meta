@@ -452,6 +452,18 @@ export default function InvitationStepperPage() {
           </div>
           <span>Free trial of Meta Verified</span>
         </li>
+        <li className="items-center gap-2 hidden lg:flex">
+        <div className="rounded-full bg-green-100 p-1">
+          <Check className="h-4 w-4 text-green-600" />
+        </div>
+        <span>Increased discoverability</span>
+      </li>
+      <li className=" items-center gap-2 hidden lg:flex">
+        <div className="rounded-full bg-green-100 p-1">
+          <Check className="h-4 w-4 text-green-600" />
+        </div>
+        <span>Meta Support</span>
+      </li> 
       </ul>
     </div>
   )}

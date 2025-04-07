@@ -42,6 +42,8 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
   
   const { user } = useAuth()
   console.log(user)
+  console.log("Datos personales:", personalData);
+
   // Get all social networks with their usernames and followers
   const socialNetworks = !isLoading && personalData ? [
     { name: "instagram", label: "Instagram", username: personalData?.instagram_username, followers: personalData?.instagram_followers },
@@ -49,7 +51,10 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
     { name: "youtube", label: "YouTube", username: personalData?.youtube_username, followers: personalData?.youtube_followers },
     { name: "pinterest", label: "Pinterest", username: personalData?.pinterest_username, followers: personalData?.pinterest_followers }
   ].filter(network => network.username) : [];
-  
+
+  console.log("Redes Sociales Cargadas:", socialNetworks);
+
+  console.log("User Metadata:", user?.user_metadata);
   if (isLoading) {
     return (
       <Card>
@@ -99,11 +104,7 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
               <dt className="font-medium text-gray-500">Full Name</dt>
               <dd>{user.user_metadata.full_name || "Not set"}</dd>
             </div>
-            <div>
-              <dt className="font-medium text-gray-500">Last Name</dt>
-              <dd>{personalData?.last_name || "Not set"}</dd>
-            </div>
-            <div>
+            {/* <div>
               <dt className="font-medium text-gray-500">Birth Date</dt>
               <dd>{personalData?.birth_date || "Not set"}</dd>
             </div>
@@ -114,19 +115,19 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
             <div>
               <dt className="font-medium text-gray-500">State</dt>
               <dd>{personalData?.state_of_residence || "Not set"}</dd>
-            </div>
+            </div> */}
             <div>
               <dt className="font-medium text-gray-500">Phone Number</dt>
               <dd>{user.user_metadata.phone || ""}</dd>
             </div>
-            <div>
+            {/* <div>
               <dt className="font-medium text-gray-500">Gender</dt>
               <dd>{personalData?.gender || "Not set"}</dd>
             </div>
             <div>
               <dt className="font-medium text-gray-500">Category</dt>
               <dd>{personalData?.categories?.name || "Not set"}</dd>
-            </div>
+            </div> */}
           </dl>
           
           <div>
