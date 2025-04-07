@@ -29,13 +29,15 @@ import { fetchProjectStages } from "@/services/projectService";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
-import { validateFacebookPageUrl } from "@/utils/validationUtils";
+import { validateFacebookPageUrl } from "@/utils/validateFacebookPageUrl";
 
 // 🗃️ Types
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
 import { Check } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
+import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
+import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
 
 // 🧭 Steps
 const stepList = [
@@ -229,12 +231,57 @@ export default function InvitationStepperPage() {
     if (!invitation) return;
     setSaving(true);
 
+    const instagramUsername = formData.instagramUser?.trim();
+
+    // Validación 1: campo obligatorio
+    if (!instagramUsername) {
+      toast.error("Instagram username is required.");
+      setSaving(false);
+      return;
+    }
+
+    // Validación 2: formato correcto (sin arrobas, links, espacios, etc.)
+    if (!isValidInstagramUsernameFormat(instagramUsername)) {
+      toast.error(
+        "Please enter only the Instagram username without @ or links."
+      );
+      setSaving(false);
+      return;
+    }
+
+    let isBusinessAccount: boolean | null = null;
+    let isProfessionalAccount: boolean | null = null;
+
+    // Validación 3: existencia del usuario
+    try {
+      const result = await fetchInstagramUser(instagramUsername);
+      const user = result?.data?.user;
+
+      if (
+        !user?.username ||
+        user.username.toLowerCase() !== instagramUsername.toLowerCase()
+      ) {
+        toast.error("Instagram user does not exist or is inaccessible.");
+        setSaving(false);
+        return;
+      }
+
+      isBusinessAccount = user.is_business_account;
+      isProfessionalAccount = user.is_professional_account;
+    } catch (error) {
+      toast.error("Failed to verify Instagram user.");
+      setSaving(false);
+      return;
+    }
+
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
-      instagram_user: formData.instagramUser || null,
+      instagram_user: instagramUsername,
       phone_country_code: formData.phoneCountryCode || null,
       phone_number: formData.phoneNumber || null,
       phone_verified: formData.phoneVerified,
+      is_business_account: isBusinessAccount,
+      is_professional_account: isProfessionalAccount,
     };
 
     const { error } = await supabase
@@ -262,7 +309,7 @@ export default function InvitationStepperPage() {
       facebookFormData.facebookPageUrl
     );
 
-    console.log(isValid, error)
+    console.log(isValid, error);
     if (!isValid) {
       toast.error(errorMessage || "Invalid Facebook URL");
       return;
@@ -281,7 +328,7 @@ export default function InvitationStepperPage() {
         facebookFormData.facebookPageUrl.trim()
       );
 
-      console.log(details)
+      console.log(details);
 
       if (details.type !== "page") {
         toast.error("The provided URL does not correspond to a Facebook Page.");
@@ -373,47 +420,48 @@ export default function InvitationStepperPage() {
       {/* Contenido principal con flex-grow */}
       <div className="flex flex-col md:flex-row items-center justify-evenly flex-grow p-4 gap-2">
         <div className="text-center max-w-md space-y-1 mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mt-4">
-            Join Meta Creator Breakthrough Bonus Program
-          </h1>
+        <h1 className="text-2xl font-semibold text-gray-800 mt-4">
+    {currentStep.id === "completeProfile"
+      ? "Complete Your Profile"
+      : "Join Meta Creator Breakthrough Bonus Program"}
+  </h1>
           <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
           {/* Benefits Section */}
-          <div className="p-4">
-            <h3 className="font-medium mb-3">Benefits:</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span className="whitespace-nowrap">
-                  Gain Immediate Facebook monetization
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span>
-                  Up to $5,000 <span className="font-semibold">"in extra"</span>
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="rounded-full bg-green-100 p-1">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <span>Free trial of Meta Verified</span>
-              </li>
-            </ul>
+          {currentStep.id === "welcome" && (
+    <div className="p-4">
+      <h3 className="font-medium mb-3">Benefits:</h3>
+      <ul className="space-y-2">
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
           </div>
-        </div>
+          <span className="whitespace-nowrap">
+            Gain Immediate Facebook monetization
+          </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+          <span>Up to $5,000 in extra bonuses (90 days)</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <div className="rounded-full bg-green-100 p-1">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+          <span>Free trial of Meta Verified</span>
+        </li>
+      </ul>
+    </div>
+  )}
+</div>
 
         <div className="h-[400px] hidden lg:block bg-blue-300 p-[1px]"></div>
 
         <Card className="w-full max-w-lg min-h-lg">
           <CardContent className="pt-6">
             <Stepper steps={stepList} currentStep={currentStep.id} />
-            <hr />
             {currentStep.id === "welcome" && (
               <WelcomeForm
                 invitation={invitation}
