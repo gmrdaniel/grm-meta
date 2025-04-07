@@ -53,9 +53,9 @@ export default function CreatorDashboard() {
               </h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+            
               {/* Tarjeta de estado de verificación */}
-              <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
+              <div className="flex flex-col items-center bg-white rounded-lg shadow-md p-8 w-full max-w-md">
                 <div className="flex justify-center mb-6">
                   <div className="bg-blue-100 rounded-full p-3">
                     <EyeIcon className="h-8 w-8 text-blue-500" />
@@ -74,7 +74,7 @@ export default function CreatorDashboard() {
                   {verificationStatus === "rejected" &&
                     "Your Submission was Rejected"}
                 </h2>
-                <p className="text-center text-gray-600 mb-6 text-sm mx-auto sm:w-72 md:w-96 md:ml-[-85px] lg:w-[500px]">
+                <p className="text-center text-gray-600 mb-6 text-sm mx-auto ">
                   {verificationStatus === "review" && (
                     <>
                       We've received your details and are currently verifying
@@ -99,7 +99,7 @@ export default function CreatorDashboard() {
                   </p>
                 </div>
               </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">       
               {/* Tarjetas StatsCard: Se muestran solo si el usuario está aprobado */}
               {verificationStatus === "approved" && (
                 <>

@@ -301,7 +301,15 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
               }
             />
             <Label htmlFor="isIGProfessional" className="text-sm">
-              My account is a professional Instagram account
+              My account is a{" "}
+              <a
+                href="https://help.instagram.com/502981923235522"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                professional instagram account
+              </a>
             </Label>
           </div>
 

@@ -12,8 +12,8 @@ type StepperProps = {
 
 export const Stepper = ({ steps, currentStep }: StepperProps) => {
   return (
-    <div className="">
-      <div className="flex md:justify-between gap-4 overflow-x-auto no-scrollbar px-1">
+    <div className="mb-8">
+      <div className="flex md:justify-between gap-4 overflow-x-auto no-scrollbar ">
         {steps.map((step, index) => {
           const isActive = currentStep === step.id;
           const stepNumber = index + 1;
@@ -21,7 +21,8 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
           return (
             <div
               key={step.id}
-              className="flex-shrink-0 flex-1 min-w-[90px] md:min-w-0 text-center"
+              className="flex-shrink-0 flex-grow text-center"
+              style={{ flexBasis: "0", minWidth: "70px" }} // Ajuste para evitar scroll
             >
               <div
                 className={cn(
@@ -36,9 +37,18 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
               <p
                 title={step.label}
                 className={cn(
-                  "text-xs mt-2 text-ellipsis whitespace-nowrap overflow-hidden",
-                  isActive && "text-indigo-600 font-medium"
+                  "text-xs mt-2",
+                  isActive ? "text-indigo-600 font-medium" : "text-gray-600"
                 )}
+                style={{
+                  display: "-webkit-box", // Habilitar el comportamiento de caja flexible
+                  WebkitLineClamp: 2, // Limitar a 2 líneas
+                  WebkitBoxOrient: "vertical", // Orientación vertical para el texto
+                  overflow: "hidden", // Ocultar el texto que exceda las 2 líneas
+                  textOverflow: "ellipsis", // Mostrar puntos suspensivos si es necesario
+                  wordBreak: "break-word", // Romper palabras largas para evitar desbordamientos
+                  whiteSpace: "normal", // Permitir que el texto se ajuste automáticamente
+                }}
               >
                 {step.label}
               </p>

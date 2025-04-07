@@ -49,6 +49,10 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
    }
    onContinue();
  };
+
+ const handleAcceptTerms = () => {
+  onCheckboxChange(true); // Marca el checkbox de términos y condiciones
+};
   return (
     <>
       <CardContent className="space-y-6">
@@ -144,6 +148,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
           <TermsCheckbox
             formData={formData}
             onCheckboxChange={onCheckboxChange}
+            onAcceptTerms={handleAcceptTerms}
           />
         </div>
       </CardContent>
