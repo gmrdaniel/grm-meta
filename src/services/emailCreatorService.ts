@@ -26,7 +26,7 @@ export const getEmailCreators = async (): Promise<EmailCreator[]> => {
   }
 };
 
-// Update an email creator's prompt and prompt output
+// Update an email creator's prompt, prompt output and status
 export const updateEmailCreatorPrompt = async (
   id: string,
   prompt: string,
@@ -38,6 +38,7 @@ export const updateEmailCreatorPrompt = async (
       .update({
         prompt,
         prompt_output: promptOutput,
+        status: 'completed',
         updated_at: new Date().toISOString()
       })
       .eq('id', id) as { error: any };

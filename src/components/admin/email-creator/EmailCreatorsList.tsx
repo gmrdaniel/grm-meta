@@ -74,7 +74,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators, 
                   <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      creator.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      creator.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                      creator.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {creator.status}
                     </span>
@@ -85,9 +86,10 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators, 
                       size="sm"
                       onClick={() => handleGenerateClick(creator)}
                       className="flex items-center gap-1"
+                      disabled={creator.status === 'completed'}
                     >
                       <Wand2 className="h-4 w-4" />
-                      Create Text Notification
+                      {creator.status === 'completed' ? 'Already Generated' : 'Create Text Notification'}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -105,4 +107,4 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ creators, 
       />
     </>
   );
-};
+}

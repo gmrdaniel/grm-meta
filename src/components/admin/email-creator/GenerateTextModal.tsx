@@ -9,7 +9,7 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { EmailCreator } from "@/types/email-creator";
 import { toast } from "sonner";
@@ -118,10 +118,10 @@ export function GenerateTextModal({
       const plainText = extractPlainText(data.result);
       setExtractedText(plainText);
       
-      // Update the email creator with the prompt and result
+      // Update the email creator with the prompt, result and change status to 'completed'
       await updateEmailCreatorPrompt(creator.id, prompt, plainText);
       
-      toast.success("Text notification generated successfully");
+      toast.success("Text notification generated and status updated to completed");
       onSuccess();
       onOpenChange(false);
     } catch (err) {
@@ -138,7 +138,7 @@ export function GenerateTextModal({
         <DialogHeader>
           <DialogTitle>Generate Text Notification for {creator?.full_name}</DialogTitle>
           <DialogDescription>
-            This will generate a personalized notification for the creator using GPT-4o.
+            This will generate a personalized notification for the creator using GPT-4o and update their status to completed.
           </DialogDescription>
         </DialogHeader>
         
@@ -153,6 +153,16 @@ export function GenerateTextModal({
               <div>
                 <span className="text-sm font-medium">TikTok Link:</span>
                 <p className="text-sm break-all">{creator?.tiktok_link}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium">Current Status:</span>
+                <p className="text-sm">
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    creator?.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {creator?.status}
+                  </span>
+                </p>
               </div>
             </div>
           </div>
@@ -191,7 +201,10 @@ export function GenerateTextModal({
                 Generating...
               </>
             ) : (
-              "Generate Text"
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Generate Text
+              </>
             )}
           </Button>
         </DialogFooter>
