@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar } from "@/components/Sidebar";
 import InvitationsList from "@/components/admin/invitations/InvitationsList";
 import InvitationForm from "@/components/admin/invitations/InvitationForm";
+import ImportInvitations from "@/components/admin/invitations/ImportInvitations";
 import { Plus } from "lucide-react";
 
 const InvitationsPage = () => {
@@ -37,6 +38,7 @@ const InvitationsPage = () => {
           <TabsList className="mb-4">
             <TabsTrigger value="list">Invitations List</TabsTrigger>
             <TabsTrigger value="create">Create Invitation</TabsTrigger>
+            <TabsTrigger value="import">Import Invitations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
@@ -57,6 +59,17 @@ const InvitationsPage = () => {
               </CardHeader>
               <CardContent>
                 <InvitationForm onSuccess={handleInvitationCreated} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="import">
+            <Card>
+              <CardHeader>
+                <CardTitle>Import Invitations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImportInvitations onSuccess={handleInvitationCreated} />
               </CardContent>
             </Card>
           </TabsContent>
