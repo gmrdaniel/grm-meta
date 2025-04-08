@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BulkGenerateTextModal } from "./BulkGenerateTextModal";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import * as XLSX from 'xlsx';
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
@@ -82,34 +83,28 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     }
 
     const selectedCreators = getSelectedCreators();
-    const csvData = selectedCreators.map(creator => ({
-      full_name: creator.full_name,
-      email: creator.email,
-      prompt_output: creator.prompt_output || ""
+    
+    const exportData = selectedCreators.map(creator => ({
+      "Full Name": creator.full_name || "",
+      "Email": creator.email || "",
+      "Prompt Output": creator.prompt_output || ""
     }));
 
-    const headers = ["full_name", "email", "prompt_output"];
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map(row => 
-        headers.map(header => {
-          const value = String(row[header as keyof typeof row] || "").replace(/"/g, '""');
-          return `"${value}"`;
-        }).join(",")
-      )
-    ].join("\n");
-
-    const BOM = "\uFEFF";
-    const csvContentWithBOM = BOM + csvContent;
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
     
-    const blob = new Blob([csvContentWithBOM], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `email_creators_export_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const columnWidths = [
+      { wch: 25 }, // Full Name
+      { wch: 30 }, // Email
+      { wch: 80 }  // Prompt Output - wider for text content
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
+
+    const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+    
+    XLSX.writeFile(workbook, fileName, { bookType: 'xlsx' });
     
     toast.success(`${selectedCreators.length} records exported successfully`);
   };
