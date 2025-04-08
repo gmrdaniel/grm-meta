@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter, Eye } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +11,13 @@ import { BulkGenerateTextModal } from "./BulkGenerateTextModal";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import * as XLSX from 'xlsx';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
@@ -39,6 +45,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isBulkGenerateModalOpen, setIsBulkGenerateModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [viewTextCreator, setViewTextCreator] = useState<EmailCreator | null>(null);
+  const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
@@ -48,6 +56,11 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const handleBulkGenerateClick = () => {
     if (selectedItems.length === 0) return;
     setIsBulkGenerateModalOpen(true);
+  };
+
+  const handleViewText = (creator: EmailCreator) => {
+    setViewTextCreator(creator);
+    setIsViewTextDialogOpen(true);
   };
 
   const toggleSelectAll = () => {
@@ -76,6 +89,22 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     if (statusFilter === "pending") return creator.status !== "completed";
     return true;
   });
+
+  const getTiktokHandle = (tiktokLink: string): string => {
+    // Try to extract the handle from URLs like https://www.tiktok.com/@username
+    const match = tiktokLink.match(/@([^/?]+)/);
+    if (match && match[1]) {
+      return `@${match[1]}`;
+    }
+    
+    // If no @ found in the URL, check if it's just a username without @
+    if (!tiktokLink.includes("/") && !tiktokLink.includes("@")) {
+      return `@${tiktokLink}`;
+    }
+    
+    // Otherwise return the original link
+    return tiktokLink;
+  };
 
   const handleDownloadSelected = () => {
     if (selectedItems.length === 0) {
@@ -238,8 +267,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>TikTok Link</TableHead>
-                  <TableHead>Invitation Link</TableHead>
+                  <TableHead>TikTok</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -264,28 +292,9 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >
-                        {creator.tiktok_link.length > 30 
-                          ? `${creator.tiktok_link.substring(0, 30)}...` 
-                          : creator.tiktok_link}
+                        {getTiktokHandle(creator.tiktok_link)}
                         <ExternalLink size={14} />
                       </a>
-                    </TableCell>
-                    <TableCell>
-                      {creator.link_invitation ? (
-                        <a 
-                          href={creator.link_invitation} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline flex items-center gap-1"
-                        >
-                          {creator.link_invitation.length > 30 
-                            ? `${creator.link_invitation.substring(0, 30)}...` 
-                            : creator.link_invitation}
-                          <ExternalLink size={14} />
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">Not provided</span>
-                      )}
                     </TableCell>
                     <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
                     <TableCell>
@@ -297,16 +306,29 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleGenerateClick(creator)}
-                        className="flex items-center gap-1"
-                        disabled={creator.status === 'completed'}
-                      >
-                        <Wand2 className="h-4 w-4" />
-                        {creator.status === 'completed' ? 'Already Generated' : 'Create Text Notification'}
-                      </Button>
+                      <div className="flex gap-2">
+                        {creator.prompt_output && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewText(creator)}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Text
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleGenerateClick(creator)}
+                          className="flex items-center gap-1"
+                          disabled={creator.status === 'completed'}
+                        >
+                          <Wand2 className="h-4 w-4" />
+                          {creator.status === 'completed' ? 'Already Generated' : 'Create Text'}
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -386,6 +408,28 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         onOpenChange={setIsBulkGenerateModalOpen}
         onSuccess={onRefresh}
       />
+
+      <Dialog open={isViewTextDialogOpen} onOpenChange={setIsViewTextDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generated Text for {viewTextCreator?.full_name}</DialogTitle>
+          </DialogHeader>
+          {viewTextCreator?.prompt_output ? (
+            <div className="whitespace-pre-wrap text-base">
+              {viewTextCreator.prompt_output}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No generated text available.
+            </div>
+          )}
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
