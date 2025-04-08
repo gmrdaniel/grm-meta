@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter, Eye } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter, Eye, FileDown } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +19,12 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
@@ -103,7 +110,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     return tiktokLink;
   };
 
-  const handleDownloadSelected = () => {
+  const handleDownloadSelected = (format: 'xls' | 'csv') => {
     if (selectedItems.length === 0) {
       toast.error("Please select at least one record to download");
       return;
@@ -141,49 +148,65 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     
-    const columnWidths = [
-      { wch: 25 },  // Full_name
-      { wch: 30 },  // Email
-      { wch: 35 },  // meta_content_invitation
-      { wch: 400 }, // Paragraph 1 - maximum width
-      { wch: 400 }, // Paragraph 2 - maximum width
-      { wch: 400 }, // Paragraph 3 - maximum width
-      { wch: 400 }, // Paragraph 4 - maximum width
-      { wch: 400 }, // Paragraph 5 - maximum width
-      { wch: 400 }, // Paragraph 6 - maximum width
-      { wch: 400 }, // Paragraph 7 - maximum width
-      { wch: 400 }, // Paragraph 8 - maximum width
-      { wch: 400 }, // Paragraph 9 - maximum width
-      { wch: 400 }, // Paragraph 10 - maximum width
-      { wch: 400 }, // Paragraph 11 - maximum width
-    ];
-    
-    worksheet['!cols'] = columnWidths;
-
-    for (let i = 0; i < exportData.length; i++) {
-      for (let col = 3; col <= 13; col++) { // Paragraph columns (3-13)
-        const cellRef = XLSX.utils.encode_cell({r: i+1, c: col});
-        if (!worksheet[cellRef]) continue;
-        
-        if (!worksheet[cellRef].s) worksheet[cellRef].s = {};
-        worksheet[cellRef].s.alignment = { wrapText: true, vertical: 'top' };
+    if (format === 'csv') {
+      // For CSV export we'll use direct CSV generation which can better handle long text
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      
+      // Create blob and download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.csv`;
+      
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success(`${selectedCreators.length} records exported successfully as CSV`);
+    } else {
+      // For XLS export with improved handling of long text
+      // Set extra wide column widths to prevent truncation
+      const columnWidths = [
+        { wch: 25 },  // Full_name
+        { wch: 30 },  // Email
+        { wch: 35 },  // meta_content_invitation
+      ];
+      
+      // Set all paragraph columns to have very wide width
+      for (let i = 0; i < 11; i++) {
+        columnWidths.push({ wch: 1000 }); // Setting extremely wide to avoid truncation
       }
+      
+      worksheet['!cols'] = columnWidths;
+
+      // Enable text wrapping for all cells containing paragraphs
+      for (let i = 0; i < exportData.length; i++) {
+        for (let col = 3; col <= 13; col++) { // Paragraph columns (3-13)
+          const cellRef = XLSX.utils.encode_cell({r: i+1, c: col});
+          if (!worksheet[cellRef]) continue;
+          
+          if (!worksheet[cellRef].s) worksheet[cellRef].s = {};
+          worksheet[cellRef].s.alignment = { wrapText: true, vertical: 'top' };
+        }
+      }
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
+
+      const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+      
+      // Use xlsx format for better compatibility with longer text
+      XLSX.writeFile(workbook, fileName, { 
+        bookType: 'xlsx', // Using xlsx instead of xls for better unicode support
+        bookSST: false,
+        type: 'binary',
+        cellStyles: true,
+        compression: true
+      });
+      
+      toast.success(`${selectedCreators.length} records exported successfully as Excel`);
     }
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
-
-    const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xls`;
-    
-    XLSX.writeFile(workbook, fileName, { 
-      bookType: 'xls',
-      bookSST: false,
-      type: 'binary',
-      cellStyles: true,
-      compression: true
-    });
-    
-    toast.success(`${selectedCreators.length} records exported successfully as XLS`);
   };
 
   if (creators.length === 0) {
@@ -260,15 +283,28 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
               )}
             </div>
             {selectedItems.length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1"
-                onClick={handleDownloadSelected}
-              >
-                <Download className="h-4 w-4" />
-                Download Selected ({selectedItems.length})
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1"
+                  >
+                    <FileDown className="h-4 w-4" />
+                    Download Selected ({selectedItems.length})
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleDownloadSelected('xlsx')}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Download as Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDownloadSelected('csv')}>
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Download as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
@@ -371,16 +407,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                     >
                       <Wand2 className="h-4 w-4" />
                       Generate All Selected
-                    </Button>
-                    
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      onClick={handleDownloadSelected}
-                      className="flex items-center gap-1"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download Selected
                     </Button>
                   </div>
                 </div>
