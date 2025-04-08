@@ -4,7 +4,7 @@ import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -108,6 +108,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>TikTok Link</TableHead>
+                  <TableHead>Invitation Link</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -130,10 +131,30 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                         href={creator.tiktok_link} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline flex items-center gap-1"
                       >
-                        {creator.tiktok_link}
+                        {creator.tiktok_link.length > 30 
+                          ? `${creator.tiktok_link.substring(0, 30)}...` 
+                          : creator.tiktok_link}
+                        <ExternalLink size={14} />
                       </a>
+                    </TableCell>
+                    <TableCell>
+                      {creator.link_invitation ? (
+                        <a 
+                          href={creator.link_invitation} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-1"
+                        >
+                          {creator.link_invitation.length > 30 
+                            ? `${creator.link_invitation.substring(0, 30)}...` 
+                            : creator.link_invitation}
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">Not provided</span>
+                      )}
                     </TableCell>
                     <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
                     <TableCell>

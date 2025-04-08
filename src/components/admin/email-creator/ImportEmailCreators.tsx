@@ -52,9 +52,9 @@ export const ImportEmailCreators: React.FC<ImportEmailCreatorsProps> = ({ onImpo
     // Create a workbook with a sample template
     const wb = XLSX.utils.book_new();
     const data = [
-      ["Nombre", "Correo", "Link de TikTok"],
-      ["John Doe", "john.doe@example.com", "https://www.tiktok.com/@johndoe"],
-      ["Jane Smith", "jane.smith@example.com", "https://www.tiktok.com/@janesmith"]
+      ["Nombre", "Correo", "Link de TikTok", "Link de Invitación"],
+      ["John Doe", "john.doe@example.com", "https://www.tiktok.com/@johndoe", "https://example.com/invite/johndoe"],
+      ["Jane Smith", "jane.smith@example.com", "https://www.tiktok.com/@janesmith", ""]
     ];
     
     const ws = XLSX.utils.aoa_to_sheet(data);

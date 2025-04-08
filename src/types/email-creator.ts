@@ -4,6 +4,7 @@ export interface EmailCreator {
   full_name: string;
   email: string;
   tiktok_link: string;
+  link_invitation?: string | null;
   created_at: string;
   prompt?: string;
   prompt_output?: string;
@@ -14,6 +15,7 @@ export type EmailCreatorImportRow = {
   full_name: string;
   email: string;
   tiktok_link: string;
+  link_invitation?: string;
 };
 
 export type EmailCreatorImportResult = {

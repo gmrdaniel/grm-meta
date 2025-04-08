@@ -254,6 +254,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          link_invitation: string | null
           prompt: string | null
           prompt_output: string | null
           status: string
@@ -265,6 +266,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
           status?: string
@@ -276,6 +278,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
           status?: string

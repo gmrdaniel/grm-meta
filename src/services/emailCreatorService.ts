@@ -127,12 +127,17 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
         }
 
         // Create a new email creator
-        const newCreator = {
+        const newCreator: any = {
           full_name: row['Nombre'],
           email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
           status: 'active'
         };
+
+        // Add the optional link_invitation field if it exists
+        if (row['Link de Invitación'] && typeof row['Link de Invitación'] === 'string') {
+          newCreator.link_invitation = row['Link de Invitación'];
+        }
 
         console.log("Inserting new creator:", newCreator);
 
