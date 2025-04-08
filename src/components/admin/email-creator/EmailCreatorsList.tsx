@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -196,9 +195,9 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
       const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
       
-      // Use xlsx format for better compatibility with longer text
+      // Using xls format but with .xlsx file extension and better configuration
       XLSX.writeFile(workbook, fileName, { 
-        bookType: 'xlsx', // Using xlsx instead of xls for better unicode support
+        bookType: 'xlsx', 
         bookSST: false,
         type: 'binary',
         cellStyles: true,
@@ -295,7 +294,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleDownloadSelected('xlsx')}>
+                  <DropdownMenuItem onClick={() => handleDownloadSelected('xls')}>
                     <FileDown className="h-4 w-4 mr-2" />
                     Download as Excel
                   </DropdownMenuItem>
