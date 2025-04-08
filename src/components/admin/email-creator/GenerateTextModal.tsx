@@ -9,7 +9,7 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Eye } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { EmailCreator } from "@/types/email-creator";
 import { toast } from "sonner";
@@ -33,6 +33,7 @@ export function GenerateTextModal({
   const [processedPrompt, setProcessedPrompt] = useState("");
   const [result, setResult] = useState<any>(null);
   const [extractedText, setExtractedText] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load the template description
   useEffect(() => {
@@ -47,6 +48,11 @@ export function GenerateTextModal({
       prompt = prompt.replace(/{nombre}/g, creator.full_name || "{nombre}");
       prompt = prompt.replace(/{link_red_social}/g, creator.tiktok_link || "{link_red_social}");
       setProcessedPrompt(prompt);
+      
+      // If the creator already has a prompt_output, set it to be previewed
+      if (creator.prompt_output) {
+        setExtractedText(creator.prompt_output);
+      }
     }
   }, [description, creator]);
 
@@ -77,6 +83,10 @@ export function GenerateTextModal({
       
       // Replace escaped newlines with actual newlines
       plainText = plainText.replace(/\\n/g, '\n');
+      
+      // Replace each newline with two newlines
+      plainText = plainText.replace(/\n/g, '\n\n');
+      
       return plainText;
     } catch (err) {
       console.error("Error extracting text:", err);
@@ -114,7 +124,7 @@ export function GenerateTextModal({
       const data = await response.json();
       setResult(data.result);
       
-      // Extract the plain text
+      // Extract the plain text and apply double newlines
       const plainText = extractPlainText(data.result);
       setExtractedText(plainText);
       
@@ -130,6 +140,10 @@ export function GenerateTextModal({
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePreview = () => {
+    setShowPreview(!showPreview);
   };
 
   return (
@@ -154,6 +168,12 @@ export function GenerateTextModal({
                 <span className="text-sm font-medium">TikTok Link:</span>
                 <p className="text-sm break-all">{creator?.tiktok_link}</p>
               </div>
+              {creator?.link_invitation && (
+                <div>
+                  <span className="text-sm font-medium">Invitation Link:</span>
+                  <p className="text-sm break-all">{creator?.link_invitation}</p>
+                </div>
+              )}
               <div>
                 <span className="text-sm font-medium">Current Status:</span>
                 <p className="text-sm">
@@ -167,16 +187,39 @@ export function GenerateTextModal({
             </div>
           </div>
           
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Prompt Template</h3>
-            <Textarea 
-              value={processedPrompt} 
-              readOnly 
-              className="h-40 font-mono text-xs bg-gray-50"
-            />
-          </div>
+          {creator?.prompt_output && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={togglePreview}
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                {showPreview ? "Hide Preview" : "Show Preview"}
+              </Button>
+            </div>
+          )}
           
-          {extractedText && (
+          {(showPreview && creator?.prompt_output) ? (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Generated Content Preview</h3>
+              <div className="p-4 bg-blue-50 rounded-md whitespace-pre-wrap">
+                {creator.prompt_output}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Prompt Template</h3>
+              <Textarea 
+                value={processedPrompt} 
+                readOnly 
+                className="h-40 font-mono text-xs bg-gray-50"
+              />
+            </div>
+          )}
+          
+          {extractedText && !showPreview && (
             <div className="space-y-2 border-t pt-4">
               <h3 className="text-sm font-medium">Generated Text</h3>
               <div className="p-4 bg-blue-50 rounded-md whitespace-pre-wrap">
