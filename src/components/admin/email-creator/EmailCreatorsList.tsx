@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -84,26 +85,55 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
     const selectedCreators = getSelectedCreators();
     
-    const exportData = selectedCreators.map(creator => ({
-      "Full Name": creator.full_name || "",
-      "Email": creator.email || "",
-      "Prompt Output": creator.prompt_output || ""
-    }));
+    // Create dynamic export data with paragraphs as separate columns
+    const exportData = selectedCreators.map(creator => {
+      // Split prompt_output by double line breaks to get paragraphs
+      const paragraphs = creator.prompt_output 
+        ? creator.prompt_output.split(/\n\s*\n/)
+        : [];
+      
+      // Create a base object with creator info
+      const baseObject: Record<string, string> = {
+        "Full Name": creator.full_name || "",
+        "Email": creator.email || "",
+        "TikTok Link": creator.tiktok_link || "",
+      };
+      
+      // Add each paragraph as a separate column
+      paragraphs.forEach((paragraph, index) => {
+        // Trim whitespace and replace any remaining newlines with spaces
+        const cleanParagraph = paragraph.trim().replace(/\n/g, ' ');
+        baseObject[`Paragraph ${index + 1}`] = cleanParagraph;
+      });
+      
+      return baseObject;
+    });
 
+    // Create worksheet from the export data
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     
-    const columnWidths = [
-      { wch: 25 }, // Full Name
-      { wch: 30 }, // Email
-      { wch: 80 }  // Prompt Output - wider for text content
-    ];
+    // Set column widths for better readability
+    const maxColumns = Math.max(...exportData.map(obj => Object.keys(obj).length));
+    const columnWidths = Array(maxColumns).fill(0).map((_, i) => {
+      if (i < 3) {
+        // First columns (name, email, tiktok) get standard widths
+        return { wch: i === 0 ? 25 : i === 1 ? 30 : 35 };
+      } else {
+        // Paragraph columns get wider width
+        return { wch: 60 };
+      }
+    });
+    
     worksheet['!cols'] = columnWidths;
 
+    // Create workbook and add the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
 
+    // Generate filename with current date
     const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
     
+    // Write the workbook to a file
     XLSX.writeFile(workbook, fileName, { bookType: 'xlsx' });
     
     toast.success(`${selectedCreators.length} records exported successfully`);
