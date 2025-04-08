@@ -8,6 +8,7 @@ import { Wand2, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BulkGenerateTextModal } from "./BulkGenerateTextModal";
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
@@ -33,10 +34,16 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const [selectedCreator, setSelectedCreator] = useState<EmailCreator | null>(null);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isBulkGenerateModalOpen, setIsBulkGenerateModalOpen] = useState(false);
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
     setIsGenerateModalOpen(true);
+  };
+
+  const handleBulkGenerateClick = () => {
+    if (selectedItems.length === 0) return;
+    setIsBulkGenerateModalOpen(true);
   };
 
   const toggleSelectAll = () => {
@@ -53,6 +60,11 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     } else {
       setSelectedItems([...selectedItems, id]);
     }
+  };
+  
+  // Get selected creators objects array
+  const getSelectedCreators = (): EmailCreator[] => {
+    return creators.filter(creator => selectedItems.includes(creator.id));
   };
   
   if (creators.length === 0) {
@@ -187,7 +199,23 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
               {selectedItems.length > 0 && (
-                <span>{selectedItems.length} item(s) selected</span>
+                <div className="flex space-x-2 items-center">
+                  <span>{selectedItems.length} item(s) selected</span>
+                  {selectedItems.length > 0 && (
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      onClick={handleBulkGenerateClick}
+                      className="flex items-center gap-1"
+                      disabled={selectedItems.every(id => 
+                        creators.find(c => c.id === id)?.status === 'completed'
+                      )}
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      Generate All Selected
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex items-center space-x-2">
@@ -221,6 +249,13 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         creator={selectedCreator}
         open={isGenerateModalOpen}
         onOpenChange={setIsGenerateModalOpen}
+        onSuccess={onRefresh}
+      />
+      
+      <BulkGenerateTextModal
+        creators={getSelectedCreators()}
+        open={isBulkGenerateModalOpen}
+        onOpenChange={setIsBulkGenerateModalOpen}
         onSuccess={onRefresh}
       />
     </>
