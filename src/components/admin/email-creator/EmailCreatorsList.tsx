@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -92,18 +91,15 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   });
 
   const getTiktokHandle = (tiktokLink: string): string => {
-    // Try to extract the handle from URLs like https://www.tiktok.com/@username
     const match = tiktokLink.match(/@([^/?]+)/);
     if (match && match[1]) {
       return `@${match[1]}`;
     }
     
-    // If no @ found in the URL, check if it's just a username without @
     if (!tiktokLink.includes("/") && !tiktokLink.includes("@")) {
       return `@${tiktokLink}`;
     }
     
-    // Otherwise return the original link
     return tiktokLink;
   };
 
@@ -115,28 +111,27 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
     const selectedCreators = getSelectedCreators();
     
-    // Create export data with the specified column order
     const exportData = selectedCreators.map(creator => {
-      // Split prompt_output by double line breaks to get paragraphs
-      const paragraphs = creator.prompt_output 
-        ? creator.prompt_output.split(/\n\s*\n/)
-        : [];
+      let paragraphs: string[] = [];
       
-      // Create a base object with creator info in the specified order
+      if (creator.prompt_output) {
+        paragraphs = creator.prompt_output
+          .split(/\n\s*\n/)
+          .map(p => p.trim())
+          .filter(p => p.length > 0);
+      }
+      
       const baseObject: Record<string, string> = {
         "Full_name": creator.full_name || "",
         "Email": creator.email || "",
         "meta_content_invitation": creator.link_invitation || "",
       };
       
-      // Add each paragraph as a separate column, with placeholders for missing paragraphs
       for (let i = 1; i <= 11; i++) {
         const paragraphIndex = i - 1;
         if (paragraphIndex < paragraphs.length) {
-          // Trim whitespace and replace any remaining newlines with spaces
-          baseObject[`Paragraph ${i}`] = paragraphs[paragraphIndex].trim().replace(/\n/g, ' ');
+          baseObject[`Paragraph ${i}`] = paragraphs[paragraphIndex].replace(/\n/g, ' ');
         } else {
-          // Add empty cell if paragraph doesn't exist
           baseObject[`Paragraph ${i}`] = "";
         }
       }
@@ -144,38 +139,38 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
       return baseObject;
     });
 
-    // Create worksheet from the export data
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     
-    // Set column widths for better readability
     const columnWidths = [
       { wch: 25 },  // Full_name
       { wch: 30 },  // Email
       { wch: 35 },  // meta_content_invitation
-      { wch: 60 },  // Paragraph 1
-      { wch: 60 },  // Paragraph 2
-      { wch: 60 },  // Paragraph 3
-      { wch: 60 },  // Paragraph 4
-      { wch: 60 },  // Paragraph 5
-      { wch: 60 },  // Paragraph 6
-      { wch: 60 },  // Paragraph 7
-      { wch: 60 },  // Paragraph 8
-      { wch: 60 },  // Paragraph 9
-      { wch: 60 },  // Paragraph 10
-      { wch: 60 },  // Paragraph 11
+      { wch: 150 }, // Paragraph 1 - increased width
+      { wch: 150 }, // Paragraph 2 - increased width
+      { wch: 150 }, // Paragraph 3 - increased width
+      { wch: 150 }, // Paragraph 4 - increased width
+      { wch: 150 }, // Paragraph 5 - increased width
+      { wch: 150 }, // Paragraph 6 - increased width
+      { wch: 150 }, // Paragraph 7 - increased width
+      { wch: 150 }, // Paragraph 8 - increased width
+      { wch: 150 }, // Paragraph 9 - increased width
+      { wch: 150 }, // Paragraph 10 - increased width
+      { wch: 150 }, // Paragraph 11 - increased width
     ];
     
     worksheet['!cols'] = columnWidths;
 
-    // Create workbook and add the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
 
-    // Generate filename with current date
     const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xls`;
     
-    // Write the workbook to a file with xls extension (Excel 97-2003 format)
-    XLSX.writeFile(workbook, fileName, { bookType: 'xls' });
+    XLSX.writeFile(workbook, fileName, { 
+      bookType: 'xls',
+      bookSST: false,
+      type: 'binary',
+      cellStyles: true
+    });
     
     toast.success(`${selectedCreators.length} records exported successfully`);
   };
