@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -114,26 +115,31 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
     const selectedCreators = getSelectedCreators();
     
-    // Create dynamic export data with paragraphs as separate columns
+    // Create export data with the specified column order
     const exportData = selectedCreators.map(creator => {
       // Split prompt_output by double line breaks to get paragraphs
       const paragraphs = creator.prompt_output 
         ? creator.prompt_output.split(/\n\s*\n/)
         : [];
       
-      // Create a base object with creator info
+      // Create a base object with creator info in the specified order
       const baseObject: Record<string, string> = {
-        "Full Name": creator.full_name || "",
+        "Full_name": creator.full_name || "",
         "Email": creator.email || "",
-        "TikTok Link": creator.tiktok_link || "",
+        "Link_invitation": creator.link_invitation || "",
       };
       
-      // Add each paragraph as a separate column
-      paragraphs.forEach((paragraph, index) => {
-        // Trim whitespace and replace any remaining newlines with spaces
-        const cleanParagraph = paragraph.trim().replace(/\n/g, ' ');
-        baseObject[`Paragraph ${index + 1}`] = cleanParagraph;
-      });
+      // Add each paragraph as a separate column, with placeholders for missing paragraphs
+      for (let i = 1; i <= 11; i++) {
+        const paragraphIndex = i - 1;
+        if (paragraphIndex < paragraphs.length) {
+          // Trim whitespace and replace any remaining newlines with spaces
+          baseObject[`Paragraph ${i}`] = paragraphs[paragraphIndex].trim().replace(/\n/g, ' ');
+        } else {
+          // Add empty cell if paragraph doesn't exist
+          baseObject[`Paragraph ${i}`] = "";
+        }
+      }
       
       return baseObject;
     });
@@ -142,16 +148,22 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     
     // Set column widths for better readability
-    const maxColumns = Math.max(...exportData.map(obj => Object.keys(obj).length));
-    const columnWidths = Array(maxColumns).fill(0).map((_, i) => {
-      if (i < 3) {
-        // First columns (name, email, tiktok) get standard widths
-        return { wch: i === 0 ? 25 : i === 1 ? 30 : 35 };
-      } else {
-        // Paragraph columns get wider width
-        return { wch: 60 };
-      }
-    });
+    const columnWidths = [
+      { wch: 25 },  // Full_name
+      { wch: 30 },  // Email
+      { wch: 35 },  // Link_invitation
+      { wch: 60 },  // Paragraph 1
+      { wch: 60 },  // Paragraph 2
+      { wch: 60 },  // Paragraph 3
+      { wch: 60 },  // Paragraph 4
+      { wch: 60 },  // Paragraph 5
+      { wch: 60 },  // Paragraph 6
+      { wch: 60 },  // Paragraph 7
+      { wch: 60 },  // Paragraph 8
+      { wch: 60 },  // Paragraph 9
+      { wch: 60 },  // Paragraph 10
+      { wch: 60 },  // Paragraph 11
+    ];
     
     worksheet['!cols'] = columnWidths;
 
@@ -162,7 +174,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     // Generate filename with current date
     const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
     
-    // Write the workbook to a file
+    // Write the workbook to a file with xlsx extension (Excel format)
     XLSX.writeFile(workbook, fileName, { bookType: 'xlsx' });
     
     toast.success(`${selectedCreators.length} records exported successfully`);
