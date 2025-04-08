@@ -131,7 +131,8 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
           full_name: row['Nombre'],
           email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
-          status: 'active'
+          status: 'active',
+          source_file: file.name // Add the source file name
         };
 
         // Add the optional link_invitation field if it exists

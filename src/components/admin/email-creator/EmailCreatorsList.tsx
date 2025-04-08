@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -131,6 +132,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         "Full_name": creator.full_name || "",
         "Email": creator.email || "",
         "meta_content_invitation": creator.link_invitation || "",
+        "Source_file": creator.source_file || "Unknown",
       };
       
       for (let i = 1; i <= 11; i++) {
@@ -170,6 +172,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         { wch: 25 },  // Full_name
         { wch: 30 },  // Email
         { wch: 35 },  // meta_content_invitation
+        { wch: 25 },  // Source_file
       ];
       
       // Set all paragraph columns to have very wide width
@@ -321,6 +324,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>TikTok</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -348,6 +352,11 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                         {getTiktokHandle(creator.tiktok_link)}
                         <ExternalLink size={14} />
                       </a>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-gray-600">
+                        {creator.source_file || "Manual entry"}
+                      </span>
                     </TableCell>
                     <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
                     <TableCell>

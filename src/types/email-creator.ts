@@ -9,6 +9,7 @@ export interface EmailCreator {
   prompt?: string;
   prompt_output?: string;
   status: 'active' | 'inactive' | 'completed';
+  source_file?: string | null;
 }
 
 export type EmailCreatorImportRow = {

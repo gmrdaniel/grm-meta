@@ -257,6 +257,7 @@ export type Database = {
           link_invitation: string | null
           prompt: string | null
           prompt_output: string | null
+          source_file: string | null
           status: string
           tiktok_link: string
           updated_at: string
@@ -269,6 +270,7 @@ export type Database = {
           link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
+          source_file?: string | null
           status?: string
           tiktok_link: string
           updated_at?: string
@@ -281,6 +283,7 @@ export type Database = {
           link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
+          source_file?: string | null
           status?: string
           tiktok_link?: string
           updated_at?: string
