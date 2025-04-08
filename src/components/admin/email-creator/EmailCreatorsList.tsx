@@ -4,11 +4,13 @@ import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BulkGenerateTextModal } from "./BulkGenerateTextModal";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface EmailCreatorsListProps {
   creators: EmailCreator[];
@@ -35,6 +37,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isBulkGenerateModalOpen, setIsBulkGenerateModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
@@ -47,10 +50,10 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   };
 
   const toggleSelectAll = () => {
-    if (selectedItems.length === creators.length) {
+    if (selectedItems.length === filteredCreators.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(creators.map(creator => creator.id));
+      setSelectedItems(filteredCreators.map(creator => creator.id));
     }
   };
 
@@ -65,6 +68,54 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   // Get selected creators objects array
   const getSelectedCreators = (): EmailCreator[] => {
     return creators.filter(creator => selectedItems.includes(creator.id));
+  };
+  
+  // Filter creators based on status
+  const filteredCreators = creators.filter(creator => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "completed") return creator.status === "completed";
+    if (statusFilter === "pending") return creator.status !== "completed";
+    return true;
+  });
+
+  // Handle download of selected creators
+  const handleDownloadSelected = () => {
+    if (selectedItems.length === 0) {
+      toast.error("Please select at least one record to download");
+      return;
+    }
+
+    const selectedCreators = getSelectedCreators();
+    const csvData = selectedCreators.map(creator => ({
+      full_name: creator.full_name,
+      email: creator.email,
+      prompt_output: creator.prompt_output || ""
+    }));
+
+    // Create CSV content
+    const headers = ["full_name", "email", "prompt_output"];
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => 
+        headers.map(header => {
+          // Escape quotes in the content and wrap in quotes
+          const value = String(row[header as keyof typeof row] || "").replace(/"/g, '""');
+          return `"${value}"`;
+        }).join(",")
+      )
+    ].join("\n");
+
+    // Create and download the CSV file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `email_creators_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success(`${selectedCreators.length} records exported successfully`);
   };
   
   if (creators.length === 0) {
@@ -91,7 +142,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
           <CardTitle>Email Creator List</CardTitle>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">
-              Showing {creators.length} of {total} items
+              Showing {filteredCreators.length} of {total} items
             </span>
             <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
               <SelectTrigger className="w-[100px]">
@@ -106,13 +157,60 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Select 
+                value={statusFilter} 
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue>
+                    <div className="flex items-center">
+                      <Filter className="mr-2 h-4 w-4" />
+                      {statusFilter === "all" && "All Statuses"}
+                      {statusFilter === "completed" && "Completed Only"}
+                      {statusFilter === "pending" && "Pending Only"}
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="completed">Completed Only</SelectItem>
+                  <SelectItem value="pending">Pending Only</SelectItem>
+                </SelectContent>
+              </Select>
+              {statusFilter !== "all" && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  {statusFilter === "completed" ? "Completed" : "Pending"}
+                  <button 
+                    onClick={() => setStatusFilter("all")}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              )}
+            </div>
+            {selectedItems.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={handleDownloadSelected}
+              >
+                <Download className="h-4 w-4" />
+                Download Selected ({selectedItems.length})
+              </Button>
+            )}
+          </div>
+
           <div className="rounded-md border mb-4">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <Checkbox 
-                      checked={selectedItems.length === creators.length && creators.length > 0}
+                      checked={selectedItems.length === filteredCreators.length && filteredCreators.length > 0}
                       onCheckedChange={toggleSelectAll}
                       aria-label="Select all"
                     />
@@ -127,7 +225,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {creators.map((creator) => (
+                {filteredCreators.map((creator) => (
                   <TableRow key={creator.id}>
                     <TableCell>
                       <Checkbox 
@@ -201,7 +299,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
               {selectedItems.length > 0 && (
                 <div className="flex space-x-2 items-center">
                   <span>{selectedItems.length} item(s) selected</span>
-                  {selectedItems.length > 0 && (
+                  <div className="flex gap-2">
                     <Button 
                       size="sm"
                       variant="outline"
@@ -214,7 +312,17 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                       <Wand2 className="h-4 w-4" />
                       Generate All Selected
                     </Button>
-                  )}
+                    
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      onClick={handleDownloadSelected}
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Selected
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
