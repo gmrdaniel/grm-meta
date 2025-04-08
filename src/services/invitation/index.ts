@@ -4,3 +4,4 @@ export * from './createInvitation';
 export * from './updateInvitation';
 export * from './deleteInvitation';
 export * from "./sendCreatorInvitationEmail";
+export * from './exportInvitations';
