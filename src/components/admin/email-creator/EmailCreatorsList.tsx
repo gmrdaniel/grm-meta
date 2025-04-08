@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -65,12 +64,10 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     }
   };
   
-  // Get selected creators objects array
   const getSelectedCreators = (): EmailCreator[] => {
     return creators.filter(creator => selectedItems.includes(creator.id));
   };
   
-  // Filter creators based on status
   const filteredCreators = creators.filter(creator => {
     if (statusFilter === "all") return true;
     if (statusFilter === "completed") return creator.status === "completed";
@@ -78,7 +75,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     return true;
   });
 
-  // Handle download of selected creators
   const handleDownloadSelected = () => {
     if (selectedItems.length === 0) {
       toast.error("Please select at least one record to download");
@@ -92,21 +88,21 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
       prompt_output: creator.prompt_output || ""
     }));
 
-    // Create CSV content
     const headers = ["full_name", "email", "prompt_output"];
     const csvContent = [
       headers.join(","),
       ...csvData.map(row => 
         headers.map(header => {
-          // Escape quotes in the content and wrap in quotes
           const value = String(row[header as keyof typeof row] || "").replace(/"/g, '""');
           return `"${value}"`;
         }).join(",")
       )
     ].join("\n");
 
-    // Create and download the CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    const BOM = "\uFEFF";
+    const csvContentWithBOM = BOM + csvContent;
+    
+    const blob = new Blob([csvContentWithBOM], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
@@ -117,7 +113,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     
     toast.success(`${selectedCreators.length} records exported successfully`);
   };
-  
+
   if (creators.length === 0) {
     return (
       <Card>
@@ -293,7 +289,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
             </Table>
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
               {selectedItems.length > 0 && (
