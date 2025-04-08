@@ -126,7 +126,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
       const baseObject: Record<string, string> = {
         "Full_name": creator.full_name || "",
         "Email": creator.email || "",
-        "Link_invitation": creator.link_invitation || "",
+        "meta_content_invitation": creator.link_invitation || "",
       };
       
       // Add each paragraph as a separate column, with placeholders for missing paragraphs
@@ -151,7 +151,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     const columnWidths = [
       { wch: 25 },  // Full_name
       { wch: 30 },  // Email
-      { wch: 35 },  // Link_invitation
+      { wch: 35 },  // meta_content_invitation
       { wch: 60 },  // Paragraph 1
       { wch: 60 },  // Paragraph 2
       { wch: 60 },  // Paragraph 3
@@ -172,10 +172,10 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
 
     // Generate filename with current date
-    const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+    const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xls`;
     
-    // Write the workbook to a file with xlsx extension (Excel format)
-    XLSX.writeFile(workbook, fileName, { bookType: 'xlsx' });
+    // Write the workbook to a file with xls extension (Excel 97-2003 format)
+    XLSX.writeFile(workbook, fileName, { bookType: 'xls' });
     
     toast.success(`${selectedCreators.length} records exported successfully`);
   };
