@@ -139,40 +139,74 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
       return baseObject;
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const format = 'xls'; // Default format
     
-    const columnWidths = [
-      { wch: 25 },  // Full_name
-      { wch: 30 },  // Email
-      { wch: 35 },  // meta_content_invitation
-      { wch: 150 }, // Paragraph 1 - increased width
-      { wch: 150 }, // Paragraph 2 - increased width
-      { wch: 150 }, // Paragraph 3 - increased width
-      { wch: 150 }, // Paragraph 4 - increased width
-      { wch: 150 }, // Paragraph 5 - increased width
-      { wch: 150 }, // Paragraph 6 - increased width
-      { wch: 150 }, // Paragraph 7 - increased width
-      { wch: 150 }, // Paragraph 8 - increased width
-      { wch: 150 }, // Paragraph 9 - increased width
-      { wch: 150 }, // Paragraph 10 - increased width
-      { wch: 150 }, // Paragraph 11 - increased width
-    ];
-    
-    worksheet['!cols'] = columnWidths;
+    if (format === 'csv') {
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.csv`;
+      
+      if (navigator.msSaveBlob) {
+        navigator.msSaveBlob(blob, fileName);
+      } else {
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
+      toast.success(`${selectedCreators.length} records exported successfully as CSV`);
+    } else {
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      
+      const columnWidths = [
+        { wch: 25 },  // Full_name
+        { wch: 30 },  // Email
+        { wch: 35 },  // meta_content_invitation
+        { wch: 400 }, // Paragraph 1 - maximum width
+        { wch: 400 }, // Paragraph 2 - maximum width
+        { wch: 400 }, // Paragraph 3 - maximum width
+        { wch: 400 }, // Paragraph 4 - maximum width
+        { wch: 400 }, // Paragraph 5 - maximum width
+        { wch: 400 }, // Paragraph 6 - maximum width
+        { wch: 400 }, // Paragraph 7 - maximum width
+        { wch: 400 }, // Paragraph 8 - maximum width
+        { wch: 400 }, // Paragraph 9 - maximum width
+        { wch: 400 }, // Paragraph 10 - maximum width
+        { wch: 400 }, // Paragraph 11 - maximum width
+      ];
+      
+      worksheet['!cols'] = columnWidths;
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
+      for (let i = 0; i < exportData.length; i++) {
+        for (let col = 3; col <= 13; col++) { // Paragraph columns (3-13)
+          const cellRef = XLSX.utils.encode_cell({r: i+1, c: col});
+          if (!worksheet[cellRef]) continue;
+          
+          if (!worksheet[cellRef].s) worksheet[cellRef].s = {};
+          worksheet[cellRef].s.alignment = { wrapText: true, vertical: 'top' };
+        }
+      }
 
-    const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xls`;
-    
-    XLSX.writeFile(workbook, fileName, { 
-      bookType: 'xls',
-      bookSST: false,
-      type: 'binary',
-      cellStyles: true
-    });
-    
-    toast.success(`${selectedCreators.length} records exported successfully`);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "EmailCreators");
+
+      const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xls`;
+      
+      XLSX.writeFile(workbook, fileName, { 
+        bookType: 'xls',
+        bookSST: false,
+        type: 'binary',
+        cellStyles: true,
+        compression: true
+      });
+      
+      toast.success(`${selectedCreators.length} records exported successfully as XLS`);
+    }
   };
 
   if (creators.length === 0) {
