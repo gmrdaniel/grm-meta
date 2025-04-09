@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { toast } from "sonner";
@@ -7,19 +6,8 @@ import * as XLSX from 'xlsx';
 export const useEmailCreators = (creators: EmailCreator[]) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFileFilter, setSourceFileFilter] = useState<string>("all");
   const [viewTextCreator, setViewTextCreator] = useState<EmailCreator | null>(null);
   const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
-  const [uniqueSourceFiles, setUniqueSourceFiles] = useState<string[]>([]);
-
-  useEffect(() => {
-    const sourceFiles = creators
-      .map(creator => creator.source_file || "Manual entry")
-      .filter((value, index, self) => self.indexOf(value) === index)
-      .sort();
-    
-    setUniqueSourceFiles(sourceFiles);
-  }, [creators]);
 
   const toggleSelectAll = () => {
     if (selectedItems.length === filteredCreators.length) {
@@ -50,11 +38,6 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     if (statusFilter !== "all") {
       if (statusFilter === "completed" && !creator.prompt_output) return false;
       if (statusFilter === "pending" && creator.prompt_output) return false;
-    }
-    
-    if (sourceFileFilter !== "all") {
-      const creatorSourceFile = creator.source_file || "Manual entry";
-      if (creatorSourceFile !== sourceFileFilter) return false;
     }
     
     return true;
@@ -158,13 +141,10 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     selectedItems,
     statusFilter,
     setStatusFilter,
-    sourceFileFilter,
-    setSourceFileFilter,
     viewTextCreator,
     setViewTextCreator,
     isViewTextDialogOpen,
     setIsViewTextDialogOpen,
-    uniqueSourceFiles,
     filteredCreators,
     toggleSelectAll,
     toggleSelectItem,

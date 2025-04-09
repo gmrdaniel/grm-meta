@@ -17,7 +17,6 @@ export default function AdminCreateEmail() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [sourceFileFilter, setSourceFileFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   
   const handleImportComplete = () => {
@@ -44,7 +43,6 @@ export default function AdminCreateEmail() {
         const response = await getEmailCreators({ 
           page, 
           pageSize,
-          sourceFile: sourceFileFilter || undefined,
           status: statusFilter || undefined
         });
         setCreators(response.data);
@@ -58,7 +56,7 @@ export default function AdminCreateEmail() {
     };
 
     fetchCreators();
-  }, [refreshTrigger, page, pageSize, sourceFileFilter, statusFilter]);
+  }, [refreshTrigger, page, pageSize, statusFilter]);
 
   return (
     <div className="flex h-screen bg-gray-50">

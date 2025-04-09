@@ -43,12 +43,9 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     selectedItems,
     statusFilter,
     setStatusFilter,
-    sourceFileFilter,
-    setSourceFileFilter,
     viewTextCreator,
     isViewTextDialogOpen,
     setIsViewTextDialogOpen,
-    uniqueSourceFiles,
     filteredCreators,
     toggleSelectAll,
     toggleSelectItem,
@@ -111,9 +108,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
             <EmailCreatorsFilters
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
-              sourceFileFilter={sourceFileFilter}
-              setSourceFileFilter={setSourceFileFilter}
-              uniqueSourceFiles={uniqueSourceFiles}
             />
             
             <EmailCreatorsActions

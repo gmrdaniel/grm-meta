@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse, SourceFileSummary } from '@/types/email-creator';
 import { toast } from 'sonner';
@@ -11,17 +10,12 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     const page = params?.page || 1;
     const pageSize = params?.pageSize || 10;
     const startIndex = (page - 1) * pageSize;
-    const sourceFile = params?.sourceFile || null;
     const status = params?.status || null;
 
     // Build query
     let query = supabase.from('email_creators').select('*', { count: 'exact' });
     
-    // Apply filters if provided
-    if (sourceFile) {
-      query = query.eq('source_file', sourceFile);
-    }
-    
+    // Apply status filter if provided
     // Updated status filter to check for prompt_output
     if (status) {
       if (status === 'completed') {
@@ -44,11 +38,6 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     // Reset query for data fetch
     query = supabase.from('email_creators').select('*');
     
-    // Apply filters again for data query
-    if (sourceFile) {
-      query = query.eq('source_file', sourceFile);
-    }
-    
     // Apply the same status filter to the data query
     if (status) {
       if (status === 'completed') {
@@ -60,7 +49,7 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
       }
     }
     
-    // Get paginated data
+    // Get paginated data - always sorted by creation date descending
     const { data, error } = await query
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + pageSize - 1);

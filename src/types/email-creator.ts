@@ -29,7 +29,6 @@ export type EmailCreatorImportResult = {
 export interface PaginationParams {
   page: number;
   pageSize: number;
-  sourceFile?: string;
   status?: string;
 }
 
