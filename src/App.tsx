@@ -16,9 +16,7 @@ import AdminInvitations from "./pages/admin/invitations";
 import AdminTasks from "./pages/admin/tasks";
 import AdminTaskCreate from "./pages/admin/tasks/create";
 import AdminTest from "./pages/admin/test";
-import AdminCreateEmail from "./pages/admin/create-email"; 
-import AdminNotifications from "./pages/admin/admin-notifications";
-import AdminLogNotification from "./pages/admin/log-notification";
+import AdminCreateEmail from "./pages/admin/create-email"; // Add the new page import
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationPage from "./pages/invite/[url]/[id]";
@@ -94,22 +92,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminCreateEmail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/admin-notifications"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminNotifications />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/log-notification"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminLogNotification />
                   </ProtectedRoute>
                 }
               />
