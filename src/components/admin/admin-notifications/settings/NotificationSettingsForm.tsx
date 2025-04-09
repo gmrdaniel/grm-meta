@@ -11,6 +11,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+// Define type-safe notification types using the types from the database
+type NotificationType = Database["public"]["Enums"]["notification_types"];
+type NotificationChannel = Database["public"]["Enums"]["notification_channel"];
 
 interface NotificationSettingsFormProps {
   onSuccess: () => void;
@@ -21,8 +26,8 @@ export function NotificationSettingsForm({ onSuccess }: NotificationSettingsForm
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
-    type: "notification",
-    channel: "email",
+    type: "notification" as NotificationType,
+    channel: "email" as NotificationChannel,
     enabled: true,
     delay_days: 0,
     frequency_days: 1,
@@ -46,7 +51,13 @@ export function NotificationSettingsForm({ onSuccess }: NotificationSettingsForm
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'type') {
+      setFormData((prev) => ({ ...prev, [name]: value as NotificationType }));
+    } else if (name === 'channel') {
+      setFormData((prev) => ({ ...prev, [name]: value as NotificationChannel }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSwitchChange = (name: string, checked: boolean) => {

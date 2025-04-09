@@ -14,11 +14,13 @@ import { useState } from "react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 
-interface NotificationSetting {
+// Define NotificationSetting type using the Database type
+type NotificationSetting = {
   id: string;
-  type: string;
-  channel: string;
+  type: Database["public"]["Enums"]["notification_types"];
+  channel: Database["public"]["Enums"]["notification_channel"];
   enabled: boolean;
   delay_days: number;
   frequency_days: number;
@@ -26,7 +28,8 @@ interface NotificationSetting {
   created_at: string;
   subject: string | null;
   message: string;
-}
+  stage_id?: string | null;
+};
 
 interface NotificationSettingsListProps {
   onCreateNew: () => void;
@@ -41,7 +44,6 @@ export function NotificationSettingsList({ onCreateNew }: NotificationSettingsLi
     queryFn: async () => {
       const startIndex = (page - 1) * pageSize;
       
-      // Supabase query needs to be updated to use the correct schema
       const { data: settings, error, count } = await supabase
         .from("notification_settings")
         .select("*", { count: "exact" })
