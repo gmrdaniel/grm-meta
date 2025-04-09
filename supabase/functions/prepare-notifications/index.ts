@@ -2,15 +2,15 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 import { differenceInDays } from "https://esm.sh/date-fns";
 
-// Inicializa Supabase con la Service Role Key
+// Supabase
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-// Configuraciones de paginación y límite de ejecución
-const BATCH_SIZE = 500; // por cada setting
-const MAX_INSERTS = 1000; // total por ejecución
+// Configuración
+const BATCH_SIZE = 500;
+const MAX_INSERTS = 1000;
 
 serve(async () => {
   const now = new Date();
@@ -61,26 +61,42 @@ serve(async () => {
 
         if (daysInStage < delay_days) continue;
 
+        // 1. Chequear si ya hay un pending
+        const { data: existingPending } = await supabase
+          .from("notification_logs")
+          .select("id")
+          .eq("invitation_id", invitation_id)
+          .eq("notification_setting_id", setting_id)
+          .eq("status", "pending");
+
+        if ((existingPending?.length || 0) > 0) continue;
+
+        // 2. Chequear cantidad de envíos ya realizados
         const { data: logs } = await supabase
           .from("notification_logs")
           .select("id, sent_at")
           .eq("invitation_id", invitation_id)
           .eq("notification_setting_id", setting_id)
+          .eq("status", "sent")
           .order("sent_at", { ascending: false });
 
         if ((logs?.length || 0) >= max_notifications) continue;
 
+        // 3. Verificar tiempo mínimo entre envíos
         const lastSent = logs?.[0]?.sent_at;
         const daysSinceLast = lastSent ? differenceInDays(now, new Date(lastSent)) : Infinity;
 
         if (daysSinceLast < frequency_days) continue;
 
+        // 4. Insertar nuevo log pendiente
         const { error: insertError } = await supabase.from("notification_logs").insert({
           invitation_id,
           notification_setting_id: setting_id,
           stage_id: current_stage_id,
           channel,
-          status: "pending"
+          status: "pending",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
 
         if (insertError) {
