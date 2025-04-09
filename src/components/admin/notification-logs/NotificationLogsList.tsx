@@ -6,6 +6,7 @@ import { NotificationLogsTable } from "./components/NotificationLogsTable";
 import { NotificationLogsPagination } from "./components/NotificationLogsPagination";
 import { PageSizeSelector } from "./components/PageSizeSelector";
 import { NotificationLogsSummary } from "./components/NotificationLogsSummary";
+import { NotificationLogsFilters } from "./components/NotificationLogsFilters";
 
 export function NotificationLogsList() {
   const {
@@ -17,8 +18,23 @@ export function NotificationLogsList() {
     currentPage,
     setCurrentPage,
     totalLogs,
-    totalPages
+    totalPages,
+    filters,
+    setFilters,
+    filteredLogs
   } = useNotificationLogs();
+
+  const clearFilters = () => {
+    setFilters({
+      status: null,
+      dateRange: { from: undefined, to: undefined }
+    });
+  };
+
+  // Count active filters
+  const activeFiltersCount = 
+    (filters.status ? 1 : 0) + 
+    (filters.dateRange.from || filters.dateRange.to ? 1 : 0);
 
   if (isLoading) {
     return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
@@ -35,6 +51,13 @@ export function NotificationLogsList() {
 
   return (
     <div className="space-y-4">
+      <NotificationLogsFilters 
+        filters={filters}
+        setFilters={setFilters}
+        clearFilters={clearFilters}
+        activeFiltersCount={activeFiltersCount}
+      />
+
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="flex justify-between items-center px-4 py-3 border-b">
           <h3 className="text-lg font-medium">Notification Logs</h3>
@@ -53,6 +76,7 @@ export function NotificationLogsList() {
       <NotificationLogsSummary
         currentCount={logs?.length || 0}
         totalCount={totalLogs}
+        filteredCount={filteredLogs?.length || 0}
       />
     </div>
   );
