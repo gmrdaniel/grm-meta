@@ -82,7 +82,7 @@ function renderTemplate(template: string, variables: Record<string, string | und
 function generateValueFor(key: string, invitation: any): string | undefined {
   switch (key) {
     case "url":
-      return `${baseAppUrl}${invitation.url}`;
+      return `${baseAppUrl}${invitation.invitation_url}`;
     default:
       return invitation[key];
   }
