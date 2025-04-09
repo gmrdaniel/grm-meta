@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -57,7 +56,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
   const [uniqueSourceFiles, setUniqueSourceFiles] = useState<string[]>([]);
 
-  // Extract unique source files when creators change
   React.useEffect(() => {
     const sourceFiles = creators
       .map(creator => creator.source_file || "Manual entry")
@@ -103,13 +101,11 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   };
   
   const filteredCreators = creators.filter(creator => {
-    // Status filter
     if (statusFilter !== "all") {
-      if (statusFilter === "completed" && creator.status !== "completed") return false;
-      if (statusFilter === "pending" && creator.status === "completed") return false;
+      if (statusFilter === "completed" && !creator.prompt_output) return false;
+      if (statusFilter === "pending" && creator.prompt_output) return false;
     }
     
-    // Source file filter
     if (sourceFileFilter !== "all") {
       const creatorSourceFile = creator.source_file || "Manual entry";
       if (creatorSourceFile !== sourceFileFilter) return false;
@@ -171,10 +167,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     
     if (format === 'csv') {
-      // For CSV export we'll use direct CSV generation which can better handle long text
       const csv = XLSX.utils.sheet_to_csv(worksheet);
       
-      // Create blob and download
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.csv`;
@@ -187,8 +181,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
       
       toast.success(`${selectedCreators.length} records exported successfully as CSV`);
     } else {
-      // For XLS export with improved handling of long text
-      // Set extra wide column widths to prevent truncation
       const columnWidths = [
         { wch: 25 },  // Full_name
         { wch: 30 },  // Email
@@ -196,14 +188,12 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         { wch: 25 },  // Source_file
       ];
       
-      // Set all paragraph columns to have very wide width
       for (let i = 0; i < 11; i++) {
         columnWidths.push({ wch: 1000 }); // Setting extremely wide to avoid truncation
       }
       
       worksheet['!cols'] = columnWidths;
 
-      // Enable text wrapping for all cells containing paragraphs
       for (let i = 0; i < exportData.length; i++) {
         for (let col = 3; col <= 13; col++) { // Paragraph columns (3-13)
           const cellRef = XLSX.utils.encode_cell({r: i+1, c: col});
@@ -219,7 +209,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
 
       const fileName = `email_creators_export_${new Date().toISOString().split("T")[0]}.xlsx`;
       
-      // Using xls format but with .xlsx file extension and better configuration
       XLSX.writeFile(workbook, fileName, { 
         bookType: 'xlsx', 
         bookSST: false,
@@ -273,7 +262,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 mb-4">
-            {/* Status filter */}
             <div className="flex items-center space-x-2">
               <Select 
                 value={statusFilter} 
@@ -308,7 +296,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
               )}
             </div>
             
-            {/* Source file filter */}
             <div className="flex items-center space-x-2">
               <Select 
                 value={sourceFileFilter} 
@@ -344,7 +331,6 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
               )}
             </div>
             
-            {/* Download selected button */}
             {selectedItems.length > 0 && (
               <div className="ml-auto">
                 <DropdownMenu>

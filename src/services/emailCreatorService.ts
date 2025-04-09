@@ -22,8 +22,15 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
       query = query.eq('source_file', sourceFile);
     }
     
+    // Updated status filter to check for prompt_output
     if (status) {
-      query = query.eq('status', status);
+      if (status === 'completed') {
+        query = query.not('prompt_output', 'is', null);
+      } else if (status === 'pending') {
+        query = query.is('prompt_output', null);
+      } else {
+        query = query.eq('status', status);
+      }
     }
     
     // Get total count for pagination
@@ -42,8 +49,15 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
       query = query.eq('source_file', sourceFile);
     }
     
+    // Apply the same status filter to the data query
     if (status) {
-      query = query.eq('status', status);
+      if (status === 'completed') {
+        query = query.not('prompt_output', 'is', null);
+      } else if (status === 'pending') {
+        query = query.is('prompt_output', null);
+      } else {
+        query = query.eq('status', status);
+      }
     }
     
     // Get paginated data
