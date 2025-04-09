@@ -5,7 +5,6 @@ import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmailCreatorsList } from "@/components/admin/email-creator/EmailCreatorsList";
 import { ImportEmailCreators } from "@/components/admin/email-creator/ImportEmailCreators";
-import { SourceFilesDownload } from "@/components/admin/email-creator/SourceFilesDownload";
 import { getEmailCreators } from "@/services/emailCreatorService";
 import { EmailCreator } from "@/types/email-creator";
 
@@ -69,7 +68,6 @@ export default function AdminCreateEmail() {
             <TabsList>
               <TabsTrigger value="list">Creators List</TabsTrigger>
               <TabsTrigger value="import">Import Creators</TabsTrigger>
-              <TabsTrigger value="source-files">Source Files</TabsTrigger>
             </TabsList>
             
             <TabsContent value="list" className="space-y-4">
@@ -93,10 +91,6 @@ export default function AdminCreateEmail() {
             
             <TabsContent value="import" className="space-y-4">
               <ImportEmailCreators onImportComplete={handleImportComplete} />
-            </TabsContent>
-
-            <TabsContent value="source-files" className="space-y-4">
-              <SourceFilesDownload onRefresh={handleRefresh} />
             </TabsContent>
           </Tabs>
         </div>
