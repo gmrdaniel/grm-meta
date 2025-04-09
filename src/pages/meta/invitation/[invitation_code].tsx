@@ -72,15 +72,7 @@ export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
-    // Estado para almacenar la plataforma de redes sociales
-  const [socialMediaPlatform, setSocialMediaPlatform] = useState<string | null>(null);
-
-  // Recupera el valor desde localStorage cuando el componente se monta
-  useEffect(() => {
-    const platform = localStorage.getItem("selectedSocialMediaPlatform");
-    console.log("Selected Social Media invitationcode:", platform);
-    setSocialMediaPlatform(platform);
-  }, []);
+    
 
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
