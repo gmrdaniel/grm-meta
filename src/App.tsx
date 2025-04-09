@@ -18,6 +18,7 @@ import AdminTaskCreate from "./pages/admin/tasks/create";
 import AdminTest from "./pages/admin/test";
 import AdminCreateEmail from "./pages/admin/create-email"; 
 import AdminNotificationSettings from "./pages/admin/notification-settings";
+import AdminNotificationLogs from "./pages/admin/notification-logs";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationPage from "./pages/invite/[url]/[id]";
@@ -101,6 +102,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminNotificationSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/notification-logs"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminNotificationLogs />
                   </ProtectedRoute>
                 }
               />

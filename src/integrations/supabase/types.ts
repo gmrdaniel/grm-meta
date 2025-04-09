@@ -290,6 +290,61 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_logs: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          error_message: string | null
+          id: string
+          invitation_id: string
+          notification_setting_id: string
+          sent_at: string | null
+          stage_id: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          error_message?: string | null
+          id?: string
+          invitation_id: string
+          notification_setting_id: string
+          sent_at?: string | null
+          stage_id?: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          error_message?: string | null
+          id?: string
+          invitation_id?: string
+          notification_setting_id?: string
+          sent_at?: string | null
+          stage_id?: string | null
+          status?: Database["public"]["Enums"]["notification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_notification_setting_id_fkey"
+            columns: ["notification_setting_id"]
+            isOneToOne: false
+            referencedRelation: "notification_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           channel: Database["public"]["Enums"]["notification_channel"]
