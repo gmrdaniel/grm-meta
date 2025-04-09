@@ -753,9 +753,6 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
-      notification_channel: "sms" | "email"
-      notification_status: "sent" | "failed" | "pending"
-      notification_types: "reminder" | "notification" | "alert"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
@@ -874,9 +871,6 @@ export const Constants = {
   public: {
     Enums: {
       invitation_status: ["pending", "accepted", "rejected", "completed"],
-      notification_channel: ["sms", "email"],
-      notification_status: ["sent", "failed", "pending"],
-      notification_types: ["reminder", "notification", "alert"],
       task_status: ["pending", "in_progress", "completed", "review"],
       user_role: ["admin", "creator"],
     },
