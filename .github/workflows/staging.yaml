@@ -26,16 +26,23 @@ jobs:
           echo "PROJECT_ID is: ${SUPABASE_PROJECT_ID:+set}"
           echo "ACCESS_TOKEN is: ${SUPABASE_ACCESS_TOKEN:+set}"
         shell: bash
-        
+
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push
-      
-      # ✅ New step: Deploy all edge functions in supabase/functions/
-      - name: Deploy Supabase Edge Functions
+
+      # ✅ Fetch develop branch to compare changes
+      - name: Fetch develop branch
+        run: git fetch origin develop
+
+      # ✅ Deploy only changed Edge Functions
+      - name: Deploy Supabase Edge Functions (only if changed)
         run: |
           for dir in supabase/functions/*/ ; do
             func=$(basename "$dir")
-            echo "Deploying function: $func"
-            supabase functions deploy "$func"
+            if git diff --quiet origin/develop -- "$dir"; then
+              echo "No changes in $func, skipping."
+            else
+              echo "Deploying function: $func"
+              supabase functions deploy "$func"
+            fi
           done
-
