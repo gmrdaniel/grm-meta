@@ -18,6 +18,8 @@ import {
 import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
 import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
 import { InvitationError } from "@/components/invitation/InvitationError";
+import { WelcomeFormYoutube } from "@/components/invitation/WelcomFormYouTube";
+import {CompleteProfileFormYtb} from "@/components/invitation/CompleteProfileFormYtb";
 
 // 🛠️ Services
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
@@ -70,6 +72,8 @@ export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
+    
+
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
@@ -89,6 +93,9 @@ export default function InvitationStepperPage() {
   // 🔃 Fetch invitation and stages
   useEffect(() => {
     const fetchInvitationAndStages = async () => {
+      console.log("Fetching invitation and stages...");
+      
+      
       try {
         setLoading(true);
         setError(null);
@@ -99,6 +106,8 @@ export default function InvitationStepperPage() {
         }
 
         const { data, error } = await findInvitationByCode(invitation_code);
+            // Agregar un console.log para inspeccionar los datos recibidos
+    console.log("Data fetched from backend:", data);
 
         if (error || !data?.length) {
           setError("Invalid invitation code or invitation not found");
@@ -111,7 +120,8 @@ export default function InvitationStepperPage() {
           setError("This invitation has already been accepted");
           return;
         }
-
+        //console.log("Fetched invitation code:", invitationData);
+        
         setInvitation(invitationData);
         setFormData({
           fullName: invitationData.full_name || "",
@@ -119,10 +129,10 @@ export default function InvitationStepperPage() {
           socialMediaHandle: invitationData.social_media_handle || "",
           termsAccepted: false,
         });
-
+        
         const stagesData = await fetchProjectStages(invitationData.project_id);
         setProjectStages(stagesData);
-
+        
         if (invitationData.current_stage_id) {
           const currentStage = stagesData.find(
             (s) => s.id === invitationData.current_stage_id
@@ -131,7 +141,7 @@ export default function InvitationStepperPage() {
             const currentStep = stepList.find(
               (step) => step.id == currentStage.slug
             );
-
+            
             setCurrentStep(currentStep);
           }
         }
@@ -142,7 +152,7 @@ export default function InvitationStepperPage() {
         setLoading(false);
       }
     };
-
+    
     fetchInvitationAndStages();
   }, [invitation_code]);
 
@@ -474,24 +484,27 @@ export default function InvitationStepperPage() {
         <Card className="w-full max-w-lg min-h-lg">
           <CardContent className="pt-6">
             <Stepper steps={stepList} currentStep={currentStep.id} />
-            {currentStep.id === "welcome" && (
-              <WelcomeForm
-                invitation={invitation}
-                formData={formData}
-                onInputChange={handleInputChange}
-                onCheckboxChange={handleCheckboxChange}
-                onContinue={handleContinueWelcome}
-                isSubmitting={isSubmitting}
-              />
-            )}
-            {currentStep.id === "completeProfile" && (
-              <CompleteProfileForm
-                onSubmit={handleCompleteProfileSubmit}
-                isSubmitting={saving}
-                invitation={invitation}
-              />
-            )}
-            {currentStep.id === "fbcreation" &&
+           {/* Condicional basado en social_media_type o youtube_media_type */}
+          {invitation?.social_media_type === "tiktok" && (
+            <>
+              {currentStep.id === "welcome" && (
+                <WelcomeForm
+                  invitation={invitation}
+                  formData={formData}
+                  onInputChange={handleInputChange}
+                  onCheckboxChange={handleCheckboxChange}
+                  onContinue={handleContinueWelcome}
+                  isSubmitting={isSubmitting}
+                />
+              )}
+              {currentStep.id === "completeProfile" && (
+                <CompleteProfileForm
+                  onSubmit={handleCompleteProfileSubmit}
+                  isSubmitting={saving}
+                  invitation={invitation}
+                />
+              )}
+               {currentStep.id === "fbcreation" &&
               (submissionComplete || invitation.fb_step_completed) && (
                 <SubmissionCompleteScreen
                   showPasswordForm={showPasswordForm}
@@ -514,11 +527,58 @@ export default function InvitationStepperPage() {
                   onSubmit={handleFacebookSubmit}
                 />
               )}
-          </CardContent>
-        </Card>
-      </div>
+            </>
+          )}
 
-      <Footer />
+          {invitation?.youtube_social_media === "youtube" && (
+            <>
+              {currentStep.id === "welcome" && (
+                < WelcomeFormYoutube
+                  invitation={invitation}
+                  formData={formData}
+                  onInputChange={handleInputChange}
+                  onCheckboxChange={handleCheckboxChange}
+                  onContinue={handleContinueWelcome}
+                  isSubmitting={isSubmitting}
+                />
+              )}
+              {currentStep.id === "completeProfile" && (
+                <CompleteProfileFormYtb
+                  onSubmit={handleCompleteProfileSubmit}
+                  isSubmitting={saving}
+                  invitation={invitation}
+                />
+              )}
+               {currentStep.id === "fbcreation" &&
+              (submissionComplete || invitation.fb_step_completed) && (
+                <SubmissionCompleteScreen
+                  showPasswordForm={showPasswordForm}
+                  passwordData={passwordData}
+                  submitting={submitting}
+                  onPasswordChange={handlePasswordChange}
+                  onSetPassword={handleSetPassword}
+                  onShowPasswordForm={() => setShowPasswordForm(true)}
+                />
+              )}
+            {currentStep.id === "fbcreation" &&
+              !submissionComplete &&
+              !invitation.fb_step_completed && (
+                <FacebookPageForm
+                  formData={facebookFormData}
+                  submitting={submitting}
+                  error={error}
+                  onInputChange={handleFacebookInputChange}
+                  onCheckboxChange={handleCheckboxFacebookChange}
+                  onSubmit={handleFacebookSubmit}
+                />
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  );
+
+    <Footer />
+  </div>
+);
 }

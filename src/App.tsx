@@ -39,6 +39,7 @@ function App() {
                   path="/meta/invitation/:invitation_code?"
                   element={<InvitationStepperPage />}
                 />
+                
 
                 {/* Admin routes */}
                 <Route
@@ -118,7 +119,6 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              
             </>
           </AuthProvider>
         </BrowserRouter>

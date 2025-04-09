@@ -45,7 +45,8 @@ const formSchema = z.object({
         message: "Do not include @ or links in the handle",
       }
     ),
-  social_media_type: z.enum(["tiktok", "pinterest"]).optional(),
+  social_media_type: z.enum(["tiktok", "pinterest"]).nullable(),
+  youtube_social_media: z.string().nullable(),
   project_id: z.string().uuid({ message: "Please select a project" }),
   invitation_type: z.enum(["new_user", "existing_user"]),
 });
@@ -65,7 +66,9 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       social_media_handle: "",
       invitation_type: "new_user",
     },
-  });
+});
+
+
 
   const [createdInvitation, setCreatedInvitation] = useState<null | {
     email: string;
@@ -99,7 +102,10 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       full_name: data.full_name,
       email: data.email,
       social_media_handle: data.social_media_handle || null,
-      social_media_type: data.social_media_type || null,
+      social_media_type: data.youtube_social_media
+        ? null
+        : data.social_media_type,
+      youtube_social_media: data.youtube_social_media || null,
       project_id: data.project_id,
       invitation_type: data.invitation_type,
     };
@@ -192,8 +198,21 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
               <FormItem>
                 <FormLabel>Social Media Platform</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
+                  onValueChange={(value) => {
+                    if (value === "youtube") {
+                      form.setValue("youtube_social_media", value); // Guardar en youtube_channel
+                      form.setValue("social_media_type", null); // Limpiar social_media_type
+                    } else {
+                      form.setValue(
+                        "social_media_type",
+                        value as "tiktok" | "pinterest"
+                      ); // Guardar en social_media_type
+                      form.setValue("youtube_social_media", null); // Limpiar youtube_channel
+                    }
+                  }}
+                  value={
+                    form.watch("youtube_social_media") ? "youtube" : field.value
+                  } // Mostrar el valor correcto
                   disabled={!hasSocialMedia}
                 >
                   <FormControl>
@@ -204,6 +223,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                   <SelectContent>
                     <SelectItem value="tiktok">TikTok</SelectItem>
                     <SelectItem value="pinterest">Pinterest</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
