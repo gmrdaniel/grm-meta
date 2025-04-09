@@ -15,6 +15,19 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 
+interface NotificationSetting {
+  id: string;
+  type: string;
+  channel: string;
+  enabled: boolean;
+  delay_days: number;
+  frequency_days: number;
+  max_notifications: number;
+  created_at: string;
+  subject: string | null;
+  message: string;
+}
+
 interface NotificationSettingsListProps {
   onCreateNew: () => void;
 }
@@ -28,7 +41,8 @@ export function NotificationSettingsList({ onCreateNew }: NotificationSettingsLi
     queryFn: async () => {
       const startIndex = (page - 1) * pageSize;
       
-      const { data, error, count } = await supabase
+      // Supabase query needs to be updated to use the correct schema
+      const { data: settings, error, count } = await supabase
         .from("notification_settings")
         .select("*", { count: "exact" })
         .range(startIndex, startIndex + pageSize - 1)
@@ -37,7 +51,7 @@ export function NotificationSettingsList({ onCreateNew }: NotificationSettingsLi
       if (error) throw error;
       
       return {
-        settings: data,
+        settings: settings as NotificationSetting[],
         totalCount: count || 0
       };
     },
@@ -56,7 +70,7 @@ export function NotificationSettingsList({ onCreateNew }: NotificationSettingsLi
   if (error) {
     return (
       <div className="bg-red-50 p-4 rounded-md border border-red-200 text-red-700">
-        <p>Error loading notification settings: {error.message}</p>
+        <p>Error loading notification settings: {(error as Error).message}</p>
       </div>
     );
   }

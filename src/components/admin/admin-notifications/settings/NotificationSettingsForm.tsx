@@ -60,7 +60,7 @@ export function NotificationSettingsForm({ onSuccess }: NotificationSettingsForm
     try {
       const { error } = await supabase
         .from("notification_settings")
-        .insert([formData]);
+        .insert(formData);
 
       if (error) throw error;
 
