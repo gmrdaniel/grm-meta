@@ -67,7 +67,8 @@ export const EmailCreatorItem: React.FC<EmailCreatorItemProps> = ({
       </TableCell>
       <TableCell>
         <Badge 
-          variant={creator.prompt_output ? "success" : "outline"}
+          variant={creator.prompt_output ? "default" : "outline"}
+          className={creator.prompt_output ? "bg-green-500 hover:bg-green-600" : ""}
         >
           {creator.prompt_output ? "Completed" : "Pending"}
         </Badge>
