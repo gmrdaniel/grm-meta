@@ -290,6 +290,56 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at: string | null
+          delay_days: number
+          enabled: boolean
+          frequency_days: number
+          id: string
+          max_notifications: number
+          message: string
+          stage_id: string | null
+          subject: string | null
+          type: Database["public"]["Enums"]["notification_types"]
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string | null
+          delay_days?: number
+          enabled?: boolean
+          frequency_days?: number
+          id?: string
+          max_notifications?: number
+          message: string
+          stage_id?: string | null
+          subject?: string | null
+          type: Database["public"]["Enums"]["notification_types"]
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string | null
+          delay_days?: number
+          enabled?: boolean
+          frequency_days?: number
+          id?: string
+          max_notifications?: number
+          message?: string
+          stage_id?: string | null
+          subject?: string | null
+          type?: Database["public"]["Enums"]["notification_types"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
