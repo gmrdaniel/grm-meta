@@ -1,6 +1,5 @@
-
 import * as XLSX from 'xlsx';
-import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse } from '@/types/email-creator';
+import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse, SourceFileSummary } from '@/types/email-creator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -89,6 +88,69 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
       pageSize: params?.pageSize || 10,
       totalPages: 0
     };
+  }
+};
+
+// Get source files summary with counts of processed and pending creators
+export const getSourceFilesSummary = async (): Promise<SourceFileSummary[]> => {
+  try {
+    // First get all unique source files
+    const { data: sourceFiles, error: sourceFilesError } = await supabase
+      .from('email_creators')
+      .select('source_file')
+      .is('source_file', 'not.null');
+    
+    if (sourceFilesError) {
+      console.error("Error fetching source files:", sourceFilesError);
+      throw sourceFilesError;
+    }
+
+    const uniqueSourceFiles = [...new Set(sourceFiles?.map(item => item.source_file))].filter(Boolean);
+    
+    // For each source file, get counts
+    const summaries: SourceFileSummary[] = [];
+    
+    for (const sourceFile of uniqueSourceFiles) {
+      // Get total count
+      const { count: totalCount, error: totalError } = await supabase
+        .from('email_creators')
+        .select('*', { count: 'exact' })
+        .eq('source_file', sourceFile);
+      
+      if (totalError) {
+        console.error(`Error getting total count for ${sourceFile}:`, totalError);
+        continue;
+      }
+      
+      // Get processed count (prompt_output is not null)
+      const { count: processedCount, error: processedError } = await supabase
+        .from('email_creators')
+        .select('*', { count: 'exact' })
+        .eq('source_file', sourceFile)
+        .not('prompt_output', 'is', null);
+      
+      if (processedError) {
+        console.error(`Error getting processed count for ${sourceFile}:`, processedError);
+        continue;
+      }
+      
+      // Calculate pending count
+      const pendingCount = (totalCount || 0) - (processedCount || 0);
+      
+      summaries.push({
+        sourceFile,
+        totalCount: totalCount || 0,
+        processedCount: processedCount || 0,
+        pendingCount
+      });
+    }
+    
+    // Sort by source file name
+    return summaries.sort((a, b) => a.sourceFile.localeCompare(b.sourceFile));
+  } catch (error) {
+    console.error("Error in getSourceFilesSummary:", error);
+    toast.error("Failed to load source files summary");
+    return [];
   }
 };
 

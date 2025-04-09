@@ -39,3 +39,10 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
+
+export interface SourceFileSummary {
+  sourceFile: string;
+  totalCount: number;
+  processedCount: number;
+  pendingCount: number;
+}
