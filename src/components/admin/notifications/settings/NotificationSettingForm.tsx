@@ -123,7 +123,20 @@ export const NotificationSettingForm: React.FC<NotificationSettingFormProps> = (
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      await onSubmit(values);
+      // Ensure all required fields are included
+      const submissionData: Omit<NotificationSetting, 'id' | 'created_at'> = {
+        type: values.type,
+        subject: values.subject,
+        message: values.message,
+        channel: values.channel,
+        enabled: values.enabled,
+        delay_days: values.delay_days,
+        frequency_days: values.frequency_days,
+        max_notifications: values.max_notifications,
+        stage_id: values.stage_id === "" ? null : values.stage_id,
+      };
+      
+      await onSubmit(submissionData);
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);

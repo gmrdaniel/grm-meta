@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { NotificationSettingsTable } from "./NotificationSettingsTable";
@@ -107,6 +107,8 @@ export const NotificationSettingsTab: React.FC = () => {
   }
 
   const totalPages = data ? Math.ceil(data.count / pageSize) : 0;
+  const isFirstPage = page === 1;
+  const isLastPage = page === totalPages;
 
   return (
     <div className="space-y-4">
@@ -137,10 +139,9 @@ export const NotificationSettingsTab: React.FC = () => {
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      aria-disabled={page === 1}
-                      className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                      onClick={() => !isFirstPage && setPage((p) => Math.max(1, p - 1))}
+                      aria-disabled={isFirstPage}
+                      className={isFirstPage ? "pointer-events-none opacity-50" : ""}
                     />
                   </PaginationItem>
                   
@@ -157,10 +158,9 @@ export const NotificationSettingsTab: React.FC = () => {
                   
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      aria-disabled={page === totalPages}
-                      className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                      onClick={() => !isLastPage && setPage((p) => Math.min(totalPages, p + 1))}
+                      aria-disabled={isLastPage}
+                      className={isLastPage ? "pointer-events-none opacity-50" : ""}
                     />
                   </PaginationItem>
                 </PaginationContent>

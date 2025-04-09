@@ -9,7 +9,7 @@ export const fetchNotificationSettings = async (
 ) => {
   let query = supabase
     .from("notification_settings")
-    .select("*, project_stages(name)", { count: "exact" });
+    .select("*, project_stages(name)", { count: "exact" }) as any;
 
   // Apply filters if provided
   if (filters.type) {
@@ -50,7 +50,7 @@ export const fetchNotificationLogs = async (
       notification_settings(*),
       creator_invitations(full_name, email),
       project_stages(name)
-    `, { count: "exact" });
+    `, { count: "exact" }) as any;
 
   // Apply filters if provided
   if (filters.status) {
@@ -80,11 +80,11 @@ export const fetchNotificationLogs = async (
 };
 
 export const createNotificationSetting = async (notificationSetting: Omit<NotificationSetting, 'id' | 'created_at'>) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("notification_settings")
-    .insert(notificationSetting)
+    .insert(notificationSetting as any)
     .select()
-    .single();
+    .single() as any);
 
   if (error) {
     console.error("Error creating notification setting:", error);
@@ -95,12 +95,12 @@ export const createNotificationSetting = async (notificationSetting: Omit<Notifi
 };
 
 export const updateNotificationSetting = async (id: string, updates: Partial<NotificationSetting>) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("notification_settings")
-    .update(updates)
+    .update(updates as any)
     .eq("id", id)
     .select()
-    .single();
+    .single() as any);
 
   if (error) {
     console.error("Error updating notification setting:", error);
@@ -111,10 +111,10 @@ export const updateNotificationSetting = async (id: string, updates: Partial<Not
 };
 
 export const deleteNotificationSetting = async (id: string) => {
-  const { error } = await supabase
+  const { error } = await (supabase
     .from("notification_settings")
     .delete()
-    .eq("id", id);
+    .eq("id", id) as any);
 
   if (error) {
     console.error("Error deleting notification setting:", error);
