@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse, SourceFileSummary } from '@/types/email-creator';
 import { toast } from 'sonner';
@@ -62,7 +63,7 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     // Get paginated data
     const { data, error } = await query
       .order('created_at', { ascending: false })
-      .range(startIndex, startIndex + pageSize - 1) as { data: EmailCreator[] | null, error: any };
+      .range(startIndex, startIndex + pageSize - 1);
       
     if (error) {
       console.error("Error fetching email creators:", error);
@@ -98,7 +99,7 @@ export const getSourceFilesSummary = async (): Promise<SourceFileSummary[]> => {
     const { data: sourceFiles, error: sourceFilesError } = await supabase
       .from('email_creators')
       .select('source_file')
-      .is('source_file', 'not.null');
+      .not('source_file', 'is', null);
     
     if (sourceFilesError) {
       console.error("Error fetching source files:", sourceFilesError);
@@ -169,7 +170,7 @@ export const updateEmailCreatorPrompt = async (
         status: 'completed',
         updated_at: new Date().toISOString()
       })
-      .eq('id', id) as { error: any };
+      .eq('id', id);
 
     if (error) {
       console.error("Error updating email creator prompt:", error);
@@ -182,6 +183,7 @@ export const updateEmailCreatorPrompt = async (
   }
 };
 
+// Import email creators from Excel
 export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCreatorImportResult> => {
   const result: EmailCreatorImportResult = {
     successful: 0,
@@ -241,7 +243,7 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
         }
 
         // Create a new email creator
-        const newCreator: any = {
+        const newCreator = {
           full_name: row['Nombre'],
           email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
@@ -256,10 +258,10 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
 
         console.log("Inserting new creator:", newCreator);
 
-        // Insert into the database with type assertion
+        // Insert into the database
         const { error } = await supabase
           .from('email_creators')
-          .insert([newCreator]) as { error: any };
+          .insert([newCreator]);
 
         if (error) {
           console.error("Database insertion error:", error);
