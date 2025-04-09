@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse } from '@/types/email-creator';
 import { toast } from 'sonner';
@@ -27,7 +26,7 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     }
     
     // Get total count for pagination
-    const { count, error: countError } = await query.select('*', { count: 'exact', head: true });
+    const { count, error: countError } = await query;
     
     if (countError) {
       console.error("Error counting email creators:", countError);
