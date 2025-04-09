@@ -1,10 +1,12 @@
 
 import React from "react";
 import { EmailCreator } from "@/types/email-creator";
-import { TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Wand2, Eye, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, MessageSquarePlus } from "lucide-react";
+import { format } from "date-fns";
 
 interface EmailCreatorItemProps {
   creator: EmailCreator;
@@ -12,6 +14,7 @@ interface EmailCreatorItemProps {
   onSelectItem: (id: string) => void;
   onViewText: (creator: EmailCreator) => void;
   onGenerateClick: (creator: EmailCreator) => void;
+  hideEmail?: boolean;
 }
 
 export const EmailCreatorItem: React.FC<EmailCreatorItemProps> = ({
@@ -20,79 +23,77 @@ export const EmailCreatorItem: React.FC<EmailCreatorItemProps> = ({
   onSelectItem,
   onViewText,
   onGenerateClick,
+  hideEmail = false,
 }) => {
-  const getTiktokHandle = (tiktokLink: string): string => {
-    const match = tiktokLink.match(/@([^/?]+)/);
-    if (match && match[1]) {
-      return `@${match[1]}`;
-    }
-    
-    if (!tiktokLink.includes("/") && !tiktokLink.includes("@")) {
-      return `@${tiktokLink}`;
-    }
-    
-    return tiktokLink;
+  const handleToggleSelect = () => {
+    onSelectItem(creator.id);
+  };
+
+  const truncateUrl = (url: string, maxLength = 30) => {
+    if (!url) return "";
+    if (url.length <= maxLength) return url;
+    return url.substring(0, maxLength) + "...";
   };
 
   return (
     <TableRow key={creator.id}>
-      <TableCell>
-        <Checkbox 
+      <TableCell className="w-[50px]">
+        <Checkbox
           checked={isSelected}
-          onCheckedChange={() => onSelectItem(creator.id)}
+          onCheckedChange={handleToggleSelect}
           aria-label={`Select ${creator.full_name}`}
         />
       </TableCell>
-      <TableCell>{creator.full_name}</TableCell>
-      <TableCell>{creator.email}</TableCell>
+      <TableCell>
+        <div className="font-medium">{creator.full_name}</div>
+        {!hideEmail && <div className="text-sm text-muted-foreground">{creator.email}</div>}
+      </TableCell>
+      {!hideEmail && (
+        <TableCell>{creator.email}</TableCell>
+      )}
       <TableCell>
         <a 
           href={creator.tiktok_link} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-blue-600 hover:underline flex items-center gap-1"
+          className="text-blue-600 hover:underline"
         >
-          {getTiktokHandle(creator.tiktok_link)}
-          <ExternalLink size={14} />
+          {truncateUrl(creator.tiktok_link)}
         </a>
       </TableCell>
+      <TableCell>{creator.source_file || "Manual Entry"}</TableCell>
       <TableCell>
-        <span className="text-sm text-gray-600">
-          {creator.source_file || "Manual entry"}
-        </span>
-      </TableCell>
-      <TableCell>{new Date(creator.created_at).toLocaleString()}</TableCell>
-      <TableCell>
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          creator.status === 'completed' ? 'bg-green-100 text-green-800' : 
-          creator.status === 'active' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-        }`}>
-          {creator.status}
-        </span>
+        {creator.created_at ? format(new Date(creator.created_at), 'MMM d, yyyy') : 'N/A'}
       </TableCell>
       <TableCell>
-        <div className="flex gap-2">
+        <Badge 
+          variant={creator.prompt_output ? "success" : "outline"}
+        >
+          {creator.prompt_output ? "Completed" : "Pending"}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex space-x-2">
           {creator.prompt_output && (
             <Button 
               variant="outline" 
-              size="sm"
+              size="sm" 
               onClick={() => onViewText(creator)}
-              className="flex items-center gap-1"
             >
-              <Eye className="h-4 w-4" />
-              View Text
+              <Eye className="h-4 w-4 mr-1" />
+              View
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onGenerateClick(creator)}
-            className="flex items-center gap-1"
-            disabled={creator.status === 'completed'}
-          >
-            <Wand2 className="h-4 w-4" />
-            {creator.status === 'completed' ? 'Already Generated' : 'Create Text'}
-          </Button>
+          {!creator.prompt_output && (
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => onGenerateClick(creator)}
+            >
+              <MessageSquarePlus className="h-4 w-4 mr-1" />
+              Generate
+            </Button>
+          )}
         </div>
       </TableCell>
     </TableRow>

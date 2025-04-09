@@ -1,13 +1,20 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { EmailCreator } from "@/types/email-creator";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
+
+export type SortConfig = {
+  key: string;
+  direction: "asc" | "desc";
+};
 
 export const useEmailCreators = (creators: EmailCreator[]) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [viewTextCreator, setViewTextCreator] = useState<EmailCreator | null>(null);
   const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "created_at", direction: "desc" });
 
   const toggleSelectAll = () => {
     if (selectedItems.length === filteredCreators.length) {
@@ -34,14 +41,50 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     setIsViewTextDialogOpen(true);
   };
 
-  const filteredCreators = creators.filter(creator => {
+  const handleSortChange = (key: string) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const filteredCreators = useMemo(() => {
+    let result = [...creators];
+    
+    // First apply filters
     if (statusFilter !== "all") {
-      if (statusFilter === "completed" && !creator.prompt_output) return false;
-      if (statusFilter === "pending" && creator.prompt_output) return false;
+      if (statusFilter === "completed") {
+        result = result.filter(creator => creator.prompt_output);
+      } else if (statusFilter === "pending") {
+        result = result.filter(creator => !creator.prompt_output);
+      }
     }
     
-    return true;
-  });
+    // Then apply sorting
+    if (sortConfig) {
+      result.sort((a, b) => {
+        if (sortConfig.key === 'created_at') {
+          const aDate = new Date(a.created_at).getTime();
+          const bDate = new Date(b.created_at).getTime();
+          return sortConfig.direction === 'asc' ? aDate - bDate : bDate - aDate;
+        }
+        
+        // If we add more sortable fields in the future
+        const aValue = a[sortConfig.key as keyof EmailCreator];
+        const bValue = b[sortConfig.key as keyof EmailCreator];
+        
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return sortConfig.direction === 'asc'
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
+        
+        return 0;
+      });
+    }
+    
+    return result;
+  }, [creators, statusFilter, sortConfig]);
 
   const handleDownloadSelected = (format: 'xls' | 'csv') => {
     if (selectedItems.length === 0) {
@@ -150,6 +193,8 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     toggleSelectItem,
     getSelectedCreators,
     handleViewText,
-    handleDownloadSelected
+    handleDownloadSelected,
+    sortConfig,
+    handleSortChange
   };
 };

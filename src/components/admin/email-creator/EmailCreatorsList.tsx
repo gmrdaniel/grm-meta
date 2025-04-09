@@ -51,7 +51,9 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     toggleSelectItem,
     getSelectedCreators,
     handleViewText,
-    handleDownloadSelected
+    handleDownloadSelected,
+    sortConfig,
+    handleSortChange
   } = useEmailCreators(creators);
 
   const handleGenerateClick = (creator: EmailCreator) => {
@@ -127,6 +129,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
             toggleSelectItem={toggleSelectItem}
             onViewText={handleViewText}
             onGenerateClick={handleGenerateClick}
+            sortConfig={sortConfig}
+            onSortChange={handleSortChange}
           />
 
           <EmailCreatorsPagination
