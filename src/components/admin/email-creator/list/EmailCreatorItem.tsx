@@ -46,11 +46,8 @@ export const EmailCreatorItem: React.FC<EmailCreatorItemProps> = ({
       </TableCell>
       <TableCell>
         <div className="font-medium">{creator.full_name}</div>
-        {!hideEmail && <div className="text-sm text-muted-foreground">{creator.email}</div>}
+        <div className="text-sm text-muted-foreground">{creator.email}</div>
       </TableCell>
-      {!hideEmail && (
-        <TableCell>{creator.email}</TableCell>
-      )}
       <TableCell>
         <a 
           href={creator.tiktok_link} 

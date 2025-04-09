@@ -86,7 +86,6 @@ export const EmailCreatorsTable: React.FC<EmailCreatorsTableProps> = ({
               onSelectItem={toggleSelectItem}
               onViewText={onViewText}
               onGenerateClick={onGenerateClick}
-              hideEmail={true}
             />
           ))}
         </TableBody>
