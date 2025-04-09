@@ -73,7 +73,7 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     const total = count || 0;
     
     return {
-      data: data || [],
+      data: (data || []) as EmailCreator[],
       total,
       page,
       pageSize,
@@ -167,7 +167,7 @@ export const updateEmailCreatorPrompt = async (
       .update({
         prompt,
         prompt_output: promptOutput,
-        status: 'completed',
+        status: 'completed' as EmailCreator['status'],
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
@@ -243,7 +243,14 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
         }
 
         // Create a new email creator
-        const newCreator = {
+        const newCreator: {
+          full_name: string;
+          email: string;
+          tiktok_link: string;
+          status: EmailCreator['status'];
+          source_file: string;
+          link_invitation?: string;
+        } = {
           full_name: row['Nombre'],
           email: row['Correo'],
           tiktok_link: row['Link de TikTok'],
