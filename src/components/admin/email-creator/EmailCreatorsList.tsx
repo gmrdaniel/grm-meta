@@ -4,7 +4,7 @@ import { EmailCreator } from "@/types/email-creator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter, Eye, FileDown } from "lucide-react";
+import { Wand2, ChevronLeft, ChevronRight, ExternalLink, Download, Filter, Eye, FileDown, FileText } from "lucide-react";
 import { GenerateTextModal } from "./GenerateTextModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -52,8 +52,20 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isBulkGenerateModalOpen, setIsBulkGenerateModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFileFilter, setSourceFileFilter] = useState<string>("all");
   const [viewTextCreator, setViewTextCreator] = useState<EmailCreator | null>(null);
   const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
+  const [uniqueSourceFiles, setUniqueSourceFiles] = useState<string[]>([]);
+
+  // Extract unique source files when creators change
+  React.useEffect(() => {
+    const sourceFiles = creators
+      .map(creator => creator.source_file || "Manual entry")
+      .filter((value, index, self) => self.indexOf(value) === index)
+      .sort();
+    
+    setUniqueSourceFiles(sourceFiles);
+  }, [creators]);
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
@@ -91,9 +103,18 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   };
   
   const filteredCreators = creators.filter(creator => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "completed") return creator.status === "completed";
-    if (statusFilter === "pending") return creator.status !== "completed";
+    // Status filter
+    if (statusFilter !== "all") {
+      if (statusFilter === "completed" && creator.status !== "completed") return false;
+      if (statusFilter === "pending" && creator.status === "completed") return false;
+    }
+    
+    // Source file filter
+    if (sourceFileFilter !== "all") {
+      const creatorSourceFile = creator.source_file || "Manual entry";
+      if (creatorSourceFile !== sourceFileFilter) return false;
+    }
+    
     return true;
   });
 
@@ -238,19 +259,21 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
               Showing {filteredCreators.length} of {total} items
             </span>
             <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="10">10 per page</SelectItem>
                 <SelectItem value="50">50 per page</SelectItem>
                 <SelectItem value="100">100 per page</SelectItem>
+                <SelectItem value="500">500 per page</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between mb-4">
+          <div className="flex flex-wrap gap-4 mb-4">
+            {/* Status filter */}
             <div className="flex items-center space-x-2">
               <Select 
                 value={statusFilter} 
@@ -284,29 +307,69 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                 </Badge>
               )}
             </div>
-            {selectedItems.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1"
+            
+            {/* Source file filter */}
+            <div className="flex items-center space-x-2">
+              <Select 
+                value={sourceFileFilter} 
+                onValueChange={setSourceFileFilter}
+              >
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue>
+                    <div className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      {sourceFileFilter === "all" ? "All Source Files" : sourceFileFilter}
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Source Files</SelectItem>
+                  {uniqueSourceFiles.map(source => (
+                    <SelectItem key={source} value={source}>
+                      {source}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {sourceFileFilter !== "all" && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  {sourceFileFilter}
+                  <button 
+                    onClick={() => setSourceFileFilter("all")}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1"
                   >
-                    <FileDown className="h-4 w-4" />
-                    Download Selected ({selectedItems.length})
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleDownloadSelected('xls')}>
-                    <FileDown className="h-4 w-4 mr-2" />
-                    Download as Excel
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDownloadSelected('csv')}>
-                    <FileDown className="h-4 w-4 mr-2" />
-                    Download as CSV
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    ×
+                  </button>
+                </Badge>
+              )}
+            </div>
+            
+            {/* Download selected button */}
+            {selectedItems.length > 0 && (
+              <div className="ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      Download Selected ({selectedItems.length})
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => handleDownloadSelected('xls')}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Download as Excel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownloadSelected('csv')}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Download as CSV
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
           </div>
 

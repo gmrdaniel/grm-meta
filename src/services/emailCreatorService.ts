@@ -11,21 +11,43 @@ export const getEmailCreators = async (params?: PaginationParams): Promise<Pagin
     const page = params?.page || 1;
     const pageSize = params?.pageSize || 10;
     const startIndex = (page - 1) * pageSize;
+    const sourceFile = params?.sourceFile || null;
+    const status = params?.status || null;
 
+    // Build query
+    let query = supabase.from('email_creators').select('*', { count: 'exact' });
+    
+    // Apply filters if provided
+    if (sourceFile) {
+      query = query.eq('source_file', sourceFile);
+    }
+    
+    if (status) {
+      query = query.eq('status', status);
+    }
+    
     // Get total count for pagination
-    const { count, error: countError } = await supabase
-      .from('email_creators')
-      .select('*', { count: 'exact', head: true });
+    const { count, error: countError } = await query.select('*', { count: 'exact', head: true });
     
     if (countError) {
       console.error("Error counting email creators:", countError);
       throw countError;
     }
     
+    // Reset query for data fetch
+    query = supabase.from('email_creators').select('*');
+    
+    // Apply filters again for data query
+    if (sourceFile) {
+      query = query.eq('source_file', sourceFile);
+    }
+    
+    if (status) {
+      query = query.eq('status', status);
+    }
+    
     // Get paginated data
-    const { data, error } = await supabase
-      .from('email_creators')
-      .select('*')
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + pageSize - 1) as { data: EmailCreator[] | null, error: any };
       
