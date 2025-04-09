@@ -7,6 +7,7 @@ export interface CreatorInvitation {
   social_media_type?: string | null;
   social_media_handle?: string | null;
   other_social_media?: string | null;
+  youtube_social_media?: string;
   youtube_channel?: string | null;
   instagram_user?: string | null;
   facebook_page?: string | null;
@@ -29,6 +30,7 @@ export type CreateInvitationData = {
   email: string;
   social_media_handle?: string | null;
   social_media_type?: string | null;
+  youtube_social_media?: string | null;
   project_id: string;
   invitation_type: string;
 };
