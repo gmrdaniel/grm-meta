@@ -109,6 +109,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
                 <SelectItem value="50">50 per page</SelectItem>
                 <SelectItem value="100">100 per page</SelectItem>
                 <SelectItem value="500">500 per page</SelectItem>
+                <SelectItem value="1000">1000 per page</SelectItem>
               </SelectContent>
             </Select>
           </div>
