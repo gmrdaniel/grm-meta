@@ -1,12 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { WelcomeForm } from "@/components/invitation/WelcomeForm";
-import { findInvitationByCode } from "@/integrations/supabase/client";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { checkExistingTask } from "@/services/tasksService";
 
