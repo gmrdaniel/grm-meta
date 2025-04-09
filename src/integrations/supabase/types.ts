@@ -290,6 +290,111 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_logs: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          error_message: string | null
+          id: string
+          invitation_id: string
+          notification_setting_id: string
+          sent_at: string | null
+          stage_id: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          error_message?: string | null
+          id?: string
+          invitation_id: string
+          notification_setting_id: string
+          sent_at?: string | null
+          stage_id?: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          error_message?: string | null
+          id?: string
+          invitation_id?: string
+          notification_setting_id?: string
+          sent_at?: string | null
+          stage_id?: string | null
+          status?: Database["public"]["Enums"]["notification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_notification_setting_id_fkey"
+            columns: ["notification_setting_id"]
+            isOneToOne: false
+            referencedRelation: "notification_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at: string | null
+          delay_days: number
+          enabled: boolean
+          frequency_days: number
+          id: string
+          max_notifications: number
+          message: string
+          stage_id: string | null
+          subject: string | null
+          type: Database["public"]["Enums"]["notification_types"]
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string | null
+          delay_days?: number
+          enabled?: boolean
+          frequency_days?: number
+          id?: string
+          max_notifications?: number
+          message: string
+          stage_id?: string | null
+          subject?: string | null
+          type: Database["public"]["Enums"]["notification_types"]
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string | null
+          delay_days?: number
+          enabled?: boolean
+          frequency_days?: number
+          id?: string
+          max_notifications?: number
+          message?: string
+          stage_id?: string | null
+          subject?: string | null
+          type?: Database["public"]["Enums"]["notification_types"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "project_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -753,6 +858,9 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
+      notification_channel: "sms" | "email"
+      notification_status: "sent" | "failed" | "pending"
+      notification_types: "reminder" | "notification" | "alert"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
@@ -871,6 +979,9 @@ export const Constants = {
   public: {
     Enums: {
       invitation_status: ["pending", "accepted", "rejected", "completed"],
+      notification_channel: ["sms", "email"],
+      notification_status: ["sent", "failed", "pending"],
+      notification_types: ["reminder", "notification", "alert"],
       task_status: ["pending", "in_progress", "completed", "review"],
       user_role: ["admin", "creator"],
     },
