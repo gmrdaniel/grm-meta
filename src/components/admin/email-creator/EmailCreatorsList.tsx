@@ -23,6 +23,7 @@ interface EmailCreatorsListProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   total: number;
+  onStatusFilterChange: (status: string) => void;
 }
 
 export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ 
@@ -33,7 +34,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   pageSize, 
   onPageChange, 
   onPageSizeChange,
-  total
+  total,
+  onStatusFilterChange
 }) => {
   const [selectedCreator, setSelectedCreator] = useState<EmailCreator | null>(null);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
@@ -55,6 +57,12 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     sortConfig,
     handleSortChange
   } = useEmailCreators(creators);
+
+  // Update the handler to pass the filter change to parent
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status);
+    onStatusFilterChange(status);
+  };
 
   const handleGenerateClick = (creator: EmailCreator) => {
     setSelectedCreator(creator);
@@ -109,7 +117,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
           <div className="flex flex-wrap justify-between items-start">
             <EmailCreatorsFilters
               statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
+              setStatusFilter={handleStatusFilterChange}
             />
             
             <EmailCreatorsActions
@@ -123,7 +131,7 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
           </div>
 
           <EmailCreatorsTable
-            creators={filteredCreators}
+            creators={creators}
             selectedItems={selectedItems}
             toggleSelectAll={toggleSelectAll}
             toggleSelectItem={toggleSelectItem}

@@ -35,6 +35,12 @@ export default function AdminCreateEmail() {
     setPage(1); // Reset to first page when changing page size
   };
 
+  // Handle status filter changes
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status === "all" ? null : status);
+    setPage(1); // Reset to first page when changing filter
+  };
+
   useEffect(() => {
     const fetchCreators = async () => {
       setIsLoading(true);
@@ -85,6 +91,7 @@ export default function AdminCreateEmail() {
                   onPageChange={handlePageChange}
                   onPageSizeChange={handlePageSizeChange}
                   total={total}
+                  onStatusFilterChange={handleStatusFilterChange}
                 />
               )}
             </TabsContent>

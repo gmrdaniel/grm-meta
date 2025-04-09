@@ -16,11 +16,16 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
   const [isViewTextDialogOpen, setIsViewTextDialogOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "created_at", direction: "desc" });
 
+  // Reset selected items when creators list changes
+  useEffect(() => {
+    setSelectedItems([]);
+  }, [creators]);
+
   const toggleSelectAll = () => {
-    if (selectedItems.length === filteredCreators.length) {
+    if (selectedItems.length === creators.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(filteredCreators.map(creator => creator.id));
+      setSelectedItems(creators.map(creator => creator.id));
     }
   };
 
@@ -48,19 +53,11 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     }));
   };
 
+  // Use the sorted data directly - don't filter it locally
   const filteredCreators = useMemo(() => {
     let result = [...creators];
     
-    // First apply filters
-    if (statusFilter !== "all") {
-      if (statusFilter === "completed") {
-        result = result.filter(creator => creator.prompt_output);
-      } else if (statusFilter === "pending") {
-        result = result.filter(creator => !creator.prompt_output);
-      }
-    }
-    
-    // Then apply sorting
+    // Apply sorting
     if (sortConfig) {
       result.sort((a, b) => {
         if (sortConfig.key === 'created_at') {
@@ -84,7 +81,7 @@ export const useEmailCreators = (creators: EmailCreator[]) => {
     }
     
     return result;
-  }, [creators, statusFilter, sortConfig]);
+  }, [creators, sortConfig]);
 
   const handleDownloadSelected = (format: 'xls' | 'csv') => {
     if (selectedItems.length === 0) {
