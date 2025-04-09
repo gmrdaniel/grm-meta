@@ -2,33 +2,12 @@
 import { useState } from "react";
 import { sleep } from "@/services/tiktokVideoService";
 
-// Counter to track API calls
-let apiTestCallCounter = 0;
-
-/**
- * Get RapidAPI key based on call count 
- */
-const getTestApiKey = (): string => {
-  const apiKeys = [
-    '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-    'e41eda6abfmsha84f23487a19afbp1b05bajsn9fec65137765'
-  ];
-  
-  apiTestCallCounter++;
-  const keyIndex = (apiTestCallCounter - 1) % apiKeys.length;
-  
-  console.log(`🔑 Test API Key: Using API KEY #${keyIndex + 1} (${apiKeys[keyIndex].substring(0, 8)}...)`);
-  
-  return apiKeys[keyIndex];
-};
-
 export function useTikTokVideoApi() {
   const [username, setUsername] = useState<string>("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
-  const [currentApiKey, setCurrentApiKey] = useState<string>("");
 
   // Get adaptive delay based on retry count
   const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {
@@ -59,14 +38,11 @@ export function useTikTokVideoApi() {
           await sleep(delayTime);
         }
         
-        const apiKey = getTestApiKey();
-        setCurrentApiKey(apiKey);
-        
         const url = `https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`;
         const options = {
           method: 'GET',
           headers: {
-            'x-rapidapi-key': apiKey,
+            'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
             'x-rapidapi-host': 'tiktok-api6.p.rapidapi.com'
           }
         };
@@ -91,8 +67,7 @@ export function useTikTokVideoApi() {
           data: responseData,
           success: true,
           timestamp: new Date().toLocaleString(),
-          retries: currentRetry,
-          apiKey: `KEY #${(apiTestCallCounter - 1) % 2 + 1} (${apiKey.substring(0, 8)}...)`
+          retries: currentRetry
         });
       } catch (err) {
         if (err instanceof Error && err.message.includes('429')) {
@@ -130,7 +105,6 @@ export function useTikTokVideoApi() {
     loading,
     error,
     retryCount,
-    currentApiKey,
     handleTest
   };
 }

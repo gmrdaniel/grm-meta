@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TikTokVideo } from "@/types/creator";
 
@@ -88,28 +87,6 @@ const getAdaptiveDelay = (baseDelay: number, retryCount: number): number => {
   return Math.min(baseDelay * Math.pow(2, retryCount), 10000);
 };
 
-// Counter to track API calls and alternate between API keys
-let apiCallCounter = 0;
-
-/**
- * Get RapidAPI key based on call count to alternate between different keys
- * @returns RapidAPI key to use for the current request
- */
-const getRapidAPIKey = (): string => {
-  const apiKeys = [
-    '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-    'e41eda6abfmsha84f23487a19afbp1b05bajsn9fec65137765'
-  ];
-  
-  // Increment counter and use modulo to alternate between keys
-  apiCallCounter++;
-  const keyIndex = (apiCallCounter - 1) % apiKeys.length;
-  
-  console.log(`🔑 API Key selection: Using API KEY #${keyIndex + 1} (${apiKeys[keyIndex].substring(0, 8)}...)`);
-  
-  return apiKeys[keyIndex];
-};
-
 /**
  * Fetch TikTok user information using the TikTok API
  * Implements adaptive delays to manage rate limits
@@ -134,13 +111,10 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
           await sleep(500);
         }
         
-        // Get the API key for this request
-        const apiKey = getRapidAPIKey();
-        
         const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': apiKey,
+            'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
             'X-RapidAPI-Host': 'tiktok-api23.p.rapidapi.com'
           }
         });
@@ -202,13 +176,10 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
           await sleep(delayTime);
         }
         
-        // Get the API key for this request
-        const apiKey = getRapidAPIKey();
-        
         const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': apiKey,
+            'X-RapidAPI-Key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
             'X-RapidAPI-Host': 'tiktok-api6.p.rapidapi.com'
           }
         });
