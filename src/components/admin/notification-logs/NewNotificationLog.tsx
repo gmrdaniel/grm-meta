@@ -74,7 +74,7 @@ export function NewNotificationLog({ onSuccess }: { onSuccess?: () => void }) {
     queryKey: ["invitations"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("creator_invitations" as any)
+        .from("creator_invitations")
         .select("id, email, full_name")
         .order("created_at", { ascending: false });
       
@@ -88,7 +88,7 @@ export function NewNotificationLog({ onSuccess }: { onSuccess?: () => void }) {
     queryKey: ["notification-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("notification_settings" as any)
+        .from("notification_settings")
         .select("id, type, message, channel")
         .order("created_at", { ascending: false });
       
@@ -102,7 +102,7 @@ export function NewNotificationLog({ onSuccess }: { onSuccess?: () => void }) {
     queryKey: ["project-stages"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("project_stages" as any)
+        .from("project_stages")
         .select("id, name, project_id")
         .order("name", { ascending: true });
       
@@ -121,7 +121,7 @@ export function NewNotificationLog({ onSuccess }: { onSuccess?: () => void }) {
     setIsSubmitting(true);
     try {
       const { error } = await supabase
-        .from("notification_logs" as any)
+        .from("notification_logs")
         .insert({
           invitation_id: values.invitation_id,
           notification_setting_id: values.notification_setting_id,
