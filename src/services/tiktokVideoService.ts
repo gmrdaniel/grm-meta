@@ -105,6 +105,8 @@ const getRapidAPIKey = (): string => {
   apiCallCounter++;
   const keyIndex = (apiCallCounter - 1) % apiKeys.length;
   
+  console.log(`🔑 API Key selection: Using API KEY #${keyIndex + 1} (${apiKeys[keyIndex].substring(0, 8)}...)`);
+  
   return apiKeys[keyIndex];
 };
 
@@ -134,7 +136,6 @@ export const fetchTikTokUserInfo = async (username: string): Promise<any> => {
         
         // Get the API key for this request
         const apiKey = getRapidAPIKey();
-        console.log(`Using API key index: ${(apiCallCounter - 1) % 2 + 1}`);
         
         const response = await fetch(`https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=${encodeURIComponent(username)}`, {
           method: 'GET',
@@ -203,7 +204,6 @@ export const fetchTikTokUserVideos = async (username: string, creatorId: string)
         
         // Get the API key for this request
         const apiKey = getRapidAPIKey();
-        console.log(`Using API key index: ${(apiCallCounter - 1) % 2 + 1}`);
         
         const response = await fetch(`https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(username)}`, {
           method: 'GET',

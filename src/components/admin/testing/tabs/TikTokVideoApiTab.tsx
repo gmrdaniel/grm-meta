@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTikTokVideoApi } from "../hooks/useTikTokVideoApi";
 import ErrorDisplay from "../ErrorDisplay";
 import TestResultDisplay from "../TestResultDisplay";
-import { Loader2 } from "lucide-react";
+import { Loader2, Key } from "lucide-react";
 
 export default function TikTokVideoApiTab() {
   const {
@@ -16,6 +16,7 @@ export default function TikTokVideoApiTab() {
     loading,
     error,
     retryCount,
+    currentApiKey,
     handleTest
   } = useTikTokVideoApi();
 
@@ -56,6 +57,13 @@ export default function TikTokVideoApiTab() {
             </div>
             <ErrorDisplay error={error} />
           </div>
+
+          {result?.apiKey && (
+            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800 border border-blue-200 flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              <p className="font-medium">API Key utilizada: {result.apiKey}</p>
+            </div>
+          )}
 
           {retryCount > 0 && loading && (
             <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 border border-yellow-200">
