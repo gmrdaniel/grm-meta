@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { EmailCreator, EmailCreatorImportRow, EmailCreatorImportResult, PaginationParams, PaginatedResponse } from '@/types/email-creator';
 import { toast } from 'sonner';
@@ -147,6 +148,22 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
           throw new Error('Missing or invalid "Link de TikTok" field');
         }
 
+        // Check if the email already exists
+        const { data: existingCreator, error: checkError } = await supabase
+          .from('email_creators')
+          .select('id, email')
+          .eq('email', row['Correo'])
+          .maybeSingle();
+
+        if (checkError) {
+          console.error("Error checking for existing email:", checkError);
+          throw new Error(`Database error: ${checkError.message}`);
+        }
+
+        if (existingCreator) {
+          throw new Error(`Email "${row['Correo']}" already exists in the database`);
+        }
+
         // Create a new email creator
         const newCreator: any = {
           full_name: row['Nombre'],
@@ -170,6 +187,12 @@ export const importEmailCreatorsFromExcel = async (file: File): Promise<EmailCre
 
         if (error) {
           console.error("Database insertion error:", error);
+          
+          // Handle unique constraint violation
+          if (error.code === '23505' && error.details?.includes('email')) {
+            throw new Error(`Duplicate email: "${row['Correo']}" already exists in the database`);
+          }
+          
           throw new Error(`Database error: ${error.message}`);
         }
 
