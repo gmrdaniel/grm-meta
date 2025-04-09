@@ -47,8 +47,8 @@ export function NotificationSettingsList() {
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('notification_settings')
-        .update({ enabled: !currentStatus })
+        .from('notification_settings' as any)
+        .update({ enabled: !currentStatus } as any)
         .eq('id', id);
       
       if (error) throw error;
@@ -67,7 +67,7 @@ export function NotificationSettingsList() {
     
     try {
       const { error } = await supabase
-        .from('notification_settings')
+        .from('notification_settings' as any)
         .delete()
         .eq('id', id);
       
@@ -175,7 +175,7 @@ export function NotificationSettingsList() {
 async function fetchNotificationSettings() {
   // Join with project_stages to get stage names
   const { data, error } = await supabase
-    .from('notification_settings')
+    .from('notification_settings' as any)
     .select(`
       *,
       project_stages:stage_id (name)

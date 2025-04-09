@@ -56,8 +56,8 @@ export function NewNotificationSettings({ onSuccess }: NewNotificationSettingsPr
   const onSubmit = async (values: FormValues) => {
     try {
       const { error } = await supabase
-        .from('notification_settings')
-        .insert([values]);
+        .from('notification_settings' as any)
+        .insert([values as any]);
       
       if (error) throw error;
       
@@ -192,7 +192,7 @@ export function NewNotificationSettings({ onSuccess }: NewNotificationSettingsPr
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">All Stages</SelectItem>
+                      <SelectItem value="all_stages">All Stages</SelectItem>
                       {projectStages?.map(stage => (
                         <SelectItem key={stage.id} value={stage.id}>
                           {stage.name}
