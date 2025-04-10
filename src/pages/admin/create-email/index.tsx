@@ -28,11 +28,13 @@ export default function AdminCreateEmail() {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+    // We don't reset any filters here, so they are maintained
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setPage(1); // Reset to first page when changing page size
+    // We maintain the status filter here
   };
 
   // Handle status filter changes
@@ -92,6 +94,7 @@ export default function AdminCreateEmail() {
                   onPageSizeChange={handlePageSizeChange}
                   total={total}
                   onStatusFilterChange={handleStatusFilterChange}
+                  currentStatusFilter={statusFilter}
                 />
               )}
             </TabsContent>

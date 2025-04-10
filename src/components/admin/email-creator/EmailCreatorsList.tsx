@@ -24,6 +24,7 @@ interface EmailCreatorsListProps {
   onPageSizeChange: (pageSize: number) => void;
   total: number;
   onStatusFilterChange: (status: string) => void;
+  currentStatusFilter: string | null;
 }
 
 export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({ 
@@ -35,7 +36,8 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
   onPageChange, 
   onPageSizeChange,
   total,
-  onStatusFilterChange
+  onStatusFilterChange,
+  currentStatusFilter
 }) => {
   const [selectedCreator, setSelectedCreator] = useState<EmailCreator | null>(null);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
@@ -57,6 +59,15 @@ export const EmailCreatorsList: React.FC<EmailCreatorsListProps> = ({
     sortConfig,
     handleSortChange
   } = useEmailCreators(creators);
+
+  // Initialize the status filter with the current value from props
+  React.useEffect(() => {
+    if (currentStatusFilter === null) {
+      setStatusFilter("all");
+    } else {
+      setStatusFilter(currentStatusFilter);
+    }
+  }, [currentStatusFilter, setStatusFilter]);
 
   // Update the handler to pass the filter change to parent
   const handleStatusFilterChange = (status: string) => {
