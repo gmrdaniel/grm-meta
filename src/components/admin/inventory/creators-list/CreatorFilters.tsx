@@ -94,16 +94,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             </DropdownMenuItem>
             <DropdownMenuItem className="flex items-center gap-2">
               <Checkbox 
-                id="with-videos"
-                checked={activeFilters.withVideos || false}
-                onCheckedChange={() => handleFilterChange('withVideos')}
-              />
-              <Label htmlFor="with-videos" className="flex-1 cursor-pointer">
-                Con videos descargados
-              </Label>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-2">
-              <Checkbox 
                 id="without-videos"
                 checked={activeFilters.withoutVideos || false}
                 onCheckedChange={() => handleFilterChange('withoutVideos')}

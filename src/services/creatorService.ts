@@ -40,11 +40,6 @@ export const fetchCreators = async (
       query = query.is('fecha_consulta_videos', null);
     }
 
-    // New filter to fetch creators WITH downloaded videos (fecha_consulta_videos is NOT null)
-    if (filters.withVideos) {
-      query = query.not('fecha_consulta_videos', 'is', null);
-    }
-
     // Add filter for creators without YouTube data
     if (filters.withoutYouTube) {
       query = query.is('fecha_descarga_yt', null);

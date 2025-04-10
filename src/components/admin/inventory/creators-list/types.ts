@@ -1,4 +1,3 @@
-
 import { Creator } from "@/types/creator";
 
 export interface CreatorFilter {
@@ -7,9 +6,8 @@ export interface CreatorFilter {
   hasYouTubeUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
-  withVideos?: boolean; // New filter for creators WITH videos
   withoutYouTube?: boolean;
-  withoutYouTubeEngagement?: boolean;
+  withoutYouTubeEngagement?: boolean; // New filter for creators without YouTube engagement
 }
 
 export interface CreatorsListProps {
