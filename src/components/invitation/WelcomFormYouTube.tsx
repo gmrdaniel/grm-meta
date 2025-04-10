@@ -92,10 +92,10 @@ export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
             />
           </div>
 
-          {invitation.youtube_social_media && (
+          {invitation.social_media_type && (
             <div className="space-y-2">
               <Label htmlFor="socialMediaHandle">
-                {invitation.youtube_social_media === "youtube"
+                {invitation.social_media_type === "youtube"
                   ? "YouTube Username"
                   : "Pinterest Username"}
               </Label>
