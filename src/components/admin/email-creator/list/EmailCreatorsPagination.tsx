@@ -81,8 +81,9 @@ export const EmailCreatorsPagination: React.FC<EmailCreatorsPaginationProps> = (
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => onPageChange(page - 1)}
+                  onClick={() => page > 1 && onPageChange(page - 1)}
                   className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={page === 1}
                 />
               </PaginationItem>
               
@@ -120,9 +121,9 @@ export const EmailCreatorsPagination: React.FC<EmailCreatorsPaginationProps> = (
               
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => onPageChange(page + 1)}
-                  disabled={page === totalPages}
+                  onClick={() => page < totalPages && onPageChange(page + 1)}
                   className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={page === totalPages}
                 />
               </PaginationItem>
             </PaginationContent>
