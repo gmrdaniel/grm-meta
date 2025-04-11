@@ -102,7 +102,11 @@ export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
               <Input
                 id="socialMediaHandle"
                 name="socialMediaHandle"
-                value={formData.socialMediaHandle}
+                value={
+                  invitation.social_media_type === "youtube"
+                    ? invitation.youtube_channel // Mostrar youtube_channel para YouTube
+                    : formData.socialMediaHandle // Mostrar socialMediaHandle para otras plataformas
+                }
                 readOnly
                 className="bg-gray-50"
                 placeholder={
