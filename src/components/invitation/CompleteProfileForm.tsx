@@ -348,7 +348,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     onChange={handleInputChange}
                     className="w-20"
                     readOnly={true}
-                    disabled={true}
                     aria-readonly={formData.phoneVerified}
                   />
                   <Input
