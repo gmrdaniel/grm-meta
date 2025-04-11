@@ -157,7 +157,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         body: {
           action: "send",
           phoneNumber: formData.phoneNumber,
-          countryCode: formData.phoneCountryCode,
+          countryCode: formData.phoneCountryCode ?? '+1',
         },
       });
 
