@@ -29,6 +29,7 @@ export interface ProfileFormData {
   phoneCountryCode: string;
   phoneNumber: string;
   phoneVerified: boolean;
+  
 }
 
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({

@@ -19,7 +19,7 @@ export const YouTubeForm = ({
   handleInputChange,
   handleCheckboxChange,
   handleContinueWelcome,
-  handleCompleteProfileSubmit,
+  handleCompleteProfileYtbSubmit,
   handleFacebookInputChange,
   handleCheckboxFacebookChange,
   handleFacebookSubmit,
@@ -42,7 +42,7 @@ export const YouTubeForm = ({
       )}
       {currentStep.id === "completeProfile" && (
         <CompleteProfileFormYtb
-          onSubmit={handleCompleteProfileSubmit}
+          onSubmit={handleCompleteProfileYtbSubmit}
           isSubmitting={saving}
           invitation={invitation}
         />
