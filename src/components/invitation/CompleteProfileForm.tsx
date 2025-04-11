@@ -60,7 +60,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     setFormData({
       youtubeChannel: invitation.youtube_channel,
       instagramUser: invitation.instagram_user,
-      phoneCountryCode: invitation.phone_country_code,
+      phoneCountryCode: invitation.phone_country_code ?? '+1',
       phoneNumber: invitation.phone_number,
       phoneVerified: invitation.phone_verified,
       isIGProfessional: invitation.is_professional_account,
