@@ -33,7 +33,7 @@ serve(async () => {
       channel,
       delay_days,
       frequency_days,
-      max_notifications
+      max_notifications,
     } = setting;
 
     let offset = 0;
@@ -61,17 +61,17 @@ serve(async () => {
 
         if (daysInStage < delay_days) continue;
 
-        // 1. Chequear si ya hay un pending
-        const { data: existingPending } = await supabase
+        // 1. Chequear si ya existe una notificación previa (pending, sent o failed)
+        const { data: existingLogs } = await supabase
           .from("notification_logs")
           .select("id")
           .eq("invitation_id", invitation_id)
           .eq("notification_setting_id", setting_id)
-          .eq("status", "pending");
+          .in("status", ["pending", "sent", "failed"]);
 
-        if ((existingPending?.length || 0) > 0) continue;
+        if ((existingLogs?.length || 0) > 0) continue;
 
-        // 2. Chequear cantidad de envíos ya realizados
+        // 2. Chequear cantidad de notificaciones enviadas
         const { data: logs } = await supabase
           .from("notification_logs")
           .select("id, sent_at")
