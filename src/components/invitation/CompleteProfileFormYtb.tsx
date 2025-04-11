@@ -31,7 +31,7 @@ export interface ProfileFormData {
   phoneVerified: boolean;
 }
 
-export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
+export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
   isSubmitting,
   invitation,
@@ -60,7 +60,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     setFormData({
       youtubeChannel: invitation.youtube_channel,
       instagramUser: invitation.instagram_user,
-      phoneCountryCode: invitation.phone_country_code ?? '+1',
+      phoneCountryCode: invitation.phone_country_code,
       phoneNumber: invitation.phone_number,
       phoneVerified: invitation.phone_verified,
       isIGProfessional: invitation.is_professional_account,
@@ -77,10 +77,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     }
   }, [countdown]);
 
-  useEffect(() => {
-    validateInstagramUsername(formData.instagramUser)
-  }, [formData.instagramUser])
-
   // Format countdown as mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -89,7 +85,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       .toString()
       .padStart(2, "0")}`;
   };
-  
 
   const validateInstagramUsername = (username: string): boolean => {
     if (!username) {
@@ -162,7 +157,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         body: {
           action: "send",
           phoneNumber: formData.phoneNumber,
-          countryCode: formData.phoneCountryCode ?? '+1',
+          countryCode: formData.phoneCountryCode,
         },
       });
 
@@ -352,7 +347,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     value={formData.phoneCountryCode}
                     onChange={handleInputChange}
                     className="w-20"
-                    readOnly={true}
+                    readOnly={formData.phoneVerified}
+                    disabled={formData.phoneVerified}
                     aria-readonly={formData.phoneVerified}
                   />
                   <Input
@@ -465,7 +461,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 
           {/* Campo opcional: YouTube */}
           <div className="space-y-2">
-            <Label htmlFor="youtubeChannel">YouTube Channel (Optional)</Label>
+            <Label htmlFor="youtubeChannel">TikTok Channel (Optional)</Label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3">
                 <span className="text-slate-500 text-sm">@</span>

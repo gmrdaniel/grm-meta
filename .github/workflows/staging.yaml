@@ -38,4 +38,3 @@ jobs:
             echo "Deploying function: $func"
             supabase functions deploy "$func"
           done
-

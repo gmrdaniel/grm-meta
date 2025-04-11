@@ -361,3 +361,58 @@ entrypoint = "./functions/instagram-details/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/instagram-details/*.html" ]
+
+[functions.prepare-notifications]
+enabled = true
+verify_jwt = true
+import_map = "./functions/prepare-notifications/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/prepare-notifications/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/prepare-notifications/*.html" ]
+
+[functions.send-creators-pending-notifications]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-creators-pending-notifications/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/send-creators-pending-notifications/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/send-creators-pending-notifications/*.html" ]
+
+[functions.function_send-pending-sms]
+enabled = true
+verify_jwt = true
+import_map = "./functions/function_send-pending-sms/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/function_send-pending-sms/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/function_send-pending-sms/*.html" ]
+
+[functions.send-pending-sms]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-pending-sms/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/send-pending-sms/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/send-pending-sms/*.html" ]
+
+[functions.send-creators--pending-sms]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-creators--pending-sms/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/send-creators--pending-sms/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/send-creators--pending-sms/*.html" ]
