@@ -158,7 +158,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         body: {
           action: "send",
           phoneNumber: formData.phoneNumber,
-          countryCode: formData.phoneCountryCode,
+          countryCode: formData.phoneCountryCode ?? '+1',
         },
       });
 
@@ -348,8 +348,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     value={formData.phoneCountryCode}
                     onChange={handleInputChange}
                     className="w-20"
-                    readOnly={formData.phoneVerified}
-                    disabled={formData.phoneVerified}
+                    readOnly={true}
+                    disabled={true}
                     aria-readonly={formData.phoneVerified}
                   />
                   <Input

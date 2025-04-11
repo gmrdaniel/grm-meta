@@ -17,23 +17,29 @@ const MAX_BATCH = 100; // máximo por ejecución
 serve(async () => {
   const { data: pendingLogs, error } = await supabase
     .from("notification_logs")
-    .select(`
-      id,
-      invitation_id,
-      notification_setting_id,
-      channel,
-      creator_invitations:invitation_id (
-        full_name,
-        email,
-        invitation_code,
-        invitation_url
-      ),
-      notification_settings:notification_setting_id (
-        subject,
-        message,
-        type
+    .select(
+      `
+    id,
+    invitation_id,
+    notification_setting_id,
+    channel,
+    creator_invitations:invitation_id (
+      full_name,
+      email,
+      invitation_code,
+      invitation_url
+    ),
+    notification_settings:notification_setting_id (
+      subject,
+      message,
+      type,
+      template_id,
+      email_templates:template_id (
+        html
       )
-    `)
+    )
+  `
+    )
     .eq("status", "pending")
     .limit(MAX_BATCH);
 
@@ -56,7 +62,7 @@ serve(async () => {
         status: success ? "sent" : "failed",
         sent_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        error_message: success ? null : "Failed to send"
+        error_message: success ? null : "Failed to send",
       })
       .eq("id", log.id);
 
@@ -73,7 +79,10 @@ function extractVariables(template: string): string[] {
   return matches.map((match) => match.replace(/{{|}}/g, "").trim());
 }
 
-function renderTemplate(template: string, variables: Record<string, string | undefined>): string {
+function renderTemplate(
+  template: string,
+  variables: Record<string, string | undefined>
+): string {
   return template.replace(/{{(.*?)}}/g, (_, key) => {
     return variables[key.trim()] || "";
   });
@@ -90,7 +99,11 @@ function generateValueFor(key: string, invitation: any): string | undefined {
 
 // ===================== ENVÍO ========================
 
-async function sendNotification(channel: string, invitation: any, setting: any): Promise<boolean> {
+async function sendNotification(
+  channel: string,
+  invitation: any,
+  setting: any
+): Promise<boolean> {
   const requiredVars = extractVariables(setting.message);
   const variables: Record<string, string | undefined> = {};
 
@@ -98,7 +111,13 @@ async function sendNotification(channel: string, invitation: any, setting: any):
     variables[key] = generateValueFor(key, invitation);
   }
 
-  const html = renderTemplate(setting.message, variables);
+  let html = renderTemplate(setting.message, variables);
+
+  // Si hay plantilla asociada, embebe el contenido
+  if (setting.email_templates?.html) {
+    html = setting.email_templates.html.replace("{{content}}", html);
+  }
+
   const subject = renderTemplate(setting.subject || "Notification", variables);
 
   if (channel === "email") {
@@ -107,7 +126,7 @@ async function sendNotification(channel: string, invitation: any, setting: any):
         from: senderEmail,
         to: [invitation.email],
         subject,
-        html
+        html,
       });
 
       if (response.error) {
