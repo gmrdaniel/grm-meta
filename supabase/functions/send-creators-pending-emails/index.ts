@@ -115,7 +115,7 @@ async function sendNotification(
 
   // Si hay plantilla asociada, embebe el contenido
   if (setting.email_templates?.html) {
-    html = setting.email_templates.html.replace("{{body}}", html);
+    html = setting.email_templates.html.replace("{{content}}", html);
   }
 
   const subject = renderTemplate(setting.subject || "Notification", variables);
