@@ -60,7 +60,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     setFormData({
       youtubeChannel: invitation.youtube_channel,
       instagramUser: invitation.instagram_user,
-      phoneCountryCode: invitation.phone_country_code,
+      phoneCountryCode: invitation.phone_country_code ?? '+1',
       phoneNumber: invitation.phone_number,
       phoneVerified: invitation.phone_verified,
       isIGProfessional: invitation.is_professional_account,
@@ -348,7 +348,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     onChange={handleInputChange}
                     className="w-20"
                     readOnly={true}
-                    disabled={true}
                     aria-readonly={formData.phoneVerified}
                   />
                   <Input

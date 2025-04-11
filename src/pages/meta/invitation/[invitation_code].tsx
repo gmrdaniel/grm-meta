@@ -60,8 +60,10 @@ const defaultFormData = {
 };
 
 const defaultFacebookData = {
+  facebookProfileUrl: "",
   facebookPageUrl: "",
-  verifyOwnership: false,
+  verifyPageOwnership: false,
+  verifyProfileOwnership: false,
   linkInstagram: false,
 };
 
@@ -310,17 +312,29 @@ export default function InvitationStepperPage() {
   };
 
   const handleFacebookSubmit = async () => {
-    if (!facebookFormData.verifyOwnership) {
+    if (!facebookFormData.verifyPageOwnership) {
       toast.error("Please verify that you own this Facebook page");
       return;
     }
 
-    const { isValid, errorMessage } = validateFacebookPageUrl(
-      facebookFormData.facebookPageUrl
-    );
+    if (!facebookFormData.verifyProfileOwnership) {
+      toast.error("Please verify that you own this Facebook ");
+      return;
+    }
+    const { isValid: isPageUrlValid, errorMessage: pageUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookPageUrl);
 
-    if (!isValid) {
-      toast.error(errorMessage || "Invalid Facebook URL");
+    const { isValid: isProfileUrlValid, errorMessage: profileUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookProfileUrl);
+
+    // Validación secuencial
+    if (!isPageUrlValid) {
+      toast.error(pageUrlError || "Invalid Facebook Business Page URL");
+      return;
+    }
+
+    if (!isProfileUrlValid) {
+      toast.error(profileUrlError || "Invalid Facebook Personal Profile URL");
       return;
     }
 
@@ -347,7 +361,8 @@ export default function InvitationStepperPage() {
       // Proceed with update if validation passed
       const result = await updateFacebookPage(
         invitation.id,
-        facebookFormData.facebookPageUrl.trim()
+        facebookFormData.facebookPageUrl.trim(),
+        facebookFormData.facebookProfileUrl.trim()
       );
 
       if (
