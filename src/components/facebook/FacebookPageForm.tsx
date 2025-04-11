@@ -8,9 +8,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FacebookPageFormProps {
   formData: {
-    facebookPageUrl: string;
-    verifyOwnership: boolean;
-    linkInstagram: boolean;
+    facebookProfileUrl: string
+    facebookPageUrl: string
+    verifyPageOwnership: boolean
+    verifyProfileOwnership: boolean
+    linkInstagram: boolean
   };
   submitting: boolean;
   error: string | null;
@@ -30,7 +32,9 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   const isSubmitDisabled =
     submitting ||
     !formData.facebookPageUrl.trim() ||
-    !formData.verifyOwnership ||
+    !formData.verifyPageOwnership ||
+    !formData.facebookProfileUrl.trim() ||
+    !formData.verifyProfileOwnership ||
     !formData.linkInstagram;
 
   return (
@@ -41,8 +45,11 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
         </h1>
         <div className="flex items-center text-red-500 mt-2">
           <p className="text-gray-500 font-medium mt-4">
-          <p className="text-gray-600 text-xs ">
-          Important: On this step, please share/create a Facebook Page and make sure to connect it with your Instagram account to complete your application and send it for validation to Meta!          </p>
+            <p className="text-gray-600 text-xs ">
+              Important: On this step, please share/create a Facebook Page and
+              make sure to connect it with your Instagram account to complete
+              your application and send it for validation to Meta!{" "}
+            </p>
           </p>
         </div>
       </div>
@@ -54,22 +61,30 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
       )}
 
       <div className="space-y-6">
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">1. Share your Facebook Page</h2>
-          <a
-            href="https://www.facebook.com/business/help/104002523024878"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-blue-500 hover:underline"
-          >
-            <span className="mr-2 inline-flex items-center">
-              Need to create a Facebook page? See here how.
-            </span>
-            <ExternalLink className="h-4 w-4" />
-          </a>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">
+              1. Share your Facebook Page
+            </h2>
+            <aside className="text-xs text-yellow-700 bg-amber-50 border border-yellow-300 rounded-sm p-2">
+              <strong>Attention:</strong> Page name must be 5–30 characters
+              long. Only letters, numbers, periods, and underscores are allowed.
+            </aside>
+            <a
+              href="https://www.facebook.com/business/help/104002523024878"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-blue-500 hover:underline text-sm"
+            >
+              <span className="inline-flex items-center">
+                Need to create a Facebook page? See here how.
+              </span>
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
 
           <div className="space-y-2">
-            <Label htmlFor="facebookPageUrl">Facebook Page URL</Label>
+            <Label htmlFor="facebookPageUrl">Facebook Business Page URL</Label>
             <div className="flex items-center">
               <Input
                 id="facebookPageUrl"
@@ -83,26 +98,58 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 placeholder="https://www.facebook.com/yourpage"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              <span className="text-gray-900 font-semibold">
-                Example: <code>https://www.facebook.com/yourpage</code>
-              </span>
-              <br />
-              Page name must be 5–30 characters long. Only letters, numbers,
-              periods, and underscores are allowed.
+            <p className="text-xs text-gray-600 font-semibold">
+              Example: <span className="text-gray-500 font-normal">https://www.facebook.com/yourpage</span>
             </p>
           </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="verifyOwnership"
-              checked={formData.verifyOwnership}
+              id="verifyPageOwnership"
+              checked={formData.verifyPageOwnership}
               onCheckedChange={(checked) =>
-                onCheckboxChange("verifyOwnership", checked as boolean)
+                onCheckboxChange("verifyPageOwnership", checked as boolean)
               }
             />
-            <Label htmlFor="verifyOwnership" className="text-sm">
-            I verify this Facebook Page is mine
+            <Label htmlFor="verifyPageOwnership" className="text-sm">
+            I verify this is my own profile
+            </Label>
+          </div>
+
+          <hr className="my-8 border-[2px] rounded-lg" />
+
+          <div className="space-y-2">
+            <Label htmlFor="facebookProfileUrl">
+              Facebook Personal Profile URL
+            </Label>
+            <div className="flex items-center">
+              <Input
+                id="facebookProfileUrl"
+                name="facebookProfileUrl"
+                value={formData.facebookProfileUrl}
+                onChange={onInputChange}
+                className="rounded-l-none"
+                type="url"
+                pattern="https://www\.facebook\.com/.*"
+                required
+                placeholder="https://www.facebook.com/yourprofile"
+              />
+            </div>
+            <p className="text-xs text-gray-600 font-semibold">
+              Example: <span className="text-gray-500 font-normal">https://www.facebook.com/yourprofile</span>
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verifyProfileOwnership"
+              checked={formData.verifyProfileOwnership}
+              onCheckedChange={(checked) =>
+                onCheckboxChange("verifyProfileOwnership", checked as boolean)
+              }
+            />
+            <Label htmlFor="verifyProfileOwnership" className="text-sm">
+              This is my own personal page to verify ownership
             </Label>
           </div>
         </div>
@@ -115,7 +162,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             href="https://www.facebook.com/help/1148909221857370"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center text-blue-500 hover:underline"
+            className="flex items-center text-blue-500 hover:underline text-sm"
           >
             <span>Instructions here</span>
             <ExternalLink className="h-4 w-4 ml-1" />

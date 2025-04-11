@@ -56,8 +56,10 @@ const defaultFormData = {
 };
 
 const defaultFacebookData = {
+  facebookProfileUrl: "",
   facebookPageUrl: "",
-  verifyOwnership: false,
+  verifyPageOwnership: false,
+  verifyProfileOwnership: false,
   linkInstagram: false,
 };
 
@@ -282,7 +284,7 @@ export default function InvitationStepperPage() {
       phone_verified: formData.phoneVerified, */
       is_business_account: isBusinessAccount,
       is_professional_account: isProfessionalAccount,
-      status: 'in process' as const
+      status: "in process" as const,
     };
 
     const { error } = await supabase
@@ -301,17 +303,29 @@ export default function InvitationStepperPage() {
   };
 
   const handleFacebookSubmit = async () => {
-    if (!facebookFormData.verifyOwnership) {
+    if (!facebookFormData.verifyPageOwnership) {
       toast.error("Please verify that you own this Facebook page");
       return;
     }
 
-    const { isValid, errorMessage } = validateFacebookPageUrl(
-      facebookFormData.facebookPageUrl
-    );
+    if (!facebookFormData.verifyProfileOwnership) {
+      toast.error("Please verify that you own this Facebook ");
+      return;
+    }
+    const { isValid: isPageUrlValid, errorMessage: pageUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookPageUrl);
 
-    if (!isValid) {
-      toast.error(errorMessage || "Invalid Facebook URL");
+    const { isValid: isProfileUrlValid, errorMessage: profileUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookProfileUrl);
+
+    // Validación secuencial
+    if (!isPageUrlValid) {
+      toast.error(pageUrlError || "Invalid Facebook Business Page URL");
+      return;
+    }
+
+    if (!isProfileUrlValid) {
+      toast.error(profileUrlError || "Invalid Facebook Personal Profile URL");
       return;
     }
 
@@ -338,7 +352,8 @@ export default function InvitationStepperPage() {
       // Proceed with update if validation passed
       const result = await updateFacebookPage(
         invitation.id,
-        facebookFormData.facebookPageUrl.trim()
+        facebookFormData.facebookPageUrl.trim(),
+        facebookFormData.facebookProfileUrl.trim()
       );
 
       if (
@@ -420,54 +435,54 @@ export default function InvitationStepperPage() {
       {/* Contenido principal con flex-grow */}
       <div className="flex flex-col md:flex-row items-center justify-evenly flex-grow p-4 gap-2">
         <div className="text-center max-w-md space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mt-4">
-    {currentStep.id === "completeProfile"
-      ? "Complete Your Profile"
-      : "Join Meta Creator Breakthrough Bonus Program"}
-  </h1>
+          <h1 className="text-2xl font-semibold text-gray-800 mt-4">
+            {currentStep.id === "completeProfile"
+              ? "Complete Your Profile"
+              : "Join Meta Creator Breakthrough Bonus Program"}
+          </h1>
           <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
 
           {/* Benefits Section */}
           {currentStep.id === "welcome" && (
-    <div className="p-4">
-      <h3 className="font-medium mb-3">Benefits:</h3>
-      <ul className="space-y-2">
-        <li className="flex items-center gap-2">
-          <div className="rounded-full bg-green-100 p-1">
-            <Check className="h-4 w-4 text-green-600" />
-          </div>
-          <span className="whitespace-nowrap">
-            Gain Immediate Facebook monetization
-          </span>
-        </li>
-        <li className="flex items-center gap-2">
-          <div className="rounded-full bg-green-100 p-1">
-            <Check className="h-4 w-4 text-green-600" />
-          </div>
-          <span>Up to $5,000 in extra bonuses (90 days)</span>
-        </li>
-        <li className="flex items-center gap-2">
-          <div className="rounded-full bg-green-100 p-1">
-            <Check className="h-4 w-4 text-green-600" />
-          </div>
-          <span>Free trial of Meta Verified</span>
-        </li>
-        <li className="items-center gap-2 hidden lg:flex">
-        <div className="rounded-full bg-green-100 p-1">
-          <Check className="h-4 w-4 text-green-600" />
+            <div className="p-4">
+              <h3 className="font-medium mb-3">Benefits:</h3>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span className="whitespace-nowrap">
+                    Gain Immediate Facebook monetization
+                  </span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>Up to $5,000 in extra bonuses (90 days)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>Free trial of Meta Verified</span>
+                </li>
+                <li className="items-center gap-2 hidden lg:flex">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>Increased discoverability</span>
+                </li>
+                <li className=" items-center gap-2 hidden lg:flex">
+                  <div className="rounded-full bg-green-100 p-1">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>Meta Support</span>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
-        <span>Increased discoverability</span>
-      </li>
-      <li className=" items-center gap-2 hidden lg:flex">
-        <div className="rounded-full bg-green-100 p-1">
-          <Check className="h-4 w-4 text-green-600" />
-        </div>
-        <span>Meta Support</span>
-      </li> 
-      </ul>
-    </div>
-  )}
-</div>
 
         <div className="h-[400px] hidden lg:block bg-blue-300 p-[1px]"></div>
 
