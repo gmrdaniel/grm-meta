@@ -77,6 +77,10 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     }
   }, [countdown]);
 
+  useEffect(() => {
+    validateInstagramUsername(formData.instagramUser)
+  }, [formData.instagramUser])
+
   // Format countdown as mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -85,6 +89,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
       .toString()
       .padStart(2, "0")}`;
   };
+  
 
   const validateInstagramUsername = (username: string): boolean => {
     if (!username) {
