@@ -61,29 +61,30 @@ serve(async () => {
 
         if (daysInStage < delay_days) continue;
 
-        // 1. Chequear si ya existe una notificación previa (pending, sent o failed)
-        const { data: existingLogs } = await supabase
+        // 1. Chequear si ya hay una notificación pendiente
+        const { data: existingPending } = await supabase
           .from("notification_logs")
           .select("id")
           .eq("invitation_id", invitation_id)
           .eq("notification_setting_id", setting_id)
-          .in("status", ["pending", "sent", "failed"]);
+          .eq("status", "pending");
 
-        if ((existingLogs?.length || 0) > 0) continue;
+        if ((existingPending?.length || 0) > 0) continue;
 
-        // 2. Chequear cantidad de notificaciones enviadas
+        // 2. Verificar intentos anteriores (fallidos o enviados)
         const { data: logs } = await supabase
           .from("notification_logs")
-          .select("id, sent_at")
+          .select("id, sent_at, status")
           .eq("invitation_id", invitation_id)
           .eq("notification_setting_id", setting_id)
-          .eq("status", "sent")
+          .in("status", ["sent", "failed"])
           .order("sent_at", { ascending: false });
 
         if ((logs?.length || 0) >= max_notifications) continue;
 
-        // 3. Verificar tiempo mínimo entre envíos
-        const lastSent = logs?.[0]?.sent_at;
+        // 3. Aplicar frecuencia solo si el último fue enviado exitosamente
+        const lastLog = logs?.[0];
+        const lastSent = lastLog?.status === "sent" ? lastLog?.sent_at : null;
         const daysSinceLast = lastSent ? differenceInDays(now, new Date(lastSent)) : Infinity;
 
         if (daysSinceLast < frequency_days) continue;
