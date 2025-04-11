@@ -66,7 +66,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             <h2 className="text-lg font-semibold">
               1. Share your Facebook Page
             </h2>
-            <aside className="text-xs text-yellow-700 bg-amber-50 border border-yellow-300 rounded-sm p-2">
+            <aside className="text-xs text-yellow-700 bg-amber-50 border border-yellow-300 p-2">
               <strong>Attention:</strong> Page name must be 5–30 characters
               long. Only letters, numbers, periods, and underscores are allowed.
             </aside>
@@ -182,7 +182,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           </div>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-md border border-blue-100 flex items-center">
+        <div className="text-xs bg-blue-50 p-2 border border-blue-100 flex items-center">
           <div className="rounded-full bg-green-100 p-1 mr-2">
             <Check className="h-4 w-4 text-green-600" />
           </div>
