@@ -33,7 +33,8 @@ export const updateInvitationStatus = async (
  */
 export const updateFacebookPage = async (
   invitationId: string,
-  facebookPageUrl: string
+  facebookPageUrl: string,
+  facebookProfileUrl: string
 ): Promise<CreatorInvitation | null> => {
   try {
     // Verify the invitation exists before updating
@@ -55,6 +56,7 @@ export const updateFacebookPage = async (
       .from('creator_invitations')
       .update({ 
         facebook_page: facebookPageUrl,
+        facebook_profile: facebookProfileUrl,
         updated_at: new Date().toISOString(),
         fb_step_completed: true
       })
