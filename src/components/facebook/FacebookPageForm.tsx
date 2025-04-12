@@ -112,7 +112,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               }
             />
             <Label htmlFor="verifyPageOwnership" className="text-sm">
-            I verify this is my own profile
+            I verify that I own this page.
             </Label>
           </div>
 
