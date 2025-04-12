@@ -149,7 +149,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               }
             />
             <Label htmlFor="verifyProfileOwnership" className="text-sm">
-              This is my own profile.git
+              This is my own profile
             </Label>
           </div>
         </div>
