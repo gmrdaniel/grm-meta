@@ -58,35 +58,47 @@ export const fetchInvitationsWithPagination = async (
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = 'created_at',
-  sortOrder: 'asc' | 'desc' = 'desc'
+  sortOrder: 'asc' | 'desc' = 'desc',
+  statusFilter?: "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended"
 ): Promise<{ data: CreatorInvitation[], count: number }> => {
   try {
-    // Calculate range for pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
-    
-    // First get the total count
-    const { count, error: countError } = await supabase
+
+    // --- Paso 1: Obtener el count con filtro si aplica
+    let countQuery = supabase
       .from('creator_invitations')
       .select('*', { count: 'exact', head: true });
-    
+
+    if (statusFilter) {
+      countQuery = countQuery.eq('status', statusFilter);
+    }
+
+    const { count, error: countError } = await countQuery;
+
     if (countError) {
       console.error('Error fetching invitations count:', countError);
       return { data: [], count: 0 };
     }
-    
-    // Then fetch the paginated data
-    const { data, error } = await supabase
+
+    // --- Paso 2: Obtener los datos paginados
+    let dataQuery = supabase
       .from('creator_invitations')
       .select('*')
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(from, to);
-    
+
+    if (statusFilter) {
+      dataQuery = dataQuery.eq('status', statusFilter);
+    }
+
+    const { data, error } = await dataQuery;
+
     if (error) {
       console.error('Error fetching paginated invitations:', error);
       return { data: [], count: count || 0 };
     }
-    
+
     return { 
       data: data as CreatorInvitation[], 
       count: count || 0 
@@ -96,6 +108,7 @@ export const fetchInvitationsWithPagination = async (
     return { data: [], count: 0 };
   }
 };
+
 
 /**
  * Fetch all invitations (no pagination, for export)

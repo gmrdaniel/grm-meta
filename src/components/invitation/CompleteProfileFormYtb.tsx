@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
 import { CreatorInvitation } from "@/types/invitation";
+import { ProfileFormData } from "@/types/forms-type";
+
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
@@ -22,14 +24,7 @@ interface CompleteProfileFormProps {
   invitation: CreatorInvitation;
 }
 
-export interface ProfileFormData {
-  youtubeChannel: string;
-  instagramUser: string;
-  isIGProfessional: boolean;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  phoneVerified: boolean;
-}
+
 
 export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
@@ -43,6 +38,7 @@ export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
     phoneNumber: "",
     phoneVerified: false,
     isIGProfessional: false,
+    socialMediaHandle: "",
   });
 
   const [verificationStep, setVerificationStep] = useState<
@@ -64,7 +60,9 @@ export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
       phoneNumber: invitation.phone_number,
       phoneVerified: invitation.phone_verified,
       isIGProfessional: invitation.is_professional_account,
+      socialMediaHandle: invitation.social_media_handle,
     });
+    
   }, [invitation]);
 
   // Handle countdown timer for OTP expiration
@@ -238,6 +236,7 @@ export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
   };
 
   const handleSubmit = () => {
+    
     // Validate Instagram username before submission
     if (!validateInstagramUsername(formData.instagramUser)) {
       toast.error("Please fix the Instagram username format");
@@ -459,24 +458,25 @@ export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
             )}
           </div>
 
-          {/* Campo opcional: YouTube */}
+          {/* Campo opcional: tiktok */}
           <div className="space-y-2">
-            <Label htmlFor="youtubeChannel">TikTok Channel (Optional)</Label>
+            <Label htmlFor="tiktokChannel">TikTok Channel (Optional)</Label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3">
                 <span className="text-slate-500 text-sm">@</span>
               </div>
               <Input
-                id="youtubeChannel"
-                name="youtubeChannel"
-                value={formData.youtubeChannel}
+                id="tiktokChannel"
+                name="tiktokChannel"
+                value={formData.socialMediaHandle}
                 onChange={(e) => {
                   const sanitizedValue = sanitizeInputBeforeUpdate(
                     e.target.value
                   );
+                  console.log("TikTok Channel value captured:", sanitizedValue);
                   setFormData((prev) => ({
                     ...prev,
-                    youtubeChannel: sanitizedValue,
+                    socialMediaHandle: sanitizedValue,
                   }));
                 }}
                 placeholder="channelname"

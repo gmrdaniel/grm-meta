@@ -13,7 +13,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { WelcomeForm } from "@/components/invitation/WelcomeForm";
 import {
   CompleteProfileForm,
-  ProfileFormData,
+  
 } from "@/components/invitation/CompleteProfileForm";
 import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
 import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
@@ -42,6 +42,7 @@ import { Check } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
+import { ProfileFormData } from "@/types/forms-type";
 
 // 🧭 Steps
 const stepList = [
@@ -75,6 +76,9 @@ const defaultPasswordData = {
 export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
+
+
+  
 
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
@@ -156,6 +160,51 @@ export default function InvitationStepperPage() {
 
     fetchInvitationAndStages();
   }, [invitation_code]);
+
+  interface YouTubeProfileFormData {
+    youtubeChannel: string;
+    instagramUser: string;
+    isIGProfessional: boolean;
+    phoneCountryCode: string; 
+    phoneNumber: string;
+    phoneVerified: boolean;
+    socialMediaHandle: string; // Para el "TikTok Channel" que se guarda aquí
+  }
+
+  
+
+const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) => {
+  if (!invitation) return;
+  setSaving(true);
+
+  const updateData = {
+    youtube_channel: formData.youtubeChannel || null,
+    instagram_user: formData.instagramUser,
+    is_professional_account: formData.isIGProfessional,
+    phone_country_code: formData.phoneCountryCode || null,
+    phone_number: formData.phoneNumber || null,
+    phone_verified: formData.phoneVerified || false,
+    social_media_handle: formData.socialMediaHandle || null, // Para TikTok
+  };
+  console.log("updateData being sent to Supabase:", updateData);
+
+  const { error } = await supabase
+    .from("creator_invitations")
+    .update(updateData)
+    .eq("id", invitation.id);
+
+  if (error) {
+    toast.error("Failed to save YouTube profile");
+  } else {
+    toast.success("YouTube profile saved successfully");
+    goToNextStep();
+  }
+
+  setSaving(false);
+};
+
+
+
 
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,6 +342,7 @@ export default function InvitationStepperPage() {
       phone_verified: formData.phoneVerified, */
       is_business_account: isBusinessAccount,
       is_professional_account: isProfessionalAccount,
+      
       status: "in process" as const,
     };
 
@@ -539,7 +589,8 @@ export default function InvitationStepperPage() {
                 handleInputChange={handleInputChange}
                 handleCheckboxChange={handleCheckboxChange}
                 handleContinueWelcome={handleContinueWelcome}
-                handleCompleteProfileSubmit={handleCompleteProfileSubmit}
+                handleCompleteProfileYtbSubmit={handleCompleteProfileYtbSubmit}
+               // handleCompleteProfileSubmit={handleCompleteProfileSubmit}
                 handleFacebookInputChange={handleFacebookInputChange}
                 handleCheckboxFacebookChange={handleCheckboxFacebookChange}
                 handleFacebookSubmit={handleFacebookSubmit}
