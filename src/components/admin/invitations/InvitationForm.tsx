@@ -94,19 +94,27 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     },
   });
 
-  const   onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Convert form data to match the expected API format
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     const invitationData: CreateInvitationData = {
       full_name: data.full_name,
       email: data.email,
-      social_media_handle:
-        data.social_media_type === "youtube" ? null : data.social_media_handle || null,
-      youtube_channel:
-        data.social_media_type === "youtube" ? data.social_media_handle || null : null,
-      social_media_type: data.social_media_type,
+      social_media_handle: null,
+      youtube_channel: null,
+      social_media_type: data.social_media_type || null,
       project_id: data.project_id,
       invitation_type: data.invitation_type,
     };
+  
+    const socialMediaPropertyMap: Record<string, keyof CreateInvitationData | null> = {
+      tiktok: "social_media_handle",
+      youtube: "youtube_channel",
+    };
+  
+    const targetProperty = socialMediaPropertyMap[data.social_media_type || ""];
+  
+    if (targetProperty && data.social_media_handle) {
+      invitationData[targetProperty] = data.social_media_handle;
+    }
 
     createInvitationMutation.mutate(invitationData, {
       onSuccess: (invitation) => {
