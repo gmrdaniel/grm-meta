@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
 import { CreatorInvitation } from "@/types/invitation";
+import { ProfileFormData } from "@/types/forms-type";
 
 interface CompleteProfileFormProps {
   onSubmit: (formData: ProfileFormData) => void;
@@ -22,15 +23,7 @@ interface CompleteProfileFormProps {
   invitation: CreatorInvitation;
 }
 
-export interface ProfileFormData {
-  youtubeChannel: string;
-  instagramUser: string;
-  isIGProfessional: boolean;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  phoneVerified: boolean;
-  
-}
+
 
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   onSubmit,

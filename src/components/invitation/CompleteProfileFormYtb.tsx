@@ -15,29 +15,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
 import { CreatorInvitation } from "@/types/invitation";
+import { ProfileFormData } from "@/types/forms-type";
+
 
 interface CompleteProfileFormProps {
-  onSubmit: (formData: YouTubeProfileFormData) => void;
+  onSubmit: (formData: ProfileFormData) => void;
   isSubmitting: boolean;
   invitation: CreatorInvitation;
 }
 
-export interface YouTubeProfileFormData { 
-  youtubeChannel: string;
-  instagramUser: string;
-  isIGProfessional: boolean;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  phoneVerified: boolean;
-  socialMediaHandle: string;
-}
+
 
 export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
   isSubmitting,
   invitation,
 }) => {
-  const [formData, setFormData] = useState<YouTubeProfileFormData>({
+  const [formData, setFormData] = useState<ProfileFormData>({
     youtubeChannel: "",
     instagramUser: "",
     phoneCountryCode: "+1",
@@ -242,7 +236,7 @@ export const CompleteProfileFormYtb: React.FC<CompleteProfileFormProps> = ({
   };
 
   const handleSubmit = () => {
-    console.log("Form data being submitted:", formData);
+    
     // Validate Instagram username before submission
     if (!validateInstagramUsername(formData.instagramUser)) {
       toast.error("Please fix the Instagram username format");

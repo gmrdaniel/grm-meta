@@ -13,7 +13,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { WelcomeForm } from "@/components/invitation/WelcomeForm";
 import {
   CompleteProfileForm,
-  ProfileFormData,
+  
 } from "@/components/invitation/CompleteProfileForm";
 import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
 import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
@@ -42,6 +42,7 @@ import { Check } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
+import { ProfileFormData } from "@/types/forms-type";
 
 // 🧭 Steps
 const stepList = [

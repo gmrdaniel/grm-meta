@@ -131,7 +131,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     });
   };
 
-  const hasSocialMedia = form.watch("social_media_handle") !== "";
+  const hasSocialMedia = !!form.watch("social_media_type");
 
   return (
     <Form {...form}>
@@ -169,33 +169,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="social_media_handle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Social Media Handle</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span className="text-slate-500 text-sm">@</span>
-                    </div>
-                    <Input
-                      {...field}
-                      className="pl-8"
-                      placeholder="creatorname123"
-                    />
-                  </div>
-                </FormControl>
-                <FormDescription>
-                  <span className="text-muted-foreground text-xs">
-                    Example: <code>creatorname123</code>
-                  </span>
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          
 
           <FormField
             control={form.control}
@@ -210,8 +184,8 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                       value as "tiktok" | "pinterest" | "youtube"
                     ); // Guardar siempre en social_media_type
                   }}
-                  value={field.value} // Mostrar el valor correcto
-                  disabled={!hasSocialMedia}
+                  value={field.value}
+                  
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -228,6 +202,34 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
               </FormItem>
             )}
           />
+           <FormField
+            control={form.control}
+            name="social_media_handle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social Media Handle</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                      <span className="text-slate-500 text-sm">@</span>
+                    </div>
+                    <Input
+                      {...field}
+                      className="pl-8"
+                      placeholder="creatorname123"
+                      disabled={!hasSocialMedia}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>
+                  <span className="text-muted-foreground text-xs">
+                    Example: <code>creatorname123</code>
+                  </span>
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          /> 
 
           <FormField
             control={form.control}
