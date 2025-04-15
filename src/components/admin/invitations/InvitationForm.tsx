@@ -56,7 +56,6 @@ interface InvitationFormProps {
 }
 
 const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
-  const sendEmail = useSendInvitationEmail();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,12 +66,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       invitation_type: "new_user",
     },
   });
-
-  const [createdInvitation, setCreatedInvitation] = useState<null | {
-    email: string;
-    full_name?: string;
-    invitation_code: string;
-  }>(null);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
@@ -117,13 +110,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     }
 
     createInvitationMutation.mutate(invitationData, {
-      onSuccess: (invitation) => {
-        setCreatedInvitation({
-          email: invitation.email,
-          full_name: invitation.full_name,
-          invitation_code: invitation.invitation_code,
-        });
-
+      onSuccess: () => {
         toast.success("Invitation created!");
         form.reset();
         if (onSuccess) onSuccess();
@@ -183,6 +170,8 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                       "social_media_type",
                       value as "tiktok" | "pinterest" | "youtube"
                     ); // Guardar siempre en social_media_type
+
+                    form.setValue("social_media_handle", "");
                   }}
                   value={field.value}
                   
