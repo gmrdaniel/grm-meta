@@ -17,6 +17,7 @@ import AdminTest from "./pages/admin/test";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
+import NotificationLogs from "./pages/admin/notification-logs";
 
 
 const queryClient = new QueryClient();
@@ -97,6 +98,16 @@ function App() {
                       <AdminTest />
                     </ProtectedRoute>
                   }
+                  
+                />
+                <Route
+                  path="/admin/Notification-Logs"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <NotificationLogs />
+                    </ProtectedRoute>
+                  }
+                  
                 />
 
                 {/* Creator routes */}
