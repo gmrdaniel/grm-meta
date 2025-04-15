@@ -45,7 +45,8 @@ const formSchema = z.object({
         message: "Do not include @ or links in the handle",
       }
     ),
-  social_media_type: z.enum(["tiktok", "pinterest"]).optional(),
+  social_media_type: z.enum(["tiktok", "pinterest", "youtube"]).optional(),
+  //youtube_social_media: z.string().nullable(),
   project_id: z.string().uuid({ message: "Please select a project" }),
   invitation_type: z.enum(["new_user", "existing_user"]),
 });
@@ -55,7 +56,6 @@ interface InvitationFormProps {
 }
 
 const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
-  const sendEmail = useSendInvitationEmail();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,12 +66,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       invitation_type: "new_user",
     },
   });
-
-  const [createdInvitation, setCreatedInvitation] = useState<null | {
-    email: string;
-    full_name?: string;
-    invitation_code: string;
-  }>(null);
 
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ["projects"],
@@ -94,24 +88,29 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Convert form data to match the expected API format
     const invitationData: CreateInvitationData = {
       full_name: data.full_name,
       email: data.email,
-      social_media_handle: data.social_media_handle || null,
+      social_media_handle: null,
+      youtube_channel: null,
       social_media_type: data.social_media_type || null,
       project_id: data.project_id,
       invitation_type: data.invitation_type,
     };
+  
+    const socialMediaPropertyMap: Record<string, keyof CreateInvitationData | null> = {
+      tiktok: "social_media_handle",
+      youtube: "youtube_channel",
+    };
+  
+    const targetProperty = socialMediaPropertyMap[data.social_media_type || ""];
+  
+    if (targetProperty && data.social_media_handle) {
+      invitationData[targetProperty] = data.social_media_handle;
+    }
 
     createInvitationMutation.mutate(invitationData, {
-      onSuccess: (invitation) => {
-        setCreatedInvitation({
-          email: invitation.email,
-          full_name: invitation.full_name,
-          invitation_code: invitation.invitation_code,
-        });
-
+      onSuccess: () => {
         toast.success("Invitation created!");
         form.reset();
         if (onSuccess) onSuccess();
@@ -119,7 +118,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     });
   };
 
-  const hasSocialMedia = form.watch("social_media_handle") !== "";
+  const hasSocialMedia = !!form.watch("social_media_type");
 
   return (
     <Form {...form}>
@@ -157,7 +156,42 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             )}
           />
 
+          
+
           <FormField
+            control={form.control}
+            name="social_media_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social Media Platform</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    form.setValue(
+                      "social_media_type",
+                      value as "tiktok" | "pinterest" | "youtube"
+                    ); // Guardar siempre en social_media_type
+
+                    form.setValue("social_media_handle", "");
+                  }}
+                  value={field.value}
+                  
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select social media platform" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="pinterest">Pinterest</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
             control={form.control}
             name="social_media_handle"
             render={({ field }) => (
@@ -172,6 +206,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                       {...field}
                       className="pl-8"
                       placeholder="creatorname123"
+                      disabled={!hasSocialMedia}
                     />
                   </div>
                 </FormControl>
@@ -183,33 +218,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                 <FormMessage />
               </FormItem>
             )}
-          />
-
-          <FormField
-            control={form.control}
-            name="social_media_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Social Media Platform</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!hasSocialMedia}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select social media platform" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="pinterest">Pinterest</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          /> 
 
           <FormField
             control={form.control}

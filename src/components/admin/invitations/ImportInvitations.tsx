@@ -113,16 +113,15 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         const rowNumber = i + 1;
-
+      
         // Skip empty rows
         if (!row || row.length === 0) continue;
-
+      
         const fullName = row[nameIndex]?.toString().trim();
         const email = row[emailIndex]?.toString().trim();
         const socialMediaHandle = row[handleIndex]?.toString().trim();
-        const socialMediaType =
-          row[platformIndex]?.toString().trim() || "tiktok";
-
+        const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() || "tiktok";
+      
         // Validate row data
         const rowErrors = [];
         if (!fullName) rowErrors.push("Creator Name is required");
@@ -131,7 +130,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           rowErrors.push("Invalid email format");
         }
-
+      
         if (rowErrors.length > 0) {
           errors.push({
             row: rowNumber,
@@ -145,26 +144,36 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           });
           continue;
         }
-
-        // Create invitation
+      
+        // Prepare invitation data dynamically
+        const invitationData: CreateInvitationData = {
+          full_name: fullName,
+          email: email,
+          project_id: values.projectId,
+          invitation_type: values.invitationType,
+          social_media_type: socialMediaType
+        };
+      
+        // Set handle field based on platform
+        switch (socialMediaType) {
+          case "tiktok":
+            invitationData.social_media_handle = socialMediaHandle || null;
+            break;
+          case "youtube":
+            invitationData.youtube_channel = socialMediaHandle || null;
+            break;
+          default:
+            invitationData.social_media_handle = socialMediaHandle || null;
+            break;
+        }
+      
         try {
-          const invitationData: CreateInvitationData = {
-            full_name: fullName,
-            email: email,
-            social_media_handle: socialMediaHandle || null,
-            social_media_type: socialMediaType || null,
-            project_id: values.projectId,
-            invitation_type: values.invitationType, // Use the updated invitation type value
-          };
-
           console.log("Creating invitation with data:", invitationData);
-
           await createInvitation(invitationData);
           successCount++;
         } catch (error) {
           console.error("Error creating invitation:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
           errors.push({
             row: rowNumber,
             data: {
@@ -177,6 +186,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           });
         }
       }
+      
 
       setImportErrors(errors);
       setImportSuccess(successCount);
