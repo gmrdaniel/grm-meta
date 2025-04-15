@@ -34,7 +34,7 @@ serve(async () => {
       delay_days,
       frequency_days,
       max_notifications,
-      invitation_status,
+      target_status,
     } = setting;
 
     let offset = 0;
@@ -46,8 +46,8 @@ serve(async () => {
         .eq("current_stage_id", stage_id);
 
       //filtrar por estatus en caso de que la configuracion tenga un status
-      if (invitation_status) {
-        query = query.eq("status", invitation_status);
+      if (target_status) {
+        query = query.eq("status", target_status);
       }
 
       const { data: invitations, error: fetchError } = await query.range(
