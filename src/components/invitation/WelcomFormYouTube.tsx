@@ -25,7 +25,7 @@ interface WelcomeFormProps {
   isSubmitting?: boolean;
 }
 
-export const WelcomeForm: React.FC<WelcomeFormProps> = ({
+export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
   invitation,
   formData,
   onInputChange,
@@ -59,7 +59,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
         {/* Join Meta Creator Program Section (Moved from CardHeader) */}
         <div className="mt-4 border-gray-200 pt-4">
           <h2 className="text-xl font-bold text-gray-800 mb-2 whitespace-normal lg:whitespace-nowrap">
-            Join Meta Breakthrough Bonus Program
+            Join Meta Breakthrough Bonus
           </h2>
           <p className="text-gray-600 text-sm">
             You've been invited to join this exclusive program. Apply through us
@@ -94,15 +94,11 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
 
           {invitation.social_media_type && (
             <div className="space-y-2">
-              <Label htmlFor="socialMediaHandle">
-                {invitation.social_media_type === "tiktok"
-                  ? "TikTok Username"
-                  : "Pinterest Username"}
-              </Label>
+              <Label htmlFor="youtube_channel">YouTube Channel</Label>
               <Input
-                id="socialMediaHandle"
-                name="socialMediaHandle"
-                value={formData.socialMediaHandle}
+                id="youtube_channel"
+                name="youtube_channel"
+                value={invitation.youtube_channel}
                 readOnly
                 className="bg-gray-50"
                 placeholder={

@@ -49,41 +49,51 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@radix-ui/react-dropdown-menu";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import InvitationsPagination from "./InvitationsPagination";
 
 const InvitationsList = () => {
-
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isExporting, setIsExporting] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
   const queryClient = useQueryClient();
 
-  const {
-    data,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["invitations", { page: currentPage, pageSize }],
-    queryFn: () => fetchInvitationsWithPagination(currentPage, pageSize),
-  });
+ // Normalizamos el filtro para que "all" no aplique ningún filtro
+const normalizedStatusFilter =
+  filterStatus === "all" ? undefined : (filterStatus as 
+    "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
+
+const { data, isLoading, error } = useQuery({
+  queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
+  queryFn: () =>
+    fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
+});
+  
+  
 
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
       status,
     }: {
       id: string;
-      status: "pending" | "rejected" | 'completed' | 'sended' | 'in process';
+      status: "pending" | "rejected" | "completed" | "sended" | "in process";
     }) => updateInvitationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
@@ -125,7 +135,7 @@ const InvitationsList = () => {
 
   const handleStatusChange = (
     id: string,
-    newStatus: "pending" | "rejected" | 'completed' | 'sended' | 'in process'
+    newStatus: "pending" | "rejected" | "completed" | "sended" | "in process"
   ) => {
     updateStatusMutation.mutate({ id, status: newStatus });
   };
@@ -137,15 +147,13 @@ const InvitationsList = () => {
     }
   };
 
-  const createInvitationLink = (invitation: CreatorInvitation) => { 
+  const createInvitationLink = (invitation: CreatorInvitation) => {
     const baseUrl = window.location.origin;
     const fullUrl = `${baseUrl}${invitation.invitation_url}`;
 
-    return fullUrl
-  }
+    return fullUrl;
+  };
   const copyInvitationLink = (invitation: CreatorInvitation) => {
-    
-
     navigator.clipboard
       .writeText(createInvitationLink(invitation))
       .then(() => toast.success("Invitation link copied to clipboard"))
@@ -223,16 +231,26 @@ const InvitationsList = () => {
     return <div className="text-red-500 p-4">Error loading invitations</div>;
   }
 
+  const filteredInvitations =
+  filterStatus === "all"
+  ? invitations
+  : invitations.filter(
+    (invitation: CreatorInvitation) => invitation.status === filterStatus
+  );
+  
+  if (filteredInvitations.length === 0 && filterStatus !== "all") {
+    setFilterStatus("all");
+    toast.info("No invitations found for the selected filter");
+  }
+  
   if (!invitations || invitations.length === 0) {
     return <div className="text-center p-4">No invitations found</div>;
   }
-
-
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button 
-          onClick={handleExportInvitations} 
+        <Button
+          onClick={handleExportInvitations}
           disabled={isExporting}
           variant="outline"
           className="flex items-center gap-2"
@@ -240,6 +258,26 @@ const InvitationsList = () => {
           <Download size={16} />
           {isExporting ? "Exporting..." : "Export All Invitations"}
         </Button>
+      </div>
+      <div className="mt-4 md:mt-0">
+        <Select
+          onValueChange={(value) => {
+            setFilterStatus(value);
+            setCurrentPage(1);
+          }}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="sended">Sended</SelectItem>
+            <SelectItem value="in process">In Process</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <Table>
         <TableHeader>
@@ -254,7 +292,7 @@ const InvitationsList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invitations.map((invitation: CreatorInvitation) => (
+          {filteredInvitations.map((invitation: CreatorInvitation) => (
             <TableRow key={invitation.id}>
               <TableCell className="font-medium">
                 {invitation.full_name}

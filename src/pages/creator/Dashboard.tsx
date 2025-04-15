@@ -66,7 +66,7 @@ export default function CreatorDashboard() {
                     <>
                      
                       <span className="whitespace-normal md:whitespace-nowrap">
-                        Your Submission is Under Review!
+                      Welcome! Your Submission is Under Review
                       </span>
                     </>
                   )}
