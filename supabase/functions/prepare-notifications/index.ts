@@ -35,32 +35,35 @@ serve(async () => {
       frequency_days,
       max_notifications,
     } = setting;
-
+  
     let offset = 0;
-    let finished = false;
-
-    while (!finished) {
+  
+    while (true) {
       const { data: invitations, error: fetchError } = await supabase
         .from("creator_invitations")
-        .select("*")
+        .select("id, email, stage_updated_at, current_stage_id")
         .eq("current_stage_id", stage_id)
         .range(offset, offset + BATCH_SIZE - 1);
-
+  
       if (fetchError || !invitations || invitations.length === 0) {
-        finished = true;
         break;
       }
-
+  
       for (const invitation of invitations) {
-        const { id: invitation_id, created_at, email, current_stage_id } = invitation;
-
-        if (!created_at || !email) continue;
-
-        const enteredDate = new Date(created_at);
+        const {
+          id: invitation_id,
+          stage_updated_at,
+          email,
+          current_stage_id,
+        } = invitation;
+  
+        if (!stage_updated_at || !email) continue;
+  
+        const enteredDate = new Date(stage_updated_at);
         const daysInStage = differenceInDays(now, enteredDate);
-
+  
         if (daysInStage < delay_days) continue;
-
+  
         // 1. Chequear si ya hay una notificación pendiente
         const { data: existingPending } = await supabase
           .from("notification_logs")
@@ -68,9 +71,9 @@ serve(async () => {
           .eq("invitation_id", invitation_id)
           .eq("notification_setting_id", setting_id)
           .eq("status", "pending");
-
+  
         if ((existingPending?.length || 0) > 0) continue;
-
+  
         // 2. Verificar intentos anteriores (fallidos o enviados)
         const { data: logs } = await supabase
           .from("notification_logs")
@@ -79,16 +82,16 @@ serve(async () => {
           .eq("notification_setting_id", setting_id)
           .in("status", ["sent", "failed"])
           .order("sent_at", { ascending: false });
-
+  
         if ((logs?.length || 0) >= max_notifications) continue;
-
+  
         // 3. Aplicar frecuencia solo si el último fue enviado exitosamente
         const lastLog = logs?.[0];
         const lastSent = lastLog?.status === "sent" ? lastLog?.sent_at : null;
         const daysSinceLast = lastSent ? differenceInDays(now, new Date(lastSent)) : Infinity;
-
+  
         if (daysSinceLast < frequency_days) continue;
-
+  
         // 4. Insertar nuevo log pendiente
         const { error: insertError } = await supabase.from("notification_logs").insert({
           invitation_id,
@@ -97,15 +100,15 @@ serve(async () => {
           channel,
           status: "pending",
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         });
-
+  
         if (insertError) {
           console.error(`Error inserting log for invitation ${invitation_id}:`, insertError);
         } else {
           totalInserted++;
         }
-
+  
         if (totalInserted >= MAX_INSERTS) {
           console.warn("Max notifications inserted. Cutting execution.");
           return new Response(`Inserted ${totalInserted} pending notifications (max reached)`, {
@@ -113,10 +116,11 @@ serve(async () => {
           });
         }
       }
-
+  
       offset += BATCH_SIZE;
     }
   }
+  
 
   return new Response(`Inserted ${totalInserted} pending notifications`, { status: 200 });
 });

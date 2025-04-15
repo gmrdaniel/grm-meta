@@ -92,10 +92,19 @@ function generateValueFor(key: string, invitation: any): string | undefined {
   switch (key) {
     case "url":
       return `${baseAppUrl}${invitation.invitation_url}`;
+    case "stage_updated_at":
+      return invitation.stage_updated_at
+        ? new Date(invitation.stage_updated_at).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : undefined;
     default:
       return invitation[key];
   }
 }
+
 
 // ===================== ENVÍO ========================
 
