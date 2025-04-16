@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 const specificUsers = [
@@ -22,11 +23,6 @@ export function UserFilter({
 }: UserFilterProps) {
   const [open, setOpen] = useState(false);
   const [loading] = useState(false);
-  const [users] = useState(specificUsers.map(name => ({
-    id: name,
-    name: name,
-    email: `${name.toLowerCase()}@example.com`
-  })));
 
   // Get the selected user name directly from specificUsers or default text
   const selectedUserName = value === null ? "Sin usuario asignado" : value;
@@ -47,20 +43,25 @@ export function UserFilter({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          size="sm"
           role="combobox"
           aria-expanded={open}
-          className="w-[180px] justify-between"
+          className="flex items-center gap-1"
           disabled={loading}
         >
-          {loading ? (
-            "Cargando usuarios..."
-          ) : (
-            <>
-              <User className="mr-2 h-4 w-4" />
-              <span className="truncate">{selectedUserName}</span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </>
+          <User className="h-4 w-4" />
+          Usuario asignado
+          {value !== null && (
+            <Badge className="ml-1 bg-primary text-primary-foreground" variant="default">
+              {selectedUserName}
+            </Badge>
           )}
+          {value === null && (
+            <Badge className="ml-1" variant="outline">
+              Sin asignar
+            </Badge>
+          )}
+          <ChevronsUpDown className="h-4 w-4 ml-1 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0">
@@ -75,19 +76,12 @@ export function UserFilter({
                 <span>Sin usuario asignado</span>
               </div>
             </CommandItem>
-            {users.map(user => (
-              <CommandItem key={user.id} onSelect={() => handleSelect(user.name)} className="text-sm" value={user.name}>
-                <div className="flex flex-col w-full">
-                  <div className="flex items-center">
-                    {value === user.name && <Check className="mr-2 h-4 w-4" />}
-                    <User className="mr-2 h-4 w-4" />
-                    <span>{user.name}</span>
-                  </div>
-                  {user.email && (
-                    <span className="text-xs text-muted-foreground ml-8">
-                      {user.email}
-                    </span>
-                  )}
+            {specificUsers.map(name => (
+              <CommandItem key={name} onSelect={() => handleSelect(name)} className="text-sm" value={name}>
+                <div className="flex items-center">
+                  {value === name && <Check className="mr-2 h-4 w-4" />}
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{name}</span>
                 </div>
               </CommandItem>
             ))}
