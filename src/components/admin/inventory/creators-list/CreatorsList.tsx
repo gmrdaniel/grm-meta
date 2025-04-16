@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
@@ -53,7 +52,6 @@ export function CreatorsList({
   const totalCount = creatorsData?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Reset selected creators when page changes
   useEffect(() => {
     setSelectedCreators([]);
     setSelectAll(false);
@@ -151,10 +149,11 @@ export function CreatorsList({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
                   <SelectItem value="50">50</SelectItem>
                   <SelectItem value="100">100</SelectItem>
                   <SelectItem value="250">250</SelectItem>
+                  <SelectItem value="500">500</SelectItem>
+                  <SelectItem value="1000">1,000</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -233,4 +232,3 @@ export function CreatorsList({
     </div>
   );
 }
-
