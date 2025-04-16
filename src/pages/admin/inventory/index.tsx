@@ -43,8 +43,7 @@ export default function AdminInventory() {
     setSelectedUser(user);
     console.log(`Selected user: ${user}`);
     
-    // Update filters to include the selected user - this is the string value
-    // that will be used in the query to filter creators by usuario_asignado
+    // Update filters to include the selected user
     setFilters(prevFilters => ({
       ...prevFilters,
       selectedUser: user
