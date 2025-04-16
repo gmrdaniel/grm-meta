@@ -45,11 +45,9 @@ export const fetchCreators = async (
     }
 
     if (filters.assignedToUser) {
-      if (filters.assignedToUser === 'unassigned') {
-        query = query.is('usuario_asignado', null);
-      } else {
-        query = query.eq('usuario_asignado', filters.assignedToUser);
-      }
+      query = query.eq('usuario_asignado', filters.assignedToUser);
+    } else if (filters.assignedToUser === null) {
+      query = query.is('usuario_asignado', null);
     }
   }
   
