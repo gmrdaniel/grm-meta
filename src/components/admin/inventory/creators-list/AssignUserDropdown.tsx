@@ -32,7 +32,7 @@ export function AssignUserDropdown({
   showIcon = true
 }: AssignUserDropdownProps) {
   const [open, setOpen] = useState(false);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState(currentUserId || "");
   const [loadingAssign, setLoadingAssign] = useState(false);
@@ -94,7 +94,7 @@ export function AssignUserDropdown({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[280px] p-0">
         <Command>
           <CommandInput placeholder="Buscar usuario..." />
           <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
@@ -117,10 +117,17 @@ export function AssignUserDropdown({
                 className="text-sm"
                 value={user.name}
               >
-                <div className="flex items-center">
-                  {value === user.id && <Check className="mr-2 h-4 w-4" />}
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  <span>{user.name}</span>
+                <div className="flex flex-col w-full">
+                  <div className="flex items-center">
+                    {value === user.id && <Check className="mr-2 h-4 w-4" />}
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    <span>{user.name}</span>
+                  </div>
+                  {user.email && (
+                    <span className="text-xs text-muted-foreground ml-8">
+                      {user.email}
+                    </span>
+                  )}
                 </div>
               </CommandItem>
             ))}

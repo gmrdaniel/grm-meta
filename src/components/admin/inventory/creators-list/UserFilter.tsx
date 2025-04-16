@@ -25,7 +25,7 @@ interface UserFilterProps {
 
 export function UserFilter({ value, onChange }: UserFilterProps) {
   const [open, setOpen] = useState(false);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(false);
   
   const selectedUserName = !value 
@@ -79,7 +79,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[230px] p-0">
+      <PopoverContent className="w-[280px] p-0">
         <Command>
           <CommandInput placeholder="Buscar usuario..." />
           <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
@@ -110,10 +110,17 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
                 onSelect={() => handleSelect(user.id)}
                 className="text-sm"
               >
-                <div className="flex items-center">
-                  {value === user.id && <Check className="mr-2 h-4 w-4" />}
-                  <User className="mr-2 h-4 w-4" />
-                  <span>{user.name}</span>
+                <div className="flex flex-col w-full">
+                  <div className="flex items-center">
+                    {value === user.id && <Check className="mr-2 h-4 w-4" />}
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{user.name}</span>
+                  </div>
+                  {user.email && (
+                    <span className="text-xs text-muted-foreground ml-8">
+                      {user.email}
+                    </span>
+                  )}
                 </div>
               </CommandItem>
             ))}
