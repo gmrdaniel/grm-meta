@@ -4,8 +4,12 @@ import { Check, ChevronsUpDown, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { fetchAdminUsers } from "@/services/creatorService";
 import { toast } from "sonner";
+
+const specificUsers = [
+  "DANIEL", "ORIANA", "FRANK", "ANA", 
+  "MANUEL", "DAYANA", "KATHERINE", "SAONE"
+];
 
 interface UserFilterProps {
   value: string | null;
@@ -17,35 +21,19 @@ export function UserFilter({
   onChange
 }: UserFilterProps) {
   const [open, setOpen] = useState(false);
-  const [users, setUsers] = useState<{
-    id: string;
-    name: string;
-    email: string;
-  }[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [users] = useState(specificUsers.map(name => ({
+    id: name,
+    name: name,
+    email: `${name.toLowerCase()}@example.com`
+  })));
 
   // Get the selected user name for display
   const selectedUserName = value === null ? "Sin asignar" : users.find(user => user.name === value)?.name || value;
   
-  useEffect(() => {
-    const loadUsers = async () => {
-      setLoading(true);
-      try {
-        const adminUsers = await fetchAdminUsers();
-        setUsers(adminUsers);
-      } catch (error) {
-        console.error("Error loading admin users:", error);
-        toast.error("Error al cargar los usuarios administradores");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUsers();
-  }, []);
-
   const handleSelect = (selectedValue: string) => {
     if (selectedValue === "unassigned") {
-      onChange("unassigned");
+      onChange(null);
     } else {
       onChange(selectedValue);
     }
@@ -80,7 +68,7 @@ export function UserFilter({
           <CommandGroup>
             <CommandItem onSelect={() => handleSelect("unassigned")} className="text-sm" value="unassigned">
               <div className="flex items-center">
-                {value === "unassigned" && <Check className="mr-2 h-4 w-4" />}
+                {value === null && <Check className="mr-2 h-4 w-4" />}
                 <X className="mr-2 h-4 w-4" />
                 <span>Sin asignar</span>
               </div>

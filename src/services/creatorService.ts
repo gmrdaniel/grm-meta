@@ -138,7 +138,7 @@ export const fetchAdminUsers = async (): Promise<{ id: string; name: string; ema
   return specificUsers.map(name => ({
     id: name,
     name: name,
-    email: `${name.toLowerCase()}@example.com` // Placeholder emails
+    email: `${name.toLowerCase()}@example.com`
   }));
 };
 
