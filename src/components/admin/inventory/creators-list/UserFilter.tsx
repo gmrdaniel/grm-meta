@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, User, Users, X } from "lucide-react";
+import { Check, ChevronsUpDown, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,7 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { fetchAdminUsers } from "@/services/creatorService";
 import { toast } from "sonner";
 
@@ -30,10 +29,8 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
   
   // Get the selected user name for display
   const selectedUserName = value === null 
-    ? "Todos los usuarios" 
-    : value === "unassigned" 
-      ? "Sin asignar" 
-      : users.find(user => user.name === value)?.name || value;
+    ? "Sin asignar" 
+    : users.find(user => user.name === value)?.name || value;
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -53,9 +50,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
   }, []);
 
   const handleSelect = (selectedValue: string) => {
-    if (selectedValue === "all") {
-      onChange(null);
-    } else if (selectedValue === "unassigned") {
+    if (selectedValue === "unassigned") {
       onChange("unassigned");
     } else {
       onChange(selectedValue);
@@ -80,7 +75,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
               <User className="mr-2 h-4 w-4" />
             )
           ) : (
-            <Users className="mr-2 h-4 w-4" />
+            <User className="mr-2 h-4 w-4" />
           )}
           {loading ? "Cargando..." : selectedUserName}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -91,17 +86,6 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
           <CommandInput placeholder="Buscar usuario..." />
           <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
           <CommandGroup>
-            <CommandItem
-              onSelect={() => handleSelect("all")}
-              className="text-sm"
-              value="all"
-            >
-              <div className="flex items-center">
-                {value === null && <Check className="mr-2 h-4 w-4" />}
-                <Users className="mr-2 h-4 w-4" />
-                <span>Todos los usuarios</span>
-              </div>
-            </CommandItem>
             <CommandItem
               onSelect={() => handleSelect("unassigned")}
               className="text-sm"

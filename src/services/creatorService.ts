@@ -1,11 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
 
-/**
- * Fetch creators with pagination and filtering
- */
 export const fetchCreators = async (
   page: number = 1, 
   pageSize: number = 10,
