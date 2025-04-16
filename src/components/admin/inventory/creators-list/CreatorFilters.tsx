@@ -1,187 +1,73 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
+import { Check, Filter, X } from "lucide-react";
 import { CreatorFilter } from "./types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface CreatorFiltersProps {
   activeFilters: CreatorFilter;
   onFilterChange: (filters: CreatorFilter) => void;
 }
 
-export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFiltersProps) {
+export function CreatorFilters({ 
+  activeFilters, 
+  onFilterChange 
+}: CreatorFiltersProps) {
+  
   const toggleFilter = (filterName: keyof CreatorFilter) => {
-    const newFilters = { ...activeFilters };
-    
-    // Check if the property exists and toggle it, or set it to true if it doesn't exist
-    if (newFilters[filterName] === true) {
-      delete newFilters[filterName];
-    } else {
-      newFilters[filterName] = true;
+    // We need to make sure we're handling the selectedUser property correctly
+    if (filterName === 'selectedUser') {
+      return; // Don't toggle this filter directly
     }
     
-    onFilterChange(newFilters);
+    onFilterChange({
+      ...activeFilters,
+      [filterName]: !activeFilters[filterName]
+    });
   };
-
+  
   const clearFilters = () => {
-    onFilterChange({});
+    // Preserve the selectedUser when clearing other filters
+    const selectedUser = activeFilters.selectedUser;
+    onFilterChange(selectedUser ? { selectedUser } : {});
   };
-
-  const hasFilters = Object.keys(activeFilters).length > 0;
-  const activeFilterCount = Object.keys(activeFilters).length;
-
+  
+  const hasFilters = Object.keys(activeFilters).some(key => 
+    key !== 'selectedUser' && activeFilters[key as keyof CreatorFilter]
+  );
+  
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2 items-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Filter className="h-4 w-4" />
-              Filtros
-              {activeFilterCount > 0 && (
-                <Badge className="ml-1 bg-primary text-primary-foreground" variant="default">
-                  {activeFilterCount}
-                </Badge>
-              )}
-              <ChevronsUpDown className="h-4 w-4 ml-1 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-60">
-            <DropdownMenuLabel>Filtros de Creadores</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuGroup>
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('tiktokEligible')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                TikTok Elegible
-                {activeFilters.tiktokEligible && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('hasTikTokUsername')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Usuario TikTok
-                {activeFilters.hasTikTokUsername && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('hasYouTubeUsername')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Usuario YouTube
-                {activeFilters.hasYouTubeUsername && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuGroup>
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('withoutEngagement')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Sin Engagement
-                {activeFilters.withoutEngagement && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('withoutVideos')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Sin Videos
-                {activeFilters.withoutVideos && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('withVideos')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Con Videos
-                {activeFilters.withVideos && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('withoutYouTube')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Sin YouTube
-                {activeFilters.withoutYouTube && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-
-              <DropdownMenuItem 
-                onClick={() => toggleFilter('withoutYouTubeEngagement')}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                Sin Engagement YT
-                {activeFilters.withoutYouTubeEngagement && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            
-            {hasFilters && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={clearFilters}
-                  className="flex items-center gap-1 cursor-pointer text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                  Limpiar todos los filtros
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        {hasFilters && (
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={clearFilters}
-            className="flex items-center gap-1"
-          >
-            <X className="h-4 w-4" />
-            Limpiar filtros
-          </Button>
-        )}
-      </div>
-
+    <div className="flex gap-2">
+      <Button 
+        variant={activeFilters.tiktokEligible ? "default" : "outline"} 
+        size="sm"
+        onClick={() => toggleFilter('tiktokEligible')}
+        className="flex items-center gap-1"
+      >
+        {activeFilters.tiktokEligible ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+        TikTok Elegible
+      </Button>
+      
+      <Button 
+        variant={activeFilters.hasTikTokUsername ? "default" : "outline"} 
+        size="sm"
+        onClick={() => toggleFilter('hasTikTokUsername')}
+        className="flex items-center gap-1"
+      >
+        {activeFilters.hasTikTokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+        Usuario TikTok
+      </Button>
+      
       {hasFilters && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {Object.entries(activeFilters).map(([key, value]) => {
-            return (
-              <Badge 
-                key={key} 
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {key === 'tiktokEligible' && 'TikTok Elegible'}
-                {key === 'hasTikTokUsername' && 'Usuario TikTok'}
-                {key === 'hasYouTubeUsername' && 'Usuario YouTube'}
-                {key === 'withoutEngagement' && 'Sin Engagement'}
-                {key === 'withoutVideos' && 'Sin Videos'}
-                {key === 'withVideos' && 'Con Videos'}
-                {key === 'withoutYouTube' && 'Sin YouTube'}
-                {key === 'withoutYouTubeEngagement' && 'Sin Engagement YT'}
-                <X 
-                  className="h-3 w-3 cursor-pointer" 
-                  onClick={() => toggleFilter(key as keyof CreatorFilter)} 
-                />
-              </Badge>
-            );
-          })}
-        </div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={clearFilters}
+          className="flex items-center gap-1"
+        >
+          <X className="h-4 w-4" />
+          Limpiar filtros
+        </Button>
       )}
     </div>
   );

@@ -46,6 +46,7 @@ export const fetchCreators = async (
     }
 
     if (filters.selectedUser) {
+      // Ensure we're passing the exact string value for filtering
       query = query.eq('usuario_asignado', filters.selectedUser);
     }
   }
