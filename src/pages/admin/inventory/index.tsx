@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -12,13 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { toast } from "sonner";
 import { CreatorFilter, CreatorsList } from "@/components/admin/inventory/creators-list";
-import { RadioUserFilter } from "@/components/admin/inventory/creators-list/RadioUserFilter";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [filters, setFilters] = useState<CreatorFilter>({});
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   
   const { refetch } = useQuery({
     queryKey: ["creators"],
@@ -37,17 +34,6 @@ export default function AdminInventory() {
 
   const handleFilterChange = (newFilters: CreatorFilter) => {
     setFilters(newFilters);
-  };
-
-  const handleUserSelect = (user: string | null) => {
-    setSelectedUser(user);
-    console.log(`Selected user: ${user}`);
-    
-    // Update filters to include the selected user
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      selectedUser: user
-    }));
   };
 
   return (
@@ -71,26 +57,11 @@ export default function AdminInventory() {
               </TabsList>
               
               <TabsContent value="list" className="space-y-6">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold">Lista de Creadores</h2>
-                    <p className="text-gray-500">Total: {useQuery({
-                      queryKey: ["creatorCount", filters],
-                      queryFn: () => fetchCreators(1, 1, filters).then(res => res.count),
-                    }).data || 0} creadores</p>
-                  </div>
-                  
-                  <RadioUserFilter 
-                    selectedUser={selectedUser}
-                    onSelectUser={handleUserSelect}
-                  />
-                  
-                  <CreatorsList 
-                    onCreatorSelect={handleCreatorSelect}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                  />
-                </div>
+                <CreatorsList 
+                  onCreatorSelect={handleCreatorSelect}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
               </TabsContent>
               
               <TabsContent value="create" className="space-y-6">

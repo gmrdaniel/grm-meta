@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -45,8 +44,10 @@ export const fetchCreators = async (
       query = query.is('engagement_youtube', null);
     }
 
-    if (filters.selectedUser) {
-      query = query.eq('usuario_asignado', filters.selectedUser);
+    if (filters.assignedToUser) {
+      query = query.eq('usuario_asignado', filters.assignedToUser);
+    } else if (filters.assignedToUser === null) {
+      query = query.is('usuario_asignado', null);
     }
   }
   
