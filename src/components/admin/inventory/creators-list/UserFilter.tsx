@@ -29,7 +29,7 @@ export function UserFilter({
   })));
 
   // Get the selected user name for display
-  const selectedUserName = value === null ? "Sin asignar" : users.find(user => user.name === value)?.name || value;
+  const selectedUserName = value === null ? "Sin usuario asignado" : users.find(user => user.name === value)?.name || value;
   
   const handleSelect = (selectedValue: string) => {
     if (selectedValue === "unassigned") {
@@ -70,7 +70,7 @@ export function UserFilter({
               <div className="flex items-center">
                 {value === null && <Check className="mr-2 h-4 w-4" />}
                 <X className="mr-2 h-4 w-4" />
-                <span>Sin asignar</span>
+                <span>Sin usuario asignado</span>
               </div>
             </CommandItem>
             {users.map(user => (
