@@ -45,8 +45,20 @@ export function AssignUserDropdown({
     const loadUsers = async () => {
       setLoading(true);
       try {
-        const adminUsers = await fetchAdminUsers();
-        setUsers(adminUsers);
+        // Define the specific users we want to display
+        const specificUsers = [
+          "DANIEL", "ORIANA", "FRANK", "ANA", 
+          "MANUEL", "DAYANA", "KATHERINE", "SAONE"
+        ];
+        
+        // Create hardcoded user list
+        const hardcodedUsers = specificUsers.map(name => ({
+          id: name,
+          name: name,
+          email: `${name.toLowerCase()}@example.com` // Placeholder emails
+        }));
+        
+        setUsers(hardcodedUsers);
       } catch (error) {
         console.error("Error loading admin users:", error);
         toast.error("Error al cargar los usuarios administradores");

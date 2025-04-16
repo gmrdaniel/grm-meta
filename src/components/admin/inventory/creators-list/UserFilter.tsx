@@ -28,6 +28,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
   const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(false);
   
+  // Get the selected user name for display
   const selectedUserName = !value 
     ? "Todos los usuarios" 
     : value === "unassigned" 
@@ -38,19 +39,20 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
     const loadUsers = async () => {
       setLoading(true);
       try {
-        const adminUsers = await fetchAdminUsers();
-        // Hardcode the specific users as requested
+        // Define the specific users we want to display
         const specificUsers = [
           "DANIEL", "ORIANA", "FRANK", "ANA", 
           "MANUEL", "DAYANA", "KATHERINE", "SAONE"
         ];
         
-        // Filter and map the users to match the specific names
-        const filteredUsers = adminUsers.filter(user => 
-          specificUsers.includes(user.name.toUpperCase())
-        );
-
-        setUsers(filteredUsers);
+        // Create hardcoded user list
+        const hardcodedUsers = specificUsers.map(name => ({
+          id: name,
+          name: name,
+          email: `${name.toLowerCase()}@example.com` // Placeholder emails
+        }));
+        
+        setUsers(hardcodedUsers);
       } catch (error) {
         console.error("Error loading admin users:", error);
         toast.error("Error al cargar los usuarios administradores");
