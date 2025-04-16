@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
@@ -200,10 +199,16 @@ export const fetchAndSaveYouTubeShorts = async (
 };
 
 /**
+ * Type for progress callback
+ */
+type ProgressCallback = (processed: number, total: number) => void;
+
+/**
  * Batch update YouTube info for multiple creators
  */
 export const batchUpdateYouTubeInfo = async (
-  creators: Creator[]
+  creators: Creator[],
+  onProgress?: ProgressCallback
 ): Promise<{ 
   totalProcessed: number, 
   successful: number, 
@@ -214,7 +219,11 @@ export const batchUpdateYouTubeInfo = async (
   
   console.log(`Starting batch update of YouTube info for ${creators.length} creators`);
   
-  for (const creator of creators) {
+  const creatorsWithYouTube = creators.filter(c => c.usuario_youtube);
+  const totalToProcess = creatorsWithYouTube.length;
+  let processed = 0;
+  
+  for (const creator of creatorsWithYouTube) {
     if (!creator.usuario_youtube) continue;
     
     try {
@@ -226,12 +235,17 @@ export const batchUpdateYouTubeInfo = async (
       failed++;
     }
     
+    processed++;
+    if (onProgress) {
+      onProgress(processed, totalToProcess);
+    }
+    
     // Add a small delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 1500));
   }
   
   return {
-    totalProcessed: creators.length,
+    totalProcessed: totalToProcess,
     successful,
     failed
   };
@@ -241,7 +255,8 @@ export const batchUpdateYouTubeInfo = async (
  * Batch fetch YouTube shorts for multiple creators
  */
 export const batchFetchYouTubeShorts = async (
-  creators: Creator[]
+  creators: Creator[],
+  onProgress?: ProgressCallback
 ): Promise<{ 
   totalProcessed: number, 
   successful: number, 
@@ -252,7 +267,11 @@ export const batchFetchYouTubeShorts = async (
   
   console.log(`Starting batch fetch of YouTube shorts for ${creators.length} creators`);
   
-  for (const creator of creators) {
+  const creatorsWithYouTube = creators.filter(c => c.usuario_youtube);
+  const totalToProcess = creatorsWithYouTube.length;
+  let processed = 0;
+  
+  for (const creator of creatorsWithYouTube) {
     if (!creator.usuario_youtube) continue;
     
     try {
@@ -272,12 +291,17 @@ export const batchFetchYouTubeShorts = async (
       failed++;
     }
     
+    processed++;
+    if (onProgress) {
+      onProgress(processed, totalToProcess);
+    }
+    
     // Add a delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 3000));
   }
   
   return {
-    totalProcessed: creators.length,
+    totalProcessed: totalToProcess,
     successful,
     failed
   };

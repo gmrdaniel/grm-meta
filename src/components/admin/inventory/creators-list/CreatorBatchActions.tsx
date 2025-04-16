@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { 
   fetchAdminUsers, 
   batchAssignCreatorsToUser 
@@ -41,6 +42,8 @@ export function CreatorBatchActions({
   const [loading, setLoading] = useState(false);
   const [processingOperation, setProcessingOperation] = useState<string | null>(null);
   const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [processedCount, setProcessedCount] = useState(0);
   
   const creatorCount = selectedCreators.length;
 
@@ -93,9 +96,17 @@ export function CreatorBatchActions({
     }
   };
 
+  const updateProgress = (processed: number, total: number) => {
+    const percentage = Math.floor((processed / total) * 100);
+    setProgress(percentage);
+    setProcessedCount(processed);
+  };
+
   const handleBatchGetTikTokInfo = async () => {
     try {
       setProcessingOperation("tikTokInfo");
+      setProgress(0);
+      setProcessedCount(0);
       
       // Filter creators that have TikTok usernames
       const creatorsWithTikTok = selectedCreators.filter(c => c.usuario_tiktok);
@@ -107,7 +118,10 @@ export function CreatorBatchActions({
       
       toast.info(`Obteniendo información de TikTok para ${creatorsWithTikTok.length} creadores...`);
       
-      const result = await batchUpdateTikTokInfo(creatorsWithTikTok);
+      const result = await batchUpdateTikTokInfo(
+        creatorsWithTikTok, 
+        (processed, total) => updateProgress(processed, total)
+      );
       
       toast.success(`Información de TikTok actualizada para ${result.successful} de ${result.totalProcessed} creadores`);
       onSuccess();
@@ -116,12 +130,16 @@ export function CreatorBatchActions({
       toast.error("Error al obtener información de TikTok");
     } finally {
       setProcessingOperation(null);
+      setProgress(0);
+      setProcessedCount(0);
     }
   };
 
   const handleBatchGetTikTokVideos = async () => {
     try {
       setProcessingOperation("tikTokVideos");
+      setProgress(0);
+      setProcessedCount(0);
       
       // Filter creators that have TikTok usernames
       const creatorsWithTikTok = selectedCreators.filter(c => c.usuario_tiktok);
@@ -133,7 +151,10 @@ export function CreatorBatchActions({
       
       toast.info(`Obteniendo videos de TikTok para ${creatorsWithTikTok.length} creadores...`);
       
-      const result = await batchFetchTikTokVideos(creatorsWithTikTok);
+      const result = await batchFetchTikTokVideos(
+        creatorsWithTikTok,
+        (processed, total) => updateProgress(processed, total)
+      );
       
       toast.success(`Videos de TikTok obtenidos para ${result.successful} de ${result.totalProcessed} creadores`);
       onSuccess();
@@ -142,12 +163,16 @@ export function CreatorBatchActions({
       toast.error("Error al obtener videos de TikTok");
     } finally {
       setProcessingOperation(null);
+      setProgress(0);
+      setProcessedCount(0);
     }
   };
 
   const handleBatchUpdateYouTubeInfo = async () => {
     try {
       setProcessingOperation("youTubeInfo");
+      setProgress(0);
+      setProcessedCount(0);
       
       // Filter creators that have YouTube usernames
       const creatorsWithYouTube = selectedCreators.filter(c => c.usuario_youtube);
@@ -159,7 +184,10 @@ export function CreatorBatchActions({
       
       toast.info(`Actualizando información de YouTube para ${creatorsWithYouTube.length} creadores...`);
       
-      const result = await batchUpdateYouTubeInfo(creatorsWithYouTube);
+      const result = await batchUpdateYouTubeInfo(
+        creatorsWithYouTube,
+        (processed, total) => updateProgress(processed, total)
+      );
       
       toast.success(`Información de YouTube actualizada para ${result.successful} de ${result.totalProcessed} creadores`);
       onSuccess();
@@ -168,12 +196,16 @@ export function CreatorBatchActions({
       toast.error("Error al actualizar información de YouTube");
     } finally {
       setProcessingOperation(null);
+      setProgress(0);
+      setProcessedCount(0);
     }
   };
 
   const handleBatchGetYouTubeShorts = async () => {
     try {
       setProcessingOperation("youTubeShorts");
+      setProgress(0);
+      setProcessedCount(0);
       
       // Filter creators that have YouTube usernames
       const creatorsWithYouTube = selectedCreators.filter(c => c.usuario_youtube);
@@ -185,7 +217,10 @@ export function CreatorBatchActions({
       
       toast.info(`Obteniendo Shorts de YouTube para ${creatorsWithYouTube.length} creadores...`);
       
-      const result = await batchFetchYouTubeShorts(creatorsWithYouTube);
+      const result = await batchFetchYouTubeShorts(
+        creatorsWithYouTube,
+        (processed, total) => updateProgress(processed, total)
+      );
       
       toast.success(`Shorts de YouTube obtenidos para ${result.successful} de ${result.totalProcessed} creadores`);
       onSuccess();
@@ -194,6 +229,8 @@ export function CreatorBatchActions({
       toast.error("Error al obtener Shorts de YouTube");
     } finally {
       setProcessingOperation(null);
+      setProgress(0);
+      setProcessedCount(0);
     }
   };
 
@@ -207,6 +244,25 @@ export function CreatorBatchActions({
           Ejecuta acciones en lote para todos los seleccionados
         </span>
       </div>
+      
+      {processingOperation && (
+        <div className="mt-1 mb-2">
+          <div className="flex justify-between text-sm mb-1">
+            <span>
+              {processingOperation === "tikTokInfo" && "Obteniendo información de TikTok..."}
+              {processingOperation === "tikTokVideos" && "Obteniendo videos de TikTok..."}
+              {processingOperation === "youTubeInfo" && "Actualizando información de YouTube..."}
+              {processingOperation === "youTubeShorts" && "Obteniendo Shorts de YouTube..."}
+            </span>
+            <span className="text-muted-foreground">
+              {processedCount} de {selectedCreators.filter(c => 
+                processingOperation.includes("TikTok") ? c.usuario_tiktok : c.usuario_youtube
+              ).length} procesados
+            </span>
+          </div>
+          <Progress value={progress} className="h-2 w-full" />
+        </div>
+      )}
       
       <div className="flex flex-wrap items-center gap-2 mt-1">
         <Button

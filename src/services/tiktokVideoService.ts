@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TikTokVideo, Creator } from "@/types/creator";
 
@@ -320,10 +321,16 @@ export const updateCreatorTikTokFollowers = async (creatorId: string, followerCo
 };
 
 /**
+ * Type for progress callback
+ */
+type ProgressCallback = (processed: number, total: number) => void;
+
+/**
  * Batch update TikTok info for multiple creators
  */
 export const batchUpdateTikTokInfo = async (
-  creators: Creator[]
+  creators: Creator[],
+  onProgress?: ProgressCallback
 ): Promise<{
   totalProcessed: number,
   successful: number,
@@ -334,7 +341,11 @@ export const batchUpdateTikTokInfo = async (
   
   console.log(`Starting batch update of TikTok info for ${creators.length} creators`);
   
-  for (const creator of creators) {
+  const creatorsWithTikTok = creators.filter(c => c.usuario_tiktok);
+  const totalToProcess = creatorsWithTikTok.length;
+  let processed = 0;
+  
+  for (const creator of creatorsWithTikTok) {
     if (!creator.usuario_tiktok) continue;
     
     try {
@@ -357,12 +368,17 @@ export const batchUpdateTikTokInfo = async (
       failed++;
     }
     
+    processed++;
+    if (onProgress) {
+      onProgress(processed, totalToProcess);
+    }
+    
     // Add a delay to avoid rate limiting
     await sleep(1500);
   }
   
   return {
-    totalProcessed: creators.length,
+    totalProcessed: totalToProcess,
     successful,
     failed
   };
@@ -372,7 +388,8 @@ export const batchUpdateTikTokInfo = async (
  * Batch fetch TikTok videos for multiple creators
  */
 export const batchFetchTikTokVideos = async (
-  creators: Creator[]
+  creators: Creator[],
+  onProgress?: ProgressCallback
 ): Promise<{
   totalProcessed: number,
   successful: number,
@@ -383,7 +400,11 @@ export const batchFetchTikTokVideos = async (
   
   console.log(`Starting batch fetch of TikTok videos for ${creators.length} creators`);
   
-  for (const creator of creators) {
+  const creatorsWithTikTok = creators.filter(c => c.usuario_tiktok);
+  const totalToProcess = creatorsWithTikTok.length;
+  let processed = 0;
+  
+  for (const creator of creatorsWithTikTok) {
     if (!creator.usuario_tiktok) continue;
     
     try {
@@ -402,12 +423,17 @@ export const batchFetchTikTokVideos = async (
       failed++;
     }
     
+    processed++;
+    if (onProgress) {
+      onProgress(processed, totalToProcess);
+    }
+    
     // Add a delay to avoid rate limiting
     await sleep(3000);
   }
   
   return {
-    totalProcessed: creators.length,
+    totalProcessed: totalToProcess,
     successful,
     failed
   };
