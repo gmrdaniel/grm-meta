@@ -11,7 +11,6 @@ export const fetchCreators = async (
     .from('creator_inventory')
     .select('*', { count: 'exact' });
   
-  // Apply filters if provided
   if (filters) {
     if (filters.tiktokEligible) {
       query = query.eq('elegible_tiktok', true);
@@ -54,7 +53,6 @@ export const fetchCreators = async (
     }
   }
   
-  // Add pagination
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   
@@ -132,7 +130,6 @@ export const deleteCreator = async (id: string): Promise<void> => {
  * Fetch admin users for assignment
  */
 export const fetchAdminUsers = async (): Promise<{ id: string; name: string; email: string }[]> => {
-  // Return hardcoded list of specific users
   const specificUsers = [
     "DANIEL", "ORIANA", "FRANK", "ANA", 
     "MANUEL", "DAYANA", "KATHERINE", "SAONE"
@@ -166,7 +163,6 @@ export const assignCreatorToUser = async (creatorId: string, userName: string | 
  * Batch assign creators to a user
  */
 export const batchAssignCreatorsToUser = async (creatorIds: string[], userName: string | null): Promise<void> => {
-  // No creators to assign
   if (creatorIds.length === 0) return;
   
   console.log(`Batch assigning ${creatorIds.length} creators to user: ${userName}`);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,10 +6,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fetchAdminUsers } from "@/services/creatorService";
 import { toast } from "sonner";
+
 interface UserFilterProps {
   value: string | null;
   onChange: (value: string | null) => void;
 }
+
 export function UserFilter({
   value,
   onChange
@@ -23,6 +26,7 @@ export function UserFilter({
 
   // Get the selected user name for display
   const selectedUserName = value === null ? "Sin asignar" : users.find(user => user.name === value)?.name || value;
+  
   useEffect(() => {
     const loadUsers = async () => {
       setLoading(true);
@@ -38,6 +42,7 @@ export function UserFilter({
     };
     loadUsers();
   }, []);
+
   const handleSelect = (selectedValue: string) => {
     if (selectedValue === "unassigned") {
       onChange("unassigned");
@@ -46,9 +51,27 @@ export function UserFilter({
     }
     setOpen(false);
   };
-  return <Popover open={open} onOpenChange={setOpen}>
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-[180px] justify-between"
+          disabled={loading}
+        >
+          {loading ? (
+            "Cargando usuarios..."
+          ) : (
+            <>
+              <User className="mr-2 h-4 w-4" />
+              <span className="truncate">{selectedUserName}</span>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </>
+          )}
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0">
         <Command>
@@ -62,20 +85,25 @@ export function UserFilter({
                 <span>Sin asignar</span>
               </div>
             </CommandItem>
-            {users.map(user => <CommandItem key={user.id} onSelect={() => handleSelect(user.name)} className="text-sm" value={user.name}>
+            {users.map(user => (
+              <CommandItem key={user.id} onSelect={() => handleSelect(user.name)} className="text-sm" value={user.name}>
                 <div className="flex flex-col w-full">
                   <div className="flex items-center">
                     {value === user.name && <Check className="mr-2 h-4 w-4" />}
                     <User className="mr-2 h-4 w-4" />
                     <span>{user.name}</span>
                   </div>
-                  {user.email && <span className="text-xs text-muted-foreground ml-8">
+                  {user.email && (
+                    <span className="text-xs text-muted-foreground ml-8">
                       {user.email}
-                    </span>}
+                    </span>
+                  )}
                 </div>
-              </CommandItem>)}
+              </CommandItem>
+            ))}
           </CommandGroup>
         </Command>
       </PopoverContent>
-    </Popover>;
+    </Popover>
+  );
 }
