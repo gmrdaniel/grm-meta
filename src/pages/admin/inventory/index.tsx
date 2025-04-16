@@ -42,7 +42,12 @@ export default function AdminInventory() {
   const handleUserSelect = (user: string | null) => {
     setSelectedUser(user);
     console.log(`Selected user: ${user}`);
-    // Here you could add additional logic, like filtering creators by user
+    
+    // Update filters to include the selected user
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      selectedUser: user
+    }));
   };
 
   return (
@@ -70,7 +75,7 @@ export default function AdminInventory() {
                   <div>
                     <h2 className="text-2xl font-bold">Lista de Creadores</h2>
                     <p className="text-gray-500">Total: {useQuery({
-                      queryKey: ["creatorCount"],
+                      queryKey: ["creatorCount", filters],
                       queryFn: () => fetchCreators(1, 1, filters).then(res => res.count),
                     }).data || 0} creadores</p>
                   </div>

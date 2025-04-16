@@ -8,6 +8,7 @@ export interface CreatorFilter {
   withVideos?: boolean;
   withoutYouTube?: boolean;
   withoutYouTubeEngagement?: boolean;
+  selectedUser?: string | null;
 }
 
 export interface CreatorsListProps {
