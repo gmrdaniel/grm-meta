@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
 import { CreatorFilter } from "./types";
 import { UserFilter } from "./UserFilter";
+import { RadioUserFilter } from "./RadioUserFilter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +55,7 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
   const activeFilterCount = Object.keys(activeFilters).length;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex flex-wrap gap-2 items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -157,11 +158,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <UserFilter 
-          value={activeFilters.assignedToUser || null} 
-          onChange={handleUserFilterChange} 
-        />
         
         {hasFilters && (
           <Button 
@@ -176,10 +172,16 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
         )}
       </div>
 
+      {/* User filter using radio buttons */}
+      <RadioUserFilter 
+        value={activeFilters.assignedToUser || null} 
+        onChange={handleUserFilterChange} 
+      />
+
       {hasFilters && (
         <div className="flex flex-wrap gap-2 mt-2">
           {Object.entries(activeFilters).map(([key, value]) => {
-            // Skip rendering badge for assignedToUser as it's shown in the dropdown
+            // Skip rendering badge for assignedToUser as it's shown in the RadioUserFilter
             if (key === 'assignedToUser') return null;
             
             return (
@@ -203,6 +205,20 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
               </Badge>
             );
           })}
+          
+          {/* Add badge for assignedToUser if it exists */}
+          {activeFilters.assignedToUser && (
+            <Badge 
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              Usuario: {activeFilters.assignedToUser}
+              <X 
+                className="h-3 w-3 cursor-pointer" 
+                onClick={() => handleUserFilterChange(null)} 
+              />
+            </Badge>
+          )}
         </div>
       )}
     </div>

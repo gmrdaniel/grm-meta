@@ -46,8 +46,6 @@ export const fetchCreators = async (
 
     if (filters.assignedToUser) {
       query = query.eq('usuario_asignado', filters.assignedToUser);
-    } else if (filters.assignedToUser === null) {
-      query = query.is('usuario_asignado', null);
     }
   }
   
