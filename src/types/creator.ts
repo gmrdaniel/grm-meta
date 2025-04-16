@@ -15,7 +15,7 @@ export interface Creator {
   seguidores_youtube?: number;
   elegible_youtube?: boolean;
   engagement_youtube?: number;
-  views_youtube?: number; // New field for YouTube views
+  views_youtube?: number;
   page_facebook?: string;
   lada_telefono?: string;
   telefono?: string;
@@ -23,22 +23,10 @@ export interface Creator {
   fecha_creacion: string;
   fecha_consulta_videos?: string;
   fecha_descarga_yt?: string;
-}
-
-export interface TikTokVideo {
-  id: string;
-  creator_id: string;
-  video_id: string;
-  description?: string;
-  create_time?: number;
-  author?: string;
-  author_id?: string;
-  video_definition?: string;
-  duration?: number;
-  number_of_comments?: number;
-  number_of_hearts?: number;
-  number_of_plays?: number;
-  number_of_reposts?: number;
-  created_at: string;
-  updated_at: string;
+  enviado_hubspot?: boolean;
+  fecha_envio_hubspot?: string;
+  tiene_invitacion?: boolean;
+  codigo_invitacion?: string;
+  tiene_prompt_generado?: boolean;
+  usuario_asignado?: string;
 }

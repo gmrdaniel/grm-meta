@@ -92,15 +92,18 @@ export type Database = {
       creator_inventory: {
         Row: {
           apellido: string
+          codigo_invitacion: string | null
           correo: string
           elegible_tiktok: boolean | null
           elegible_youtube: boolean | null
           engagement_tiktok: number | null
           engagement_youtube: number | null
+          enviado_hubspot: boolean | null
           estatus: string | null
           fecha_consulta_videos: string | null
           fecha_creacion: string | null
           fecha_descarga_yt: string | null
+          fecha_envio_hubspot: string | null
           id: string
           lada_telefono: string | null
           nombre: string
@@ -110,6 +113,8 @@ export type Database = {
           seguidores_tiktok: number | null
           seguidores_youtube: number | null
           telefono: string | null
+          tiene_invitacion: boolean | null
+          tiene_prompt_generado: boolean | null
           usuario_pinterest: string | null
           usuario_tiktok: string | null
           usuario_youtube: string | null
@@ -117,15 +122,18 @@ export type Database = {
         }
         Insert: {
           apellido: string
+          codigo_invitacion?: string | null
           correo: string
           elegible_tiktok?: boolean | null
           elegible_youtube?: boolean | null
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
+          enviado_hubspot?: boolean | null
           estatus?: string | null
           fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
           fecha_descarga_yt?: string | null
+          fecha_envio_hubspot?: string | null
           id?: string
           lada_telefono?: string | null
           nombre: string
@@ -135,6 +143,8 @@ export type Database = {
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           telefono?: string | null
+          tiene_invitacion?: boolean | null
+          tiene_prompt_generado?: boolean | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
@@ -142,15 +152,18 @@ export type Database = {
         }
         Update: {
           apellido?: string
+          codigo_invitacion?: string | null
           correo?: string
           elegible_tiktok?: boolean | null
           elegible_youtube?: boolean | null
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
+          enviado_hubspot?: boolean | null
           estatus?: string | null
           fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
           fecha_descarga_yt?: string | null
+          fecha_envio_hubspot?: string | null
           id?: string
           lada_telefono?: string | null
           nombre?: string
@@ -160,6 +173,8 @@ export type Database = {
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           telefono?: string | null
+          tiene_invitacion?: boolean | null
+          tiene_prompt_generado?: boolean | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
