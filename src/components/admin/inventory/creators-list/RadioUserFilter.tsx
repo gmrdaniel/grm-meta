@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -46,15 +45,17 @@ export function RadioUserFilter({ selectedUser, onSelectUser }: RadioUserFilterP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selectedUser || ""} onValueChange={onSelectUser} className="flex flex-col space-y-2">
-          {USERS.map((user) => (
-            <div key={user} className="flex items-center space-x-2">
-              <RadioGroupItem value={user} id={`radio-user-${user}`} />
-              <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
-                Radio: {user}
-              </Label>
-            </div>
-          ))}
+        <RadioGroup value={selectedUser || ""} onValueChange={onSelectUser}>
+          <div className="grid grid-cols-4 gap-4">
+            {USERS.map((user, index) => (
+              <div key={user} className={`${index % 2 === 0 ? 'col-span-2' : 'col-span-2'} flex items-center space-x-2`}>
+                <RadioGroupItem value={user} id={`radio-user-${user}`} />
+                <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
+                  Radio: {user}
+                </Label>
+              </div>
+            ))}
+          </div>
         </RadioGroup>
       </CardContent>
     </Card>
