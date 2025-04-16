@@ -34,8 +34,10 @@ export function UserFilter({
   const handleSelect = (selectedValue: string) => {
     if (selectedValue === "unassigned") {
       onChange(null);
+      toast.success("Filtro establecido: Sin usuario asignado");
     } else {
       onChange(selectedValue);
+      toast.success(`Filtro establecido: ${selectedValue}`);
     }
     setOpen(false);
   };
