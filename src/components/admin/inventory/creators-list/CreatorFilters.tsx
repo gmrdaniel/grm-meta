@@ -18,7 +18,10 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
     if (newFilters[filterName] === true) {
       delete newFilters[filterName];
     } else {
-      newFilters[filterName] = true;
+      // Only set boolean value for non-assignedToUser filters
+      if (filterName !== 'assignedToUser') {
+        newFilters[filterName] = true;
+      }
     }
     
     onFilterChange(newFilters);

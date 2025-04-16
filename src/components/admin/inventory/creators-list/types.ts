@@ -11,6 +11,7 @@ export interface CreatorFilter {
   withoutYouTube?: boolean;
   withoutYouTubeEngagement?: boolean;
   assignedToUser?: string;
+  [key: string]: boolean | string | undefined;
 }
 
 export interface CreatorsListProps {
