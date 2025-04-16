@@ -32,7 +32,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
     ? "Todos los usuarios" 
     : value === "unassigned" 
       ? "Sin asignar" 
-      : users.find(user => user.id === value)?.name || "Usuario seleccionado";
+      : value;
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -107,12 +107,12 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
             {users.map((user) => (
               <CommandItem
                 key={user.id}
-                onSelect={() => handleSelect(user.id)}
+                onSelect={() => handleSelect(user.name)}
                 className="text-sm"
               >
                 <div className="flex flex-col w-full">
                   <div className="flex items-center">
-                    {value === user.id && <Check className="mr-2 h-4 w-4" />}
+                    {value === user.name && <Check className="mr-2 h-4 w-4" />}
                     <User className="mr-2 h-4 w-4" />
                     <span>{user.name}</span>
                   </div>

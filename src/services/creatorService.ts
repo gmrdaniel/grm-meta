@@ -156,10 +156,10 @@ export const fetchAdminUsers = async (): Promise<{ id: string; name: string; ema
 /**
  * Assign a creator to a user
  */
-export const assignCreatorToUser = async (creatorId: string, userId: string | null): Promise<void> => {
+export const assignCreatorToUser = async (creatorId: string, userName: string | null): Promise<void> => {
   const { error } = await supabase
     .from('creator_inventory')
-    .update({ usuario_asignado: userId })
+    .update({ usuario_asignado: userName })
     .eq('id', creatorId);
   
   if (error) {

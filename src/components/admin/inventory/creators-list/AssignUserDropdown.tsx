@@ -38,7 +38,7 @@ export function AssignUserDropdown({
   const [loadingAssign, setLoadingAssign] = useState(false);
   
   const currentUserName = currentUserId 
-    ? users.find(user => user.id === currentUserId)?.name || "Asignado" 
+    ? currentUserId 
     : "Sin asignar";
 
   useEffect(() => {
@@ -58,12 +58,12 @@ export function AssignUserDropdown({
     loadUsers();
   }, []);
 
-  const handleAssign = async (userId: string | null) => {
+  const handleAssign = async (userName: string | null) => {
     setLoadingAssign(true);
     try {
-      await assignCreatorToUser(creatorId, userId);
-      setValue(userId || "");
-      toast.success(userId ? "Creador asignado correctamente" : "Asignación eliminada");
+      await assignCreatorToUser(creatorId, userName);
+      setValue(userName || "");
+      toast.success(userName ? "Creador asignado correctamente" : "Asignación eliminada");
       onSuccess();
     } catch (error) {
       console.error("Error assigning creator:", error);
@@ -113,13 +113,13 @@ export function AssignUserDropdown({
             {users.map((user) => (
               <CommandItem
                 key={user.id}
-                onSelect={() => handleAssign(user.id)}
+                onSelect={() => handleAssign(user.name)}
                 className="text-sm"
                 value={user.name}
               >
                 <div className="flex flex-col w-full">
                   <div className="flex items-center">
-                    {value === user.id && <Check className="mr-2 h-4 w-4" />}
+                    {value === user.name && <Check className="mr-2 h-4 w-4" />}
                     <UserPlus className="mr-2 h-4 w-4" />
                     <span>{user.name}</span>
                   </div>
