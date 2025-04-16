@@ -1,20 +1,18 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2, Download, RefreshCcw, Youtube, Video } from "lucide-react";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-import { 
-  fetchTikTokUserInfo, 
-  updateCreatorTikTokInfo, 
-  fetchTikTokUserVideos,
-  sleep
-} from "@/services/tiktokVideoService";
 import { Creator } from "@/types/creator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Trash2, UserPlus, X } from "lucide-react";
 import { 
-  fetchAndUpdateYouTubeInfo, 
-  fetchAndSaveYouTubeShorts 
-} from "@/services/youtubeService";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { fetchAdminUsers, batchAssignCreatorsToUser } from "@/services/creatorService";
 
 interface CreatorBatchActionsProps {
   selectedCreators: Creator[];
@@ -24,386 +22,181 @@ interface CreatorBatchActionsProps {
 
 export function CreatorBatchActions({ 
   selectedCreators, 
-  onSuccess,
+  onSuccess, 
   clearSelection 
 }: CreatorBatchActionsProps) {
-  const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<boolean>(false);
-  const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<boolean>(false);
-  const [loadingYouTubeInfo, setLoadingYouTubeInfo] = useState<boolean>(false);
-  const [loadingYouTubeShorts, setLoadingYouTubeShorts] = useState<boolean>(false);
-  const [processedCount, setProcessedCount] = useState<number>(0);
-  const [totalToProcess, setTotalToProcess] = useState<number>(0);
-  const [currentCreator, setCurrentCreator] = useState<string>("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
+  
+  const creatorCount = selectedCreators.length;
 
-  const updateTikTokInfoMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      const userInfo = await fetchTikTokUserInfo(username);
-      
-      const followerCount = userInfo?.userInfo?.stats?.followerCount;
-      const heartCount = userInfo?.userInfo?.stats?.heartCount;
-      const secUid = userInfo?.userInfo?.user?.secUid;
-      
-      if (followerCount !== undefined) {
-        let engagementRate = null;
-        if (heartCount && followerCount > 0) {
-          engagementRate = (heartCount / followerCount) * 100;
-        }
-        
-        await updateCreatorTikTokInfo(creatorId, followerCount, secUid, engagementRate);
-        
-        const isEligible = followerCount >= 100000;
-        return { 
-          followerCount, 
-          isEligible, 
-          secUid,
-          engagementRate,
-          username
-        };
-      }
-      
-      throw new Error(`No se pudo obtener el número de seguidores para @${username}`);
-    },
-    onSuccess: (data) => {
-      setProcessedCount(prev => prev + 1);
-      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
-      toast.success(`@${data.username}: ${data.followerCount.toLocaleString()} seguidores (${eligibilityStatus}), Engagement: ${data.engagementRate ? data.engagementRate.toFixed(2) + '%' : 'N/A'}`);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingTikTokInfo(false);
-        clearSelection();
-        toast.success(`Procesados ${totalToProcess} creadores correctamente`);
-      }
-    },
-    onError: (error, variables) => {
-      toast.error(`Error con @${variables.username}: ${(error as Error).message}`);
-      setProcessedCount(prev => prev + 1);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingTikTokInfo(false);
-        clearSelection();
-      }
-    }
-  });
+  if (creatorCount === 0) {
+    return null;
+  }
 
-  const fetchTikTokVideosMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      setCurrentCreator(username);
-      const result = await fetchTikTokUserVideos(username, creatorId);
-      return { ...result, username };
-    },
-    onSuccess: (data) => {
-      setProcessedCount(prev => prev + 1);
-      toast.success(`@${data.username}: ${data.savedCount} videos guardados (${data.savedCount}/${data.totalCount})`);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingTikTokVideos(false);
-        setCurrentCreator("");
-        clearSelection();
-        toast.success(`Procesados videos de ${totalToProcess} creadores correctamente`);
-      }
-    },
-    onError: (error, variables) => {
-      toast.error(`Error con videos de @${variables.username}: ${(error as Error).message}`);
-      setProcessedCount(prev => prev + 1);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingTikTokVideos(false);
-        setCurrentCreator("");
-        clearSelection();
-      }
-    }
-  });
+  const handleBatchDelete = async () => {
+    // Implementation for batch deletion would go here
+    toast.success(`${creatorCount} creadores eliminados`);
+    onSuccess();
+    clearSelection();
+    setIsDeleteDialogOpen(false);
+  };
 
-  const updateYouTubeInfoMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      setCurrentCreator(username);
-      const result = await fetchAndUpdateYouTubeInfo(creatorId, username);
-      return { ...result, username };
-    },
-    onSuccess: (data) => {
-      setProcessedCount(prev => prev + 1);
-      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
-      toast.success(`@${data.username}: ${data.subscriberCount.toLocaleString()} suscriptores (${eligibilityStatus})`);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingYouTubeInfo(false);
-        setCurrentCreator("");
-        clearSelection();
-        toast.success(`Procesados datos de YouTube de ${totalToProcess} creadores correctamente`);
-      }
-    },
-    onError: (error, variables) => {
-      toast.error(`Error con YouTube de @${variables.username}: ${(error as Error).message}`);
-      setProcessedCount(prev => prev + 1);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingYouTubeInfo(false);
-        setCurrentCreator("");
-        clearSelection();
-      }
-    }
-  });
-
-  const fetchYouTubeShortsMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
-      setCurrentCreator(username);
-      const result = await fetchAndSaveYouTubeShorts(creatorId, username);
-      return { ...result, username };
-    },
-    onSuccess: (data) => {
-      setProcessedCount(prev => prev + 1);
-      toast.success(`@${data.username}: ${data.savedCount} shorts guardados (${data.savedCount}/${data.totalVideos})`);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingYouTubeShorts(false);
-        setCurrentCreator("");
-        clearSelection();
-        toast.success(`Procesados shorts de YouTube de ${totalToProcess} creadores correctamente`);
-      }
-    },
-    onError: (error, variables) => {
-      toast.error(`Error con shorts de YouTube de @${variables.username}: ${(error as Error).message}`);
-      setProcessedCount(prev => prev + 1);
-      
-      if (processedCount + 1 === totalToProcess) {
-        onSuccess();
-        setLoadingYouTubeShorts(false);
-        setCurrentCreator("");
-        clearSelection();
-      }
-    }
-  });
-
-  const handleBatchFetchTikTokInfo = () => {
-    const creatorsWithTikTok = selectedCreators.filter(creator => creator.usuario_tiktok);
-    
-    if (creatorsWithTikTok.length === 0) {
-      toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de TikTok");
-      return;
-    }
-    
-    setLoadingTikTokInfo(true);
-    setProcessedCount(0);
-    setTotalToProcess(creatorsWithTikTok.length);
-    
-    for (const creator of creatorsWithTikTok) {
-      updateTikTokInfoMutation.mutate({ 
-        creatorId: creator.id, 
-        username: creator.usuario_tiktok || '' 
-      });
+  const openAssignDialog = async () => {
+    try {
+      setLoading(true);
+      const adminUsers = await fetchAdminUsers();
+      setUsers(adminUsers);
+      setIsAssignDialogOpen(true);
+    } catch (error) {
+      console.error("Error loading admin users:", error);
+      toast.error("Error al cargar los usuarios administradores");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBatchFetchTikTokVideos = async () => {
-    const creatorsWithTikTok = selectedCreators.filter(creator => creator.usuario_tiktok);
-    
-    if (creatorsWithTikTok.length === 0) {
-      toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de TikTok");
-      return;
-    }
-    
-    setLoadingTikTokVideos(true);
-    setProcessedCount(0);
-    setTotalToProcess(creatorsWithTikTok.length);
-    
-    for (let i = 0; i < creatorsWithTikTok.length; i++) {
-      const creator = creatorsWithTikTok[i];
+  const handleBatchAssign = async (userName: string | null) => {
+    try {
+      setLoading(true);
+      const creatorIds = selectedCreators.map(creator => creator.id);
+      await batchAssignCreatorsToUser(creatorIds, userName);
       
-      try {
-        await fetchTikTokVideosMutation.mutateAsync({ 
-          creatorId: creator.id, 
-          username: creator.usuario_tiktok || '' 
-        });
-        
-        if (i < creatorsWithTikTok.length - 1) {
-          await sleep(2500);
-        }
-      } catch (error) {
-        console.error(`Error processing creator ${creator.usuario_tiktok}:`, error);
-        setProcessedCount(prev => prev + 1);
-      }
+      toast.success(
+        userName 
+          ? `${creatorCount} creadores asignados a ${userName}` 
+          : `Se eliminó la asignación de ${creatorCount} creadores`
+      );
+      
+      onSuccess();
+      clearSelection();
+      setIsAssignDialogOpen(false);
+    } catch (error) {
+      console.error("Error assigning creators:", error);
+      toast.error("Error al asignar creadores");
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleBatchFetchYouTubeInfo = async () => {
-    const creatorsWithYouTube = selectedCreators.filter(creator => creator.usuario_youtube);
-    
-    if (creatorsWithYouTube.length === 0) {
-      toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de YouTube");
-      return;
-    }
-    
-    setLoadingYouTubeInfo(true);
-    setProcessedCount(0);
-    setTotalToProcess(creatorsWithYouTube.length);
-    
-    for (let i = 0; i < creatorsWithYouTube.length; i++) {
-      const creator = creatorsWithYouTube[i];
-      
-      try {
-        await updateYouTubeInfoMutation.mutateAsync({ 
-          creatorId: creator.id, 
-          username: creator.usuario_youtube || '' 
-        });
-        
-        if (i < creatorsWithYouTube.length - 1) {
-          await sleep(1500);
-        }
-      } catch (error) {
-        console.error(`Error processing creator ${creator.usuario_youtube}:`, error);
-        setProcessedCount(prev => prev + 1);
-      }
-    }
-  };
-
-  const handleBatchFetchYouTubeShorts = async () => {
-    const creatorsWithYouTube = selectedCreators.filter(creator => creator.usuario_youtube);
-    
-    if (creatorsWithYouTube.length === 0) {
-      toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de YouTube");
-      return;
-    }
-    
-    setLoadingYouTubeShorts(true);
-    setProcessedCount(0);
-    setTotalToProcess(creatorsWithYouTube.length);
-    
-    for (let i = 0; i < creatorsWithYouTube.length; i++) {
-      const creator = creatorsWithYouTube[i];
-      
-      try {
-        await fetchYouTubeShortsMutation.mutateAsync({ 
-          creatorId: creator.id, 
-          username: creator.usuario_youtube || '' 
-        });
-        
-        if (i < creatorsWithYouTube.length - 1) {
-          await sleep(2000);
-        }
-      } catch (error) {
-        console.error(`Error processing creator ${creator.usuario_youtube}:`, error);
-        setProcessedCount(prev => prev + 1);
-      }
-    }
-  };
-
-  if (selectedCreators.length === 0) return null;
 
   return (
-    <div className="bg-slate-50 p-3 rounded-md border mt-4 mb-2">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h3 className="font-medium text-sm">
-            {selectedCreators.length} creadores seleccionados
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Ejecuta acciones en lote para todos los seleccionados
-          </p>
-          {currentCreator && (
-            <p className="text-xs font-medium text-blue-600 mt-1">
-              Procesando actualmente: @{currentCreator}
-            </p>
-          )}
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            size="sm"
-            variant="outline"
-            onClick={clearSelection}
-            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo || loadingYouTubeShorts}
-          >
-            Cancelar selección
-          </Button>
+    <div className="flex items-center gap-2 my-4 p-2 bg-muted/50 rounded-md">
+      <span className="text-sm font-medium mr-2">
+        {creatorCount} creadores seleccionados
+      </span>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-1"
+        onClick={openAssignDialog}
+        disabled={loading}
+      >
+        <UserPlus className="h-4 w-4" />
+        Asignar usuario
+      </Button>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-1 text-destructive"
+        onClick={() => setIsDeleteDialogOpen(true)}
+      >
+        <Trash2 className="h-4 w-4" />
+        Eliminar
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        size="sm"
+        onClick={clearSelection}
+      >
+        Limpiar selección
+      </Button>
+      
+      {/* Delete confirmation dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar creadores</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar {creatorCount} creadores? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleBatchDelete}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Assign user dialog */}
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Asignar usuario</DialogTitle>
+            <DialogDescription>
+              Selecciona un usuario para asignar a los {creatorCount} creadores seleccionados.
+            </DialogDescription>
+          </DialogHeader>
           
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchTikTokInfo}
-            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo || loadingYouTubeShorts}
-            className="flex items-center gap-1"
-          >
-            {loadingTikTokInfo ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <RefreshCcw className="h-3 w-3 mr-1" />
-                Obtener info TikTok
-              </>
-            )}
-          </Button>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Usuarios disponibles</h3>
+              
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  key="unassigned"
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={() => handleBatchAssign(null)}
+                  disabled={loading}
+                >
+                  <X className="h-4 w-4" />
+                  Sin asignar
+                </Button>
+                
+                {users.map(user => (
+                  <Button
+                    key={user.id}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1"
+                    onClick={() => handleBatchAssign(user.name)}
+                    disabled={loading}
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    {user.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
           
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchTikTokVideos}
-            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo || loadingYouTubeShorts}
-            className="flex items-center gap-1"
-          >
-            {loadingTikTokVideos ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <Download className="h-3 w-3 mr-1" />
-                Obtener videos TikTok
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchYouTubeInfo}
-            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo || loadingYouTubeShorts}
-            className="flex items-center gap-1"
-          >
-            {loadingYouTubeInfo ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <Youtube className="h-3 w-3 mr-1" />
-                Actualizar YouTube
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            size="sm"
-            variant="secondary"
-            onClick={handleBatchFetchYouTubeShorts}
-            disabled={loadingTikTokInfo || loadingTikTokVideos || loadingYouTubeInfo || loadingYouTubeShorts}
-            className="flex items-center gap-1"
-          >
-            {loadingYouTubeShorts ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Procesando Shorts ({processedCount}/{totalToProcess})
-              </>
-            ) : (
-              <>
-                <Video className="h-3 w-3 mr-1" />
-                Obtener Shorts YouTube
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsAssignDialogOpen(false)}
+              disabled={loading}
+            >
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

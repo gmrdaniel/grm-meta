@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -135,7 +136,7 @@ export const deleteCreator = async (id: string): Promise<void> => {
  * Fetch admin users for assignment
  */
 export const fetchAdminUsers = async (): Promise<{ id: string; name: string; email: string }[]> => {
-  // Instead of fetching from database, return hardcoded list
+  // Return hardcoded list of specific users
   const specificUsers = [
     "DANIEL", "ORIANA", "FRANK", "ANA", 
     "MANUEL", "DAYANA", "KATHERINE", "SAONE"
@@ -152,7 +153,8 @@ export const fetchAdminUsers = async (): Promise<{ id: string; name: string; ema
  * Assign a creator to a user
  */
 export const assignCreatorToUser = async (creatorId: string, userName: string | null): Promise<void> => {
-  // Store the user's name directly in usuario_asignado
+  console.log(`Assigning creator ${creatorId} to user: ${userName}`);
+  
   const { error } = await supabase
     .from('creator_inventory')
     .update({ usuario_asignado: userName })
@@ -160,6 +162,26 @@ export const assignCreatorToUser = async (creatorId: string, userName: string | 
   
   if (error) {
     console.error('Error assigning creator to user:', error);
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * Batch assign creators to a user
+ */
+export const batchAssignCreatorsToUser = async (creatorIds: string[], userName: string | null): Promise<void> => {
+  // No creators to assign
+  if (creatorIds.length === 0) return;
+  
+  console.log(`Batch assigning ${creatorIds.length} creators to user: ${userName}`);
+  
+  const { error } = await supabase
+    .from('creator_inventory')
+    .update({ usuario_asignado: userName })
+    .in('id', creatorIds);
+  
+  if (error) {
+    console.error('Error batch assigning creators to user:', error);
     throw new Error(error.message);
   }
 };

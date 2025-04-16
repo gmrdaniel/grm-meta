@@ -45,20 +45,8 @@ export function AssignUserDropdown({
     const loadUsers = async () => {
       setLoading(true);
       try {
-        // Define the specific users we want to display
-        const specificUsers = [
-          "DANIEL", "ORIANA", "FRANK", "ANA", 
-          "MANUEL", "DAYANA", "KATHERINE", "SAONE"
-        ];
-        
-        // Create hardcoded user list
-        const hardcodedUsers = specificUsers.map(name => ({
-          id: name,
-          name: name,
-          email: `${name.toLowerCase()}@example.com` // Placeholder emails
-        }));
-        
-        setUsers(hardcodedUsers);
+        const users = await fetchAdminUsers();
+        setUsers(users);
       } catch (error) {
         console.error("Error loading admin users:", error);
         toast.error("Error al cargar los usuarios administradores");
@@ -71,11 +59,12 @@ export function AssignUserDropdown({
   }, []);
 
   const handleAssign = async (userName: string | null) => {
+    console.log(`Assigning creator ${creatorId} to user: ${userName}`);
     setLoadingAssign(true);
     try {
       await assignCreatorToUser(creatorId, userName);
       setValue(userName || "");
-      toast.success(userName ? "Creador asignado correctamente" : "Asignación eliminada");
+      toast.success(userName ? `Creador asignado a ${userName}` : "Asignación eliminada");
       onSuccess();
     } catch (error) {
       console.error("Error assigning creator:", error);
