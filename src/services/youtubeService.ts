@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
@@ -284,8 +285,9 @@ export const batchFetchYouTubeShorts = async (
 
 /**
  * Fetch all creators with YouTube usernames and update their info
+ * This function was renamed to avoid the redeclaration error
  */
-export const batchUpdateYouTubeInfo = async (): Promise<{ 
+export const batchUpdateAllYouTubeInfos = async (): Promise<{ 
   totalProcessed: number, 
   successful: number, 
   failed: number 

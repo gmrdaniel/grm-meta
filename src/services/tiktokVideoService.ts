@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { TikTokVideo } from "@/types/creator";
+import { TikTokVideo, Creator } from "@/types/creator";
 
 /**
  * Fetch TikTok videos for a specific creator
