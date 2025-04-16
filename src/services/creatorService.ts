@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -134,10 +135,10 @@ export const deleteCreator = async (id: string): Promise<void> => {
 /**
  * Fetch admin users for assignment
  */
-export const fetchAdminUsers = async (): Promise<{ id: string; name: string }[]> => {
+export const fetchAdminUsers = async (): Promise<{ id: string; name: string; email: string }[]> => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name')
+    .select('id, first_name, last_name, email')
     .eq('role', 'admin');
   
   if (error) {
@@ -147,7 +148,8 @@ export const fetchAdminUsers = async (): Promise<{ id: string; name: string }[]>
   
   return data.map(user => ({
     id: user.id,
-    name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.id
+    name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.id,
+    email: user.email || ''
   }));
 };
 
