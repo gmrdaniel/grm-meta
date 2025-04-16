@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { CreatorFilter } from "@/components/admin/inventory/creators-list/types";
@@ -25,34 +24,36 @@ export const fetchCreators = async (
       query = query.not('usuario_tiktok', 'is', null);
     }
 
-    // New filter for creators with YouTube username
     if (filters.hasYouTubeUsername) {
       query = query.not('usuario_youtube', 'is', null);
     }
 
-    // Filter creators without engagement data
     if (filters.withoutEngagement) {
       query = query.or('engagement_tiktok.is.null,engagement_tiktok.eq.0');
     }
     
-    // Updated filter to fetch creators where fecha_consulta_videos is null
     if (filters.withoutVideos) {
       query = query.is('fecha_consulta_videos', null);
     }
 
-    // New filter to fetch creators WITH downloaded videos (fecha_consulta_videos is NOT null)
     if (filters.withVideos) {
       query = query.not('fecha_consulta_videos', 'is', null);
     }
 
-    // Add filter for creators without YouTube data
     if (filters.withoutYouTube) {
       query = query.is('fecha_descarga_yt', null);
     }
     
-    // New filter for creators without YouTube engagement
     if (filters.withoutYouTubeEngagement) {
       query = query.is('engagement_youtube', null);
+    }
+
+    if (filters.assignedToUser) {
+      if (filters.assignedToUser === 'unassigned') {
+        query = query.is('usuario_asignado', null);
+      } else {
+        query = query.eq('usuario_asignado', filters.assignedToUser);
+      }
     }
   }
   
@@ -126,6 +127,41 @@ export const deleteCreator = async (id: string): Promise<void> => {
   
   if (error) {
     console.error('Error deleting creator:', error);
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * Fetch admin users for assignment
+ */
+export const fetchAdminUsers = async (): Promise<{ id: string; name: string }[]> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name')
+    .eq('role', 'admin');
+  
+  if (error) {
+    console.error('Error fetching admin users:', error);
+    throw new Error(error.message);
+  }
+  
+  return data.map(user => ({
+    id: user.id,
+    name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.id
+  }));
+};
+
+/**
+ * Assign a creator to a user
+ */
+export const assignCreatorToUser = async (creatorId: string, userId: string | null): Promise<void> => {
+  const { error } = await supabase
+    .from('creator_inventory')
+    .update({ usuario_asignado: userId })
+    .eq('id', creatorId);
+  
+  if (error) {
+    console.error('Error assigning creator to user:', error);
     throw new Error(error.message);
   }
 };

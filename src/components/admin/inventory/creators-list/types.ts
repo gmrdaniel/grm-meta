@@ -7,9 +7,10 @@ export interface CreatorFilter {
   hasYouTubeUsername?: boolean;
   withoutEngagement?: boolean;
   withoutVideos?: boolean;
-  withVideos?: boolean; // New filter for creators WITH videos
+  withVideos?: boolean;
   withoutYouTube?: boolean;
   withoutYouTubeEngagement?: boolean;
+  assignedToUser?: string;
 }
 
 export interface CreatorsListProps {
@@ -21,4 +22,9 @@ export interface CreatorsListProps {
 export interface TikTokInfoMutationParams {
   creatorId: string;
   username: string;
+}
+
+export interface AssignUserParams {
+  creatorId: string;
+  userId: string | null;
 }

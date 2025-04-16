@@ -3,7 +3,7 @@ import { Creator } from "@/types/creator";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Pencil, Phone } from "lucide-react";
+import { MoreHorizontal, Pencil, Phone, User } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import {
 import { CreatorBasicInfo } from "./CreatorBasicInfo";
 import { SocialNetworks } from "./SocialNetworks";
 import { formatDate } from "./utils";
+import { AssignUserDropdown } from "./AssignUserDropdown";
 
 interface CreatorRowProps {
   creator: Creator;
@@ -64,7 +65,15 @@ export function CreatorRow({
         />
       </TableCell>
       <TableCell>
-        <CreatorBasicInfo creator={creator} />
+        <div className="space-y-1">
+          <CreatorBasicInfo creator={creator} />
+          {creator.usuario_asignado && (
+            <div className="flex items-center text-xs text-gray-500 mt-1">
+              <User className="h-3 w-3 mr-1" />
+              <span>Asignado a usuario</span>
+            </div>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <SocialNetworks
@@ -110,28 +119,37 @@ export function CreatorRow({
         </Badge>
       </TableCell>
       <TableCell className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={(e) => {
-                if (onCreatorSelect) {
-                  e.stopPropagation();
-                }
-              }}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Abrir menú</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleEdit}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Editar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center justify-end gap-2">
+          <AssignUserDropdown
+            creatorId={creator.id}
+            currentUserId={creator.usuario_asignado || null}
+            onSuccess={onRefetch}
+            showIcon={false}
+          />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={(e) => {
+                  if (onCreatorSelect) {
+                    e.stopPropagation();
+                  }
+                }}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Abrir menú</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </TableCell>
     </TableRow>
   );
