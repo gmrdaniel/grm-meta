@@ -66,20 +66,25 @@ export default function AdminInventory() {
               </TabsList>
               
               <TabsContent value="list" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="md:col-span-1">
-                    <RadioUserFilter 
-                      selectedUser={selectedUser}
-                      onSelectUser={handleUserSelect}
-                    />
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">Lista de Creadores</h2>
+                    <p className="text-gray-500">Total: {useQuery({
+                      queryKey: ["creatorCount"],
+                      queryFn: () => fetchCreators(1, 1, filters).then(res => res.count),
+                    }).data || 0} creadores</p>
                   </div>
-                  <div className="md:col-span-3">
-                    <CreatorsList 
-                      onCreatorSelect={handleCreatorSelect}
-                      filters={filters}
-                      onFilterChange={handleFilterChange}
-                    />
-                  </div>
+                  
+                  <RadioUserFilter 
+                    selectedUser={selectedUser}
+                    onSelectUser={handleUserSelect}
+                  />
+                  
+                  <CreatorsList 
+                    onCreatorSelect={handleCreatorSelect}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                  />
                 </div>
               </TabsContent>
               

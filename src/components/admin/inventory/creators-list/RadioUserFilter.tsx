@@ -51,7 +51,7 @@ export function RadioUserFilter({ selectedUser, onSelectUser }: RadioUserFilterP
               <div key={user} className={`${index % 2 === 0 ? 'col-span-2' : 'col-span-2'} flex items-center space-x-2`}>
                 <RadioGroupItem value={user} id={`radio-user-${user}`} />
                 <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
-                  Radio: {user}
+                  {user}
                 </Label>
               </div>
             ))}
