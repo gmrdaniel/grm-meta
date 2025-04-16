@@ -10,16 +10,11 @@ interface RadioUserFilterProps {
   onSelectUser: (user: string | null) => void;
 }
 
-const USERS = [
-  "DANIEL", 
-  "ORIANA", 
-  "FRANK", 
-  "ANA", 
-  "MANUEL", 
-  "DAYANA", 
-  "KATHERINE", 
-  "SAONE"
-];
+// Rearranged users according to specified columns
+const COLUMN_1 = ["DANIEL", "FRANK"];
+const COLUMN_2 = ["MANUEL", "KATHERINE"];
+const COLUMN_3 = ["ORIANA", "ANA"];
+const COLUMN_4 = ["DAYANA", "SAONE"];
 
 export function RadioUserFilter({ selectedUser, onSelectUser }: RadioUserFilterProps) {
   const handleClearSelection = () => {
@@ -47,14 +42,49 @@ export function RadioUserFilter({ selectedUser, onSelectUser }: RadioUserFilterP
       <CardContent>
         <RadioGroup value={selectedUser || ""} onValueChange={onSelectUser}>
           <div className="grid grid-cols-4 gap-4">
-            {USERS.map((user, index) => (
-              <div key={user} className={`${index % 2 === 0 ? 'col-span-2' : 'col-span-2'} flex items-center space-x-2`}>
-                <RadioGroupItem value={user} id={`radio-user-${user}`} />
-                <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
-                  {user}
-                </Label>
-              </div>
-            ))}
+            <div className="col-span-1 space-y-2">
+              {COLUMN_1.map((user) => (
+                <div key={user} className="flex items-center space-x-2">
+                  <RadioGroupItem value={user} id={`radio-user-${user}`} />
+                  <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
+                    {user}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
+            <div className="col-span-1 space-y-2">
+              {COLUMN_2.map((user) => (
+                <div key={user} className="flex items-center space-x-2">
+                  <RadioGroupItem value={user} id={`radio-user-${user}`} />
+                  <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
+                    {user}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
+            <div className="col-span-1 space-y-2">
+              {COLUMN_3.map((user) => (
+                <div key={user} className="flex items-center space-x-2">
+                  <RadioGroupItem value={user} id={`radio-user-${user}`} />
+                  <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
+                    {user}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
+            <div className="col-span-1 space-y-2">
+              {COLUMN_4.map((user) => (
+                <div key={user} className="flex items-center space-x-2">
+                  <RadioGroupItem value={user} id={`radio-user-${user}`} />
+                  <Label htmlFor={`radio-user-${user}`} className="font-normal cursor-pointer">
+                    {user}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
         </RadioGroup>
       </CardContent>
