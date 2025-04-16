@@ -115,6 +115,7 @@ export type Database = {
           telefono: string | null
           tiene_invitacion: boolean | null
           tiene_prompt_generado: boolean | null
+          usuario_asignado: string | null
           usuario_pinterest: string | null
           usuario_tiktok: string | null
           usuario_youtube: string | null
@@ -145,6 +146,7 @@ export type Database = {
           telefono?: string | null
           tiene_invitacion?: boolean | null
           tiene_prompt_generado?: boolean | null
+          usuario_asignado?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           telefono?: string | null
           tiene_invitacion?: boolean | null
           tiene_prompt_generado?: boolean | null
+          usuario_asignado?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
