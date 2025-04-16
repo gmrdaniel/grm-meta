@@ -39,7 +39,18 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
       setLoading(true);
       try {
         const adminUsers = await fetchAdminUsers();
-        setUsers(adminUsers);
+        // Hardcode the specific users as requested
+        const specificUsers = [
+          "DANIEL", "ORIANA", "FRANK", "ANA", 
+          "MANUEL", "DAYANA", "KATHERINE", "SAONE"
+        ];
+        
+        // Filter and map the users to match the specific names
+        const filteredUsers = adminUsers.filter(user => 
+          specificUsers.includes(user.name.toUpperCase())
+        );
+
+        setUsers(filteredUsers);
       } catch (error) {
         console.error("Error loading admin users:", error);
         toast.error("Error al cargar los usuarios administradores");
