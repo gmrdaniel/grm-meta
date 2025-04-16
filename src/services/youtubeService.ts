@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
@@ -197,6 +196,90 @@ export const fetchAndSaveYouTubeShorts = async (
     console.error('Error in fetchAndSaveYouTubeShorts:', error);
     throw error;
   }
+};
+
+/**
+ * Batch update YouTube info for multiple creators
+ */
+export const batchUpdateYouTubeInfo = async (
+  creators: Creator[]
+): Promise<{ 
+  totalProcessed: number, 
+  successful: number, 
+  failed: number 
+}> => {
+  let successful = 0;
+  let failed = 0;
+  
+  console.log(`Starting batch update of YouTube info for ${creators.length} creators`);
+  
+  for (const creator of creators) {
+    if (!creator.usuario_youtube) continue;
+    
+    try {
+      console.log(`Processing YouTube info for creator ${creator.id} (${creator.usuario_youtube})`);
+      await fetchAndUpdateYouTubeInfo(creator.id, creator.usuario_youtube);
+      successful++;
+    } catch (error) {
+      console.error(`Error updating YouTube info for creator ${creator.id}:`, error);
+      failed++;
+    }
+    
+    // Add a small delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 1500));
+  }
+  
+  return {
+    totalProcessed: creators.length,
+    successful,
+    failed
+  };
+};
+
+/**
+ * Batch fetch YouTube shorts for multiple creators
+ */
+export const batchFetchYouTubeShorts = async (
+  creators: Creator[]
+): Promise<{ 
+  totalProcessed: number, 
+  successful: number, 
+  failed: number 
+}> => {
+  let successful = 0;
+  let failed = 0;
+  
+  console.log(`Starting batch fetch of YouTube shorts for ${creators.length} creators`);
+  
+  for (const creator of creators) {
+    if (!creator.usuario_youtube) continue;
+    
+    try {
+      console.log(`Fetching YouTube shorts for creator ${creator.id} (${creator.usuario_youtube})`);
+      
+      const result = await fetchAndSaveYouTubeShorts(creator.id, creator.usuario_youtube);
+      
+      if (result.savedCount > 0) {
+        successful++;
+      } else {
+        console.warn(`No shorts saved for creator ${creator.id} (${creator.usuario_youtube})`);
+        // Still mark as successful if no videos were found but the API call worked
+        successful++;
+      }
+    } catch (error) {
+      console.error(`Error fetching YouTube shorts for creator ${creator.id}:`, error);
+      failed++;
+    }
+    
+    // Add a delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+  
+  return {
+    totalProcessed: creators.length,
+    successful,
+    failed
+  };
 };
 
 /**

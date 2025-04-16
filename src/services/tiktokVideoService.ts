@@ -318,3 +318,97 @@ export const updateCreatorTikTokInfo = async (
 export const updateCreatorTikTokFollowers = async (creatorId: string, followerCount: number): Promise<void> => {
   return updateCreatorTikTokInfo(creatorId, followerCount);
 };
+
+/**
+ * Batch update TikTok info for multiple creators
+ */
+export const batchUpdateTikTokInfo = async (
+  creators: Creator[]
+): Promise<{
+  totalProcessed: number,
+  successful: number,
+  failed: number
+}> => {
+  let successful = 0;
+  let failed = 0;
+  
+  console.log(`Starting batch update of TikTok info for ${creators.length} creators`);
+  
+  for (const creator of creators) {
+    if (!creator.usuario_tiktok) continue;
+    
+    try {
+      console.log(`Processing TikTok info for creator ${creator.id} (${creator.usuario_tiktok})`);
+      
+      const userInfo = await fetchTikTokUserInfo(creator.usuario_tiktok);
+      
+      const followerCount = userInfo?.userInfo?.stats?.followerCount;
+      const secUid = userInfo?.userInfo?.user?.secUid;
+      
+      if (followerCount !== undefined) {
+        await updateCreatorTikTokInfo(creator.id, followerCount, secUid);
+        successful++;
+      } else {
+        console.error(`No follower count found for creator ${creator.id} (${creator.usuario_tiktok})`);
+        failed++;
+      }
+    } catch (error) {
+      console.error(`Error updating TikTok info for creator ${creator.id}:`, error);
+      failed++;
+    }
+    
+    // Add a delay to avoid rate limiting
+    await sleep(1500);
+  }
+  
+  return {
+    totalProcessed: creators.length,
+    successful,
+    failed
+  };
+};
+
+/**
+ * Batch fetch TikTok videos for multiple creators
+ */
+export const batchFetchTikTokVideos = async (
+  creators: Creator[]
+): Promise<{
+  totalProcessed: number,
+  successful: number,
+  failed: number
+}> => {
+  let successful = 0;
+  let failed = 0;
+  
+  console.log(`Starting batch fetch of TikTok videos for ${creators.length} creators`);
+  
+  for (const creator of creators) {
+    if (!creator.usuario_tiktok) continue;
+    
+    try {
+      console.log(`Fetching TikTok videos for creator ${creator.id} (${creator.usuario_tiktok})`);
+      
+      const result = await fetchTikTokUserVideos(creator.usuario_tiktok, creator.id);
+      
+      if (result.savedCount > 0) {
+        successful++;
+      } else {
+        console.warn(`No videos saved for creator ${creator.id} (${creator.usuario_tiktok})`);
+        failed++;
+      }
+    } catch (error) {
+      console.error(`Error fetching TikTok videos for creator ${creator.id}:`, error);
+      failed++;
+    }
+    
+    // Add a delay to avoid rate limiting
+    await sleep(3000);
+  }
+  
+  return {
+    totalProcessed: creators.length,
+    successful,
+    failed
+  };
+};

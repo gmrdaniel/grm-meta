@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Creator } from "@/types/creator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Trash2, UserPlus, X } from "lucide-react";
+import { Trash2, UserPlus, X, RefreshCcw, Video, Youtube } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -12,7 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { fetchAdminUsers, batchAssignCreatorsToUser } from "@/services/creatorService";
+import { 
+  fetchAdminUsers, 
+  batchAssignCreatorsToUser 
+} from "@/services/creatorService";
+import { 
+  batchUpdateTikTokInfo, 
+  batchFetchTikTokVideos 
+} from "@/services/tiktokVideoService";
+import { 
+  batchUpdateYouTubeInfo, 
+  batchFetchYouTubeShorts 
+} from "@/services/youtubeService";
 
 interface CreatorBatchActionsProps {
   selectedCreators: Creator[];
@@ -28,6 +39,7 @@ export function CreatorBatchActions({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [processingOperation, setProcessingOperation] = useState<string | null>(null);
   const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
   
   const creatorCount = selectedCreators.length;
@@ -81,40 +93,212 @@ export function CreatorBatchActions({
     }
   };
 
+  const handleBatchGetTikTokInfo = async () => {
+    try {
+      setProcessingOperation("tikTokInfo");
+      
+      // Filter creators that have TikTok usernames
+      const creatorsWithTikTok = selectedCreators.filter(c => c.usuario_tiktok);
+      
+      if (creatorsWithTikTok.length === 0) {
+        toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de TikTok");
+        return;
+      }
+      
+      toast.info(`Obteniendo información de TikTok para ${creatorsWithTikTok.length} creadores...`);
+      
+      const result = await batchUpdateTikTokInfo(creatorsWithTikTok);
+      
+      toast.success(`Información de TikTok actualizada para ${result.successful} de ${result.totalProcessed} creadores`);
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating TikTok info:", error);
+      toast.error("Error al obtener información de TikTok");
+    } finally {
+      setProcessingOperation(null);
+    }
+  };
+
+  const handleBatchGetTikTokVideos = async () => {
+    try {
+      setProcessingOperation("tikTokVideos");
+      
+      // Filter creators that have TikTok usernames
+      const creatorsWithTikTok = selectedCreators.filter(c => c.usuario_tiktok);
+      
+      if (creatorsWithTikTok.length === 0) {
+        toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de TikTok");
+        return;
+      }
+      
+      toast.info(`Obteniendo videos de TikTok para ${creatorsWithTikTok.length} creadores...`);
+      
+      const result = await batchFetchTikTokVideos(creatorsWithTikTok);
+      
+      toast.success(`Videos de TikTok obtenidos para ${result.successful} de ${result.totalProcessed} creadores`);
+      onSuccess();
+    } catch (error) {
+      console.error("Error fetching TikTok videos:", error);
+      toast.error("Error al obtener videos de TikTok");
+    } finally {
+      setProcessingOperation(null);
+    }
+  };
+
+  const handleBatchUpdateYouTubeInfo = async () => {
+    try {
+      setProcessingOperation("youTubeInfo");
+      
+      // Filter creators that have YouTube usernames
+      const creatorsWithYouTube = selectedCreators.filter(c => c.usuario_youtube);
+      
+      if (creatorsWithYouTube.length === 0) {
+        toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de YouTube");
+        return;
+      }
+      
+      toast.info(`Actualizando información de YouTube para ${creatorsWithYouTube.length} creadores...`);
+      
+      const result = await batchUpdateYouTubeInfo(creatorsWithYouTube);
+      
+      toast.success(`Información de YouTube actualizada para ${result.successful} de ${result.totalProcessed} creadores`);
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating YouTube info:", error);
+      toast.error("Error al actualizar información de YouTube");
+    } finally {
+      setProcessingOperation(null);
+    }
+  };
+
+  const handleBatchGetYouTubeShorts = async () => {
+    try {
+      setProcessingOperation("youTubeShorts");
+      
+      // Filter creators that have YouTube usernames
+      const creatorsWithYouTube = selectedCreators.filter(c => c.usuario_youtube);
+      
+      if (creatorsWithYouTube.length === 0) {
+        toast.error("Ninguno de los creadores seleccionados tiene un nombre de usuario de YouTube");
+        return;
+      }
+      
+      toast.info(`Obteniendo Shorts de YouTube para ${creatorsWithYouTube.length} creadores...`);
+      
+      const result = await batchFetchYouTubeShorts(creatorsWithYouTube);
+      
+      toast.success(`Shorts de YouTube obtenidos para ${result.successful} de ${result.totalProcessed} creadores`);
+      onSuccess();
+    } catch (error) {
+      console.error("Error fetching YouTube shorts:", error);
+      toast.error("Error al obtener Shorts de YouTube");
+    } finally {
+      setProcessingOperation(null);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2 my-4 p-2 bg-muted/50 rounded-md">
-      <span className="text-sm font-medium mr-2">
-        {creatorCount} creadores seleccionados
-      </span>
+    <div className="flex flex-col gap-2 my-4 p-2 bg-muted/50 rounded-md">
+      <div className="flex items-center">
+        <span className="text-sm font-medium mr-2">
+          {creatorCount} creadores seleccionados
+        </span>
+        <span className="text-xs text-muted-foreground">
+          Ejecuta acciones en lote para todos los seleccionados
+        </span>
+      </div>
       
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-1"
-        onClick={openAssignDialog}
-        disabled={loading}
-      >
-        <UserPlus className="h-4 w-4" />
-        Asignar usuario
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-1 text-destructive"
-        onClick={() => setIsDeleteDialogOpen(true)}
-      >
-        <Trash2 className="h-4 w-4" />
-        Eliminar
-      </Button>
-      
-      <Button 
-        variant="ghost" 
-        size="sm"
-        onClick={clearSelection}
-      >
-        Limpiar selección
-      </Button>
+      <div className="flex flex-wrap items-center gap-2 mt-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => clearSelection()}
+        >
+          Cancelar selección
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={handleBatchGetTikTokInfo}
+          disabled={loading || processingOperation !== null}
+        >
+          {processingOperation === "tikTokInfo" ? (
+            <RefreshCcw className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCcw className="h-4 w-4" />
+          )}
+          Obtener info TikTok
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={handleBatchGetTikTokVideos}
+          disabled={loading || processingOperation !== null}
+        >
+          {processingOperation === "tikTokVideos" ? (
+            <Video className="h-4 w-4 animate-spin" />
+          ) : (
+            <Video className="h-4 w-4" />
+          )}
+          Obtener videos TikTok
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={handleBatchUpdateYouTubeInfo}
+          disabled={loading || processingOperation !== null}
+        >
+          {processingOperation === "youTubeInfo" ? (
+            <RefreshCcw className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCcw className="h-4 w-4" />
+          )}
+          Actualizar YouTube
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={handleBatchGetYouTubeShorts}
+          disabled={loading || processingOperation !== null}
+        >
+          {processingOperation === "youTubeShorts" ? (
+            <Youtube className="h-4 w-4 animate-spin" />
+          ) : (
+            <Youtube className="h-4 w-4" />
+          )}
+          Obtener Shorts YouTube
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={openAssignDialog}
+          disabled={loading || processingOperation !== null}
+        >
+          <UserPlus className="h-4 w-4" />
+          Asignar usuario
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1 text-destructive"
+          onClick={() => setIsDeleteDialogOpen(true)}
+          disabled={loading || processingOperation !== null}
+        >
+          <Trash2 className="h-4 w-4" />
+          Eliminar
+        </Button>
+      </div>
       
       {/* Delete confirmation dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
