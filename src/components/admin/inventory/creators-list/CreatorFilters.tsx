@@ -13,10 +13,12 @@ interface CreatorFiltersProps {
 export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFiltersProps) {
   const toggleFilter = (filterName: keyof CreatorFilter) => {
     const newFilters = { ...activeFilters };
-    newFilters[filterName] = !activeFilters[filterName];
     
-    if (!newFilters[filterName]) {
+    // Check if the property exists and toggle it, or set it to true if it doesn't exist
+    if (newFilters[filterName] === true) {
       delete newFilters[filterName];
+    } else {
+      newFilters[filterName] = true;
     }
     
     onFilterChange(newFilters);
