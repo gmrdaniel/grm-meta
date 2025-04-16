@@ -29,11 +29,11 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
   const [loading, setLoading] = useState(false);
   
   // Get the selected user name for display
-  const selectedUserName = !value 
+  const selectedUserName = value === null 
     ? "Todos los usuarios" 
     : value === "unassigned" 
       ? "Sin asignar" 
-      : value;
+      : users.find(user => user.name === value)?.name || value;
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -64,8 +64,14 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
     loadUsers();
   }, []);
 
-  const handleSelect = (selectedValue: string | null) => {
-    onChange(selectedValue);
+  const handleSelect = (selectedValue: string) => {
+    if (selectedValue === "all") {
+      onChange(null);
+    } else if (selectedValue === "unassigned") {
+      onChange("unassigned");
+    } else {
+      onChange(selectedValue);
+    }
     setOpen(false);
   };
 
@@ -98,11 +104,12 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
           <CommandEmpty>No se encontraron usuarios.</CommandEmpty>
           <CommandGroup>
             <CommandItem
-              onSelect={() => handleSelect(null)}
+              onSelect={() => handleSelect("all")}
               className="text-sm"
+              value="all"
             >
               <div className="flex items-center">
-                {!value && <Check className="mr-2 h-4 w-4" />}
+                {value === null && <Check className="mr-2 h-4 w-4" />}
                 <Users className="mr-2 h-4 w-4" />
                 <span>Todos los usuarios</span>
               </div>
@@ -110,6 +117,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
             <CommandItem
               onSelect={() => handleSelect("unassigned")}
               className="text-sm"
+              value="unassigned"
             >
               <div className="flex items-center">
                 {value === "unassigned" && <Check className="mr-2 h-4 w-4" />}
@@ -122,6 +130,7 @@ export function UserFilter({ value, onChange }: UserFilterProps) {
                 key={user.id}
                 onSelect={() => handleSelect(user.name)}
                 className="text-sm"
+                value={user.name}
               >
                 <div className="flex flex-col w-full">
                   <div className="flex items-center">
