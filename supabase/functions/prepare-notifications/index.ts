@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
-import { differenceInDays } from "https://esm.sh/date-fns";
+import { differenceInDays, startOfDay } from "https://esm.sh/date-fns";
 
 // Supabase
 const supabase = createClient(
@@ -69,10 +69,12 @@ serve(async () => {
 
         if (!stage_updated_at || !email) continue;
 
-        const enteredDate = new Date(stage_updated_at);
-        const daysInStage = differenceInDays(now, enteredDate);
+        const daysInStage = differenceInDays(
+          startOfDay(now),
+          startOfDay(new Date(stage_updated_at))
+        );
 
-        if (daysInStage < delay_days) continue;
+        if (daysInStage !== delay_days) continue;
 
         // 1. Chequear si ya hay una notificación pendiente
         const { data: existingPending } = await supabase
