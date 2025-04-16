@@ -43,12 +43,6 @@ export const fetchCreators = async (
     if (filters.withoutYouTubeEngagement) {
       query = query.is('engagement_youtube', null);
     }
-
-    if (filters.assignedToUser) {
-      query = query.eq('usuario_asignado', filters.assignedToUser);
-    } else if (filters.assignedToUser === null) {
-      query = query.is('usuario_asignado', null);
-    }
   }
   
   const from = (page - 1) * pageSize;

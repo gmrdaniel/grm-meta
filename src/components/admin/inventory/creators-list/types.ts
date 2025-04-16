@@ -1,6 +1,4 @@
 
-import { Creator } from "@/types/creator";
-
 export interface CreatorFilter {
   tiktokEligible?: boolean;
   hasTikTokUsername?: boolean;
@@ -10,22 +8,10 @@ export interface CreatorFilter {
   withVideos?: boolean;
   withoutYouTube?: boolean;
   withoutYouTubeEngagement?: boolean;
-  assignedToUser?: string;
-  [key: string]: boolean | string | undefined;
 }
 
 export interface CreatorsListProps {
-  onCreatorSelect?: (creator: Creator) => void;
+  onCreatorSelect?: (creator: any) => void;
   filters?: CreatorFilter;
   onFilterChange?: (filters: CreatorFilter) => void;
-}
-
-export interface TikTokInfoMutationParams {
-  creatorId: string;
-  username: string;
-}
-
-export interface AssignUserParams {
-  creatorId: string;
-  userId: string | null;
 }

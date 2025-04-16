@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
 import { CreatorFilter } from "./types";
-import { UserFilter } from "./UserFilter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,22 +26,9 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
     if (newFilters[filterName] === true) {
       delete newFilters[filterName];
     } else {
-      // Only set boolean value for non-assignedToUser filters
-      if (filterName !== 'assignedToUser') {
-        newFilters[filterName] = true;
-      }
+      newFilters[filterName] = true;
     }
     
-    onFilterChange(newFilters);
-  };
-
-  const handleUserFilterChange = (userId: string | null) => {
-    const newFilters = { ...activeFilters };
-    if (userId) {
-      newFilters.assignedToUser = userId;
-    } else {
-      delete newFilters.assignedToUser;
-    }
     onFilterChange(newFilters);
   };
 
@@ -157,11 +143,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <UserFilter 
-          value={activeFilters.assignedToUser || null} 
-          onChange={handleUserFilterChange} 
-        />
         
         {hasFilters && (
           <Button 
@@ -179,9 +160,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
       {hasFilters && (
         <div className="flex flex-wrap gap-2 mt-2">
           {Object.entries(activeFilters).map(([key, value]) => {
-            // Skip rendering badge for assignedToUser as it's shown in the dropdown
-            if (key === 'assignedToUser') return null;
-            
             return (
               <Badge 
                 key={key} 
