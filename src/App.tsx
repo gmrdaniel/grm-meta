@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/projects";
 import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
+import AdminInventoryStats from "./pages/admin/inventory-stats"; // Add import for the new page
 import AdminInvitations from "./pages/admin/invitations";
 import AdminTasks from "./pages/admin/tasks";
 import AdminTaskCreate from "./pages/admin/tasks/create";
@@ -78,6 +79,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminInventory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/inventory-stats"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminInventoryStats />
                   </ProtectedRoute>
                 }
               />

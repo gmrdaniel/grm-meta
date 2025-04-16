@@ -1,5 +1,5 @@
 
-import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText } from "lucide-react";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText, BarChart } from "lucide-react";
 
 export const adminNavigationItems = [
   {
@@ -19,6 +19,12 @@ export const adminNavigationItems = [
     shortLabel: "Inventory",
     icon: <Package size={24} />,
     to: "/admin/inventory",
+  },
+  {
+    label: "Inventory Stats",
+    shortLabel: "Stats",
+    icon: <BarChart size={24} />,
+    to: "/admin/inventory-stats",
   },
   {
     label: "Invitations",
