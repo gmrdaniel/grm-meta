@@ -28,7 +28,7 @@ export const NotificationSettingsTable = ({
           <TableHead>Delay (Days)</TableHead>
           <TableHead>Frequency</TableHead>
           <TableHead>Max Count</TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead>Enabled</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
