@@ -15,3 +15,8 @@ export interface CreatorsListProps {
   filters?: CreatorFilter;
   onFilterChange?: (filters: CreatorFilter) => void;
 }
+
+export interface TikTokInfoMutationParams {
+  creatorId: string;
+  username: string;
+}
