@@ -15,18 +15,20 @@ export const updateInvitationStatus = async (
     .eq('id', id)
     .select()
     .maybeSingle();
-  
+
   if (error) {
-    console.error('Error updating invitation status:', error);
+    console.error('Error updating invitation status:', error.message, error.details);
     throw new Error(error.message);
   }
-  
+
   if (!data) {
-    throw new Error(`Invitation with ID ${id} not found`);
+    console.warn(`No invitation found with ID: ${id}`);
+    throw new Error(`Invitation with ID ${id} not found or no permission`);
   }
-  
+
   return data as CreatorInvitation;
 };
+
 
 /**
  * Update Facebook page URL
