@@ -28,8 +28,8 @@ export function UserFilter({
     email: `${name.toLowerCase()}@example.com`
   })));
 
-  // Get the selected user name for display
-  const selectedUserName = value === null ? "Sin usuario asignado" : users.find(user => user.name === value)?.name || value;
+  // Get the selected user name directly from specificUsers or default text
+  const selectedUserName = value === null ? "Sin usuario asignado" : value;
   
   const handleSelect = (selectedValue: string) => {
     if (selectedValue === "unassigned") {
