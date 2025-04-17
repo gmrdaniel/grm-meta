@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +12,7 @@ import AdminProjects from "./pages/admin/projects";
 import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
 import AdminInventoryStats from "./pages/admin/inventory-stats";
-import AdminRecurrentTasks from "./pages/admin/recurrent-tasks"; // Add import for the new page
+import AdminRecurrentTasks from "./pages/admin/recurrent-tasks";
 import AdminInvitations from "./pages/admin/invitations";
 import AdminTasks from "./pages/admin/tasks";
 import AdminTaskCreate from "./pages/admin/tasks/create";
@@ -43,14 +42,12 @@ function App() {
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
               
-              {/* Public routes */}
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
               <Route path="/meta/invitation/:invitation_code?" element={<InvitationStepperPage />} />
               <Route path="/meta/welcome/:invitation_code?" element={<MetaWelcomePage />} />
               <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
               <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
               
-              {/* Admin routes */}
               <Route
                 path="/admin/dashboard"
                 element={
@@ -156,7 +153,6 @@ function App() {
                 }
               />
 
-              {/* Creator routes */}
               <Route
                 path="/creator/dashboard"
                 element={
