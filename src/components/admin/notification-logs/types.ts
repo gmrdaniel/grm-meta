@@ -14,4 +14,6 @@ export type NotificationLog = {
     setting_type?: string;
     setting_message?: string;
     stage_name?: string;
+    stage_order_index?: number | null;
+
   };

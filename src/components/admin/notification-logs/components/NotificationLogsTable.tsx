@@ -1,6 +1,12 @@
-
 import { format } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { NotificationLog } from "../types";
 import { getStatusColor, getChannelColor } from "../utils/notificationLogUtils";
@@ -25,6 +31,7 @@ export function NotificationLogsTable({ logs }: NotificationLogsTableProps) {
           <TableHead>Status</TableHead>
           <TableHead>Channel</TableHead>
           <TableHead>Recipient</TableHead>
+          <TableHead>Stage Index</TableHead>
           <TableHead>Stage</TableHead>
           <TableHead>Sent At</TableHead>
           <TableHead>Error</TableHead>
@@ -45,17 +52,31 @@ export function NotificationLogsTable({ logs }: NotificationLogsTableProps) {
             </TableCell>
             <TableCell>
               <div className="flex flex-col">
-                <span className="font-medium">{log.invitation_full_name || 'Unknown'}</span>
-                <span className="text-xs text-gray-500">{log.invitation_email || 'No email'}</span>
+                <span className="font-medium">
+                  {log.invitation_full_name || "Unknown"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {log.invitation_email || "No email"}
+                </span>
               </div>
             </TableCell>
-            <TableCell>{log.stage_name || 'Unknown Stage'}</TableCell>
             <TableCell>
-              {log.sent_at ? format(new Date(log.sent_at), 'MMM d, yyyy HH:mm') : 'N/A'}
+              {log.stage_order_index || "N/A"}
+            </TableCell>
+            <TableCell>
+              {log.stage_name || "Unknown Stage"}
+            </TableCell>
+            <TableCell>
+              {log.sent_at
+                ? format(new Date(log.sent_at), "MMM d, yyyy HH:mm")
+                : "N/A"}
             </TableCell>
             <TableCell>
               {log.error_message ? (
-                <div className="max-w-xs truncate text-red-500 hover:text-clip" title={log.error_message}>
+                <div
+                  className="max-w-xs truncate text-red-500 hover:text-clip"
+                  title={log.error_message}
+                >
                   {log.error_message}
                 </div>
               ) : (
