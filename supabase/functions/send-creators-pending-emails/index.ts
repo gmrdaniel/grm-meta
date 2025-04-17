@@ -54,7 +54,15 @@ serve(async () => {
     const invitation = log.creator_invitations;
     const setting = log.notification_settings;
 
-    const success = await sendNotification(log.channel, invitation, setting);
+    let errorMessage: string | null = null;
+    let success = false;
+  
+    try {
+      success = await sendNotification(log.channel, invitation, setting);
+    } catch (err) {
+      errorMessage = err instanceof Error ? err.message : String(err);
+      console.error("Unexpected error in sendNotification:", errorMessage);
+    }
 
     await supabase
       .from("notification_logs")
@@ -122,7 +130,6 @@ async function sendNotification(
 
   let html = renderTemplate(setting.message, variables);
 
-  // Si hay plantilla asociada, embebe el contenido
   if (setting.email_templates?.html) {
     html = setting.email_templates.html.replace("{{content}}", html);
   }
@@ -130,31 +137,19 @@ async function sendNotification(
   const subject = renderTemplate(setting.subject || "Notification", variables);
 
   if (channel === "email") {
-    try {
-      const response = await resend.emails.send({
-        from: senderEmail,
-        to: [invitation.email],
-        subject,
-        html,
-      });
-
-      if (response.error) {
-        console.error("Resend error:", response.error);
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      console.error("Error sending email:", err);
-      return false;
+    const response = await resend.emails.send({
+      from: senderEmail,
+      to: [invitation.email],
+      subject,
+      html,
+    });
+  
+    if (response.error) {
+      throw new Error(response.error.message || "Resend error");
     }
+  
+    return true;
   }
-
-  if (channel === "sms") {
-    console.log(`(TODO) SMS to ${invitation.phone_number}`);
-    // Aquí puedes integrar Twilio, Vonage o similar.
-    return false;
-  }
-
-  return false;
 }
+
+
