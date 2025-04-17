@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types/creator";
 import { toast } from "sonner";
@@ -199,119 +200,9 @@ export const fetchAndSaveYouTubeShorts = async (
 };
 
 /**
- * Type for progress callback
- */
-type ProgressCallback = (processed: number, total: number) => void;
-
-/**
- * Batch update YouTube info for multiple creators
- */
-export const batchUpdateYouTubeInfo = async (
-  creators: Creator[],
-  onProgress?: ProgressCallback
-): Promise<{ 
-  totalProcessed: number, 
-  successful: number, 
-  failed: number 
-}> => {
-  let successful = 0;
-  let failed = 0;
-  
-  console.log(`Starting batch update of YouTube info for ${creators.length} creators`);
-  
-  const creatorsWithYouTube = creators.filter(c => c.usuario_youtube);
-  const totalToProcess = creatorsWithYouTube.length;
-  let processed = 0;
-  
-  for (const creator of creatorsWithYouTube) {
-    if (!creator.usuario_youtube) continue;
-    
-    try {
-      console.log(`Processing YouTube info for creator ${creator.id} (${creator.usuario_youtube})`);
-      await fetchAndUpdateYouTubeInfo(creator.id, creator.usuario_youtube);
-      successful++;
-    } catch (error) {
-      console.error(`Error updating YouTube info for creator ${creator.id}:`, error);
-      failed++;
-    }
-    
-    processed++;
-    if (onProgress) {
-      onProgress(processed, totalToProcess);
-    }
-    
-    // Add a small delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 1500));
-  }
-  
-  return {
-    totalProcessed: totalToProcess,
-    successful,
-    failed
-  };
-};
-
-/**
- * Batch fetch YouTube shorts for multiple creators
- */
-export const batchFetchYouTubeShorts = async (
-  creators: Creator[],
-  onProgress?: ProgressCallback
-): Promise<{ 
-  totalProcessed: number, 
-  successful: number, 
-  failed: number 
-}> => {
-  let successful = 0;
-  let failed = 0;
-  
-  console.log(`Starting batch fetch of YouTube shorts for ${creators.length} creators`);
-  
-  const creatorsWithYouTube = creators.filter(c => c.usuario_youtube);
-  const totalToProcess = creatorsWithYouTube.length;
-  let processed = 0;
-  
-  for (const creator of creatorsWithYouTube) {
-    if (!creator.usuario_youtube) continue;
-    
-    try {
-      console.log(`Fetching YouTube shorts for creator ${creator.id} (${creator.usuario_youtube})`);
-      
-      const result = await fetchAndSaveYouTubeShorts(creator.id, creator.usuario_youtube);
-      
-      if (result.savedCount > 0) {
-        successful++;
-      } else {
-        console.warn(`No shorts saved for creator ${creator.id} (${creator.usuario_youtube})`);
-        // Still mark as successful if no videos were found but the API call worked
-        successful++;
-      }
-    } catch (error) {
-      console.error(`Error fetching YouTube shorts for creator ${creator.id}:`, error);
-      failed++;
-    }
-    
-    processed++;
-    if (onProgress) {
-      onProgress(processed, totalToProcess);
-    }
-    
-    // Add a delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 3000));
-  }
-  
-  return {
-    totalProcessed: totalToProcess,
-    successful,
-    failed
-  };
-};
-
-/**
  * Fetch all creators with YouTube usernames and update their info
- * This function was renamed to avoid the redeclaration error
  */
-export const batchUpdateAllYouTubeInfos = async (): Promise<{ 
+export const batchUpdateYouTubeInfo = async (): Promise<{ 
   totalProcessed: number, 
   successful: number, 
   failed: number 

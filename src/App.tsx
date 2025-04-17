@@ -12,8 +12,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/projects";
 import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
-import AdminInventoryStats from "./pages/admin/inventory-stats";
-import AdminRecurrentTasks from "./pages/admin/recurrent-tasks";
+import AdminInventoryStats from "./pages/admin/inventory-stats"; // Add import for the new page
 import AdminInvitations from "./pages/admin/invitations";
 import AdminTasks from "./pages/admin/tasks";
 import AdminTaskCreate from "./pages/admin/tasks/create";
@@ -27,6 +26,7 @@ import InvitationPage from "./pages/invite/[url]/[id]";
 import MetaWelcomePage from "./pages/meta/welcome/[invitation_code]";
 import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
 import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
+import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 
 const queryClient = new QueryClient();
 
@@ -42,12 +42,14 @@ function App() {
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
               
+              {/* Public routes */}
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
-              <Route path="/meta/invitation/:invitation_code?" element={<InvitationPage />} />
+              <Route path="/meta/invitation/:invitation_code?" element={<InvitationStepperPage />} />
               <Route path="/meta/welcome/:invitation_code?" element={<MetaWelcomePage />} />
               <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
               <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
               
+              {/* Admin routes */}
               <Route
                 path="/admin/dashboard"
                 element={
@@ -85,14 +87,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminInventoryStats />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/recurrent-tasks"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminRecurrentTasks />
                   </ProtectedRoute>
                 }
               />
@@ -153,6 +147,7 @@ function App() {
                 }
               />
 
+              {/* Creator routes */}
               <Route
                 path="/creator/dashboard"
                 element={
