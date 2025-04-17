@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { 
-  TikTok, 
+  Video, 
   Youtube, 
   Clock, 
   CheckCircle2, 
@@ -27,7 +27,7 @@ export function TasksList({ tasks, selectedTaskId, onSelectTask }: TasksListProp
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'tikTokVideos':
-        return <TikTok className="h-5 w-5" />;
+        return <Video className="h-5 w-5" />;
       case 'youTubeShorts':
         return <Youtube className="h-5 w-5" />;
       default:
