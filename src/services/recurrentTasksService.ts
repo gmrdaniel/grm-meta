@@ -62,12 +62,15 @@ export const fetchTaskDetail = async (taskId: string): Promise<RecurrentTaskDeta
   throw new Error("Task not found");
 };
 
+// Type for progress callback
+interface TaskExecutionOptions {
+  onProgress?: (processed: number, total: number) => void;
+}
+
 // Execute a task
 export const executeTask = async (
   taskId: string, 
-  options?: { 
-    onProgress?: (processed: number, total: number) => void 
-  }
+  options?: TaskExecutionOptions
 ): Promise<void> => {
   if (taskId === "tiktok-videos") {
     // Fetch creators without TikTok videos

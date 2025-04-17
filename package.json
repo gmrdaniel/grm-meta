@@ -42,6 +42,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "@tanstack/react-query": "^5.56.2",
     "@types/next": "^9.0.0",
+    "@types/react-helmet": "^6.1.11",
     "@uiw/react-md-editor": "^4.0.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

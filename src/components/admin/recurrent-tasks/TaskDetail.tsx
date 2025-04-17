@@ -28,7 +28,16 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
   });
 
   const { mutate: runTask, isPending } = useMutation({
-    mutationFn: executeTask,
+    mutationFn: (id: string) => {
+      return executeTask(id, {
+        onProgress: (processed: number, total: number) => {
+          const newProgress = Math.round((processed / total) * 100);
+          setProgress(newProgress);
+          setProcessedCount(processed);
+          setTotalCount(total);
+        }
+      });
+    },
     onSuccess: () => {
       toast.success("Tarea completada exitosamente");
       setIsRunning(false);
@@ -53,14 +62,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
     setProcessedCount(0);
     setTotalCount(task.pendingCount || 0);
     
-    runTask(task.id, {
-      onProgress: (processed, total) => {
-        const newProgress = Math.round((processed / total) * 100);
-        setProgress(newProgress);
-        setProcessedCount(processed);
-        setTotalCount(total);
-      }
-    });
+    runTask(task.id);
   };
 
   if (!taskId) {
