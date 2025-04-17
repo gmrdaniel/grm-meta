@@ -67,4 +67,4 @@ export function TasksList({ tasks, selectedTaskId, onSelectTask }: TasksListProp
       ))}
     </div>
   );
-};
+}
