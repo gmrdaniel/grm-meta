@@ -70,7 +70,7 @@ serve(async () => {
         status: success ? "sent" : "failed",
         sent_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        error_message: success ? null : "Failed to send",
+        error_message: errorMessage,
       })
       .eq("id", log.id);
 
