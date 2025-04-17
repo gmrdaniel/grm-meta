@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
-import { differenceInDays } from "https://esm.sh/date-fns";
+import { differenceInDays, startOfDay } from "https://esm.sh/date-fns";
 
 // Supabase
 const supabase = createClient(
@@ -34,32 +34,47 @@ serve(async () => {
       delay_days,
       frequency_days,
       max_notifications,
+      target_status,
     } = setting;
 
     let offset = 0;
-    let finished = false;
 
-    while (!finished) {
-      const { data: invitations, error: fetchError } = await supabase
+    while (true) {
+      let query = supabase
         .from("creator_invitations")
-        .select("*")
-        .eq("current_stage_id", stage_id)
-        .range(offset, offset + BATCH_SIZE - 1);
+        .select("id, email, stage_updated_at, current_stage_id, status")
+        .eq("current_stage_id", stage_id);
+
+      //filtrar por estatus en caso de que la configuracion tenga un status
+      if (target_status) {
+        query = query.eq("status", target_status);
+      }
+
+      const { data: invitations, error: fetchError } = await query.range(
+        offset,
+        offset + BATCH_SIZE - 1
+      );
 
       if (fetchError || !invitations || invitations.length === 0) {
-        finished = true;
         break;
       }
 
       for (const invitation of invitations) {
-        const { id: invitation_id, created_at, email, current_stage_id } = invitation;
+        const {
+          id: invitation_id,
+          stage_updated_at,
+          email,
+          current_stage_id,
+        } = invitation;
 
-        if (!created_at || !email) continue;
+        if (!stage_updated_at || !email) continue;
 
-        const enteredDate = new Date(created_at);
-        const daysInStage = differenceInDays(now, enteredDate);
+        const daysInStage = differenceInDays(
+          startOfDay(now),
+          startOfDay(new Date(stage_updated_at))
+        );
 
-        if (daysInStage < delay_days) continue;
+        if (daysInStage !== delay_days) continue;
 
         // 1. Chequear si ya hay una notificación pendiente
         const { data: existingPending } = await supabase
@@ -85,32 +100,42 @@ serve(async () => {
         // 3. Aplicar frecuencia solo si el último fue enviado exitosamente
         const lastLog = logs?.[0];
         const lastSent = lastLog?.status === "sent" ? lastLog?.sent_at : null;
-        const daysSinceLast = lastSent ? differenceInDays(now, new Date(lastSent)) : Infinity;
+        const daysSinceLast = lastSent
+          ? differenceInDays(now, new Date(lastSent))
+          : Infinity;
 
         if (daysSinceLast < frequency_days) continue;
 
         // 4. Insertar nuevo log pendiente
-        const { error: insertError } = await supabase.from("notification_logs").insert({
-          invitation_id,
-          notification_setting_id: setting_id,
-          stage_id: current_stage_id,
-          channel,
-          status: "pending",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+        const { error: insertError } = await supabase
+          .from("notification_logs")
+          .insert({
+            invitation_id,
+            notification_setting_id: setting_id,
+            stage_id: current_stage_id,
+            channel,
+            status: "pending",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
 
         if (insertError) {
-          console.error(`Error inserting log for invitation ${invitation_id}:`, insertError);
+          console.error(
+            `Error inserting log for invitation ${invitation_id}:`,
+            insertError
+          );
         } else {
           totalInserted++;
         }
 
         if (totalInserted >= MAX_INSERTS) {
           console.warn("Max notifications inserted. Cutting execution.");
-          return new Response(`Inserted ${totalInserted} pending notifications (max reached)`, {
-            status: 200,
-          });
+          return new Response(
+            `Inserted ${totalInserted} pending notifications (max reached)`,
+            {
+              status: 200,
+            }
+          );
         }
       }
 
@@ -118,5 +143,7 @@ serve(async () => {
     }
   }
 
-  return new Response(`Inserted ${totalInserted} pending notifications`, { status: 200 });
+  return new Response(`Inserted ${totalInserted} pending notifications`, {
+    status: 200,
+  });
 });

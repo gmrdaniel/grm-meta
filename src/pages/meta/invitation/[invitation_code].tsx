@@ -9,17 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Stepper } from "@/components/ui/stepper";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-// 📋 Form Components
-import { WelcomeForm } from "@/components/invitation/WelcomeForm";
-import {
-  CompleteProfileForm,
-  
-} from "@/components/invitation/CompleteProfileForm";
-import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
-import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
 import { InvitationError } from "@/components/invitation/InvitationError";
-import { WelcomeFormYoutube } from "@/components/invitation/WelcomFormYouTube";
-import { CompleteProfileFormYtb } from "@/components/invitation/CompleteProfileFormYtb";
 import { TikTokForm } from "@/components/invitation/TikTokForm";
 import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 
@@ -27,7 +17,6 @@ import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import {
   updateFacebookPage,
-  updateInvitationStatus,
 } from "@/services/invitation";
 import { fetchProjectStages } from "@/services/projectService";
 import { checkExistingTask } from "@/services/tasksService";
@@ -54,7 +43,8 @@ const stepList = [
 type Step = (typeof stepList)[number];
 
 const defaultFormData = {
-  fullName: "",
+  firstName: "",
+  lastName: "",
   email: "",
   socialMediaHandle: "",
   termsAccepted: false,
@@ -125,13 +115,13 @@ export default function InvitationStepperPage() {
           setError("This invitation has already been accepted");
           return;
         }
-        //console.log("Fetched invitation code:", invitationData);
 
         setInvitation(invitationData);
         setFormData({
-          fullName: invitationData.full_name || "",
-          email: invitationData.email || "",
-          socialMediaHandle: invitationData.social_media_handle || "",
+          firstName: invitationData.first_name ?? "",
+          lastName: invitationData.last_name ?? "",
+          email: invitationData.email ?? "",
+          socialMediaHandle: invitationData.social_media_handle ?? "",
           termsAccepted: false,
         });
 
@@ -178,13 +168,13 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
   setSaving(true);
 
   const updateData = {
-    youtube_channel: formData.youtubeChannel || null,
+    youtube_channel: formData.youtubeChannel ?? null,
     instagram_user: formData.instagramUser,
     is_professional_account: formData.isIGProfessional,
-    phone_country_code: formData.phoneCountryCode || null,
-    phone_number: formData.phoneNumber || null,
-    phone_verified: formData.phoneVerified || false,
-    social_media_handle: formData.socialMediaHandle || null, // Para TikTok
+    phone_country_code: formData.phoneCountryCode ?? null,
+    phone_number: formData.phoneNumber ?? null,
+    phone_verified: formData.phoneVerified ?? false,
+    social_media_handle: formData.socialMediaHandle ?? null, // Para TikTok
   };
   console.log("updateData being sent to Supabase:", updateData);
 
@@ -329,6 +319,7 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       isBusinessAccount = user.is_business_account;
       isProfessionalAccount = user.is_professional_account;
     } catch (error) {
+      console.log(error)
       toast.error("Failed to verify Instagram user.");
       setSaving(false);
       return;
@@ -451,9 +442,10 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       const { error } = await supabase.auth.signUp({
         email: invitation.email,
         password: passwordData.password,
+        phone: invitation.phone_country_code + invitation.phone_number,
         options: {
           data: {
-            full_name: invitation.full_name,
+            first_name: invitation.first_name,
             phone_number: invitation.phone_number || null,
           },
         },
@@ -461,11 +453,10 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
 
       if (error) throw error;
 
-      updateInvitationStatus(invitation.id, "completed");
-
-      toast.success("Account created! You can now log in.");
+      toast.success("Account created! You can log in now.");
       setTimeout(() => navigate("/auth"), 2000);
     } catch (err) {
+      console.log(err)
       toast.error("Error creating account");
     } finally {
       setSubmitting(false);

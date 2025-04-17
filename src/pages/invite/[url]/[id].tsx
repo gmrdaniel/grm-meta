@@ -183,7 +183,7 @@ const InvitationPage = () => {
             You've Been Invited!
           </CardTitle>
           <CardDescription className="text-center">
-            {invitation.full_name}, you've been invited to join as a creator
+            {invitation.first_name}, you've been invited to join as a creator
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

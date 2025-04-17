@@ -7,7 +7,7 @@ export const exportInvitationsToExcel = (invitations: CreatorInvitation[], filen
   try {
     // Transform data for export
     const data = invitations.map(invitation => ({
-      "Full Name": invitation.full_name,
+      "Fisrt Name": invitation.first_name,
       "Email": invitation.email,
       "Social Media Handle": invitation.social_media_handle || "",
       "Social Media Platform": invitation.social_media_type || "",

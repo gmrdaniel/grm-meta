@@ -28,9 +28,12 @@ import { CreateInvitationData } from "@/types/invitation";
 import { useSendInvitationEmail } from "@/hooks/useSendInvitationEmail";
 
 const formSchema = z.object({
-  full_name: z
+  first_name: z
     .string()
-    .min(2, { message: "Name must be at least 2 characters" }),
+    .min(2, { message: "First Name must be at least 2 characters" }),
+  last_name: z
+    .string()
+    .min(2, { message: "Last Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   social_media_handle: z
     .string()
@@ -56,11 +59,11 @@ interface InvitationFormProps {
 }
 
 const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      full_name: "",
+      first_name: "",
+      last_name: "",
       email: "",
       social_media_handle: "",
       invitation_type: "new_user",
@@ -89,7 +92,8 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     const invitationData: CreateInvitationData = {
-      full_name: data.full_name,
+      first_name: data.first_name,
+      last_name: data.last_name,
       email: data.email,
       social_media_handle: null,
       youtube_channel: null,
@@ -97,14 +101,17 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
       project_id: data.project_id,
       invitation_type: data.invitation_type,
     };
-  
-    const socialMediaPropertyMap: Record<string, keyof CreateInvitationData | null> = {
+
+    const socialMediaPropertyMap: Record<
+      string,
+      keyof CreateInvitationData | null
+    > = {
       tiktok: "social_media_handle",
       youtube: "youtube_channel",
     };
-  
+
     const targetProperty = socialMediaPropertyMap[data.social_media_type || ""];
-  
+
     if (targetProperty && data.social_media_handle) {
       invitationData[targetProperty] = data.social_media_handle;
     }
@@ -126,12 +133,26 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="full_name"
+            name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Creator Name</FormLabel>
+                <FormLabel>Creator First Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter full name" />
+                  <Input {...field} placeholder="Enter first name" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="last_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Creator Last Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Enter last name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -156,8 +177,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
             )}
           />
 
-          
-
           <FormField
             control={form.control}
             name="social_media_type"
@@ -174,7 +193,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                     form.setValue("social_media_handle", "");
                   }}
                   value={field.value}
-                  
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -191,7 +209,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
               </FormItem>
             )}
           />
-           <FormField
+          <FormField
             control={form.control}
             name="social_media_handle"
             render={({ field }) => (
@@ -218,7 +236,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                 <FormMessage />
               </FormItem>
             )}
-          /> 
+          />
 
           <FormField
             control={form.control}
