@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
 import { CreatorFilter } from "./types";
+import { UserFilter } from "./UserFilter";
+import { RadioUserFilter } from "./RadioUserFilter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +28,22 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
     if (newFilters[filterName] === true) {
       delete newFilters[filterName];
     } else {
-      newFilters[filterName] = true;
+      // Only set boolean value for non-assignedToUser filters
+      if (filterName !== 'assignedToUser') {
+        newFilters[filterName] = true;
+      }
     }
     
+    onFilterChange(newFilters);
+  };
+
+  const handleUserFilterChange = (userId: string | null) => {
+    const newFilters = { ...activeFilters };
+    if (userId) {
+      newFilters.assignedToUser = userId;
+    } else {
+      delete newFilters.assignedToUser;
+    }
     onFilterChange(newFilters);
   };
 
@@ -40,7 +55,7 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
   const activeFilterCount = Object.keys(activeFilters).length;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex flex-wrap gap-2 items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -157,9 +172,18 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
         )}
       </div>
 
+      {/* User filter using radio buttons */}
+      <RadioUserFilter 
+        value={activeFilters.assignedToUser || null} 
+        onChange={handleUserFilterChange} 
+      />
+
       {hasFilters && (
         <div className="flex flex-wrap gap-2 mt-2">
           {Object.entries(activeFilters).map(([key, value]) => {
+            // Skip rendering badge for assignedToUser as it's shown in the RadioUserFilter
+            if (key === 'assignedToUser') return null;
+            
             return (
               <Badge 
                 key={key} 
@@ -181,6 +205,20 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
               </Badge>
             );
           })}
+          
+          {/* Add badge for assignedToUser if it exists */}
+          {activeFilters.assignedToUser && (
+            <Badge 
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              Usuario: {activeFilters.assignedToUser}
+              <X 
+                className="h-3 w-3 cursor-pointer" 
+                onClick={() => handleUserFilterChange(null)} 
+              />
+            </Badge>
+          )}
         </div>
       )}
     </div>

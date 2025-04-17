@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/LoadingSpinner";
 import { EmptyStateCard } from "./components/EmptyStateCard";
@@ -7,14 +7,10 @@ import { NotificationSettingsHeader } from "./components/NotificationSettingsHea
 import { NotificationSettingsTable } from "./components/NotificationSettingsTable";
 import { NotificationSettingsPagination } from "./components/NotificationSettingsPagination";
 import { NotificationSettingsSummary } from "./components/NotificationSettingsSummary";
-import { EditNotificationSettings } from "./components/EditNotificationSettings";
 import { useNotificationSettings } from "./hooks/useNotificationSettings";
 import { toggleNotificationStatus, deleteNotificationSetting } from "./services/notificationSettingsService";
-import { NotificationSetting } from "./types";
 
 export function NotificationSettingsList() {
-  const [editingSetting, setEditingSetting] = useState<NotificationSetting | null>(null);
-  
   const {
     settings,
     isLoading,
@@ -56,61 +52,35 @@ export function NotificationSettingsList() {
     if (success) refetch();
   };
 
-  const handleEditSetting = (setting: NotificationSetting) => {
-    setEditingSetting(setting);
-  };
-
-  const handleEditSuccess = () => {
-    setEditingSetting(null);
-    refetch();
-  };
-
-  const handleEditCancel = () => {
-    setEditingSetting(null);
-  };
-
   return (
     <div className="space-y-4">
-      {editingSetting ? (
-        <EditNotificationSettings 
-          notificationSetting={editingSetting}
-          onSuccess={handleEditSuccess}
-          onCancel={handleEditCancel}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <NotificationSettingsHeader 
+          pageSize={pageSize} 
+          onPageSizeChange={setPageSize} 
         />
-      ) : (
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <NotificationSettingsHeader 
-            pageSize={pageSize} 
-            onPageSizeChange={setPageSize} 
-          />
 
-          {settings && settings.length === 0 ? (
-            <EmptyStateCard />
-          ) : (
-            <NotificationSettingsTable 
-              settings={settings} 
-              onToggleStatus={handleToggleStatus}
-              onDeleteSetting={handleDeleteSetting}
-              onEditSetting={handleEditSetting}
-            />
-          )}
-        </div>
-      )}
+        {settings && settings.length === 0 ? (
+          <EmptyStateCard />
+        ) : (
+          <NotificationSettingsTable 
+            settings={settings} 
+            onToggleStatus={handleToggleStatus}
+            onDeleteSetting={handleDeleteSetting}
+          />
+        )}
+      </div>
 
-      {!editingSetting && (
-        <>
-          <NotificationSettingsPagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-          
-          <NotificationSettingsSummary 
-            currentCount={settings?.length || 0}
-            totalCount={totalSettings}
-          />
-        </>
-      )}
+      <NotificationSettingsPagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
+      
+      <NotificationSettingsSummary 
+        currentCount={settings?.length || 0}
+        totalCount={totalSettings}
+      />
     </div>
   );
 }

@@ -12,13 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { toast } from "sonner";
 import { CreatorFilter, CreatorsList } from "@/components/admin/inventory/creators-list";
-import { RadioUserFilter } from "@/components/admin/inventory/creators-list/RadioUserFilter";
 
 export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [filters, setFilters] = useState<CreatorFilter>({});
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   
   const { refetch } = useQuery({
     queryKey: ["creators"],
@@ -37,12 +35,6 @@ export default function AdminInventory() {
 
   const handleFilterChange = (newFilters: CreatorFilter) => {
     setFilters(newFilters);
-  };
-
-  const handleUserSelect = (user: string | null) => {
-    setSelectedUser(user);
-    console.log(`Selected user: ${user}`);
-    // Here you could add additional logic, like filtering creators by user
   };
 
   return (
@@ -66,21 +58,11 @@ export default function AdminInventory() {
               </TabsList>
               
               <TabsContent value="list" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="md:col-span-1">
-                    <RadioUserFilter 
-                      selectedUser={selectedUser}
-                      onSelectUser={handleUserSelect}
-                    />
-                  </div>
-                  <div className="md:col-span-3">
-                    <CreatorsList 
-                      onCreatorSelect={handleCreatorSelect}
-                      filters={filters}
-                      onFilterChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
+                <CreatorsList 
+                  onCreatorSelect={handleCreatorSelect}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
               </TabsContent>
               
               <TabsContent value="create" className="space-y-6">

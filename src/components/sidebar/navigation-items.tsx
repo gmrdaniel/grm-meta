@@ -1,5 +1,4 @@
-
-import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText, BarChart } from "lucide-react";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText, BarChart, Clock } from "lucide-react";
 
 export const adminNavigationItems = [
   {
@@ -25,6 +24,12 @@ export const adminNavigationItems = [
     shortLabel: "Stats",
     icon: <BarChart size={24} />,
     to: "/admin/inventory-stats",
+  },
+  {
+    label: "Recurrent Tasks",
+    shortLabel: "Tasks",
+    icon: <Clock size={24} />,
+    to: "/admin/recurrent-tasks",
   },
   {
     label: "Invitations",

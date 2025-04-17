@@ -4,20 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCreators } from "@/services/creatorService";
 import { CreatorFilter, CreatorsListProps } from "./types";
 import { Creator } from "@/types/creator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { CreatorRow } from "./CreatorRow";
 import { CreatorFilters } from "./CreatorFilters";
 import { CreatorPagination } from "./CreatorPagination";
 import { CreatorEditDialog } from "./CreatorEditDialog";
 import { CreatorBatchActions } from "./CreatorBatchActions";
-import { Checkbox } from "@/components/ui/checkbox";
+import { CreatorListHeader } from "./CreatorListHeader";
+import { CreatorsTable } from "./CreatorsTable";
+import { CreatorsEmptyState } from "./CreatorsEmptyState";
 
 export function CreatorsList({ 
   onCreatorSelect, 
@@ -46,7 +39,6 @@ export function CreatorsList({
   const totalCount = creatorsData?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Reset selected creators when page changes
   useEffect(() => {
     setSelectedCreators([]);
     setSelectAll(false);
@@ -71,11 +63,6 @@ export function CreatorsList({
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
-  };
-
-  const handlePageSizeChange = (value: string) => {
-    setPageSize(parseInt(value));
-    setCurrentPage(1);
   };
 
   const handleFilterChange = (newFilters: CreatorFilter) => {
@@ -126,10 +113,12 @@ export function CreatorsList({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-2xl font-bold">Lista de Creadores</h2>
-          <p className="text-gray-500">Total: {totalCount} creadores</p>
-        </div>
+        <CreatorListHeader 
+          totalCount={totalCount}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          setCurrentPage={setCurrentPage}
+        />
         
         <CreatorFilters 
           activeFilters={activeFilters}
@@ -144,52 +133,29 @@ export function CreatorsList({
       />
       
       {creators.length === 0 ? (
-        <div className="p-8 text-center text-gray-500 border rounded-md">
-          No hay creadores que coincidan con los criterios seleccionados
-        </div>
+        <CreatorsEmptyState />
       ) : (
         <>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40px]">
-                    <Checkbox 
-                      checked={selectAll}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Seleccionar todos"
-                    />
-                  </TableHead>
-                  <TableHead className="w-[250px]">Creador</TableHead>
-                  <TableHead className="w-[300px]">Redes Sociales</TableHead>
-                  <TableHead className="w-[180px]">Teléfono</TableHead>
-                  <TableHead className="w-[150px]">Fecha</TableHead>
-                  <TableHead className="w-[120px]">Estatus</TableHead>
-                  <TableHead className="w-[120px] text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {creators.map((creator) => (
-                  <CreatorRow 
-                    key={creator.id}
-                    creator={creator}
-                    onCreatorSelect={onCreatorSelect}
-                    onEdit={handleEdit}
-                    onRefetch={refetch}
-                    isSelected={selectedCreators.some(c => c.id === creator.id)}
-                    onSelectChange={() => handleSelectCreator(creator)}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <CreatorsTable 
+            creators={creators}
+            onCreatorSelect={onCreatorSelect}
+            onEdit={handleEdit}
+            onRefetch={refetch}
+            selectedCreators={selectedCreators}
+            selectAll={selectAll}
+            onSelectAll={handleSelectAll}
+            onSelectCreator={handleSelectCreator}
+          />
 
           <CreatorPagination
             currentPage={currentPage}
             pageSize={pageSize}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
+            onPageSizeChange={(value) => {
+              setPageSize(parseInt(value));
+              setCurrentPage(1);
+            }}
           />
         </>
       )}
