@@ -15,7 +15,7 @@ export type Database = {
           created_at: string
           email: string
           error_message: string | null
-          full_name: string
+          first_name: string
           id: string
           is_active: boolean
           status: string
@@ -26,7 +26,7 @@ export type Database = {
           created_at?: string
           email: string
           error_message?: string | null
-          full_name: string
+          first_name: string
           id?: string
           is_active?: boolean
           status?: string
@@ -37,7 +37,7 @@ export type Database = {
           created_at?: string
           email?: string
           error_message?: string | null
-          full_name?: string
+          first_name?: string
           id?: string
           is_active?: boolean
           status?: string
@@ -94,7 +94,7 @@ export type Database = {
           created_at: string
           email: string
           facebook_page: string | null
-          full_name: string
+          first_name: string
           id: string
           instagram_user: string | null
           invitation_code: string
@@ -114,7 +114,7 @@ export type Database = {
           created_at?: string
           email: string
           facebook_page?: string | null
-          full_name: string
+          first_name: string
           id?: string
           instagram_user?: string | null
           invitation_code: string
@@ -134,7 +134,7 @@ export type Database = {
           created_at?: string
           email?: string
           facebook_page?: string | null
-          full_name?: string
+          first_name?: string
           id?: string
           instagram_user?: string | null
           invitation_code?: string
@@ -533,7 +533,7 @@ export type Database = {
           created_at: string
           email: string
           facebook_page: string | null
-          full_name: string
+          first_name: string
           id: string
           instagram_user: string | null
           invitation_code: string

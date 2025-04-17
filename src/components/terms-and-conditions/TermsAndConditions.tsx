@@ -91,7 +91,7 @@ export function TermsCheckbox({
                     not limited to:
                   </p>
                   <ul className="list-disc list-inside pl-4 mt-4">
-                    <li>Full Name</li>
+                    <li>Fisrt Name</li>
                     <li>Email Address</li>
                     <li>Phone Number</li>
                     <li>

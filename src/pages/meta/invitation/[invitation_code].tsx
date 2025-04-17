@@ -117,7 +117,7 @@ export default function InvitationStepperPage() {
 
         setInvitation(invitationData);
         setFormData({
-          fullName: invitationData.full_name ?? "",
+          fullName: invitationData.first_name ?? "",
           email: invitationData.email ?? "",
           socialMediaHandle: invitationData.social_media_handle ?? "",
           termsAccepted: false,
@@ -442,7 +442,7 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
         password: passwordData.password,
         options: {
           data: {
-            full_name: invitation.full_name,
+            first_name: invitation.first_name,
             phone_number: invitation.phone_number || null,
           },
         },

@@ -245,7 +245,7 @@ export function BulkInvitationsHistory() {
                     <TableBody>
                       {invitationDetails.map((detail) => (
                         <TableRow key={detail.id}>
-                          <TableCell className="font-medium">{detail.full_name}</TableCell>
+                          <TableCell className="font-medium">{detail.first_name}</TableCell>
                           <TableCell>{detail.email}</TableCell>
                           <TableCell>
                             {getStatusBadge(detail.status)}

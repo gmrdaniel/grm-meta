@@ -295,7 +295,7 @@ const { data, isLoading, error } = useQuery({
           {filteredInvitations.map((invitation: CreatorInvitation) => (
             <TableRow key={invitation.id}>
               <TableCell className="font-medium">
-                {invitation.full_name}
+                {invitation.first_name} {invitation.last_name}
               </TableCell>
               <TableCell>{invitation.email}</TableCell>
               <TableCell>
@@ -352,7 +352,7 @@ const { data, isLoading, error } = useQuery({
                       onClick={() =>
                         sendEmailMutation.mutate({
                           email: invitation.email,
-                          name: invitation.full_name,
+                          name: invitation.first_name,
                           invitationUrl: createInvitationLink(invitation),
                         })
                       }

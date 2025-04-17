@@ -24,7 +24,7 @@ serve(async () => {
     notification_setting_id,
     channel,
     creator_invitations:invitation_id (
-      full_name,
+      first_name,
       email,
       invitation_code,
       invitation_url
