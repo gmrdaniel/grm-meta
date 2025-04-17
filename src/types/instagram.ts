@@ -29,7 +29,7 @@ export interface InstagramUserResponse {
       count: number;
     };
     follows_viewer: boolean;
-    full_name: string;
+    first_name: string;
     group_metadata: unknown;
     has_ar_effects: boolean;
     has_clips: boolean;

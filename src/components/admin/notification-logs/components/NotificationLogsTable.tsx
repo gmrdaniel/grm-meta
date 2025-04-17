@@ -58,6 +58,8 @@ export function NotificationLogsTable({ logs }: NotificationLogsTableProps) {
                 <span className="text-xs text-gray-500">
                   {log.invitation_email || "No email"}
                 </span>
+                <span className="font-medium">{log.invitation_first_name || 'Unknown'}</span>
+                <span className="text-xs text-gray-500">{log.invitation_email || 'No email'}</span>
               </div>
             </TableCell>
             <TableCell>

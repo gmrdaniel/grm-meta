@@ -10,7 +10,7 @@ export async function fetchNotificationLogs(): Promise<NotificationLog[]> {
     .select(
       `
       *,
-      creator_invitations:invitation_id (email, full_name),
+      creator_invitations:invitation_id (email, first_name),
       notification_settings:notification_setting_id (type, message),
       project_stages:stage_id (name, order_index)
     `
@@ -24,7 +24,7 @@ export async function fetchNotificationLogs(): Promise<NotificationLog[]> {
   return data.map((log: any) => ({
     ...log,
     invitation_email: log.creator_invitations?.email || null,
-    invitation_full_name: log.creator_invitations?.full_name || null,
+    invitation_first_name: log.creator_invitations?.first_name || null,
     setting_type: log.notification_settings?.type || null,
     setting_message: log.notification_settings?.message || null,
     stage_name: log.project_stages?.name || null,

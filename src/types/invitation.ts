@@ -3,7 +3,8 @@ export interface CreatorInvitation {
   id: string;
   project_id?: string | null;
   email: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   social_media_type?: string | null;
   social_media_handle?: string | null;
   other_social_media?: string | null;
@@ -26,12 +27,12 @@ export interface CreatorInvitation {
 }
 
 export type CreateInvitationData = {
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   social_media_handle?: string | null; // Para TikTok
   youtube_channel?: string | null;     // Para YouTube
   social_media_type?: string | null;
-  youtube_channel: string | null;
   project_id: string;
   invitation_type: string;
 };

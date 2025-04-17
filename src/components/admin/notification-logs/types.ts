@@ -10,7 +10,7 @@ export type NotificationLog = {
     stage_id: string | null;
     // Joined data
     invitation_email?: string;
-    invitation_full_name?: string;
+    invitation_first_name?: string;
     setting_type?: string;
     setting_message?: string;
     stage_name?: string;

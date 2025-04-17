@@ -101,8 +101,8 @@ export function PersonalInfoCard({ personalData, isLoading = false }: PersonalIn
         <div className="space-y-6">
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <dt className="font-medium text-gray-500">Full Name</dt>
-              <dd>{user.user_metadata.full_name || "Not set"}</dd>
+              <dt className="font-medium text-gray-500">Fisrt Name</dt>
+              <dd>{user.user_metadata.first_name || "Not set"}</dd>
             </div>
             {/* <div>
               <dt className="font-medium text-gray-500">Birth Date</dt>

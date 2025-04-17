@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type Invitation = {
   id: string;
   email: string;
-  full_name: string;
+  first_name: string;
 };
 
 export function useInvitations() {
@@ -14,7 +14,7 @@ export function useInvitations() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("creator_invitations")
-        .select("id, email, full_name")
+        .select("id, email, first_name")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
