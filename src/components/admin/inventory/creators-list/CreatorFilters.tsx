@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
@@ -24,11 +23,9 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
   const toggleFilter = (filterName: keyof CreatorFilter) => {
     const newFilters = { ...activeFilters };
     
-    // Check if the property exists and toggle it, or set it to true if it doesn't exist
     if (newFilters[filterName] === true) {
       delete newFilters[filterName];
     } else {
-      // Only set boolean value for non-assignedToUser filters
       if (filterName !== 'assignedToUser') {
         newFilters[filterName] = true;
       }
@@ -142,6 +139,14 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
                 Sin Engagement YT
                 {activeFilters.withoutYouTubeEngagement && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
+
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutTikTokFollowers')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin seguidores TikTok
+                {activeFilters.withoutTikTokFollowers && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             
             {hasFilters && (
@@ -172,7 +177,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
         )}
       </div>
 
-      {/* User filter using radio buttons */}
       <RadioUserFilter 
         value={activeFilters.assignedToUser || null} 
         onChange={handleUserFilterChange} 
@@ -181,7 +185,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
       {hasFilters && (
         <div className="flex flex-wrap gap-2 mt-2">
           {Object.entries(activeFilters).map(([key, value]) => {
-            // Skip rendering badge for assignedToUser as it's shown in the RadioUserFilter
             if (key === 'assignedToUser') return null;
             
             return (
@@ -198,6 +201,7 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
                 {key === 'withVideos' && 'Con Videos'}
                 {key === 'withoutYouTube' && 'Sin YouTube'}
                 {key === 'withoutYouTubeEngagement' && 'Sin Engagement YT'}
+                {key === 'withoutTikTokFollowers' && 'Sin seguidores TikTok'}
                 <X 
                   className="h-3 w-3 cursor-pointer" 
                   onClick={() => toggleFilter(key as keyof CreatorFilter)} 
@@ -206,7 +210,6 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             );
           })}
           
-          {/* Add badge for assignedToUser if it exists */}
           {activeFilters.assignedToUser && (
             <Badge 
               variant="secondary"

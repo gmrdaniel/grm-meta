@@ -1,4 +1,3 @@
-
 import { Creator } from "@/types/creator";
 
 export interface CreatorFilter {
@@ -10,6 +9,7 @@ export interface CreatorFilter {
   withVideos?: boolean;
   withoutYouTube?: boolean;
   withoutYouTubeEngagement?: boolean;
+  withoutTikTokFollowers?: boolean;
   assignedToUser?: string;
   [key: string]: boolean | string | undefined;
 }

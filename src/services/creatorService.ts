@@ -44,6 +44,10 @@ export const fetchCreators = async (
       query = query.is('engagement_youtube', null);
     }
 
+    if (filters.withoutTikTokFollowers) {
+      query = query.is('seguidores_tiktok', null);
+    }
+    
     if (filters.assignedToUser) {
       query = query.eq('usuario_asignado', filters.assignedToUser);
     }
