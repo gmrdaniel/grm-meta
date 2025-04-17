@@ -11,12 +11,14 @@ interface NotificationSettingsTableProps {
   settings: NotificationSetting[] | undefined;
   onToggleStatus: (id: string, currentStatus: boolean) => void;
   onDeleteSetting: (id: string) => void;
+  onEditSetting: (setting: NotificationSetting) => void;
 }
 
 export const NotificationSettingsTable = ({
   settings,
   onToggleStatus,
-  onDeleteSetting
+  onDeleteSetting,
+  onEditSetting
 }: NotificationSettingsTableProps) => {
   return (
     <Table>
@@ -65,7 +67,11 @@ export const NotificationSettingsTable = ({
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => onEditSetting(setting)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button 
