@@ -43,7 +43,8 @@ const stepList = [
 type Step = (typeof stepList)[number];
 
 const defaultFormData = {
-  fullName: "",
+  firstName: "",
+  lastName: "",
   email: "",
   socialMediaHandle: "",
   termsAccepted: false,
@@ -117,7 +118,8 @@ export default function InvitationStepperPage() {
 
         setInvitation(invitationData);
         setFormData({
-          fullName: invitationData.first_name ?? "",
+          firstName: invitationData.first_name ?? "",
+          lastName: invitationData.last_name ?? "",
           email: invitationData.email ?? "",
           socialMediaHandle: invitationData.social_media_handle ?? "",
           termsAccepted: false,
@@ -440,6 +442,7 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       const { error } = await supabase.auth.signUp({
         email: invitation.email,
         password: passwordData.password,
+        phone: invitation.phone_country_code + invitation.phone_number,
         options: {
           data: {
             first_name: invitation.first_name,

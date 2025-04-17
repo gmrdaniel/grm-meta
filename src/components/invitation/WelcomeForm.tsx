@@ -1,5 +1,3 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,14 +5,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CreatorInvitation } from "@/types/invitation";
-import { AlertTriangle, Sparkles, Check } from "lucide-react";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 import { useState } from "react";
 
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
   formData: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     email: string;
     socialMediaHandle: string;
     termsAccepted: boolean;
@@ -69,13 +67,24 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">Fisrt Name</Label>
+            <Label htmlFor="firstName">Fisrt Name</Label>
             <Input
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
               onChange={onInputChange}
               placeholder="Your first name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={onInputChange}
+              placeholder="Your last name"
             />
           </div>
 
@@ -167,7 +176,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button onClick={handleContinue} disabled={!allChecked || isSubmitting}>
+        <Button onClick={handleContinue} disabled={!allChecked || !formData.firstName || !formData.lastName || isSubmitting}>
           {isSubmitting ? "Processing..." : "Continue"}
         </Button>
       </CardFooter>
