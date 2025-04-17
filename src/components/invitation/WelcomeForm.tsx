@@ -69,13 +69,13 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName">Fisrt Name</Label>
             <Input
               id="fullName"
               name="fullName"
               value={formData.fullName}
               onChange={onInputChange}
-              placeholder="Your full name"
+              placeholder="Your first name"
             />
           </div>
 

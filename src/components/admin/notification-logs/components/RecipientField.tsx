@@ -33,7 +33,7 @@ export function RecipientField({ control }: RecipientFieldProps) {
             <SelectContent>
               {invitations?.map((invitation) => (
                 <SelectItem key={invitation.id} value={invitation.id}>
-                  {invitation.full_name} ({invitation.email})
+                  {invitation.first_name} ({invitation.email})
                 </SelectItem>
               ))}
             </SelectContent>

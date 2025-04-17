@@ -56,7 +56,7 @@ export const createBulkInvitationDetail = async (data: {
     .from("bulk_creator_invitation_details")
     .insert({
       bulk_invitation_id: data.bulkInvitationId,
-      full_name: data.fullName,
+      first_name: data.fullName,
       email: data.email,
       status: data.status,
       error_message: data.errorMessage || null

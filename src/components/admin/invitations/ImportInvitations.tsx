@@ -83,7 +83,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
       // Validate headers
       const headers = jsonData[0];
       const requiredHeaders = [
-        "Creator Name",
+        "Creator First Name",
+        "Creator Last Name",
         "Email Address",
         "Social Media Handle",
         "Social Media Platform",
@@ -100,7 +101,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
       }
 
       // Get column indices
-      const nameIndex = headers.indexOf("Creator Name");
+      const firstNamIendex = headers.indexOf("Creator First Name");
+      const lastNameIndex = headers.indexOf("Creator Last Name");
       const emailIndex = headers.indexOf("Email Address");
       const handleIndex = headers.indexOf("Social Media Handle");
       const platformIndex = headers.indexOf("Social Media Platform");
@@ -117,14 +119,19 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
         // Skip empty rows
         if (!row || row.length === 0) continue;
       
-        const fullName = row[nameIndex]?.toString().trim();
+        const firstName = row[firstNamIendex]?.toString().trim();
+        const lastName = row[lastNameIndex]?.toString().trim();
         const email = row[emailIndex]?.toString().trim();
         const socialMediaHandle = row[handleIndex]?.toString().trim();
         const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() || "tiktok";
       
         // Validate row data
         const rowErrors = [];
-        if (!fullName) rowErrors.push("Creator Name is required");
+        
+        if (!firstName) rowErrors.push("Creator First Name is required");
+
+        if (!lastName) rowErrors.push("Creator Last Name is required");
+        
         if (!email) {
           rowErrors.push("Email Address is required");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -135,7 +142,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           errors.push({
             row: rowNumber,
             data: {
-              name: fullName || "",
+              firstName: firstName ?? "",
               email: email || "",
               socialMediaHandle: socialMediaHandle || "",
               socialMediaType: socialMediaType,
@@ -147,7 +154,8 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
       
         // Prepare invitation data dynamically
         const invitationData: CreateInvitationData = {
-          full_name: fullName,
+          first_name: firstName,
+          last_name: lastName,
           email: email,
           project_id: values.projectId,
           invitation_type: values.invitationType,
@@ -214,13 +222,14 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     // Create template data with headers and example row
     const templateData = [
       [
-        "Creator Name",
+        "Creator First Name",
+        "Creator Last Name",
         "Email Address",
         "Social Media Handle",
         "Social Media Platform",
       ],
-      ["John Doe", "john@example.com", "johndoe", "tiktok"],
-      ["Jane Smith", "jane@example.com", "janesmith", "tiktok"],
+      ["John", "Doe", "john@example.com", "johndoe", "tiktok"],
+      ["Jane", "Smith", "jane@example.com", "janesmith", "tiktok"],
     ];
 
     // Create new workbook and worksheet
@@ -306,7 +315,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             <p className="text-sm text-gray-500 mb-2">
               The Excel file should have the following headers: <br />
               <code className="text-xs bg-gray-100 p-1 rounded">
-                Creator Name, Email Address, Social Media Handle, Social Media
+                Creator First Name, Creator Last Name, Email Address, Social Media Handle, Social Media
                 Platform
               </code>
             </p>
