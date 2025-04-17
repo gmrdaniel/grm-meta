@@ -26,7 +26,6 @@ import InvitationPage from "./pages/invite/[url]/[id]";
 import MetaWelcomePage from "./pages/meta/welcome/[invitation_code]";
 import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
 import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
-import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 
 const queryClient = new QueryClient();
 
