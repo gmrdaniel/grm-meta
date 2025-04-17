@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { LoadingSpinner } from "@/components/auth/LoadingSpinner";
 import { EmptyStateCard } from "./components/EmptyStateCard";
@@ -9,8 +9,6 @@ import { NotificationSettingsPagination } from "./components/NotificationSetting
 import { NotificationSettingsSummary } from "./components/NotificationSettingsSummary";
 import { useNotificationSettings } from "./hooks/useNotificationSettings";
 import { toggleNotificationStatus, deleteNotificationSetting } from "./services/notificationSettingsService";
-import { NotificationSetting } from "./types";
-import { EditNotificationSettings } from "./EditNotificationSettings";
 
 export function NotificationSettingsList() {
   const {
@@ -26,30 +24,10 @@ export function NotificationSettingsList() {
     totalPages
   } = useNotificationSettings();
 
-  const [editingSetting, setEditingSetting] = useState<NotificationSetting | null>(null);
-
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-    const success = await toggleNotificationStatus(id, currentStatus);
-    if (success) refetch();
-  };
-
-  const handleDeleteSetting = async (id: string) => {
-    const success = await deleteNotificationSetting(id);
-    if (success) refetch();
-  };
-
-  const handleEditSetting = (setting: NotificationSetting) => {
-    setEditingSetting(setting);
-  };
-
-  const handleEditSuccess = () => {
-    setEditingSetting(null);
-    refetch();
-  };
-
-  const handleCancelEdit = () => {
-    setEditingSetting(null);
-  };
+  // Reset to first page when changing page size
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
 
   if (isLoading) {
     return <div className="flex justify-center p-8"><LoadingSpinner /></div>;
@@ -64,15 +42,15 @@ export function NotificationSettingsList() {
     );
   }
 
-  if (editingSetting) {
-    return (
-      <EditNotificationSettings 
-        setting={editingSetting} 
-        onSuccess={handleEditSuccess}
-        onCancel={handleCancelEdit}
-      />
-    );
-  }
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    const success = await toggleNotificationStatus(id, currentStatus);
+    if (success) refetch();
+  };
+
+  const handleDeleteSetting = async (id: string) => {
+    const success = await deleteNotificationSetting(id);
+    if (success) refetch();
+  };
 
   return (
     <div className="space-y-4">
@@ -89,7 +67,6 @@ export function NotificationSettingsList() {
             settings={settings} 
             onToggleStatus={handleToggleStatus}
             onDeleteSetting={handleDeleteSetting}
-            onEditSetting={handleEditSetting}
           />
         )}
       </div>

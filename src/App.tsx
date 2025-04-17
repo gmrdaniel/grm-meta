@@ -27,7 +27,6 @@ import InvitationPage from "./pages/invite/[url]/[id]";
 import MetaWelcomePage from "./pages/meta/welcome/[invitation_code]";
 import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]";
 import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
-import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 
 const queryClient = new QueryClient();
 
@@ -44,7 +43,7 @@ function App() {
               <Route path="/auth" element={<Auth />} />
               
               <Route path="/invite/:url/:id" element={<InvitationPage />} />
-              <Route path="/meta/invitation/:invitation_code?" element={<InvitationStepperPage />} />
+              <Route path="/meta/invitation/:invitation_code?" element={<InvitationPage />} />
               <Route path="/meta/welcome/:invitation_code?" element={<MetaWelcomePage />} />
               <Route path="/meta/completeProfile/:invitation_code" element={<CompleteProfilePage />} />
               <Route path="/meta/FbCreation/:invitation_code" element={<FbCreationPage />} />
