@@ -315,7 +315,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
             <p className="text-sm text-gray-500 mb-2">
               The Excel file should have the following headers: <br />
               <code className="text-xs bg-gray-100 p-1 rounded">
-                Creator Name, Email Address, Social Media Handle, Social Media
+                Creator First Name, Creator Last Name, Email Address, Social Media Handle, Social Media
                 Platform
               </code>
             </p>
