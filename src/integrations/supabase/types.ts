@@ -114,7 +114,9 @@ export type Database = {
           seguidores_youtube: number | null
           telefono: string | null
           tiene_invitacion: boolean | null
-          tiene_nombre_real: boolean | null
+          tiene_nombre_real:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
           tiene_prompt_generado: boolean | null
           usuario_asignado: string | null
           usuario_pinterest: string | null
@@ -146,7 +148,9 @@ export type Database = {
           seguidores_youtube?: number | null
           telefono?: string | null
           tiene_invitacion?: boolean | null
-          tiene_nombre_real?: boolean | null
+          tiene_nombre_real?:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
           tiene_prompt_generado?: boolean | null
           usuario_asignado?: string | null
           usuario_pinterest?: string | null
@@ -178,7 +182,9 @@ export type Database = {
           seguidores_youtube?: number | null
           telefono?: string | null
           tiene_invitacion?: boolean | null
-          tiene_nombre_real?: boolean | null
+          tiene_nombre_real?:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
           tiene_prompt_generado?: boolean | null
           usuario_asignado?: string | null
           usuario_pinterest?: string | null
@@ -906,6 +912,7 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
+      nombre_real_status: "pendiente" | "proceso" | "error" | "completado"
       notification_channel: "sms" | "email"
       notification_status: "sent" | "failed" | "pending"
       notification_types: "reminder" | "notification" | "alert"
@@ -1027,6 +1034,7 @@ export const Constants = {
   public: {
     Enums: {
       invitation_status: ["pending", "accepted", "rejected", "completed"],
+      nombre_real_status: ["pendiente", "proceso", "error", "completado"],
       notification_channel: ["sms", "email"],
       notification_status: ["sent", "failed", "pending"],
       notification_types: ["reminder", "notification", "alert"],

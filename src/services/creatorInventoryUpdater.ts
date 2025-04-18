@@ -95,6 +95,27 @@ const parseBooleanField = (value: any): boolean | undefined => {
   return undefined;
 };
 
+const parseEnumField = (value: any): Database["public"]["Enums"]["nombre_real_status"] | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+    switch (normalizedValue) {
+      case 'pendiente':
+      case 'proceso':
+      case 'error':
+      case 'completado':
+        return normalizedValue as Database["public"]["Enums"]["nombre_real_status"];
+      default:
+        return undefined;
+    }
+  }
+  
+  return undefined;
+};
+
 export const generateExcelTemplate = () => {
   const workbook = XLSX.utils.book_new();
   const data = [{
@@ -118,16 +139,32 @@ export const generateExcelTemplate = () => {
     promptTitle: 'Campo booleano',
     prompt: 'Seleccione TRUE o FALSE'
   };
+
+  const enumValidation = {
+    type: 'list',
+    formula1: '"pendiente,proceso,error,completado"',
+    showErrorMessage: true,
+    errorTitle: 'Valor inválido',
+    error: 'Por favor seleccione un estado válido',
+    showInputMessage: true,
+    promptTitle: 'Estado de nombre real',
+    prompt: 'Seleccione: pendiente, proceso, error, completado'
+  };
   
   if (!worksheet['!dataValidations']) {
     worksheet['!dataValidations'] = [];
   }
   
-  ['B', 'C', 'D', 'E'].forEach(col => {
+  ['B', 'C', 'D'].forEach(col => {
     worksheet['!dataValidations'].push({
       sqref: `${col}2:${col}1000`,
       ...booleanValidation
     });
+  });
+
+  worksheet['!dataValidations'].push({
+    sqref: 'E2:E1000',
+    ...enumValidation
   });
   
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
@@ -139,7 +176,7 @@ export interface CreatorStatusUpdate {
   enviado_hubspot?: boolean;
   tiene_invitacion?: boolean;
   tiene_prompt_generado?: boolean;
-  tiene_nombre_real?: boolean;
+  tiene_nombre_real?: Database["public"]["Enums"]["nombre_real_status"];
   fecha_envio_hubspot?: string;
 }
 
@@ -172,7 +209,7 @@ export const processCreatorStatusExcel = async (file: File): Promise<CreatorStat
             enviado_hubspot: parseBooleanField(row.enviado_hubspot),
             tiene_invitacion: parseBooleanField(row.tiene_invitacion),
             tiene_prompt_generado: parseBooleanField(row.tiene_prompt_generado),
-            tiene_nombre_real: parseBooleanField(row.tiene_nombre_real)
+            tiene_nombre_real: parseEnumField(row.tiene_nombre_real)
           };
 
           if (row.fecha_envio_hubspot) {
