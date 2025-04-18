@@ -48,7 +48,7 @@ export const adminNavigationItems = [
     label: "Notification Logs",
     shortLabel: "Test",
     icon: <List size={24} />,
-    to: "/admin/Notification-Logs",
+    to: "/admin/notification-logs",
   },
 ];
 
