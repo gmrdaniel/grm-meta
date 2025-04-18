@@ -25,6 +25,7 @@ serve(async () => {
     channel,
     creator_invitations:invitation_id (
       first_name,
+      last_name,
       email,
       invitation_code,
       invitation_url
