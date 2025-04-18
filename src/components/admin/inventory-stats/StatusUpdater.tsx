@@ -7,7 +7,13 @@ import { FileUploader } from "@/components/admin/inventory/import-templates/comp
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CreatorStatusUpdate, UpdateCreatorResult, generateExcelTemplate, processCreatorStatusExcel, updateCreatorsStatus } from "@/services/creatorInventoryUpdater";
+import { 
+  CreatorStatusUpdate, 
+  UpdateCreatorResult, 
+  generateExcelTemplate, 
+  updateCreatorsStatus 
+} from "@/services/creatorInventoryUpdater";
+import { processExcelFile } from "@/utils/excel/creator-inventory";
 
 export function StatusUpdater() {
   const [file, setFile] = useState<File | null>(null);
@@ -15,7 +21,7 @@ export function StatusUpdater() {
   
   // Mutation for processing Excel file
   const processFileMutation = useMutation({
-    mutationFn: processCreatorStatusExcel,
+    mutationFn: processExcelFile,
   });
   
   // Mutation for updating creator statuses
@@ -91,6 +97,7 @@ export function StatusUpdater() {
               <li>El campo <strong>correo</strong> es obligatorio y se usa como clave para buscar los creadores</li>
               <li>El campo <strong>fecha_envio_hubspot</strong> debe estar en formato DD/MM/YYYY</li>
               <li>Los campos <strong>enviado_hubspot</strong>, <strong>tiene_invitacion</strong>, y <strong>tiene_prompt_generado</strong> deben ser valores booleanos</li>
+              <li>El campo <strong>tiene_nombre_real</strong> debe ser uno de: "pendiente", "proceso", "error", "completado"</li>
             </ul>
           </AlertDescription>
         </Alert>
