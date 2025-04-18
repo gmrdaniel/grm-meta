@@ -1,181 +1,197 @@
-
-import { supabase } from "@/integrations/supabase/client";
 import * as XLSX from 'xlsx';
-import { format, parse } from 'date-fns';
-import { toast } from "sonner";
-
-export interface CreatorStatusUpdate {
-  correo: string;
-  enviado_hubspot?: boolean;
-  fecha_envio_hubspot?: string;
-  tiene_invitacion?: boolean;
-  codigo_invitacion?: string;
-  tiene_prompt_generado?: boolean;
-  usuario_asignado?: string;
-}
+import { format, isValid, parse } from 'date-fns';
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from '@/integrations/supabase/types';
 
 export interface UpdateCreatorResult {
   success: number;
   failed: number;
-  errors: { row: number; email: string; error: string }[];
+  errors: { row: number; email: string; error: string; }[];
 }
 
-export const processCreatorStatusExcel = async (file: File): Promise<CreatorStatusUpdate[]> => {
-  try {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer);
-    const worksheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[worksheetName];
-    
-    const data = XLSX.utils.sheet_to_json<any>(worksheet);
-    
-    // Validate and transform the data
-    const updates: CreatorStatusUpdate[] = [];
-    
-    for (const row of data) {
-      if (!row.correo) {
-        continue; // Skip rows without an email
-      }
-      
-      const update: CreatorStatusUpdate = {
-        correo: row.correo,
-      };
-      
-      // Process boolean fields
-      if (row.enviado_hubspot !== undefined) {
-        update.enviado_hubspot = parseBooleanField(row.enviado_hubspot);
-      }
-      
-      if (row.tiene_invitacion !== undefined) {
-        update.tiene_invitacion = parseBooleanField(row.tiene_invitacion);
-      }
-      
-      if (row.tiene_prompt_generado !== undefined) {
-        update.tiene_prompt_generado = parseBooleanField(row.tiene_prompt_generado);
-      }
-      
-      // Process date field - expecting DD/MM/YYYY format
-      if (row.fecha_envio_hubspot) {
-        try {
-          // Parse the date string and convert to ISO format
-          const parsedDate = parse(row.fecha_envio_hubspot, 'dd/MM/yyyy', new Date());
-          update.fecha_envio_hubspot = parsedDate.toISOString();
-        } catch (error) {
-          console.error('Invalid date format:', row.fecha_envio_hubspot);
-        }
-      }
-      
-      // Process string fields
-      if (row.codigo_invitacion !== undefined) {
-        update.codigo_invitacion = String(row.codigo_invitacion);
-      }
-      
-      if (row.usuario_asignado !== undefined) {
-        update.usuario_asignado = String(row.usuario_asignado);
-      }
-      
-      updates.push(update);
-    }
-    
-    return updates;
-  } catch (error) {
-    console.error('Error processing Excel file:', error);
-    throw new Error('Failed to process Excel file');
-  }
-};
-
-// Helper function to parse boolean fields from various formats
-const parseBooleanField = (value: any): boolean => {
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'number') return value !== 0;
-  if (typeof value === 'string') {
-    const lowercased = value.toLowerCase();
-    return lowercased === 'true' || lowercased === 'si' || lowercased === 'sí' || 
-           lowercased === 'yes' || lowercased === '1' || lowercased === 'verdadero';
-  }
-  return false;
-};
-
 export const updateCreatorsStatus = async (updates: CreatorStatusUpdate[]): Promise<UpdateCreatorResult> => {
-  const result: UpdateCreatorResult = {
-    success: 0,
-    failed: 0,
-    errors: []
-  };
+  let successCount = 0;
+  let failedCount = 0;
+  const errors: { row: number; email: string; error: string; }[] = [];
   
   for (let i = 0; i < updates.length; i++) {
     const update = updates[i];
     
+    if (!update.correo) {
+      failedCount++;
+      errors.push({ row: i + 2, email: update.correo, error: "Correo electrónico es requerido" });
+      continue;
+    }
+    
     try {
-      // Build the update object with only the fields that are present
-      const updateData: any = {};
-      
-      if (update.enviado_hubspot !== undefined) {
-        updateData.enviado_hubspot = update.enviado_hubspot;
-      }
-      
-      if (update.fecha_envio_hubspot !== undefined) {
-        updateData.fecha_envio_hubspot = update.fecha_envio_hubspot;
-      }
-      
-      if (update.tiene_invitacion !== undefined) {
-        updateData.tiene_invitacion = update.tiene_invitacion;
-      }
-      
-      if (update.codigo_invitacion !== undefined) {
-        updateData.codigo_invitacion = update.codigo_invitacion;
-      }
-      
-      if (update.tiene_prompt_generado !== undefined) {
-        updateData.tiene_prompt_generado = update.tiene_prompt_generado;
-      }
-      
-      if (update.usuario_asignado !== undefined) {
-        updateData.usuario_asignado = update.usuario_asignado;
-      }
-      
-      // Update the creator if the email matches
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('creator_inventory')
-        .update(updateData)
+        .update({
+          enviado_hubspot: update.enviado_hubspot,
+          tiene_invitacion: update.tiene_invitacion,
+          tiene_prompt_generado: update.tiene_prompt_generado,
+          tiene_nombre_real: update.tiene_nombre_real,
+          fecha_envio_hubspot: update.fecha_envio_hubspot ? update.fecha_envio_hubspot : null,
+        })
         .eq('correo', update.correo);
       
       if (error) {
-        result.failed++;
-        result.errors.push({
-          row: i + 2, // +2 accounts for 0-based index and header row
-          email: update.correo,
-          error: error.message
-        });
+        failedCount++;
+        errors.push({ row: i + 2, email: update.correo, error: error.message });
       } else {
-        result.success++;
+        successCount++;
       }
     } catch (error: any) {
-      result.failed++;
-      result.errors.push({
-        row: i + 2,
-        email: update.correo,
-        error: error.message || 'Unknown error'
-      });
+      failedCount++;
+      errors.push({ row: i + 2, email: update.correo, error: error.message });
     }
   }
   
-  return result;
+  return { success: successCount, failed: failedCount, errors };
 };
 
-export const generateExcelTemplate = (): void => {
-  // Create a worksheet with header
-  const ws = XLSX.utils.aoa_to_sheet([
-    ['correo', 'enviado_hubspot', 'fecha_envio_hubspot', 'tiene_invitacion', 'codigo_invitacion', 'tiene_prompt_generado', 'usuario_asignado'],
-    ['ejemplo@correo.com', 'true', '15/04/2025', 'true', 'ABC123', 'false', 'usuario1']
-  ]);
+const parseExcelDate = (excelDate: string | number): string | null => {
+  if (typeof excelDate === 'string') {
+    const parsedDate = parse(excelDate, 'dd/MM/yyyy', new Date());
+      
+    if (isValid(parsedDate)) {
+      return format(parsedDate, 'yyyy-MM-dd');
+    }
+    
+    return null;
+  }
   
-  // Create workbook and add the worksheet
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+  if (typeof excelDate === 'number') {
+    const date = XLSX.DateConv.excelToDate(excelDate);
+    if (date) {
+      return format(date, 'yyyy-MM-dd');
+    }
+    return null;
+  }
   
-  // Generate and save the Excel file
-  XLSX.writeFile(wb, 'actualizacion_creator_inventory.xlsx');
+  return null;
+};
+
+const parseBooleanField = (value: any): boolean | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
   
-  toast.success('Plantilla descargada correctamente');
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+    if (normalizedValue === 'true') {
+      return true;
+    } else if (normalizedValue === 'false') {
+      return false;
+    }
+  }
+  
+  return undefined;
+};
+
+export const generateExcelTemplate = () => {
+  const workbook = XLSX.utils.book_new();
+  const data = [{
+    correo: '',
+    enviado_hubspot: '',
+    tiene_invitacion: '',
+    tiene_prompt_generado: '',
+    tiene_nombre_real: '',
+    fecha_envio_hubspot: ''
+  }];
+  
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  
+  // Agregar validación para campos booleanos
+  const booleanValidation = {
+    type: 'list',
+    formula1: '"TRUE,FALSE"',
+    showErrorMessage: true,
+    errorTitle: 'Valor inválido',
+    error: 'Por favor seleccione TRUE o FALSE',
+    showInputMessage: true,
+    promptTitle: 'Campo booleano',
+    prompt: 'Seleccione TRUE o FALSE'
+  };
+  
+  if (!worksheet['!dataValidations']) {
+    worksheet['!dataValidations'] = [];
+  }
+  
+  // Aplicar validación a las columnas booleanas
+  ['B', 'C', 'D', 'E'].forEach(col => {
+    worksheet['!dataValidations'].push({
+      sqref: `${col}2:${col}1000`,
+      ...booleanValidation
+    });
+  });
+  
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
+  XLSX.writeFile(workbook, `template_actualizacion_creadores_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+};
+
+export interface CreatorStatusUpdate {
+  correo: string;
+  enviado_hubspot?: boolean;
+  tiene_invitacion?: boolean;
+  tiene_prompt_generado?: boolean;
+  tiene_nombre_real?: boolean;
+  fecha_envio_hubspot?: string;
+}
+
+export const processCreatorStatusExcel = async (file: File): Promise<CreatorStatusUpdate[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e: any) => {
+      try {
+        const binaryString = e.target.result;
+        const workbook = XLSX.read(binaryString, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        const headers = data[0] as string[];
+        const rows = data.slice(1);
+        
+        const jsonData: any[] = rows.map(row => {
+          const rowData: any = {};
+          headers.forEach((header, index) => {
+            rowData[header?.trim()] = row[index];
+          });
+          return rowData;
+        });
+        
+        const updates = jsonData.map((row: any) => {
+          const update: CreatorStatusUpdate = {
+            correo: row.correo?.toString().trim(),
+            enviado_hubspot: parseBooleanField(row.enviado_hubspot),
+            tiene_invitacion: parseBooleanField(row.tiene_invitacion),
+            tiene_prompt_generado: parseBooleanField(row.tiene_prompt_generado),
+            tiene_nombre_real: parseBooleanField(row.tiene_nombre_real)
+          };
+
+          if (row.fecha_envio_hubspot) {
+            update.fecha_envio_hubspot = parseExcelDate(row.fecha_envio_hubspot);
+          }
+
+          return update;
+        });
+        
+        resolve(updates);
+      } catch (error: any) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    
+    reader.readAsBinaryString(file);
+  });
 };
