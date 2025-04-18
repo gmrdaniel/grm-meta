@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { format, isValid, parse } from 'date-fns';
+import { format, isValid, parse, addDays } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from '@/integrations/supabase/types';
 
@@ -62,8 +62,10 @@ const parseExcelDate = (excelDate: string | number): string | null => {
   }
   
   if (typeof excelDate === 'number') {
-    const date = XLSX.DateConv.excelToDate(excelDate);
-    if (date) {
+    const excelEpoch = new Date(1899, 11, 30); // Month is 0-indexed in JS, so 11 = December
+    const date = addDays(excelEpoch, excelDate);
+    
+    if (isValid(date)) {
       return format(date, 'yyyy-MM-dd');
     }
     return null;
@@ -106,7 +108,6 @@ export const generateExcelTemplate = () => {
   
   const worksheet = XLSX.utils.json_to_sheet(data);
   
-  // Agregar validación para campos booleanos
   const booleanValidation = {
     type: 'list',
     formula1: '"TRUE,FALSE"',
@@ -122,7 +123,6 @@ export const generateExcelTemplate = () => {
     worksheet['!dataValidations'] = [];
   }
   
-  // Aplicar validación a las columnas booleanas
   ['B', 'C', 'D', 'E'].forEach(col => {
     worksheet['!dataValidations'].push({
       sqref: `${col}2:${col}1000`,
