@@ -9,6 +9,17 @@ export interface UpdateCreatorResult {
   errors: { row: number; email: string; error: string; }[];
 }
 
+type NombreRealStatus = 'pendiente' | 'proceso' | 'error' | 'completado';
+
+export interface CreatorStatusUpdate {
+  correo: string;
+  enviado_hubspot?: boolean;
+  tiene_invitacion?: boolean;
+  tiene_prompt_generado?: boolean;
+  tiene_nombre_real?: NombreRealStatus;
+  fecha_envio_hubspot?: string;
+}
+
 export const updateCreatorsStatus = async (updates: CreatorStatusUpdate[]): Promise<UpdateCreatorResult> => {
   let successCount = 0;
   let failedCount = 0;
@@ -95,7 +106,7 @@ const parseBooleanField = (value: any): boolean | undefined => {
   return undefined;
 };
 
-const parseEnumField = (value: any): Database["public"]["Enums"]["nombre_real_status"] | undefined => {
+const parseEnumField = (value: any): NombreRealStatus | undefined => {
   if (value === undefined || value === null) {
     return undefined;
   }
@@ -107,7 +118,7 @@ const parseEnumField = (value: any): Database["public"]["Enums"]["nombre_real_st
       case 'proceso':
       case 'error':
       case 'completado':
-        return normalizedValue as Database["public"]["Enums"]["nombre_real_status"];
+        return normalizedValue as NombreRealStatus;
       default:
         return undefined;
     }
@@ -119,12 +130,12 @@ const parseEnumField = (value: any): Database["public"]["Enums"]["nombre_real_st
 export const generateExcelTemplate = () => {
   const workbook = XLSX.utils.book_new();
   const data = [{
-    correo: '',
-    enviado_hubspot: '',
-    tiene_invitacion: '',
-    tiene_prompt_generado: '',
-    tiene_nombre_real: '',
-    fecha_envio_hubspot: ''
+    correo: 'ejemplo@correo.com',
+    enviado_hubspot: 'TRUE',
+    tiene_invitacion: 'FALSE',
+    tiene_prompt_generado: 'TRUE',
+    tiene_nombre_real: 'proceso',
+    fecha_envio_hubspot: format(new Date(), 'dd/MM/yyyy')
   }];
   
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -170,15 +181,6 @@ export const generateExcelTemplate = () => {
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
   XLSX.writeFile(workbook, `template_actualizacion_creadores_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
 };
-
-export interface CreatorStatusUpdate {
-  correo: string;
-  enviado_hubspot?: boolean;
-  tiene_invitacion?: boolean;
-  tiene_prompt_generado?: boolean;
-  tiene_nombre_real?: Database["public"]["Enums"]["nombre_real_status"];
-  fecha_envio_hubspot?: string;
-}
 
 export const processCreatorStatusExcel = async (file: File): Promise<CreatorStatusUpdate[]> => {
   return new Promise((resolve, reject) => {
