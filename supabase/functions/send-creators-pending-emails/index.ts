@@ -16,15 +16,16 @@ const MAX_BATCH = 100; // máximo por ejecución
 
 serve(async () => {
   const { data: pendingLogs, error } = await supabase
-    .from("notification_logs")
-    .select(
-      `
+  .from("notification_logs")
+  .select(
+    `
     id,
     invitation_id,
     notification_setting_id,
     channel,
     creator_invitations:invitation_id (
       first_name,
+      last_name,
       email,
       invitation_code,
       invitation_url
@@ -39,9 +40,10 @@ serve(async () => {
       )
     )
   `
-    )
-    .eq("status", "pending")
-    .limit(MAX_BATCH);
+  )
+  .eq("status", "pending")
+  .eq("channel", "email") 
+  .limit(MAX_BATCH);
 
   if (error) {
     console.error("Error fetching pending logs:", error);
