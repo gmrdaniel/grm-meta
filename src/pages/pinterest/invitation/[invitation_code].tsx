@@ -145,8 +145,31 @@ export default function PinterestInvitationPage() {
     }
   };
 
-  const handleProfileSubmit = () => {
-    setCurrentStep(stepList[2]); // Move directly to verification step (step 3)
+  const handleProfileSubmit = async () => {
+    if (!invitation) return;
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("creator_invitations")
+        .update({
+          pinterest_profile: profileData.pinterestUrl,
+          content_types: profileData.contentTypes,
+          has_connected_accounts: profileData.isConnected,
+          has_enabled_autopublish: profileData.isAutoPublishEnabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", invitation.id);
+
+      if (error) throw error;
+
+      toast.success("¡Perfil guardado exitosamente!");
+      setCurrentStep(stepList[2]); // Move to verification step (step 3)
+    } catch (err) {
+      toast.error("Error al guardar el perfil");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleVerificationComplete = async () => {
