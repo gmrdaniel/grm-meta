@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
@@ -79,14 +80,73 @@ serve(async (req) => {
           { auth: { persistSession: false } }
         );
 
-        // Update the invitation with verified status
-        const { error } = await supabaseAdmin
+        // Get invitation data
+        const { data: invitationData, error: invitationError } = await supabaseAdmin
           .from('creator_invitations')
-          .update({ phone_verified: true })
-          .eq('id', invitationId);
+          .select('email, full_name')
+          .eq('id', invitationId)
+          .single();
 
-        if (error) {
-          console.error("Error updating invitation:", error);
+        if (invitationError) {
+          console.error("Error fetching invitation:", invitationError);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: "Error fetching invitation data",
+              error: invitationError.message
+            }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Create user and profile
+        try {
+          // Create auth user with a random password (will use magic link later)
+          const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+            email: invitationData.email,
+            password: crypto.randomUUID(),
+            email_confirm: true
+          });
+
+          if (authError) throw authError;
+
+          // Create profile entry
+          if (authData.user) {
+            const { error: profileError } = await supabaseAdmin
+              .from('profiles')
+              .insert({
+                id: authData.user.id,
+                email: invitationData.email,
+                first_name: invitationData.full_name,
+                role: 'creator'
+              });
+
+            if (profileError) throw profileError;
+          }
+
+          // Update the invitation with verified status
+          const { error: updateError } = await supabaseAdmin
+            .from('creator_invitations')
+            .update({ 
+              status: 'completed',
+              phone_verified: true,
+              phone_number: phoneNumber,
+              phone_country_code: countryCode
+            })
+            .eq('id', invitationId);
+
+          if (updateError) throw updateError;
+
+        } catch (error) {
+          console.error("Error in profile creation:", error);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: "Error creating profile",
+              error: error.message
+            }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
       }
 
@@ -137,6 +197,3 @@ serve(async (req) => {
     );
   }
 });
-
-// Missing import for createClient
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';

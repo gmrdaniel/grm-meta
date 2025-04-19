@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -121,28 +122,6 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       if (error) throw error;
 
       if (data.success) {
-        const { data: invitationData, error: invitationError } = await supabase
-          .from('creator_invitations')
-          .select('email, full_name')
-          .eq('id', invitationId)
-          .single();
-
-        if (invitationError) throw invitationError;
-
-        await handleCreateProfile(invitationData.email, invitationData.full_name);
-
-        const { error: updateError } = await supabase
-          .from('creator_invitations')
-          .update({ 
-            status: 'completed',
-            phone_verified: true,
-            phone_number: phoneData.phoneNumber,
-            phone_country_code: phoneData.phoneCountryCode
-          })
-          .eq('id', invitationId);
-
-        if (updateError) throw updateError;
-
         setVerificationSuccess(true);
         setPhoneData({ ...phoneData, phoneVerified: true });
         onSubmit();
@@ -154,34 +133,6 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       toast.error("Ocurrió un error inesperado");
     } finally {
       setIsVerifying(false);
-    }
-  };
-
-  const handleCreateProfile = async (email: string, firstName: string | null) => {
-    try {
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: crypto.randomUUID(), // Generate a random password since we'll use magic link
-      });
-
-      if (signUpError) throw signUpError;
-
-      if (!user?.id) throw new Error("No user ID returned from signup");
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: email,
-          first_name: firstName,
-          role: 'creator'
-        });
-
-      if (profileError) throw profileError;
-
-    } catch (err) {
-      console.error("Error creating profile:", err);
-      throw err;
     }
   };
 
