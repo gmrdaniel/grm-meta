@@ -204,7 +204,7 @@ export default function PinterestInvitationPage() {
         </div>
 
         {/* Right column - Form card */}
-        <Card className="w-full lg:w-3/4 shadow-2xl bg-white/95 backdrop-blur">
+        <Card className="w-full lg:w-2/4 shadow-2xl bg-white/95 backdrop-blur">
           <div className="p-8">
             <Stepper steps={stepList} currentStep={currentStep.id} />
             
