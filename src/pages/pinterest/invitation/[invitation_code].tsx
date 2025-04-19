@@ -186,16 +186,16 @@ export default function PinterestInvitationPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
-      <div className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8 p-6">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
+      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-between gap-12 py-8 px-4">
         {/* Left column - Info text */}
-        <div className="text-center md:text-left space-y-6 md:w-1/3">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+        <div className="w-full lg:w-1/4 text-center lg:text-left space-y-8 lg:sticky lg:top-8">
+          <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
             Únete al Reto de Creadores de Pinterest y Gana
           </h1>
           
-          <div className="prose prose-pink">
-            <p className="text-gray-600">
+          <div className="prose prose-pink max-w-none">
+            <p className="text-gray-600 text-lg">
               ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
               conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
               en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.
@@ -204,8 +204,8 @@ export default function PinterestInvitationPage() {
         </div>
 
         {/* Right column - Form card */}
-        <Card className="w-full md:w-2/3 shadow-2xl">
-          <div className="p-6 md:p-8">
+        <Card className="w-full lg:w-3/4 shadow-2xl bg-white/95 backdrop-blur">
+          <div className="p-8">
             <Stepper steps={stepList} currentStep={currentStep.id} />
             
             {currentStep.id === "welcome" && (
@@ -231,11 +231,11 @@ export default function PinterestInvitationPage() {
             )}
 
             {currentStep.id === "complete" && (
-              <div className="text-center space-y-4 py-8">
+              <div className="text-center space-y-6 py-12">
                 <h2 className="text-2xl font-bold text-[#C2185B]">
                   ¡Felicitaciones! Has completado tu perfil
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-lg">
                   Te contactaremos pronto con más información sobre el programa.
                 </p>
               </div>
