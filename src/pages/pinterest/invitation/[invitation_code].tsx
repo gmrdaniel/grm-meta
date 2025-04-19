@@ -161,40 +161,40 @@ export default function PinterestInvitationPage() {
         })
         .eq("id", invitation.id);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    toast.success("¡Perfil guardado exitosamente!");
-    setCurrentStep(stepList[2]); // Move to verification step
-  } catch (err) {
-    toast.error("Error al guardar el perfil");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      toast.success("¡Perfil guardado exitosamente!");
+      setCurrentStep(stepList[2]); // Move to verification step (step 3)
+    } catch (err) {
+      toast.error("Error al guardar el perfil");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-const handleVerificationComplete = async () => {
-  if (!invitation) return;
-  setIsSubmitting(true);
+  const handleVerificationComplete = async () => {
+    if (!invitation) return;
+    setIsSubmitting(true);
 
-  try {
-    const { error } = await supabase
-      .from("creator_invitations")
-      .update({ 
-        status: "completed",
-        updated_at: new Date().toISOString() 
-      })
-      .eq("id", invitation.id);
+    try {
+      const { error } = await supabase
+        .from("creator_invitations")
+        .update({ 
+          status: "completed",
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", invitation.id);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    toast.success("¡Verificación completada exitosamente!");
-    setCurrentStep(stepList[2]); // Stay on verification step but show completion message
-  } catch (err) {
-    toast.error("Error al completar la verificación");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      toast.success("¡Verificación completada exitosamente!");
+      setCurrentStep(stepList[2]); // Stay on verification step but show completion message
+    } catch (err) {
+      toast.error("Error al completar la verificación");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
