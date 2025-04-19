@@ -187,8 +187,9 @@ export default function PinterestInvitationPage() {
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-8 p-6">
-        <div className="text-center md:text-left space-y-6 max-w-lg">
+      <div className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8 p-6">
+        {/* Left column - Info text */}
+        <div className="text-center md:text-left space-y-6 md:w-1/3">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
             Únete al Reto de Creadores de Pinterest y Gana
           </h1>
@@ -202,8 +203,9 @@ export default function PinterestInvitationPage() {
           </div>
         </div>
 
-        <Card className="w-full max-w-md shadow-2xl">
-          <div className="p-6">
+        {/* Right column - Form card */}
+        <Card className="w-full md:w-2/3 shadow-2xl">
+          <div className="p-6 md:p-8">
             <Stepper steps={stepList} currentStep={currentStep.id} />
             
             {currentStep.id === "welcome" && (
@@ -229,7 +231,7 @@ export default function PinterestInvitationPage() {
             )}
 
             {currentStep.id === "complete" && (
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-4 py-8">
                 <h2 className="text-2xl font-bold text-[#C2185B]">
                   ¡Felicitaciones! Has completado tu perfil
                 </h2>
