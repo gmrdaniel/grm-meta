@@ -21,7 +21,7 @@ import { ProjectStage } from "@/types/project";
 const stepList = [
   { id: "welcome", label: "Crear cuenta" },
   { id: "completeProfile", label: "Perfil" },
-  { id: "connected", label: "Conectar" },
+  { id: "connected", label: "Conectar" }
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -57,6 +57,12 @@ export default function PinterestInvitationPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [profileData, setProfileData] = useState({
+    pinterestUrl: "",
+    contentTypes: [] as string[],
+    isConnected: false,
+    isAutoPublishEnabled: false,
+  });
 
   useEffect(() => {
     const fetchInvitationAndStages = async () => {
@@ -143,6 +149,27 @@ export default function PinterestInvitationPage() {
     setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleContentTypeChange = (value: string, checked: boolean) => {
+    setProfileData((prev) => ({
+      ...prev,
+      contentTypes: checked
+        ? [...prev.contentTypes, value]
+        : prev.contentTypes.filter((type) => type !== value),
+    }));
+  };
+
+  const handleProfileCheckboxChange = (
+    key: 'isConnected' | 'isAutoPublishEnabled',
+    checked: boolean
+  ) => {
+    setProfileData((prev) => ({ ...prev, [key]: checked }));
+  };
+
   const goToNextStep = async () => {
     if (!invitation || !projectStages.length) return;
     const currentIndex = projectStages.findIndex(
@@ -221,6 +248,33 @@ export default function PinterestInvitationPage() {
     }
 
     setSaving(false);
+  };
+
+  const handleProfileSubmit = async () => {
+    if (!invitation) return;
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("creator_invitations")
+        .update({
+          pinterest_profile: profileData.pinterestUrl,
+          content_types: profileData.contentTypes,
+          has_connected_accounts: profileData.isConnected,
+          has_enabled_autopublish: profileData.isAutoPublishEnabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", invitation.id);
+
+      if (error) throw error;
+
+      toast.success("¡Perfil guardado exitosamente!");
+      goToNextStep();
+    } catch (err) {
+      toast.error("Error al guardar el perfil");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
