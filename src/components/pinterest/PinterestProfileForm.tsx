@@ -138,7 +138,6 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
       <CardFooter className="flex justify-end px-0">
         <Button
           onClick={onSubmit}
-          disabled={isSubmitting}
           className="bg-[#C2185B] hover:bg-[#A01648] text-white w-full"
         >
           {isSubmitting ? "Guardando..." : "GUARDAR Y CONTINUAR"}

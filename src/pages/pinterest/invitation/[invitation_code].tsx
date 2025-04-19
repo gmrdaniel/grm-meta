@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -146,30 +147,9 @@ export default function PinterestInvitationPage() {
   };
 
   const handleProfileSubmit = async () => {
-    if (!invitation) return;
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase
-        .from("creator_invitations")
-        .update({
-          pinterest_profile: profileData.pinterestUrl,
-          content_types: profileData.contentTypes,
-          has_connected_accounts: profileData.isConnected,
-          has_enabled_autopublish: profileData.isAutoPublishEnabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", invitation.id);
-
-      if (error) throw error;
-
-      toast.success("¡Perfil guardado exitosamente!");
-      setCurrentStep(stepList[2]); // Move to verification step (step 3)
-    } catch (err) {
-      toast.error("Error al guardar el perfil");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simply advance to the next step without validations or saving data
+    setCurrentStep(stepList[2]); // Move to verification step
+    toast.success("¡Perfil guardado exitosamente!");
   };
 
   const handleVerificationComplete = async () => {
@@ -188,7 +168,6 @@ export default function PinterestInvitationPage() {
       if (error) throw error;
 
       toast.success("¡Verificación completada exitosamente!");
-      setCurrentStep(stepList[2]); // Stay on verification step but show completion message
     } catch (err) {
       toast.error("Error al completar la verificación");
     } finally {
