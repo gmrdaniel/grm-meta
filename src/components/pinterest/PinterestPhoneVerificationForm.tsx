@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { CardContent } from "@/components/ui/card";
+import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import {
   InputOTP,
   InputOTPGroup,
@@ -25,7 +23,6 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   isSubmitting,
   invitationId,
 }) => {
-  const navigate = useNavigate();
   const [phoneData, setPhoneData] = useState({
     phoneCountryCode: "+52",
     phoneNumber: "",
@@ -36,8 +33,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [verificationSuccess, setVerificationSuccess] = useState(false);
-  const [verificationError, setVerificationError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -75,7 +71,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
 
     try {
       setIsVerifying(true);
-      setVerificationError("");
+      setError(null);
 
       const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
@@ -86,23 +82,23 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       });
 
       if (error) {
-        console.error("Error in verification process:", error);
-        setVerificationError("Ocurrió un error al enviar el código de verificación");
-        toast.error("Error al enviar el código de verificación");
+        console.error("Error al enviar código de verificación:", error);
+        setError(error.message || "Error al enviar código de verificación");
+        toast.error("Error al enviar código de verificación");
         return;
       }
 
       if (data.success) {
         toast.success("Código de verificación enviado a tu teléfono");
         setVerificationStep("verification");
-        setCountdown(600); // 10 minutes
+        setCountdown(600);
       } else {
-        setVerificationError(data.message || "Error al enviar código de verificación");
+        setError(data.message || "Error al enviar código de verificación");
         toast.error(data.message || "Error al enviar código de verificación");
       }
     } catch (err) {
       console.error("Error en el proceso de verificación:", err);
-      setVerificationError("Ocurrió un error inesperado");
+      setError("Ocurrió un error inesperado. Por favor intenta de nuevo.");
       toast.error("Ocurrió un error inesperado");
     } finally {
       setIsVerifying(false);
@@ -117,7 +113,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
 
     try {
       setIsVerifying(true);
-      setVerificationError("");
+      setError(null);
 
       const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
@@ -130,160 +126,144 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       });
 
       if (error) {
-        console.error("Error en el proceso de verificación:", error);
-        setVerificationError("Ocurrió un error al verificar el código");
-        toast.error("Error al verificar el código");
+        console.error("Error al verificar código:", error);
+        setError(error.message || "Error al verificar código");
+        toast.error("Error al verificar código");
         return;
       }
 
       if (data.success) {
-        setVerificationSuccess(true);
-        setPhoneData({ ...phoneData, phoneVerified: true });
+        toast.success("Teléfono verificado exitosamente");
+        setPhoneData({
+          ...phoneData,
+          phoneVerified: true,
+        });
         onSubmit();
       } else {
-        setVerificationError(data.message || "Código de verificación inválido");
+        setError(data.message || "Código de verificación inválido");
         toast.error(data.message || "Código de verificación inválido");
       }
     } catch (err) {
       console.error("Error en el proceso de verificación:", err);
-      setVerificationError("Ocurrió un error inesperado");
+      setError("Ocurrió un error inesperado. Por favor intenta de nuevo.");
       toast.error("Ocurrió un error inesperado");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleNavigateToLogin = () => {
-    navigate('/auth');
+  const handleResendCode = () => {
+    setVerificationCode("");
+    handleSendVerificationCode();
   };
-
-  if (verificationSuccess) {
-    return (
-      <CardContent className="space-y-6">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-semibold text-[#C2185B]">
-            ¡YA VERIFICAMOS TU CUENTA, MUCHA SUERTE!
-          </h2>
-          <p className="text-gray-600">
-            Ya puedes acceder a tu cuenta, donde recibirás la invitación al evento exclusivo de Pinterest, podrás revisar el estatus de tu participación en el sorteo y acceder a recursos diseñados para ayudarte a crecer más rápido como creador de contenido ¡y más!
-          </p>
-          <Button 
-            onClick={handleNavigateToLogin}
-            className="w-full bg-[#C2185B] hover:bg-[#A01648] text-white"
-          >
-            ACCEDE A TU CUENTA AQUÍ
-          </Button>
-        </div>
-      </CardContent>
-    );
-  }
 
   return (
     <CardContent className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Phone className="h-5 w-5" />
-          <Label className="text-lg font-medium">Phone Number</Label>
-        </div>
+        <h2 className="text-2xl font-bold text-center text-[#C2185B] mb-4">
+          ¡FELICIDADES YA ESTÁS DEL SORTEO!
+        </h2>
+        <p className="text-center text-gray-700 mb-6">
+          Ya estás en el sorteo, para verificar si ganaste termina de crear tu cuenta verificando tu número de teléfono 
+          colocando el código de verificación que te enviamos en la casilla.
+        </p>
 
-        {verificationError && (
-          <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md border border-red-200">
-            {verificationError}
-          </div>
-        )}
+        <div className="space-y-2">
+          <Label htmlFor="phoneNumber">NÚMERO DE TELÉFONO</Label>
 
-        {verificationStep === "input" ? (
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                id="phoneCountryCode"
-                name="phoneCountryCode"
-                value={phoneData.phoneCountryCode}
-                onChange={handleInputChange}
-                className="w-20"
-                readOnly={phoneData.phoneVerified}
-              />
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={phoneData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Número de teléfono"
-                className="flex-1"
-                type="tel"
-                readOnly={phoneData.phoneVerified}
-              />
-            </div>
+          {verificationStep === "input" ? (
+            <div>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  id="phoneCountryCode"
+                  name="phoneCountryCode"
+                  value={phoneData.phoneCountryCode}
+                  onChange={handleInputChange}
+                  className="w-20"
+                  readOnly={phoneData.phoneVerified}
+                />
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={phoneData.phoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Número de teléfono"
+                  className="flex-1"
+                  type="tel"
+                  readOnly={phoneData.phoneVerified}
+                />
+              </div>
 
-            {!phoneData.phoneVerified && (
-              <Button
-                onClick={handleSendVerificationCode}
-                disabled={isVerifying || !phoneData.phoneNumber || phoneData.phoneNumber.length < 10}
-                className="w-full bg-[#C2185B] hover:bg-[#A01648]"
-              >
-                {isVerifying ? "Enviando..." : "Enviar código"}
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6 bg-gray-50 p-6 rounded-lg">
-            <h3 className="text-base font-medium">Enter the 4-digit verification code</h3>
-            
-            <div className="flex justify-center py-4">
-              <InputOTP
-                maxLength={4}
-                value={verificationCode}
-                onChange={setVerificationCode}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-
-            <div className="text-center text-sm text-gray-600">
-              We sent a code to {phoneData.phoneCountryCode} {phoneData.phoneNumber}
-              {countdown > 0 && (
-                <p className="mt-1">
-                  Code expires in: {formatTime(countdown)}
-                </p>
+              {!phoneData.phoneVerified && (
+                <Button
+                  variant="default"
+                  size="lg"
+                  type="button"
+                  onClick={handleSendVerificationCode}
+                  disabled={isVerifying || !phoneData.phoneNumber || phoneData.phoneNumber.length < 10}
+                  className="w-full bg-[#C2185B] hover:bg-[#A01648] mt-4"
+                >
+                  {isVerifying ? "Enviando..." : "ENVIAR CÓDIGO"}
+                </Button>
               )}
             </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="verification-code">CÓDIGO DE VERIFICACIÓN</Label>
+                <div className="flex justify-center py-4">
+                  <InputOTP
+                    maxLength={4}
+                    value={verificationCode}
+                    onChange={setVerificationCode}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                {countdown > 0 && (
+                  <p className="text-sm text-center text-gray-500">
+                    El código expira en: {formatTime(countdown)}
+                  </p>
+                )}
+              </div>
 
-            <div className="flex justify-between">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setVerificationStep("input");
-                  setVerificationCode("");
-                  setCountdown(0);
-                  setVerificationError("");
-                }}
-              >
-                Back
-              </Button>
-              <div className="space-x-2">
+              <div className="flex justify-between">
                 <Button
                   variant="outline"
-                  onClick={handleSendVerificationCode}
-                  disabled={isVerifying || countdown > 540}
+                  onClick={() => {
+                    setVerificationStep("input");
+                    setVerificationCode("");
+                    setCountdown(0);
+                  }}
                 >
-                  Resend Code
+                  Regresar
                 </Button>
-                <Button
-                  onClick={handleVerifyCode}
-                  disabled={verificationCode.length !== 4 || isVerifying}
-                  className="bg-[#7CB9E8] hover:bg-[#6AA9D8] text-white"
-                >
-                  Verify
-                </Button>
+                <div className="space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleResendCode}
+                    disabled={isVerifying || countdown > 540}
+                  >
+                    Reenviar Código
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={handleVerifyCode}
+                    disabled={verificationCode.length !== 4 || isVerifying}
+                    className="bg-[#C2185B] hover:bg-[#A01648]"
+                  >
+                    {isVerifying ? "Verificando..." : "VERIFICAR"}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </CardContent>
   );
