@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { InvitationError } from "@/components/invitation/InvitationError";
 import { Stepper } from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const stepList = [
   { id: "welcome", label: "Crear cuenta" },
@@ -20,6 +22,7 @@ const stepList = [
 type Step = (typeof stepList)[number];
 
 export default function PinterestInvitationPage() {
+  const isMobile = useIsMobile();
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
@@ -186,26 +189,50 @@ export default function PinterestInvitationPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
-      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-between gap-12 py-8 px-4">
+    <div className={`
+      flex flex-col min-h-screen 
+      ${isMobile 
+        ? 'bg-gradient-to-br from-pink-50 to-rose-100 p-0 m-0' 
+        : 'bg-gradient-to-br from-pink-50 to-rose-100 p-4'
+      }
+    `}>
+      <div className={`
+        container mx-auto flex flex-col lg:flex-row 
+        ${isMobile 
+          ? 'items-stretch justify-center gap-0 py-0 px-0' 
+          : 'items-start justify-between gap-12 py-8 px-4'
+        }
+      `}>
         {/* Left column - Info text */}
-        <div className="w-full lg:w-1/4 text-center lg:text-left space-y-8 lg:sticky lg:top-8">
-          <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
-            Únete al Reto de Creadores de Pinterest y Gana
-          </h1>
-          
-          <div className="prose prose-pink max-w-none">
-            <p className="text-gray-600 text-lg">
-              ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
-              conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
-              en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.
-            </p>
+        {!isMobile && (
+          <div className="w-full lg:w-1/4 text-center lg:text-left space-y-8 lg:sticky lg:top-8">
+            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+              Únete al Reto de Creadores de Pinterest y Gana
+            </h1>
+            
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 text-lg">
+                ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
+                conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
+                en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Right column - Form card */}
-        <Card className="w-full lg:w-2/4 shadow-2xl bg-white/95 backdrop-blur">
-          <div className="p-8">
+        <Card className={`
+          ${isMobile 
+            ? 'w-full h-screen shadow-none bg-white rounded-none' 
+            : 'w-full lg:w-2/4 shadow-2xl bg-white/95 backdrop-blur'
+          }
+        `}>
+          <div className={`
+            ${isMobile 
+              ? 'p-4 pt-8 flex flex-col justify-between h-full' 
+              : 'p-8'
+            }
+          `}>
             <Stepper steps={stepList} currentStep={currentStep.id} />
             
             {currentStep.id === "welcome" && (
