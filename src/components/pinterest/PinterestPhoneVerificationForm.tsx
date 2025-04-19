@@ -37,6 +37,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
 
   useEffect(() => {
     if (countdown > 0) {
@@ -74,6 +75,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
 
     try {
       setIsVerifying(true);
+      setVerificationError("");
 
       const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
@@ -83,17 +85,24 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error in verification process:", error);
+        setVerificationError("Ocurrió un error al enviar el código de verificación");
+        toast.error("Error al enviar el código de verificación");
+        return;
+      }
 
       if (data.success) {
         toast.success("Código de verificación enviado a tu teléfono");
         setVerificationStep("verification");
         setCountdown(600); // 10 minutes
       } else {
+        setVerificationError(data.message || "Error al enviar código de verificación");
         toast.error(data.message || "Error al enviar código de verificación");
       }
     } catch (err) {
       console.error("Error en el proceso de verificación:", err);
+      setVerificationError("Ocurrió un error inesperado");
       toast.error("Ocurrió un error inesperado");
     } finally {
       setIsVerifying(false);
@@ -108,6 +117,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
 
     try {
       setIsVerifying(true);
+      setVerificationError("");
 
       const { data, error } = await supabase.functions.invoke("verify-phone", {
         body: {
@@ -119,17 +129,24 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error en el proceso de verificación:", error);
+        setVerificationError("Ocurrió un error al verificar el código");
+        toast.error("Error al verificar el código");
+        return;
+      }
 
       if (data.success) {
         setVerificationSuccess(true);
         setPhoneData({ ...phoneData, phoneVerified: true });
         onSubmit();
       } else {
+        setVerificationError(data.message || "Código de verificación inválido");
         toast.error(data.message || "Código de verificación inválido");
       }
     } catch (err) {
       console.error("Error en el proceso de verificación:", err);
+      setVerificationError("Ocurrió un error inesperado");
       toast.error("Ocurrió un error inesperado");
     } finally {
       setIsVerifying(false);
@@ -168,6 +185,12 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
           <Phone className="h-5 w-5" />
           <Label className="text-lg font-medium">Phone Number</Label>
         </div>
+
+        {verificationError && (
+          <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md border border-red-200">
+            {verificationError}
+          </div>
+        )}
 
         {verificationStep === "input" ? (
           <div className="space-y-4">
@@ -237,6 +260,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
                   setVerificationStep("input");
                   setVerificationCode("");
                   setCountdown(0);
+                  setVerificationError("");
                 }}
               >
                 Back
