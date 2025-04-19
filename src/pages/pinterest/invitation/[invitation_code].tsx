@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -6,16 +5,16 @@ import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
 import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
+import { PinterestPhoneVerificationForm } from "@/components/pinterest/PinterestPhoneVerificationForm";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { Stepper } from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
-import { ProjectStage } from "@/types/project";
 
 const stepList = [
   { id: "welcome", label: "Crear cuenta" },
   { id: "profile", label: "Perfil" },
-  { id: "complete", label: "Listo" },
+  { id: "verification", label: "Verificación" },
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -162,16 +161,40 @@ export default function PinterestInvitationPage() {
         })
         .eq("id", invitation.id);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      toast.success("¡Perfil guardado exitosamente!");
-      setCurrentStep(stepList[2]); // Move to complete step
-    } catch (err) {
-      toast.error("Error al guardar el perfil");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    toast.success("¡Perfil guardado exitosamente!");
+    setCurrentStep(stepList[2]); // Move to verification step
+  } catch (err) {
+    toast.error("Error al guardar el perfil");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+const handleVerificationComplete = async () => {
+  if (!invitation) return;
+  setIsSubmitting(true);
+
+  try {
+    const { error } = await supabase
+      .from("creator_invitations")
+      .update({ 
+        status: "completed",
+        updated_at: new Date().toISOString() 
+      })
+      .eq("id", invitation.id);
+
+    if (error) throw error;
+
+    toast.success("¡Verificación completada exitosamente!");
+    setCurrentStep(stepList[2]); // Stay on verification step but show completion message
+  } catch (err) {
+    toast.error("Error al completar la verificación");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (loading) {
     return (
@@ -230,15 +253,12 @@ export default function PinterestInvitationPage() {
               />
             )}
 
-            {currentStep.id === "complete" && (
-              <div className="text-center space-y-6 py-12">
-                <h2 className="text-2xl font-bold text-[#C2185B]">
-                  ¡Felicitaciones! Has completado tu perfil
-                </h2>
-                <p className="text-gray-600 text-lg">
-                  Te contactaremos pronto con más información sobre el programa.
-                </p>
-              </div>
+            {currentStep.id === "verification" && (
+              <PinterestPhoneVerificationForm
+                onSubmit={handleVerificationComplete}
+                isSubmitting={isSubmitting}
+                invitationId={invitation?.id}
+              />
             )}
           </div>
         </Card>
