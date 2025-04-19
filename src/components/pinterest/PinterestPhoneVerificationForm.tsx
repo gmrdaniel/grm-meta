@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   InputOTP,
   InputOTPGroup,
@@ -24,6 +24,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   isSubmitting,
   invitationId,
 }) => {
+  const navigate = useNavigate();
   const [phoneData, setPhoneData] = useState({
     phoneCountryCode: "+52",
     phoneNumber: "",
@@ -34,6 +35,7 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -119,7 +121,29 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       if (error) throw error;
 
       if (data.success) {
-        toast.success("Teléfono verificado exitosamente");
+        const { data: invitationData, error: invitationError } = await supabase
+          .from('creator_invitations')
+          .select('email, full_name')
+          .eq('id', invitationId)
+          .single();
+
+        if (invitationError) throw invitationError;
+
+        await handleCreateProfile(invitationData.email, invitationData.full_name);
+
+        const { error: updateError } = await supabase
+          .from('creator_invitations')
+          .update({ 
+            status: 'completed',
+            phone_verified: true,
+            phone_number: phoneData.phoneNumber,
+            phone_country_code: phoneData.phoneCountryCode
+          })
+          .eq('id', invitationId);
+
+        if (updateError) throw updateError;
+
+        setVerificationSuccess(true);
         setPhoneData({ ...phoneData, phoneVerified: true });
         onSubmit();
       } else {
@@ -132,6 +156,59 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
       setIsVerifying(false);
     }
   };
+
+  const handleCreateProfile = async (email: string, firstName: string | null) => {
+    try {
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: crypto.randomUUID(), // Generate a random password since we'll use magic link
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (!user?.id) throw new Error("No user ID returned from signup");
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: email,
+          first_name: firstName,
+          role: 'creator'
+        });
+
+      if (profileError) throw profileError;
+
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      throw err;
+    }
+  };
+
+  const handleNavigateToLogin = () => {
+    navigate('/auth');
+  };
+
+  if (verificationSuccess) {
+    return (
+      <CardContent className="space-y-6">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-[#C2185B]">
+            ¡YA VERIFICAMOS TU CUENTA, MUCHA SUERTE!
+          </h2>
+          <p className="text-gray-600">
+            Ya puedes acceder a tu cuenta, donde recibirás la invitación al evento exclusivo de Pinterest, podrás revisar el estatus de tu participación en el sorteo y acceder a recursos diseñados para ayudarte a crecer más rápido como creador de contenido ¡y más!
+          </p>
+          <Button 
+            onClick={handleNavigateToLogin}
+            className="w-full bg-[#C2185B] hover:bg-[#A01648] text-white"
+          >
+            ACCEDE A TU CUENTA AQUÍ
+          </Button>
+        </div>
+      </CardContent>
+    );
+  }
 
   return (
     <CardContent className="space-y-6">
