@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -6,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
 import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
-import { PinterestPhoneVerificationForm } from "@/components/pinterest/PinterestPhoneVerificationForm";
+import { PinterestVerificationSuccess } from "@/components/pinterest/PinterestVerificationSuccess";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { Stepper } from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
@@ -15,7 +14,7 @@ import { CreatorInvitation } from "@/types/invitation";
 const stepList = [
   { id: "welcome", label: "Crear cuenta" },
   { id: "profile", label: "Perfil" },
-  { id: "verification", label: "Verificación" },
+  { id: "success", label: "Verificación" },
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -87,36 +86,6 @@ export default function PinterestInvitationPage() {
     fetchInvitation();
   }, [invitation_code]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, termsAccepted: checked }));
-  };
-
-  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleContentTypeChange = (value: string, checked: boolean) => {
-    setProfileData((prev) => ({
-      ...prev,
-      contentTypes: checked
-        ? [...prev.contentTypes, value]
-        : prev.contentTypes.filter((type) => type !== value),
-    }));
-  };
-
-  const handleProfileCheckboxChange = (
-    key: 'isConnected' | 'isAutoPublishEnabled',
-    checked: boolean
-  ) => {
-    setProfileData((prev) => ({ ...prev, [key]: checked }));
-  };
-
   const handleContinueWelcome = async () => {
     if (!invitation) return;
     setIsSubmitting(true);
@@ -147,12 +116,6 @@ export default function PinterestInvitationPage() {
   };
 
   const handleProfileSubmit = async () => {
-    // Simply advance to the next step without validations or saving data
-    setCurrentStep(stepList[2]); // Move to verification step
-    toast.success("¡Perfil guardado exitosamente!");
-  };
-
-  const handleVerificationComplete = async () => {
     if (!invitation) return;
     setIsSubmitting(true);
 
@@ -167,9 +130,10 @@ export default function PinterestInvitationPage() {
 
       if (error) throw error;
 
-      toast.success("¡Verificación completada exitosamente!");
+      setCurrentStep(stepList[2]); // Move to success screen
+      toast.success("¡Perfil completado exitosamente!");
     } catch (err) {
-      toast.error("Error al completar la verificación");
+      toast.error("Error al guardar el perfil");
     } finally {
       setIsSubmitting(false);
     }
@@ -232,12 +196,8 @@ export default function PinterestInvitationPage() {
               />
             )}
 
-            {currentStep.id === "verification" && (
-              <PinterestPhoneVerificationForm
-                onSubmit={handleVerificationComplete}
-                isSubmitting={isSubmitting}
-                invitationId={invitation?.id}
-              />
+            {currentStep.id === "success" && (
+              <PinterestVerificationSuccess />
             )}
           </div>
         </Card>
