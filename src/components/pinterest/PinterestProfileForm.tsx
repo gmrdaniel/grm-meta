@@ -1,10 +1,10 @@
-
 import React from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "react-router-dom";
 
 interface PinterestProfileFormProps {
@@ -105,13 +105,33 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                 htmlFor="isConnected"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                HE CONECTADO MI CUENTA DE INSTAGRAM Y PINTEREST
+                AHORA CONECTA TU CUENTA DE INSTAGRAM EN TU NUEVA CUENTA DE PINTEREST !
               </label>
               <div className="text-xs text-blue-600 hover:underline">
-                <Link to="#">APRENDE CÓMO AQUÍ</Link>
+                <Link to="#">(Aprende Cómo Aquí)</Link>
               </div>
             </div>
           </div>
+
+          <RadioGroup 
+            defaultValue="no" 
+            className="space-y-2"
+            onValueChange={(value) => {
+              const isConfirmed = value === 'yes';
+              onCheckboxChange('isConnected', isConfirmed);
+            }}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="instagram-connection-no" />
+              <Label htmlFor="instagram-connection-no">AÚN NO HE CONECTADO MI CUENTA</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="instagram-connection-yes" />
+              <Label htmlFor="instagram-connection-yes">
+                CONFIRMA QUE HAS CONECTADO TU CUENTA DE INSTAGRAM A PINTEREST AQUÍ
+              </Label>
+            </div>
+          </RadioGroup>
 
           <div className="flex items-center space-x-2">
             <Checkbox
