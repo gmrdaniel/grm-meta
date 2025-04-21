@@ -44,11 +44,11 @@ import {
 import { CreatorInvitation } from "@/types/invitation";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@radix-ui/react-dropdown-menu";
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import InvitationsPagination from "./InvitationsPagination";
 
 const InvitationsList = () => {
@@ -294,61 +294,70 @@ const InvitationsList = () => {
                     align="end"
                     side="bottom"
                     sideOffset={8}
-                    collisionPadding={16}
                     className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
                   >
-                    <DropdownMenuItem
-                      onClick={() => copyInvitationLink(invitation)}
-                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    >
-                      <Copy className="mr-2 h-4 w-4" />
-                      Copy invitation link
+                    <DropdownMenuItem asChild>
+                      <button
+                        onClick={() => copyInvitationLink(invitation)}
+                        className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm"
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy invitation link
+                      </button>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      onClick={() =>
-                        sendEmailMutation.mutate({
-                          email: invitation.email,
-                          name: invitation.full_name,
-                          invitationUrl: createInvitationLink(invitation),
-                        })
-                      }
-                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-indigo-600"
-                    >
-                      <MailCheck className="mr-2 h-4 w-4" />
-                      Send invitation email
+                    <DropdownMenuItem asChild>
+                      <button
+                        onClick={() =>
+                          sendEmailMutation.mutate({
+                            email: invitation.email,
+                            name: invitation.full_name,
+                            invitationUrl: createInvitationLink(invitation),
+                          })
+                        }
+                        className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm text-indigo-600"
+                      >
+                        <MailCheck className="mr-2 h-4 w-4" />
+                        Send invitation email
+                      </button>
                     </DropdownMenuItem>
 
                     {invitation.status === "pending" && (
                       <>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(invitation.id, "accepted")
-                          }
-                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-green-600"
-                        >
-                          <Check className="mr-2 h-4 w-4" />
-                          Mark as accepted
+                        <DropdownMenuItem asChild>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(invitation.id, "accepted")
+                            }
+                            className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm text-green-600"
+                          >
+                            <Check className="mr-2 h-4 w-4" />
+                            Mark as accepted
+                          </button>
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleStatusChange(invitation.id, "rejected")
-                          }
-                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Mark as rejected
+                        <DropdownMenuItem asChild>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(invitation.id, "rejected")
+                            }
+                            className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm text-red-600"
+                          >
+                            <X className="mr-2 h-4 w-4" />
+                            Mark as rejected
+                          </button>
                         </DropdownMenuItem>
                       </>
                     )}
 
                     {invitation.status !== "pending" && (
-                      <DropdownMenuItem
-                        onClick={() => resetInvitationStatus(invitation.id)}
-                        className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-blue-600"
-                      >
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Reset to pending
+                      <DropdownMenuItem asChild>
+                        <button
+                          onClick={() => resetInvitationStatus(invitation.id)}
+                          className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm text-blue-600"
+                        >
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Reset to pending
+                        </button>
                       </DropdownMenuItem>
                     )}
 
@@ -361,15 +370,14 @@ const InvitationsList = () => {
                       }
                     >
                       <AlertDialogTrigger asChild>
-                        <DropdownMenuItem
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            setSelectedInvitation(invitation.id);
-                          }}
-                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete invitation
+                        <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                          <button
+                            onClick={() => setSelectedInvitation(invitation.id)}
+                            className="flex w-full items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete invitation
+                          </button>
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
