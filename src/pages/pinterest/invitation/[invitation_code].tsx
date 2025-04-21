@@ -188,16 +188,16 @@ export default function PinterestInvitationPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
-      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-between gap-12 py-8 px-4">
-        {/* Left column - Info text */}
-        <div className="w-full lg:w-1/4 text-center lg:text-left space-y-8 lg:sticky lg:top-8">
-          <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
+        {/* Centered column for text */}
+        <div className="w-full max-w-2xl text-center space-y-8">
+          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
             Únete al Reto de Creadores de Pinterest y Gana
           </h1>
           
           <div className="prose prose-pink max-w-none">
-            <p className="text-gray-600 text-lg">
+            <p className="text-xl text-gray-700 leading-relaxed">
               ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
               conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
               en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.
