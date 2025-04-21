@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Instagram } from "lucide-react";
+import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 
 interface PinterestWelcomeFormProps {
@@ -15,6 +15,7 @@ interface PinterestWelcomeFormProps {
     email: string;
     socialMediaHandle: string;
     termsAccepted: boolean;
+    phoneNumber: string;
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;
@@ -71,6 +72,28 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               placeholder="@usuario"
               className="border-pink-100 focus-visible:ring-pink-200"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" /> Número de Teléfono
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                value="+52"
+                className="w-20 bg-gray-50 border-pink-100"
+                readOnly
+              />
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={onInputChange}
+                placeholder="Tu número de teléfono"
+                className="flex-1 border-pink-100 focus-visible:ring-pink-200"
+                type="tel"
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2 pt-4">

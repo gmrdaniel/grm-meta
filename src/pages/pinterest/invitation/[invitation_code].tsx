@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -20,7 +19,7 @@ const stepList = [
 
 type Step = (typeof stepList)[number];
 
-export default function PinterestInvitationPage() {
+export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
@@ -34,6 +33,7 @@ export default function PinterestInvitationPage() {
     email: "",
     socialMediaHandle: "",
     termsAccepted: false,
+    phoneNumber: "", // Add this new field
   });
   const [profileData, setProfileData] = useState({
     pinterestUrl: "",
@@ -74,6 +74,7 @@ export default function PinterestInvitationPage() {
           email: invitationData.email || "",
           socialMediaHandle: invitationData.social_media_handle || "",
           termsAccepted: false,
+          phoneNumber: invitationData.phone_number || "",
         });
 
       } catch (err) {
@@ -128,6 +129,7 @@ export default function PinterestInvitationPage() {
           status: "accepted", 
           full_name: formData.fullName,
           social_media_handle: formData.socialMediaHandle,
+          phone_number: formData.phoneNumber, // Add this new field
           updated_at: new Date().toISOString() 
         })
         .eq("id", invitation.id);
