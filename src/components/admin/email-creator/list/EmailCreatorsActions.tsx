@@ -46,11 +46,11 @@ export const EmailCreatorsActions: React.FC<EmailCreatorsActionsProps> = ({
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => onDownloadSelected('xls')}>
               <FileDown className="h-4 w-4 mr-2" />
-              Download as Excel
+              <span>Download as Excel</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDownloadSelected('csv')}>
               <FileDown className="h-4 w-4 mr-2" />
-              Download as CSV
+              <span>Download as CSV</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
