@@ -1,10 +1,10 @@
-
 import React from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "react-router-dom";
 
 interface PinterestProfileFormProps {
@@ -91,14 +91,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
             ))}
           </div>
         </div>
-        <div className="space-y-4">
-          <p className="font-medium text-[#C2185B]">
-            AHORA CONECTA EN TU CUENTA DE INSTAGRAM EN TU NUEVA CUENTA DE PINTEREST !
-          </p>
-          <div className="text-xs text-blue-600 hover:underline">
-            <Link to="#">APRENDE CÓMO AQUÍ</Link>
-          </div>
-        </div>
+
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -110,20 +103,35 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
             <div className="space-y-1">
               <label
                 htmlFor="isConnected"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" >
-               CONFIRMO QUE HE CONECTADO MI CUENTA DE INSTAGRAM A PINTEREST
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                AHORA CONECTA TU CUENTA DE INSTAGRAM EN TU NUEVA CUENTA DE PINTEREST !
               </label>
+              <div className="text-xs text-blue-600 hover:underline">
+                <Link to="#">(Aprende Cómo Aquí)</Link>
+              </div>
             </div>
           </div>
 
-        <div className="space-y-4">
-          <p className="font-medium text-[#C2185B]">
-            FINALMENTE, ACTIVA AUTO PUBLICACIÓN DE TUS POSTEOS DE INSTAGRAM EN PINTEREST.
-          </p>
-          <div className="text-xs text-blue-600 hover:underline">
-            <Link to="#">APRENDE CÓMO AQUÍ</Link>
-          </div>
-        </div>
+          <RadioGroup 
+            defaultValue="no" 
+            className="space-y-2"
+            onValueChange={(value) => {
+              const isConfirmed = value === 'yes';
+              onCheckboxChange('isConnected', isConfirmed);
+            }}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="instagram-connection-no" />
+              <Label htmlFor="instagram-connection-no">AÚN NO HE CONECTADO MI CUENTA</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="instagram-connection-yes" />
+              <Label htmlFor="instagram-connection-yes">
+                CONFIRMA QUE HAS CONECTADO TU CUENTA DE INSTAGRAM A PINTEREST AQUÍ
+              </Label>
+            </div>
+          </RadioGroup>
 
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -137,8 +145,11 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                 htmlFor="isAutoPublishEnabled"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                HE ACTIVADO LA AUTO PUBLICACIÓN DE POSTS DE INSTAGRAM EN PINTEREST
+                HE ACTIVADO LA AUTOPUBLICACIÓN DE INSTAGRAM EN PINTEREST
               </label>
+              <div className="text-xs text-blue-600 hover:underline">
+                <Link to="#">APRENDE CÓMO AQUÍ</Link>
+              </div>
             </div>
           </div>
         </div>
