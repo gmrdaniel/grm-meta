@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -41,6 +42,56 @@ export default function PinterestInvitationPage() {
     isAutoPublishEnabled: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handler functions for form inputs
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      termsAccepted: checked,
+    }));
+  };
+
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleContentTypeChange = (value: string, checked: boolean) => {
+    setProfileData((prev) => {
+      if (checked) {
+        return {
+          ...prev,
+          contentTypes: [...prev.contentTypes, value],
+        };
+      } else {
+        return {
+          ...prev,
+          contentTypes: prev.contentTypes.filter((type) => type !== value),
+        };
+      }
+    });
+  };
+
+  const handleProfileCheckboxChange = (
+    key: 'isConnected' | 'isAutoPublishEnabled',
+    checked: boolean
+  ) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [key]: checked,
+    }));
+  };
 
   useEffect(() => {
     const fetchInvitation = async () => {
