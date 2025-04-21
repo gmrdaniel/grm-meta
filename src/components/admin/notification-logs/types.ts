@@ -1,5 +1,7 @@
 
 export type NotificationLog = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    created_at(created_at: any): import("react").ReactNode;
     id: string;
     channel: "email" | "sms";
     status: "sent" | "failed" | "pending";
@@ -14,4 +16,9 @@ export type NotificationLog = {
     setting_type?: string;
     setting_message?: string;
     stage_name?: string;
+    stage_order_index?: number | null;
+    invitation_created_at?: string | null;
+    invitation_stage_updated_at?: string | null;
+    last_name?: string | null;
+
   };

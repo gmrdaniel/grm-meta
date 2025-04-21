@@ -102,7 +102,7 @@ function App() {
                   
                 />
                 <Route
-                  path="/admin/Notification-Logs"
+                  path="/admin/notification-logs"
                   element={
                     <ProtectedRoute allowedRoles={["admin"]}>
                       <NotificationLogs />
