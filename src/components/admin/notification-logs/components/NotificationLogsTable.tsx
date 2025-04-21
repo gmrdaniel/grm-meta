@@ -36,9 +36,9 @@ export function NotificationLogsTable({ logs }: NotificationLogsTableProps) {
           <TableHead>Status</TableHead>
           <TableHead>Channel</TableHead>
           <TableHead>Recipient</TableHead>
-          <TableHead className="whitespace-nowrap pl-2" >Stage Index</TableHead>
+          <TableHead className=" whitespace-nowrap pl-2" >Stage Index</TableHead>
           <TableHead >Stage</TableHead>
-          <TableHead className="whitespace-nowrap ">Created At</TableHead>
+          <TableHead className="whitespace-nowrap">Created At</TableHead>
           <TableHead className="whitespace-nowrap pr-6">update At</TableHead>
           <TableHead>Sent At</TableHead>
           <TableHead>Error</TableHead>
@@ -60,18 +60,18 @@ export function NotificationLogsTable({ logs }: NotificationLogsTableProps) {
             <TableCell>
               <div className="flex flex-col">
                 <span className="font-medium">
-                  {log.invitation_first_name || "Unknown"}
+                {log.invitation_first_name || "Unknown"} {log.last_name || ""}
                 </span>
                 <span className="text-xs text-gray-500">
                   {log.invitation_email || "No email"}
                 </span>
               </div>
             </TableCell>
-            <TableCell className="text-center">{log.stage_order_index || "N/A"}</TableCell>
-            <TableCell>{log.stage_name || "Unknown Stage"}</TableCell>
-            <TableCell className="whitespace-nowrap text-center">{formatDate(log.invitation_stage_updated_at || "N/A")}</TableCell>
-            <TableCell className="whitespace-nowrap text-center ">{formatDate(log.invitation_created_at || "N/A")}</TableCell>
-            <TableCell className="whitespace-nowrap">
+            <TableCell className="text-center ">{log.stage_order_index || "N/A"}</TableCell>
+            <TableCell>{log.stage_name || "Unknown Stage"} </TableCell>
+            <TableCell className="text-center">{formatDate(log.invitation_stage_updated_at || "N/A")}</TableCell>
+            <TableCell className=" text-center ">{formatDate(log.invitation_created_at || "N/A")}</TableCell>
+            <TableCell >
               {log.sent_at
                 ? format(new Date(log.sent_at), "MMM d, yyyy HH:mm")
                 : "N/A"}

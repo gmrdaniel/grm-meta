@@ -19,5 +19,6 @@ export type NotificationLog = {
     stage_order_index?: number | null;
     invitation_created_at?: string | null;
     invitation_stage_updated_at?: string | null;
+    last_name?: string | null;
 
   };
