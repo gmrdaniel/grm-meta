@@ -111,6 +111,9 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
               placeholder="Your first name"
               className={formErrors.firstName ? "border-red-500" : ""}
             />
+            {formErrors.firstName && (
+              <p className="text-xs text-red-500">{formErrors.firstName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
