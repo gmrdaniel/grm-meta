@@ -1,2 +1,2 @@
 alter table projects
-add column slug text not null unique;
+add column slug text unique;
