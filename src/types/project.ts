@@ -5,6 +5,12 @@ export interface Project {
   created_at: string;
   updated_at: string;
   stage_count?: number;
+  project_platforms?: SocialMediaPlatform[]
+}
+
+export interface SocialMediaPlatform {
+  id: string;
+  name: string;
 }
 
 export interface ProjectStage {
