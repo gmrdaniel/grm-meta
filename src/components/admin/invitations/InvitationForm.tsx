@@ -47,7 +47,7 @@ const formSchema = z.object({
         message: "Do not include @ or links in the handle",
       }
     ),
-  social_media_type: z.enum(["tiktok", "pinterest", "youtube"]).optional(),
+  social_media_type: z.enum(["tiktok", "pinterest", "youtube", "instagram"]).optional(),
   //youtube_social_media: z.string().nullable(),
   project_id: z.string().uuid({ message: "Please select a project" }),
   invitation_type: z.enum(["new_user", "existing_user"]),
@@ -226,7 +226,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                   onValueChange={(value) => {
                     form.setValue(
                       "social_media_type",
-                      value as "tiktok" | "pinterest" | "youtube"
+                      value as "tiktok" | "pinterest" | "youtube" | 'instagram'
                     ); // Guardar siempre en social_media_type
 
                     form.setValue("social_media_handle", "");
@@ -240,7 +240,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                   </FormControl>
                   <SelectContent>
                     {selectedProject?.platforms?.map((platform) => (
-                      <SelectItem key={platform.id} value={platform.name}>
+                      <SelectItem key={platform.id} value={platform.name.toLowerCase()}>
                         {platform.name.charAt(0).toUpperCase() +
                           platform.name.slice(1)}
                       </SelectItem>
