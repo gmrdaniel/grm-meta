@@ -8,8 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckboxPinterest } from "../terms-and-conditions/TermsAndConditionsPinterest";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -135,28 +136,21 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-              <Phone className="h-3 w-3" /> Número de Teléfono
+              <Phone className="h-4 w-4" /> Número de Teléfono
             </Label>
             <div className="flex gap-2">
-              <PhoneInput
-                country={"mx"} // Puedes poner por defecto 'co', 'ar', etc.
-                onlyCountries={["mx", "co", "ar", "cl", "pe"]}
-                localization={{
-                  mx: "México",
-                  co: "Colombia",
-                  ar: "Argentina",
-                  cl: "Chile",
-                  pe: "Perú",
-                }}
+              <Input
+                value="+52"
+                className="w-20 bg-gray-50 border-pink-100"
+                readOnly
               />
-
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={onInputChange}
                 placeholder="Tu número de teléfono"
-                className="flex-1 border-pink-100 h-4 focus-visible:ring-pink-200"
+                className="flex-1 border-pink-100 focus-visible:ring-pink-200"
                 type="tel"
               />
             </div>
