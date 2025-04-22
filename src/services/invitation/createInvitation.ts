@@ -33,7 +33,7 @@ export const createInvitation = async (invitationData: CreateInvitationData): Pr
   const invitationCode = generateInvitationCode();
   
   // Generate invitation URL path - UPDATED to use meta/welcome format
-  const invitationUrl = `/meta/${project.slug}/${invitationCode}`;
+  const invitationUrl = `/${project.slug}/invitation/${invitationCode}`;
   
   // Log the invitation data for debugging
   console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });
