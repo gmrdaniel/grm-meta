@@ -18,11 +18,22 @@ export const generateInvitationCode = (): string => {
  * Create a new invitation
  */
 export const createInvitation = async (invitationData: CreateInvitationData): Promise<CreatorInvitation> => {
+  
+  const { data: project, error: projectError } = await supabase
+    .from('projects')
+    .select('slug') // Replace 'correct_column_name' with the actual column name from the database
+    .eq('id', invitationData.project_id)
+    .maybeSingle();
+
+  if (projectError || !project) {
+    throw new Error('Project not found or error fetching project slug');
+  }
+  
   // Generate a unique invitation code
   const invitationCode = generateInvitationCode();
   
   // Generate invitation URL path - UPDATED to use meta/welcome format
-  const invitationUrl = `/meta/invitation/${invitationCode}`;
+  const invitationUrl = `/${project.slug}/invitation/${invitationCode}`;
   
   // Log the invitation data for debugging
   console.log('Creating invitation with data:', { ...invitationData, invitationCode, invitationUrl });

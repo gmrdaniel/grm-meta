@@ -25,7 +25,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CreateInvitationData } from "@/types/invitation";
-import { useSendInvitationEmail } from "@/hooks/useSendInvitationEmail";
 
 const formSchema = z.object({
   first_name: z
@@ -48,7 +47,7 @@ const formSchema = z.object({
         message: "Do not include @ or links in the handle",
       }
     ),
-  social_media_type: z.enum(["tiktok", "pinterest", "youtube"]).optional(),
+  social_media_type: z.enum(["tiktok", "pinterest", "youtube", "instagram"]).optional(),
   //youtube_social_media: z.string().nullable(),
   project_id: z.string().uuid({ message: "Please select a project" }),
   invitation_type: z.enum(["new_user", "existing_user"]),
@@ -108,6 +107,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
     > = {
       tiktok: "social_media_handle",
       youtube: "youtube_channel",
+      instagram: "instagram_user",
     };
 
     const targetProperty = socialMediaPropertyMap[data.social_media_type || ""];
@@ -126,6 +126,10 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
   };
 
   const hasSocialMedia = !!form.watch("social_media_type");
+  const selectedProjectId = form.watch("project_id");
+  const selectedProject = projects?.find(
+    (project) => project.id === selectedProjectId
+  );
 
   return (
     <Form {...form}>
@@ -179,67 +183,6 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
 
           <FormField
             control={form.control}
-            name="social_media_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Social Media Platform</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    form.setValue(
-                      "social_media_type",
-                      value as "tiktok" | "pinterest" | "youtube"
-                    ); // Guardar siempre en social_media_type
-
-                    form.setValue("social_media_handle", "");
-                  }}
-                  value={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select social media platform" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="pinterest">Instagram</SelectItem>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="social_media_handle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Social Media Handle</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span className="text-slate-500 text-sm">@</span>
-                    </div>
-                    <Input
-                      {...field}
-                      className="pl-8"
-                      placeholder="creatorname123"
-                      disabled={!hasSocialMedia}
-                    />
-                  </div>
-                </FormControl>
-                <FormDescription>
-                  <span className="text-muted-foreground text-xs">
-                    Example: <code>creatorname123</code>
-                  </span>
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="project_id"
             render={({ field }) => (
               <FormItem>
@@ -266,6 +209,72 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                 </Select>
                 <FormDescription>
                   The project this invitation is associated with
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="social_media_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social Media Platform</FormLabel>
+                <Select
+                  disabled={!selectedProjectId}
+                  onValueChange={(value) => {
+                    form.setValue(
+                      "social_media_type",
+                      value as "tiktok" | "pinterest" | "youtube" | 'instagram'
+                    ); // Guardar siempre en social_media_type
+
+                    form.setValue("social_media_handle", "");
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select social media platform" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {selectedProject?.platforms?.map((platform) => (
+                      <SelectItem key={platform.id} value={platform.name.toLowerCase()}>
+                        {platform.name.charAt(0).toUpperCase() +
+                          platform.name.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="social_media_handle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Social Media Handle</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                      <span className="text-slate-500 text-sm">@</span>
+                    </div>
+                    <Input
+                      {...field}
+                      className="pl-8"
+                      placeholder="creatorname123"
+                      disabled={!hasSocialMedia}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>
+                  <span className="text-muted-foreground text-xs">
+                    Example: <code>creatorname123</code>
+                  </span>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
