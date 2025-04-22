@@ -9,10 +9,11 @@ INSERT INTO
     )
 VALUES
     (
-        'cf7f3465-2b30-4cb7-8b55-c5ab10b00505',
-        'Meta',
-        'meta',
+        'b1e23456-7f89-4abc-9d12-34567890abcd',
+        'Pinterest',
+        'pinterest',
         'active',
         '2025-03-20 03:55:06.575655+00',
         '2025-03-20 03:55:06.575655+00'
-    );
+    )
+on conflict (id) do nothing;
