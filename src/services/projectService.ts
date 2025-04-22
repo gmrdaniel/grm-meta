@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Project, ProjectStage } from "@/types/project";
+import { Project, ProjectStage, SocialMediaPlatform } from "@/types/project";
 
 /**
  * Fetch all projects
@@ -7,22 +7,33 @@ import { Project, ProjectStage } from "@/types/project";
 export const fetchProjects = async (): Promise<Project[]> => {
   const { data, error } = await supabase
     .from('projects')
-    .select('*, project_stages(count)')
+    .select(`
+      *,
+      project_stages(count),
+      project_social_media_platforms(
+        social_media_platforms(id, name)
+      )
+    `)
     .order('created_at', { ascending: false });
-  
+
   if (error) {
     console.error('Error fetching projects:', error);
     throw new Error(error.message);
   }
-  
+
   const projects = data.map(project => ({
     ...project,
     status: project.status as Project['status'],
-    stage_count: project.project_stages[0]?.count || 0
+    stage_count: project.project_stages[0]?.count || 0,
+    platforms: project.project_social_media_platforms?.map(
+      (pp: { social_media_platforms: SocialMediaPlatform }) => pp.social_media_platforms
+    ) ?? []
   }));
-  
+
   return projects as Project[];
 };
+
+
 
 /**
  * Fetch a project by ID
