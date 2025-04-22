@@ -201,7 +201,7 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="pinterest">Pinterest</SelectItem>
+                    <SelectItem value="pinterest">Instagram</SelectItem>
                     <SelectItem value="youtube">YouTube</SelectItem>
                   </SelectContent>
                 </Select>

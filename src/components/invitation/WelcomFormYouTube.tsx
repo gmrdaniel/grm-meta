@@ -69,7 +69,7 @@ export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">Fisrt Name</Label>
+            <Label htmlFor="fullName">First Name</Label>
             <Input
               id="fullName"
               name="fullName"
