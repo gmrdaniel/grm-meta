@@ -21,6 +21,27 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+// Simplify types by breaking them down into smaller interfaces
+interface Template {
+  id: string;
+  name: string;
+}
+
+// Define the shape of an SMS log record as returned from the database
+interface SMSLogRecord {
+  id: string;
+  phone_number: string;
+  country_code: string;
+  recipient_name: string | null;
+  message: string;
+  status: string;
+  created_at: string;
+  error_message: string | null;
+  template_id: string | null;
+  sms_templates: { name: string } | null;
+}
+
+// Define the processed SMS log with the template name extracted
 interface SMSLog {
   id: string;
   phone_number: string;
@@ -31,11 +52,7 @@ interface SMSLog {
   created_at: string;
   error_message: string | null;
   template_id: string | null;
-}
-
-interface Template {
-  id: string;
-  name: string;
+  template_name: string | null;
 }
 
 export function SMSLogsList() {
@@ -85,11 +102,14 @@ export function SMSLogsList() {
 
       if (error) throw error;
 
+      // Process the data to extract template names
+      const processedData: SMSLog[] = data.map((log: SMSLogRecord) => ({
+        ...log,
+        template_name: log.sms_templates?.name || null
+      }));
+
       return {
-        data: data.map(log => ({
-          ...log,
-          template_name: log.sms_templates?.name
-        })),
+        data: processedData,
         count
       };
     }
