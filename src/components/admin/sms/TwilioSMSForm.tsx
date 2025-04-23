@@ -7,6 +7,20 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CountrySelect } from "@/components/pinterest/CountrySelect";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+
+interface Template {
+  id: string;
+  name: string;
+  message: string;
+}
 
 export function TwilioSMSForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,9 +28,35 @@ export function TwilioSMSForm() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+
+  const { data: templates } = useQuery<Template[]>({
+    queryKey: ['sms_templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sms_templates')
+        .select('id, name, message')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleCountrySelect = (_countryId: string, code: string) => {
     setPhoneCode(code);
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
+      setSelectedTemplateId(templateId);
+      let processedMessage = template.message;
+      processedMessage = processedMessage.replace("{nombre}", name || "[nombre]");
+      // You would need to get the actual invitation link from your app's logic
+      processedMessage = processedMessage.replace("{link_invitation}", "[link_invitation]");
+      setMessage(processedMessage);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,12 +75,12 @@ export function TwilioSMSForm() {
 
       if (error) throw error;
 
-      toast.success("SMS sent successfully!");
+      toast.success("SMS enviado exitosamente!");
       setPhoneNumber("");
       setName("");
       setMessage("");
     } catch (error: any) {
-      toast.error(`Error sending SMS: ${error.message}`);
+      toast.error(`Error enviando SMS: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +92,25 @@ export function TwilioSMSForm() {
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
+          <div>
+            <Label htmlFor="template">Plantilla</Label>
+            <Select
+              value={selectedTemplateId}
+              onValueChange={handleTemplateSelect}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar plantilla" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates?.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <Label htmlFor="country">Código de país</Label>
             <CountrySelect
@@ -78,7 +137,18 @@ export function TwilioSMSForm() {
             <Input
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (selectedTemplateId) {
+                  const template = templates?.find(t => t.id === selectedTemplateId);
+                  if (template) {
+                    let processedMessage = template.message;
+                    processedMessage = processedMessage.replace("{nombre}", e.target.value || "[nombre]");
+                    processedMessage = processedMessage.replace("{link_invitation}", "[link_invitation]");
+                    setMessage(processedMessage);
+                  }
+                }
+              }}
               placeholder="Juan Pérez"
               required
             />

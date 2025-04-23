@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { TwilioSMSForm } from "@/components/admin/sms/TwilioSMSForm";
 import { SMSTemplateForm } from "@/components/admin/sms/SMSTemplateForm";
+import { SMSTemplatesList } from "@/components/admin/sms/SMSTemplatesList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminSMS() {
@@ -25,8 +26,9 @@ export default function AdminSMS() {
                 <TwilioSMSForm />
               </TabsContent>
 
-              <TabsContent value="templates">
+              <TabsContent value="templates" className="space-y-6">
                 <SMSTemplateForm />
+                <SMSTemplatesList />
               </TabsContent>
             </Tabs>
           </div>

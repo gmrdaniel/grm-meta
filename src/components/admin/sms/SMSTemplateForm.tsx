@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +12,23 @@ interface Project {
   name: string;
 }
 
-export function SMSTemplateForm() {
+interface Template {
+  id: string;
+  name: string;
+  message: string;
+  project_id: string | null;
+}
+
+interface SMSTemplateFormProps {
+  initialData?: Template;
+  onSuccess?: () => void;
+}
+
+export function SMSTemplateForm({ initialData, onSuccess }: SMSTemplateFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [projectId, setProjectId] = useState("");
-  const [message, setMessage] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [projectId, setProjectId] = useState(initialData?.project_id || "");
+  const [message, setMessage] = useState(initialData?.message || "");
 
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['projects'],
@@ -37,20 +48,41 @@ export function SMSTemplateForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from('sms_templates').insert({
-        name,
-        project_id: projectId,
-        message
-      });
+      if (initialData) {
+        // Update existing template
+        const { error } = await supabase
+          .from('sms_templates')
+          .update({
+            name,
+            project_id: projectId,
+            message
+          })
+          .eq('id', initialData.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("Plantilla actualizada exitosamente");
+      } else {
+        // Create new template
+        const { error } = await supabase
+          .from('sms_templates')
+          .insert({
+            name,
+            project_id: projectId,
+            message
+          });
 
-      toast.success("Plantilla guardada exitosamente");
-      setName("");
-      setProjectId("");
-      setMessage("");
+        if (error) throw error;
+        toast.success("Plantilla guardada exitosamente");
+      }
+
+      onSuccess?.();
+      if (!initialData) {
+        setName("");
+        setProjectId("");
+        setMessage("");
+      }
     } catch (error: any) {
-      toast.error(`Error al guardar la plantilla: ${error.message}`);
+      toast.error(`Error al ${initialData ? 'actualizar' : 'guardar'} la plantilla: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +90,9 @@ export function SMSTemplateForm() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-6">Crear Plantilla SMS</h2>
+      <h2 className="text-xl font-semibold mb-6">
+        {initialData ? "Editar" : "Crear"} Plantilla SMS
+      </h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
@@ -112,7 +146,10 @@ export function SMSTemplateForm() {
           className="w-full"
           disabled={isLoading}
         >
-          {isLoading ? "Guardando..." : "Guardar plantilla"}
+          {isLoading ? 
+            (initialData ? "Actualizando..." : "Guardando...") : 
+            (initialData ? "Actualizar plantilla" : "Guardar plantilla")
+          }
         </Button>
       </form>
     </div>
