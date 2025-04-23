@@ -143,9 +143,14 @@ export function CreatorRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleEdit}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar
+              <DropdownMenuItem asChild>
+                <button 
+                  className="flex w-full items-center px-2 py-1.5 text-sm"
+                  onClick={handleEdit}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar
+                </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

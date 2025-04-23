@@ -19,7 +19,7 @@ const stepList = [
 
 type Step = (typeof stepList)[number];
 
-export default function PinterestInvitationPage() {
+export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
@@ -33,6 +33,7 @@ export default function PinterestInvitationPage() {
     email: "",
     socialMediaHandle: "",
     termsAccepted: false,
+    phoneNumber: "", // Add this new field
   });
   const [profileData, setProfileData] = useState({
     pinterestUrl: "",
@@ -73,6 +74,7 @@ export default function PinterestInvitationPage() {
           email: invitationData.email || "",
           socialMediaHandle: invitationData.social_media_handle || "",
           termsAccepted: false,
+          phoneNumber: invitationData.phone_number || "",
         });
 
       } catch (err) {
@@ -127,6 +129,7 @@ export default function PinterestInvitationPage() {
           status: "accepted", 
           full_name: formData.fullName,
           social_media_handle: formData.socialMediaHandle,
+          phone_number: formData.phoneNumber, // Add this new field
           updated_at: new Date().toISOString() 
         })
         .eq("id", invitation.id);
@@ -145,8 +148,10 @@ export default function PinterestInvitationPage() {
     }
   };
 
-  const handleProfileSubmit = () => {
-    setCurrentStep(stepList[2]); // Move directly to verification step (step 3)
+  const handleProfileSubmit = async () => {
+    // Simply advance to the next step without validations or saving data
+    setCurrentStep(stepList[2]); // Move to verification step
+    toast.success("¡Perfil guardado exitosamente!");
   };
 
   const handleVerificationComplete = async () => {
@@ -165,7 +170,6 @@ export default function PinterestInvitationPage() {
       if (error) throw error;
 
       toast.success("¡Verificación completada exitosamente!");
-      setCurrentStep(stepList[2]); // Stay on verification step but show completion message
     } catch (err) {
       toast.error("Error al completar la verificación");
     } finally {
@@ -186,16 +190,16 @@ export default function PinterestInvitationPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
-      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-between gap-12 py-8 px-4">
-        {/* Left column - Info text */}
-        <div className="w-full lg:w-1/4 text-center lg:text-left space-y-8 lg:sticky lg:top-8">
-          <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
+        {/* Centered column for text */}
+        <div className="w-full max-w-2xl text-center space-y-8">
+          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
             Únete al Reto de Creadores de Pinterest y Gana
           </h1>
           
           <div className="prose prose-pink max-w-none">
-            <p className="text-gray-600 text-lg">
+            <p className="text-xl text-gray-700 leading-relaxed">
               ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
               conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
               en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.

@@ -91,7 +91,14 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
             ))}
           </div>
         </div>
-
+        <div className="space-y-4">
+          <p className="font-medium text-[#C2185B]">
+            AHORA CONECTA EN TU CUENTA DE INSTAGRAM EN TU NUEVA CUENTA DE PINTEREST !
+          </p>
+          <div className="text-xs text-blue-600 hover:underline">
+            <Link to="#">APRENDE CÓMO AQUÍ</Link>
+          </div>
+        </div>
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -103,15 +110,20 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
             <div className="space-y-1">
               <label
                 htmlFor="isConnected"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                HE CONECTADO MI CUENTA DE INSTAGRAM Y PINTEREST
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" >
+               CONFIRMO QUE HE CONECTADO MI CUENTA DE INSTAGRAM A PINTEREST
               </label>
-              <div className="text-xs text-blue-600 hover:underline">
-                <Link to="#">APRENDE CÓMO AQUÍ</Link>
-              </div>
             </div>
           </div>
+
+        <div className="space-y-4">
+          <p className="font-medium text-[#C2185B]">
+            FINALMENTE, ACTIVA AUTO PUBLICACIÓN DE TUS POSTEOS DE INSTAGRAM EN PINTEREST.
+          </p>
+          <div className="text-xs text-blue-600 hover:underline">
+            <Link to="#">APRENDE CÓMO AQUÍ</Link>
+          </div>
+        </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -125,11 +137,8 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                 htmlFor="isAutoPublishEnabled"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                HE ACTIVADO LA AUTOPUBLICACIÓN DE INSTAGRAM EN PINTEREST
+                HE ACTIVADO LA AUTO PUBLICACIÓN DE POSTS DE INSTAGRAM EN PINTEREST
               </label>
-              <div className="text-xs text-blue-600 hover:underline">
-                <Link to="#">APRENDE CÓMO AQUÍ</Link>
-              </div>
             </div>
           </div>
         </div>
@@ -138,7 +147,6 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
       <CardFooter className="flex justify-end px-0">
         <Button
           onClick={onSubmit}
-          disabled={isSubmitting}
           className="bg-[#C2185B] hover:bg-[#A01648] text-white w-full"
         >
           {isSubmitting ? "Guardando..." : "GUARDAR Y CONTINUAR"}
