@@ -1,4 +1,3 @@
-
 import React from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
+import { CountrySelect } from "./CountrySelect";
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -21,6 +21,7 @@ interface PinterestWelcomeFormProps {
   onCheckboxChange: (checked: boolean) => void;
   onContinue: () => void;
   isSubmitting?: boolean;
+  onCountrySelect?: (countryId: string, phoneCode: string) => void;
 }
 
 export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
@@ -30,10 +31,11 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   onCheckboxChange,
   onContinue,
   isSubmitting = false,
+  onCountrySelect,
 }) => {
   return (
     <>
-      <CardContent className="space-y-6 pt-4">
+      <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Nombre Completo</Label>
@@ -75,14 +77,24 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="residenceCountry">País de Residencia</Label>
+            <CountrySelect
+              placeholder="Selecciona tu país de residencia"
+              value={invitation.residence_country_id || undefined}
+              onSelect={(countryId) => onCountrySelect?.(countryId, '')}
+              className="border-pink-100 focus-visible:ring-pink-200"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
               <Phone className="h-4 w-4" /> Número de Teléfono
             </Label>
             <div className="flex gap-2">
-              <Input
-                value="+52"
-                className="w-20 bg-gray-50 border-pink-100"
-                readOnly
+              <CountrySelect
+                placeholder="Código"
+                onSelect={(_, phoneCode) => onCountrySelect?.('', phoneCode)}
+                className="w-32 border-pink-100 focus-visible:ring-pink-200"
               />
               <Input
                 id="phoneNumber"

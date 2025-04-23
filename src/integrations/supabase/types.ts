@@ -210,6 +210,7 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: Database["public"]["Enums"]["invitation_status"]
@@ -231,6 +232,7 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -252,6 +254,7 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -855,6 +858,7 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: Database["public"]["Enums"]["invitation_status"]
@@ -908,12 +912,22 @@ export type Database = {
         Args: { stage_id: string; project_id_param: string }
         Returns: boolean
       }
+      search_countries: {
+        Args: { search_term: string }
+        Returns: {
+          id: string
+          name_es: string
+          name_en: string
+          phone_code: string
+        }[]
+      }
       update_stages_order: {
         Args: { stages_data: Json[] }
         Returns: undefined
       }
     }
     Enums: {
+      country_status: "active" | "inactive"
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
       nombre_real_status: "pendiente" | "proceso" | "error" | "completado"
       notification_channel: "sms" | "email"
@@ -1036,6 +1050,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      country_status: ["active", "inactive"],
       invitation_status: ["pending", "accepted", "rejected", "completed"],
       nombre_real_status: ["pendiente", "proceso", "error", "completado"],
       notification_channel: ["sms", "email"],
