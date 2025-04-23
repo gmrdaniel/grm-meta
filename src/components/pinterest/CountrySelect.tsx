@@ -29,8 +29,9 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
   const handleOpen = async () => {
     if (countries.length > 0) return;
 
-    const { data, error } = await supabase
-      .rpc('search_countries', { search_term: '' });
+    const { data, error } = await supabase.rpc('search_countries', { 
+      search_term: '' 
+    });
 
     if (!error && data) {
       setCountries(data);

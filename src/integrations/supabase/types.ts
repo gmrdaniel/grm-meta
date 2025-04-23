@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      country_phone_codes: {
+        Row: {
+          created_at: string
+          id: string
+          iso2: string
+          iso3: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status: Database["public"]["Enums"]["country_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          iso2: string
+          iso3: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status?: Database["public"]["Enums"]["country_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          iso2?: string
+          iso3?: string
+          name_en?: string
+          name_es?: string
+          phone_code?: string
+          status?: Database["public"]["Enums"]["country_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_inventory: {
         Row: {
           apellido: string
