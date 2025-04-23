@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { countryPhoneCodes } from "@/utils/countryPhoneCodes";
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -31,6 +32,20 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   onContinue,
   isSubmitting = false,
 }) => {
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+52");
+  const [showCustomCode, setShowCustomCode] = useState(false);
+  const [customCode, setCustomCode] = useState("");
+
+  const handleCountryCodeChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomCode(true);
+      setSelectedCountryCode("");
+    } else {
+      setShowCustomCode(false);
+      setSelectedCountryCode(value);
+    }
+  };
+
   return (
     <>
       <CardContent className="space-y-6 pt-4">
@@ -79,18 +94,34 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               <Phone className="h-4 w-4" /> Número de Teléfono
             </Label>
             <div className="flex gap-2">
-              <Input
-                value="+52"
-                className="w-20 bg-gray-50 border-pink-100"
-                readOnly
-              />
+              {showCustomCode ? (
+                <Input
+                  value={customCode}
+                  onChange={(e) => setCustomCode(e.target.value)}
+                  className="w-24"
+                  placeholder="+000"
+                />
+              ) : (
+                <Select onValueChange={handleCountryCodeChange} defaultValue={selectedCountryCode}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryPhoneCodes.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name} {country.code !== "custom" && `(${country.code})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={onInputChange}
                 placeholder="Tu número de teléfono"
-                className="flex-1 border-pink-100 focus-visible:ring-pink-200"
+                className="flex-1"
                 type="tel"
               />
             </div>
