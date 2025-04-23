@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { phoneNumber, countryCode, name, message } = await req.json();
+    const { phoneNumber, countryCode, name, message, templateId } = await req.json();
     
     if (!phoneNumber || !countryCode || !message) {
       return new Response(
@@ -48,7 +48,7 @@ serve(async (req) => {
 
     const twilioData = await twilioResponse.json();
 
-    // Log the SMS attempt
+    // Log the SMS attempt with template_id
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -64,6 +64,7 @@ serve(async (req) => {
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
       sent_by: req.headers.get('authorization')?.split('Bearer ')[1],
+      template_id: templateId // Add template_id to the log
     });
 
     if (!twilioResponse.ok) {

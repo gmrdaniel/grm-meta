@@ -101,7 +101,8 @@ export function TwilioSMSForm() {
           phoneNumber,
           countryCode: phoneCode,
           name,
-          message
+          message,
+          templateId: selectedTemplateId  // Add template ID to the request
         }
       });
 
