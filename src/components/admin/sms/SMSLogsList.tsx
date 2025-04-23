@@ -30,8 +30,12 @@ interface SMSLog {
   status: string;
   created_at: string;
   error_message: string | null;
-  template_id?: string;
-  template_name?: string;
+  template_id: string | null;
+}
+
+interface Template {
+  id: string;
+  name: string;
 }
 
 export function SMSLogsList() {
@@ -50,7 +54,7 @@ export function SMSLogsList() {
         .select('id, name')
         .order('name');
       if (error) throw error;
-      return data;
+      return data as Template[];
     }
   });
 
@@ -60,12 +64,7 @@ export function SMSLogsList() {
     queryFn: async () => {
       let query = supabase
         .from('sms_logs')
-        .select(`
-          *,
-          sms_templates!inner (
-            name
-          )
-        `, { count: 'exact' });
+        .select('*, sms_templates(name)', { count: 'exact' });
 
       if (countryCodeFilter) {
         query = query.ilike('country_code', `%${countryCodeFilter}%`);
@@ -85,7 +84,14 @@ export function SMSLogsList() {
         .range(start, end);
 
       if (error) throw error;
-      return { data, count };
+
+      return {
+        data: data.map(log => ({
+          ...log,
+          template_name: log.sms_templates?.name
+        })),
+        count
+      };
     }
   });
 
@@ -178,7 +184,7 @@ export function SMSLogsList() {
               </TableCell>
               <TableCell>{log.recipient_name || '-'}</TableCell>
               <TableCell>+{log.country_code} {log.phone_number}</TableCell>
-              <TableCell>{log.sms_templates?.name || '-'}</TableCell>
+              <TableCell>{log.template_name || '-'}</TableCell>
               <TableCell>
                 <Badge className={getStatusBadgeColor(log.status)}>
                   {log.status}
