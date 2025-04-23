@@ -21,14 +21,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Simplify types by breaking them down into smaller interfaces
+// Basic template interface
 interface Template {
   id: string;
   name: string;
 }
 
-// Define the shape of an SMS log record as returned from the database
-interface SMSLogRecord {
+// Raw SMS log data from database
+interface RawSMSLog {
   id: string;
   phone_number: string;
   country_code: string;
@@ -38,10 +38,16 @@ interface SMSLogRecord {
   created_at: string;
   error_message: string | null;
   template_id: string | null;
-  sms_templates: { name: string } | null;
+  sent_at: string | null;
+  sent_by: string | null;
+  twilio_message_id: string | null;
+  twilio_response: any | null;
+  sms_templates: {
+    name: string;
+  } | null;
 }
 
-// Define the processed SMS log with the template name extracted
+// Processed SMS log for display
 interface SMSLog {
   id: string;
   phone_number: string;
@@ -102,9 +108,17 @@ export function SMSLogsList() {
 
       if (error) throw error;
 
-      // Process the data to extract template names
-      const processedData: SMSLog[] = data.map((log: SMSLogRecord) => ({
-        ...log,
+      // Transform raw data to SMSLog format
+      const processedData: SMSLog[] = (data as RawSMSLog[]).map(log => ({
+        id: log.id,
+        phone_number: log.phone_number,
+        country_code: log.country_code,
+        recipient_name: log.recipient_name,
+        message: log.message,
+        status: log.status,
+        created_at: log.created_at,
+        error_message: log.error_message,
+        template_id: log.template_id,
         template_name: log.sms_templates?.name || null
       }));
 
