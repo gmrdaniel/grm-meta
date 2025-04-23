@@ -34,9 +34,10 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
       isLoading, 
       isFetching,
       error: error ? error.message : null,
-      search
+      search,
+      isMobile
     });
-  }, [countries, isLoading, isFetching, error, search]);
+  }, [countries, isLoading, isFetching, error, search, isMobile]);
   
   const loadingMessage = isLoading || isFetching ? "Cargando países..." : null;
   const errorMessage = error ? "Error al cargar países" : null;
@@ -68,10 +69,14 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
             <CommandInput
               placeholder="Buscar país..."
               value={search}
-              onValueChange={setSearch}
+              onValueChange={(value) => {
+                console.log("Search term updated:", value);
+                setSearch(value);
+              }}
               className="h-9"
+              autoFocus={true}
             />
-            <CommandList>
+            <CommandList className="max-h-[300px] overflow-y-auto">
               {loadingMessage && <CommandEmpty>{loadingMessage}</CommandEmpty>}
               {errorMessage && <CommandEmpty>{errorMessage}</CommandEmpty>}
               {emptyMessage && <CommandEmpty>{emptyMessage}</CommandEmpty>}
@@ -82,6 +87,7 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
                       key={country.id}
                       value={country.id}
                       onSelect={() => {
+                        console.log("Country selected:", country);
                         onSelect(country.id, country.phone_code);
                         setOpen(false);
                       }}
@@ -125,6 +131,7 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
             value={search}
             onValueChange={setSearch}
             className="h-9"
+            autoFocus={true}
           />
           <CommandList>
             {loadingMessage && <CommandEmpty>{loadingMessage}</CommandEmpty>}

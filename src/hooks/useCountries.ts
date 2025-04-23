@@ -9,7 +9,9 @@ export type { Country };
 export const useCountries = (searchTerm: string = '') => {
   const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
   
+  // Update the debounced term when the search term changes
   useEffect(() => {
+    console.log("useCountries hook received searchTerm:", searchTerm);
     const timer = setTimeout(() => {
       setDebouncedTerm(searchTerm);
     }, 300);
@@ -23,5 +25,6 @@ export const useCountries = (searchTerm: string = '') => {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2,
     refetchOnWindowFocus: false,
+    enabled: true, // Always enabled to ensure countries are loaded
   });
 };
