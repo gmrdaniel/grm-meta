@@ -7,13 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-
-interface Country {
-  id: string;
-  name_es: string;
-  phone_code: string;
-}
+import { useCountries, Country } from "@/hooks/useCountries";
 
 interface CountrySelectProps {
   onSelect: (countryId: string, phoneCode: string) => void;
@@ -23,20 +17,11 @@ interface CountrySelectProps {
 }
 
 export const CountrySelect = ({ onSelect, value, className, placeholder }: CountrySelectProps) => {
-  const [countries, setCountries] = useState<Country[]>([]);
-
-  // Fetch countries when the select is opened
-  const handleOpen = async () => {
-    if (countries.length > 0) return;
-
-    const { data, error } = await supabase.rpc('search_countries', { 
-      search_term: '' 
-    });
-
-    if (!error && data) {
-      setCountries(data);
-    }
-  };
+  const { data: countries = [], isLoading, error } = useCountries();
+  
+  if (error) {
+    console.error("Error in CountrySelect:", error);
+  }
 
   return (
     <Select
@@ -47,12 +32,9 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
           onSelect(countryId, country.phone_code);
         }
       }}
-      onOpenChange={(open) => {
-        if (open) handleOpen();
-      }}
     >
-      <SelectTrigger className={className}>
-        <SelectValue placeholder={placeholder || "Seleccionar país"} />
+      <SelectTrigger className={className} disabled={isLoading}>
+        <SelectValue placeholder={isLoading ? "Cargando..." : (placeholder || "Seleccionar país")} />
       </SelectTrigger>
       <SelectContent>
         {countries.map((country) => (

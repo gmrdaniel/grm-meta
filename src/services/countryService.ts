@@ -1,22 +1,57 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
 export interface Country {
   id: string;
   code: string;
   name_es: string;
   name_en: string;
+  phone_code: string;
   active: boolean;
 }
 
-const countries: Country[] = [
-  { id: "1", code: "US", name_es: "Estados Unidos", name_en: "United States", active: true },
-  { id: "2", code: "ES", name_es: "España", name_en: "Spain", active: true },
-  { id: "3", code: "MX", name_es: "México", name_en: "Mexico", active: true },
-  { id: "4", code: "AR", name_es: "Argentina", name_en: "Argentina", active: true },
-  { id: "5", code: "CO", name_es: "Colombia", name_en: "Colombia", active: true },
-  { id: "6", code: "PE", name_es: "Perú", name_en: "Peru", active: true },
-  { id: "7", code: "CL", name_es: "Chile", name_en: "Chile", active: true },
-];
+export const searchCountries = async (searchTerm: string = ''): Promise<Country[]> => {
+  const { data, error } = await supabase.rpc('search_countries', { 
+    search_term: searchTerm 
+  });
+  
+  if (error) {
+    console.error("Error searching countries:", error);
+    throw new Error(`Failed to search countries: ${error.message}`);
+  }
+  
+  return data.map((country: any) => ({
+    id: country.id,
+    code: country.iso2 || '', // Map if available from DB
+    name_es: country.name_es,
+    name_en: country.name_en,
+    phone_code: country.phone_code,
+    active: true // Assuming active from the function filtering
+  })) as Country[];
+};
 
-export const getCountries = async (): Promise<Country[]> => {
-  return countries;
+export const getCountryById = async (countryId: string): Promise<Country | null> => {
+  if (!countryId) return null;
+  
+  const { data, error } = await supabase.rpc('search_countries', { 
+    search_term: '' 
+  });
+  
+  if (error) {
+    console.error("Error fetching countries:", error);
+    throw new Error(`Failed to fetch countries: ${error.message}`);
+  }
+  
+  const country = data.find((c: any) => c.id === countryId);
+  
+  if (!country) return null;
+  
+  return {
+    id: country.id,
+    code: country.iso2 || '',
+    name_es: country.name_es,
+    name_en: country.name_en,
+    phone_code: country.phone_code,
+    active: true
+  };
 };
