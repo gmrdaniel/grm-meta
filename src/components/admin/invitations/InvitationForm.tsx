@@ -239,12 +239,14 @@ const InvitationForm = ({ onSuccess }: InvitationFormProps) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+
                     {selectedProject?.platforms?.map((platform) => (
                       <SelectItem key={platform.id} value={platform.name.toLowerCase()}>
                         {platform.name.charAt(0).toUpperCase() +
                           platform.name.slice(1)}
                       </SelectItem>
                     ))}
+
                   </SelectContent>
                 </Select>
                 <FormMessage />

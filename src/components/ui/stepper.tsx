@@ -8,15 +8,25 @@ type Step = {
 type StepperProps = {
   steps: readonly Step[];
   currentStep: string;
+  variant?: "blue" | "pink";
 };
 
-export const Stepper = ({ steps, currentStep }: StepperProps) => {
+export const Stepper = ({
+  steps,
+  currentStep,
+  variant = "blue",
+}: StepperProps) => {
   return (
     <div className="mb-8">
       <div className="flex md:justify-between gap-4 overflow-x-auto no-scrollbar ">
         {steps.map((step, index) => {
           const isActive = currentStep === step.id;
           const stepNumber = index + 1;
+
+          const activeCircleColor =
+            variant === "pink" ? "bg-pink-600" : "bg-indigo-600";
+          const activeTextColor =
+            variant === "pink" ? "text-pink-600" : "text-indigo-600";
 
           return (
             <div
@@ -28,7 +38,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
                 className={cn(
                   "rounded-full w-9 h-9 mx-auto flex items-center justify-center text-sm font-bold transition",
                   isActive
-                    ? "bg-indigo-600 text-white shadow-lg"
+                    ?cn(activeCircleColor, "text-white shadow-lg")
                     : "bg-gray-300 text-white"
                 )}
               >
@@ -38,7 +48,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
                 title={step.label}
                 className={cn(
                   "text-xs mt-2",
-                  isActive ? "text-indigo-600 font-medium" : "text-gray-600"
+                  isActive ?  cn(activeTextColor, "font-medium") : "text-gray-600"
                 )}
                 style={{
                   display: "-webkit-box", // Habilitar el comportamiento de caja flexible
@@ -56,7 +66,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
           );
         })}
       </div>
-      <hr className="my-4"/>
+      <hr className="my-4" />
     </div>
   );
 };

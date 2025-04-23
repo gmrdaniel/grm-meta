@@ -581,7 +581,6 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
                 handleCheckboxChange={handleCheckboxChange}
                 handleContinueWelcome={handleContinueWelcome}
                 handleCompleteProfileYtbSubmit={handleCompleteProfileYtbSubmit}
-               // handleCompleteProfileSubmit={handleCompleteProfileSubmit}
                 handleFacebookInputChange={handleFacebookInputChange}
                 handleCheckboxFacebookChange={handleCheckboxFacebookChange}
                 handleFacebookSubmit={handleFacebookSubmit}

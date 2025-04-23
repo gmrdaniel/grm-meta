@@ -14,7 +14,8 @@ import { useState } from "react";
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
   formData: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     email: string;
     socialMediaHandle: string;
     termsAccepted: boolean;
@@ -37,22 +38,57 @@ export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
   const [isUSBased, setIsUSBased] = useState(false);
   const [hasNotMonetized, setHasNotMonetized] = useState(false);
   const [notInOtherProgram, setNotInOtherProgram] = useState(false);
+  const [formErrors, setFormErrors] = useState<{
+      firstName?: string;
+      lastName?: string;
+    }>({});
 
   // Función para verificar si todos los checkboxes están marcados
   const allChecked =
     isUSBased && hasNotMonetized && notInOtherProgram && formData.termsAccepted;
 
-  const handleContinue = () => {
-    if (!allChecked) {
-      toast.error("You must accept all conditions to continue");
-      return;
-    }
-    onContinue();
-  };
+    const handleContinue = () => {
+      if (!isValidName(formData.firstName) || !isValidName(formData.lastName)) {
+        toast.error(
+          "Please enter a valid first and last name (at least 2 letters, no symbols)."
+        );
+        return;
+      }
+  
+      if (!allChecked) {
+        toast.error("You must accept all conditions to continue");
+        return;
+      }
+      onContinue();
+    };
 
   const handleAcceptTerms = () => {
     onCheckboxChange(true); // Marca el checkbox de términos y condiciones
   };
+
+  const isValidName = (name: string) => {
+    const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/; // permite letras, espacios, apóstrofes y guiones
+    return nameRegex.test(name.trim());
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    onInputChange(e); // actualiza estado padre
+
+    // Validar solo firstName y lastName
+    if (name === "firstName" || name === "lastName") {
+      const isValid = isValidName(value);
+
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: isValid
+          ? undefined
+          : "Must be at least 2 letters. No spaces or special characters.",
+      }));
+    }
+  };
+
   return (
     <>
       <CardContent className="space-y-6">
@@ -69,14 +105,33 @@ export const WelcomeFormYoutube: React.FC<WelcomeFormProps> = ({
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">Fisrt Name</Label>
+          <Label htmlFor="firstName">First Name</Label>
             <Input
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
               onChange={onInputChange}
               placeholder="Your first name"
+              className={formErrors.firstName ? "border-red-500" : ""}
             />
+            {formErrors.firstName && (
+              <p className="text-xs text-red-500">{formErrors.firstName}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              placeholder="Your last name"
+              className={formErrors.lastName ? "border-red-500" : ""}
+            />
+            {formErrors.lastName && (
+              <p className="text-xs text-red-500">{formErrors.lastName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
