@@ -1,3 +1,4 @@
+
 export interface CreatorInvitation {
   id: string;
   project_id?: string | null;

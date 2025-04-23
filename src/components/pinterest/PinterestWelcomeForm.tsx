@@ -17,6 +17,7 @@ interface PinterestWelcomeFormProps {
     socialMediaHandle: string;
     termsAccepted: boolean;
     phoneNumber: string;
+    phoneCountryCode: string;
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,7 +34,8 @@ export default function InvitationStepperPage() {
     email: "",
     socialMediaHandle: "",
     termsAccepted: false,
-    phoneNumber: "", // Add this new field
+    phoneNumber: "",
+    phoneCountryCode: "+52", // Default country code
   });
   const [profileData, setProfileData] = useState({
     pinterestUrl: "",
@@ -75,6 +77,7 @@ export default function InvitationStepperPage() {
           socialMediaHandle: invitationData.social_media_handle || "",
           termsAccepted: false,
           phoneNumber: invitationData.phone_number || "",
+          phoneCountryCode: invitationData.phone_country_code || "+52",
         });
 
       } catch (err) {
@@ -129,7 +132,8 @@ export default function InvitationStepperPage() {
           status: "accepted", 
           full_name: formData.fullName,
           social_media_handle: formData.socialMediaHandle,
-          phone_number: formData.phoneNumber, // Add this new field
+          phone_number: formData.phoneNumber,
+          phone_country_code: formData.phoneCountryCode,
           updated_at: new Date().toISOString() 
         })
         .eq("id", invitation.id);
