@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
@@ -26,8 +27,6 @@ serve(async (req) => {
     }
 
     const formattedPhone = `+${countryCode}${phoneNumber}`;
-    
-    // Create Basic Auth header for Twilio
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
     
     // Send SMS via Twilio API
@@ -48,6 +47,24 @@ serve(async (req) => {
     );
 
     const twilioData = await twilioResponse.json();
+
+    // Log the SMS attempt
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    await supabase.from('sms_logs').insert({
+      phone_number: phoneNumber,
+      country_code: countryCode,
+      recipient_name: name,
+      message,
+      status: twilioResponse.ok ? 'sent' : 'failed',
+      twilio_message_id: twilioData.sid,
+      twilio_response: twilioData,
+      error_message: !twilioResponse.ok ? twilioData.message : null,
+      sent_by: req.headers.get('authorization')?.split('Bearer ')[1],
+    });
 
     if (!twilioResponse.ok) {
       throw new Error(twilioData.message || "Failed to send SMS");

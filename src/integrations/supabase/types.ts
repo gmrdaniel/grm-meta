@@ -612,6 +612,54 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_logs: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message: string
+          phone_number: string
+          recipient_name: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          twilio_message_id: string | null
+          twilio_response: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          phone_number: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          twilio_message_id?: string | null
+          twilio_response?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          phone_number?: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          twilio_message_id?: string | null
+          twilio_response?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           admin_id: string | null
