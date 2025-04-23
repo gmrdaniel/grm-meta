@@ -1,6 +1,6 @@
 
 import { Check, ChevronsUpDown } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,21 +35,55 @@ export function CountrySelector({ onSelect, placeholder, selectedCountry, type }
   const [open, setOpen] = useState(false)
   const [countries, setCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const searchCountries = useCallback(async (searchTerm: string) => {
-    setLoading(true)
+  // Load initial countries on first open
+  useEffect(() => {
+    if (open && countries.length === 0 && !loading) {
+      searchCountries('');
+    }
+  }, [open]);
+
+  const searchCountries = useCallback(async (term: string) => {
+    setLoading(true);
     try {
       const { data, error } = await supabase.rpc('search_countries', {
-        search_term: searchTerm
-      })
-      if (error) throw error
-      setCountries(data || [])
+        search_term: term
+      });
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Make sure we don't have duplicates
+        const uniqueCountries = data.reduce((acc: Country[], current: Country) => {
+          const isDuplicate = acc.find(item => item.id === current.id);
+          if (!isDuplicate) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+        
+        setCountries(uniqueCountries);
+      }
     } catch (error) {
-      console.error('Error searching countries:', error)
+      console.error('Error searching countries:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
+
+  const handleSelect = (country: Country) => {
+    onSelect(country);
+    setOpen(false);
+  };
+
+  const displayValue = () => {
+    if (!selectedCountry) return placeholder;
+    
+    return type === 'phone' 
+      ? selectedCountry.phone_code 
+      : selectedCountry.name_es;
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -60,30 +94,32 @@ export function CountrySelector({ onSelect, placeholder, selectedCountry, type }
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedCountry ? (
-            type === 'phone' ? selectedCountry.phone_code : selectedCountry.name_es
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
+          {displayValue()}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-[300px] p-0">
         <Command shouldFilter={false}>
           <CommandInput 
             placeholder="Buscar país..." 
-            onValueChange={searchCountries}
+            value={searchTerm}
+            onValueChange={(value) => {
+              setSearchTerm(value);
+              searchCountries(value);
+            }}
+            className="h-9"
           />
-          <CommandEmpty>No se encontraron países.</CommandEmpty>
+          {loading && <p className="py-2 text-center text-sm">Cargando...</p>}
+          {!loading && countries.length === 0 && (
+            <CommandEmpty>No se encontraron países.</CommandEmpty>
+          )}
           <CommandGroup className="max-h-60 overflow-auto">
             {countries.map((country) => (
               <CommandItem
                 key={country.id}
                 value={country.id}
-                onSelect={() => {
-                  onSelect(country)
-                  setOpen(false)
-                }}
+                onSelect={() => handleSelect(country)}
+                className="flex items-center"
               >
                 <Check
                   className={cn(
