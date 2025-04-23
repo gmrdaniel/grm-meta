@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -24,13 +24,26 @@ interface CountrySelectProps {
 export const CountrySelect = ({ onSelect, value, className, placeholder }: CountrySelectProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { data: countries = [], isLoading, error } = useCountries(search);
+  const { data: countries = [], isLoading, error, isFetching } = useCountries(search);
   const isMobile = useIsMobile();
   
-  if (error) {
-    console.error("Error in CountrySelect:", error);
-  }
-
+  useEffect(() => {
+    // Log the current state to debug
+    console.log("CountrySelect state:", { 
+      countries, 
+      isLoading, 
+      isFetching,
+      error: error ? error.message : null,
+      search
+    });
+  }, [countries, isLoading, isFetching, error, search]);
+  
+  const loadingMessage = isLoading || isFetching ? "Cargando países..." : null;
+  const errorMessage = error ? "Error al cargar países" : null;
+  const emptyMessage = !isLoading && !error && countries.length === 0 
+    ? "No se encontraron países" 
+    : null;
+  
   const currentCountry = countries.find(country => country.id === value);
 
   // On mobile, we use a fullscreen popover that's easier to interact with
@@ -50,7 +63,7 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="w-screen p-0" align="start" sideOffset={0}>
           <Command className="w-full">
             <CommandInput
               placeholder="Buscar país..."
@@ -59,27 +72,31 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
               className="h-9"
             />
             <CommandList>
-              <CommandEmpty>No se encontraron países</CommandEmpty>
-              <CommandGroup>
-                {countries.map((country) => (
-                  <CommandItem
-                    key={country.id}
-                    value={country.id}
-                    onSelect={() => {
-                      onSelect(country.id, country.phone_code);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === country.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {country.name_es} (+{country.phone_code})
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              {loadingMessage && <CommandEmpty>{loadingMessage}</CommandEmpty>}
+              {errorMessage && <CommandEmpty>{errorMessage}</CommandEmpty>}
+              {emptyMessage && <CommandEmpty>{emptyMessage}</CommandEmpty>}
+              {!loadingMessage && !errorMessage && !emptyMessage && (
+                <CommandGroup>
+                  {countries.map((country) => (
+                    <CommandItem
+                      key={country.id}
+                      value={country.id}
+                      onSelect={() => {
+                        onSelect(country.id, country.phone_code);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === country.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {country.name_es} (+{country.phone_code})
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
@@ -110,14 +127,18 @@ export const CountrySelect = ({ onSelect, value, className, placeholder }: Count
             className="h-9"
           />
           <CommandList>
-            <CommandEmpty>No se encontraron países</CommandEmpty>
-            <CommandGroup>
-              {countries.map((country) => (
-                <SelectItem key={country.id} value={country.id}>
-                  {country.name_es} (+{country.phone_code})
-                </SelectItem>
-              ))}
-            </CommandGroup>
+            {loadingMessage && <CommandEmpty>{loadingMessage}</CommandEmpty>}
+            {errorMessage && <CommandEmpty>{errorMessage}</CommandEmpty>}
+            {emptyMessage && <CommandEmpty>{emptyMessage}</CommandEmpty>}
+            {!loadingMessage && !errorMessage && !emptyMessage && (
+              <CommandGroup>
+                {countries.map((country) => (
+                  <SelectItem key={country.id} value={country.id}>
+                    {country.name_es} (+{country.phone_code})
+                  </SelectItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </SelectContent>

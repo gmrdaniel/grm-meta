@@ -11,6 +11,7 @@ export interface Country {
 }
 
 export const searchCountries = async (searchTerm: string = ''): Promise<Country[]> => {
+  console.log("Searching countries with term:", searchTerm);
   const { data, error } = await supabase.rpc('search_countries', { 
     search_term: searchTerm 
   });
@@ -20,9 +21,13 @@ export const searchCountries = async (searchTerm: string = ''): Promise<Country[
     throw new Error(`Failed to search countries: ${error.message}`);
   }
   
+  console.log("Countries search result:", data);
+  
+  if (!data) return [];
+  
   return data.map((country: any) => ({
     id: country.id,
-    code: '',
+    code: country.phone_code || '',
     name_es: country.name_es,
     name_en: country.name_en,
     phone_code: country.phone_code,
@@ -48,7 +53,7 @@ export const getCountryById = async (countryId: string): Promise<Country | null>
   
   return {
     id: country.id,
-    code: '',
+    code: country.phone_code || '',
     name_es: country.name_es,
     name_en: country.name_en,
     phone_code: country.phone_code,

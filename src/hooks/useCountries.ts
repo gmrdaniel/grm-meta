@@ -2,13 +2,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchCountries } from "@/services/countryService";
 import type { Country } from "@/services/countryService";
+import { useState, useEffect } from "react";
 
 export type { Country };
 
 export const useCountries = (searchTerm: string = '') => {
+  const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+  
   return useQuery({
-    queryKey: ['countries', searchTerm],
-    queryFn: () => searchCountries(searchTerm),
+    queryKey: ['countries', debouncedTerm],
+    queryFn: () => searchCountries(debouncedTerm),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
   });
 };
