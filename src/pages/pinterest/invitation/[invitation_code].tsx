@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,7 +34,9 @@ export default function InvitationStepperPage() {
     email: "",
     socialMediaHandle: "",
     termsAccepted: false,
-    phoneNumber: "", // Add this new field
+    phoneNumber: "",
+    phoneCountryCode: "",
+    residenceCountryId: "",
   });
   const [profileData, setProfileData] = useState({
     pinterestUrl: "",
@@ -75,6 +78,8 @@ export default function InvitationStepperPage() {
           socialMediaHandle: invitationData.social_media_handle || "",
           termsAccepted: false,
           phoneNumber: invitationData.phone_number || "",
+          phoneCountryCode: invitationData.phone_country_code || "",
+          residenceCountryId: invitationData.residence_country_id || "",
         });
 
       } catch (err) {
@@ -118,6 +123,15 @@ export default function InvitationStepperPage() {
     setProfileData((prev) => ({ ...prev, [key]: checked }));
   };
 
+  // New handler for country selection
+  const handleCountrySelect = (type: 'phone' | 'residence', country: any) => {
+    if (type === 'phone') {
+      setFormData(prev => ({ ...prev, phoneCountryCode: country.phone_code }));
+    } else if (type === 'residence') {
+      setFormData(prev => ({ ...prev, residenceCountryId: country.id }));
+    }
+  };
+
   const handleContinueWelcome = async () => {
     if (!invitation) return;
     setIsSubmitting(true);
@@ -129,7 +143,9 @@ export default function InvitationStepperPage() {
           status: "accepted", 
           full_name: formData.fullName,
           social_media_handle: formData.socialMediaHandle,
-          phone_number: formData.phoneNumber, // Add this new field
+          phone_number: formData.phoneNumber, 
+          phone_country_code: formData.phoneCountryCode,
+          residence_country_id: formData.residenceCountryId,
           updated_at: new Date().toISOString() 
         })
         .eq("id", invitation.id);
@@ -218,6 +234,7 @@ export default function InvitationStepperPage() {
                 formData={formData}
                 onInputChange={handleInputChange}
                 onCheckboxChange={handleCheckboxChange}
+                onCountrySelect={handleCountrySelect}
                 onContinue={handleContinueWelcome}
                 isSubmitting={isSubmitting}
               />
