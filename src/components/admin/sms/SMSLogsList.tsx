@@ -19,25 +19,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Simplified interfaces for SMS logs
-interface Template {
-  id: string;
-  name: string;
-}
-
 interface SMSLog {
   id: string;
   recipient_name: string | null;
   phone_number: string;
   country_code: string;
   template_name: string | null;
+  template_id: string | null;
   status: string;
 }
 
 export function SMSLogsList() {
   const [pageSize, setPageSize] = useState("10");
 
-  // Fetch SMS logs with simplified query
+  // Updated query to include template_id and name
   const { data: logs, isLoading } = useQuery({
     queryKey: ['sms_logs', pageSize],
     queryFn: async () => {
@@ -58,6 +53,7 @@ export function SMSLogsList() {
         phone_number: log.phone_number,
         country_code: log.country_code,
         template_name: log.sms_templates?.name || null,
+        template_id: log.template_id,
         status: log.status
       }));
 

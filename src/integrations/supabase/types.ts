@@ -624,6 +624,7 @@ export type Database = {
           sent_at: string | null
           sent_by: string | null
           status: string
+          template_id: string | null
           twilio_message_id: string | null
           twilio_response: Json | null
           updated_at: string | null
@@ -639,6 +640,7 @@ export type Database = {
           sent_at?: string | null
           sent_by?: string | null
           status?: string
+          template_id?: string | null
           twilio_message_id?: string | null
           twilio_response?: Json | null
           updated_at?: string | null
@@ -654,11 +656,20 @@ export type Database = {
           sent_at?: string | null
           sent_by?: string | null
           status?: string
+          template_id?: string | null
           twilio_message_id?: string | null
           twilio_response?: Json | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sms_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "sms_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sms_templates: {
         Row: {
