@@ -1,5 +1,4 @@
-
-import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText, BarChart } from "lucide-react";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, Plus, Bell, FileText, BarChart, MessageSquare } from "lucide-react";
 
 export const adminNavigationItems = [
   {
@@ -67,6 +66,12 @@ export const adminNavigationItems = [
     shortLabel: "Test",
     icon: <TestTube size={24} />,
     to: "/admin/test",
+  },
+  {
+    label: "SMS Admin",
+    shortLabel: "SMS",
+    icon: <MessageSquare size={24} />,
+    to: "/admin/admin-sms",
   }
 ];
 

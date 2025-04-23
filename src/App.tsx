@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,7 @@ import CompleteProfilePage from "./pages/meta/completeProfile/[invitation_code]"
 import FbCreationPage from "./pages/meta/FbCreation/[invitation_code]";
 import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 import PinterestInvitationPage from "./pages/pinterest/invitation/[invitation_code]";
+import AdminSMS from "./pages/admin/admin-sms";
 
 const queryClient = createQueryClient();
 
@@ -146,6 +146,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminTest />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/admin-sms"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminSMS />
                   </ProtectedRoute>
                 }
               />
