@@ -22,11 +22,11 @@ export const searchCountries = async (searchTerm: string = ''): Promise<Country[
   
   return data.map((country: any) => ({
     id: country.id,
-    code: country.iso2 || '', // Map if available from DB
+    code: '',
     name_es: country.name_es,
     name_en: country.name_en,
     phone_code: country.phone_code,
-    active: true // Assuming active from the function filtering
+    active: true
   })) as Country[];
 };
 
@@ -48,7 +48,7 @@ export const getCountryById = async (countryId: string): Promise<Country | null>
   
   return {
     id: country.id,
-    code: country.iso2 || '',
+    code: '',
     name_es: country.name_es,
     name_en: country.name_en,
     phone_code: country.phone_code,

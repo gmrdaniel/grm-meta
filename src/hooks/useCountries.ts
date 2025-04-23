@@ -1,8 +1,9 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { searchCountries, Country } from "@/services/countryService";
+import { searchCountries } from "@/services/countryService";
+import type { Country } from "@/services/countryService";
 
-export { Country };
+export type { Country };
 
 export const useCountries = (searchTerm: string = '') => {
   return useQuery({
