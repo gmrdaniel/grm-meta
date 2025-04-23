@@ -93,7 +93,7 @@ export function BulkGenerateTextModal({
   const generateTextForSingleCreator = async (creator: EmailCreator) => {
     try {
       const prompt = generatePrompt(creator);
-      const response = await fetch('https://chatgpt-42.p.rapidapi.com/gpt4', {
+      const response = await fetch('https://chatgpt-42.p.rapidapi.com/gpt4o', {
         method: 'POST',
         headers: {
           'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',

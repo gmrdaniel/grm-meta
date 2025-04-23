@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Filter, X, Check, ChevronsUpDown } from "lucide-react";
@@ -9,8 +8,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -73,112 +72,92 @@ export function CreatorFilters({ activeFilters, onFilterChange }: CreatorFilters
             <DropdownMenuSeparator />
             
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('tiktokEligible')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  TikTok Elegible
-                  {activeFilters.tiktokEligible && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('tiktokEligible')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                TikTok Elegible
+                {activeFilters.tiktokEligible && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
               
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('hasTikTokUsername')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Usuario TikTok
-                  {activeFilters.hasTikTokUsername && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('hasTikTokUsername')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Usuario TikTok
+                {activeFilters.hasTikTokUsername && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('hasYouTubeUsername')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Usuario YouTube
-                  {activeFilters.hasYouTubeUsername && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('hasYouTubeUsername')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Usuario YouTube
+                {activeFilters.hasYouTubeUsername && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             
             <DropdownMenuSeparator />
             
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withoutEngagement')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Sin Engagement
-                  {activeFilters.withoutEngagement && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutEngagement')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin Engagement
+                {activeFilters.withoutEngagement && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withoutVideos')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Sin Videos
-                  {activeFilters.withoutVideos && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutVideos')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin Videos
+                {activeFilters.withoutVideos && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withVideos')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Con Videos
-                  {activeFilters.withVideos && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withVideos')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Con Videos
+                {activeFilters.withVideos && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withoutYouTube')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Sin YouTube
-                  {activeFilters.withoutYouTube && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutYouTube')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin YouTube
+                {activeFilters.withoutYouTube && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withoutYouTubeEngagement')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Sin Engagement YT
-                  {activeFilters.withoutYouTubeEngagement && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutYouTubeEngagement')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin Engagement YT
+                {activeFilters.withoutYouTubeEngagement && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <button 
-                  onClick={() => toggleFilter('withoutTikTokFollowers')}
-                  className="flex w-full items-center justify-between cursor-pointer px-2 py-1.5 text-sm"
-                >
-                  Sin seguidores TikTok
-                  {activeFilters.withoutTikTokFollowers && <Check className="h-4 w-4" />}
-                </button>
+              <DropdownMenuItem 
+                onClick={() => toggleFilter('withoutTikTokFollowers')}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                Sin seguidores TikTok
+                {activeFilters.withoutTikTokFollowers && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             
             {hasFilters && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <button 
-                    onClick={clearFilters}
-                    className="flex w-full items-center gap-1 cursor-pointer text-destructive px-2 py-1.5 text-sm"
-                  >
-                    <X className="h-4 w-4" />
-                    Limpiar todos los filtros
-                  </button>
+                <DropdownMenuItem 
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 cursor-pointer text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                  Limpiar todos los filtros
                 </DropdownMenuItem>
               </>
             )}

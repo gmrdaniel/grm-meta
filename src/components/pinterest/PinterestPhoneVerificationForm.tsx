@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
-import { PinterestVerificationSuccess } from "./PinterestVerificationSuccess";
+import { PinterestPhoneForm } from "./PinterestPhoneForm";
+import { PinterestPhoneSuccess } from "./PinterestPhoneSuccess";
 
 interface PinterestPhoneVerificationFormProps {
   onSubmit: () => void;
@@ -14,8 +14,20 @@ export const PinterestPhoneVerificationForm: React.FC<PinterestPhoneVerification
   onSubmit,
   isSubmitting,
 }) => {
-  // Skip verification since it's not needed anymore
-  onSubmit();
-  
-  return <PinterestVerificationSuccess />;
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmit = () => {
+    setShowSuccess(true);
+    onSubmit();
+  };
+
+  return (
+    <CardContent className="space-y-6">
+      {!showSuccess ? (
+        <PinterestPhoneForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      ) : (
+        <PinterestPhoneSuccess />
+      )}
+    </CardContent>
+  );
 };

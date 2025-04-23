@@ -806,9 +806,6 @@ export type Database = {
           seguidores_tiktok: number | null
           seguidores_youtube: number | null
           tiene_invitacion: boolean | null
-          tiene_nombre_real:
-            | Database["public"]["Enums"]["nombre_real_status"]
-            | null
           tiene_prompt_generado: boolean | null
           usuario_tiktok: string | null
           usuario_youtube: string | null

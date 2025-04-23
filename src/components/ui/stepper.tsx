@@ -27,7 +27,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
                 className={cn(
                   "rounded-full w-9 h-9 mx-auto flex items-center justify-center text-sm font-bold transition",
                   isActive
-                    ? "bg-[#ea384c] text-white shadow-lg"
+                    ? "bg-indigo-600 text-white shadow-lg"
                     : "bg-gray-300 text-white"
                 )}
               >
@@ -37,7 +37,7 @@ export const Stepper = ({ steps, currentStep }: StepperProps) => {
                 title={step.label}
                 className={cn(
                   "text-xs mt-2 text-ellipsis whitespace-nowrap overflow-hidden",
-                  isActive && "text-[#ea384c] font-medium"
+                  isActive && "text-indigo-600 font-medium"
                 )}
               >
                 {step.label}

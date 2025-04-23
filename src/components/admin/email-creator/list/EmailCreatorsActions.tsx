@@ -2,12 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface EmailCreatorsActionsProps {
   selectedItemsCount: number;
@@ -49,23 +44,13 @@ export const EmailCreatorsActions: React.FC<EmailCreatorsActionsProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem asChild>
-              <button
-                className="flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent"
-                onClick={() => onDownloadSelected('xls')}
-              >
-                <FileDown className="h-4 w-4 mr-2" />
-                <span>Download as Excel</span>
-              </button>
+            <DropdownMenuItem onClick={() => onDownloadSelected('xls')}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Download as Excel
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <button
-                className="flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent"
-                onClick={() => onDownloadSelected('csv')}
-              >
-                <FileDown className="h-4 w-4 mr-2" />
-                <span>Download as CSV</span>
-              </button>
+            <DropdownMenuItem onClick={() => onDownloadSelected('csv')}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Download as CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
