@@ -5,9 +5,8 @@ import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
 import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
-import { PinterestPhoneVerificationForm } from "@/components/pinterest/PinterestPhoneVerificationForm";
 import { InvitationError } from "@/components/invitation/InvitationError";
-import { StepperPink } from "@/components/ui/stepperpink";
+import { Stepper} from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 
@@ -215,7 +214,7 @@ export default function InvitationStepperPage() {
         {/* Right column - Form card */}
         <Card className="w-full lg:w-2/4 shadow-2xl bg-white/95 backdrop-blur">
           <div className="p-8">
-            <StepperPink steps={stepList} currentStep={currentStep.id} />
+            <Stepper steps={stepList} currentStep={currentStep.id}  variant="pink"/>
             
             {currentStep.id === "welcome" && (
               <PinterestWelcomeForm
@@ -239,13 +238,7 @@ export default function InvitationStepperPage() {
               />
             )}
 
-            {currentStep.id === "verification" && (
-              <PinterestPhoneVerificationForm
-                onSubmit={handleVerificationComplete}
-                isSubmitting={isSubmitting}
-                invitationId={invitation?.id}
-              />
-            )}
+            
           </div>
         </Card>
       </div>

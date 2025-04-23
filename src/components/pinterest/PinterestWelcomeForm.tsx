@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckboxPinterest } from "../terms-and-conditions/TermsAndConditionsPinterest";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
+
 
 
 interface PinterestWelcomeFormProps {
@@ -120,9 +120,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               <Instagram className="h-4 w-4" /> Usuario de Instagram
             </Label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                <span className="text-slate-500 text-sm">@</span>
-              </div>
+              
               <Input
                 id="socialMediaHandle"
                 name="socialMediaHandle"
@@ -136,24 +134,21 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> Número de Teléfono
+              
             </Label>
-            <div className="flex gap-2">
-              <Input
-                value="+52"
-                className="w-20 bg-gray-50 border-pink-100"
-                readOnly
-              />
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={onInputChange}
-                placeholder="Tu número de teléfono"
-                className="flex-1 border-pink-100 focus-visible:ring-pink-200"
-                type="tel"
-              />
-            </div>
+            <PhoneValidate
+              phoneCountryCode={invitation.phone_country_code}
+              phoneNumber={formData.phoneNumber}
+              onPhoneChange={(value) => {
+                const syntheticEvent = {
+                  target: {
+                    name: "phoneNumber",
+                    value,
+                  },
+                } as React.ChangeEvent<HTMLInputElement>;
+                onInputChange(syntheticEvent);
+              }}
+            />
           </div>
 
           <div className="flex items-center space-x-2 pt-4">
