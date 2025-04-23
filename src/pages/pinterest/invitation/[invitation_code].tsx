@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,7 +34,7 @@ export default function InvitationStepperPage() {
     email: "",
     socialMediaHandle: "",
     termsAccepted: false,
-    phoneNumber: "", // Add this new field
+    phoneNumber: "", 
   });
   const [profileData, setProfileData] = useState({
     pinterestUrl: "",
@@ -42,6 +43,8 @@ export default function InvitationStepperPage() {
     isAutoPublishEnabled: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
+  const [phoneCountryCode, setPhoneCountryCode] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -76,6 +79,14 @@ export default function InvitationStepperPage() {
           termsAccepted: false,
           phoneNumber: invitationData.phone_number || "",
         });
+        
+        if (invitationData.residence_country_id) {
+          setSelectedCountryId(invitationData.residence_country_id);
+        }
+        
+        if (invitationData.phone_country_code) {
+          setPhoneCountryCode(invitationData.phone_country_code);
+        }
 
       } catch (err) {
         console.error("Error loading invitation:", err);
@@ -118,6 +129,16 @@ export default function InvitationStepperPage() {
     setProfileData((prev) => ({ ...prev, [key]: checked }));
   };
 
+  const handleCountrySelect = (countryId: string, phoneCode: string) => {
+    if (countryId) {
+      setSelectedCountryId(countryId);
+    }
+    
+    if (phoneCode) {
+      setPhoneCountryCode(phoneCode);
+    }
+  };
+
   const handleContinueWelcome = async () => {
     if (!invitation) return;
     setIsSubmitting(true);
@@ -129,7 +150,9 @@ export default function InvitationStepperPage() {
           status: "accepted", 
           full_name: formData.fullName,
           social_media_handle: formData.socialMediaHandle,
-          phone_number: formData.phoneNumber, // Add this new field
+          phone_number: formData.phoneNumber,
+          phone_country_code: phoneCountryCode,
+          residence_country_id: selectedCountryId,
           updated_at: new Date().toISOString() 
         })
         .eq("id", invitation.id);
@@ -220,6 +243,7 @@ export default function InvitationStepperPage() {
                 onCheckboxChange={handleCheckboxChange}
                 onContinue={handleContinueWelcome}
                 isSubmitting={isSubmitting}
+                onCountrySelect={handleCountrySelect}
               />
             )}
 
