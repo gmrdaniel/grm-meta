@@ -89,6 +89,36 @@ export type Database = {
         }
         Relationships: []
       }
+      country_phone_codes: {
+        Row: {
+          created_at: string
+          id: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status: Database["public"]["Enums"]["country_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status?: Database["public"]["Enums"]["country_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_en?: string
+          name_es?: string
+          phone_code?: string
+          status?: Database["public"]["Enums"]["country_status"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_inventory: {
         Row: {
           apellido: string
@@ -210,6 +240,7 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: Database["public"]["Enums"]["invitation_status"]
@@ -231,6 +262,7 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -252,6 +284,7 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -271,6 +304,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_invitations_residence_country_id_fkey"
+            columns: ["residence_country_id"]
+            isOneToOne: false
+            referencedRelation: "country_phone_codes"
             referencedColumns: ["id"]
           },
         ]
@@ -855,6 +895,7 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           status: Database["public"]["Enums"]["invitation_status"]
@@ -908,12 +949,22 @@ export type Database = {
         Args: { stage_id: string; project_id_param: string }
         Returns: boolean
       }
+      search_countries: {
+        Args: { search_term: string }
+        Returns: {
+          id: string
+          name_es: string
+          name_en: string
+          phone_code: string
+        }[]
+      }
       update_stages_order: {
         Args: { stages_data: Json[] }
         Returns: undefined
       }
     }
     Enums: {
+      country_status: "active" | "inactive"
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
       nombre_real_status: "pendiente" | "proceso" | "error" | "completado"
       notification_channel: "sms" | "email"
@@ -1036,6 +1087,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      country_status: ["active", "inactive"],
       invitation_status: ["pending", "accepted", "rejected", "completed"],
       nombre_real_status: ["pendiente", "proceso", "error", "completado"],
       notification_channel: ["sms", "email"],
