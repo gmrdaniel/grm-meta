@@ -27,6 +27,7 @@ export function TwilioSMSForm() {
   const [phoneCode, setPhoneCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
+  const [linkInvitation, setLinkInvitation] = useState("");
   const [message, setMessage] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
@@ -52,9 +53,40 @@ export function TwilioSMSForm() {
     if (template) {
       setSelectedTemplateId(templateId);
       let processedMessage = template.message;
-      processedMessage = processedMessage.replace("{nombre}", name || "[nombre]");
-      // You would need to get the actual invitation link from your app's logic
-      processedMessage = processedMessage.replace("{link_invitation}", "[link_invitation]");
+      
+      // Replace variables only if they have values
+      if (name) {
+        processedMessage = processedMessage.replace("{nombre}", name);
+      }
+      if (linkInvitation) {
+        processedMessage = processedMessage.replace("{link_invitation}", linkInvitation);
+      }
+      
+      // Replace remaining placeholders with empty strings if no values
+      processedMessage = processedMessage.replace("{nombre}", name || "");
+      processedMessage = processedMessage.replace("{link_invitation}", linkInvitation || "");
+      
+      setMessage(processedMessage);
+    }
+  };
+
+  const updateMessageWithVariables = (templateId: string, newName: string, newLink: string) => {
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
+      let processedMessage = template.message;
+      
+      // Replace variables only if they have values
+      if (newName) {
+        processedMessage = processedMessage.replace("{nombre}", newName);
+      }
+      if (newLink) {
+        processedMessage = processedMessage.replace("{link_invitation}", newLink);
+      }
+      
+      // Replace remaining placeholders with empty strings if no values
+      processedMessage = processedMessage.replace("{nombre}", newName || "");
+      processedMessage = processedMessage.replace("{link_invitation}", newLink || "");
+      
       setMessage(processedMessage);
     }
   };
@@ -79,12 +111,18 @@ export function TwilioSMSForm() {
       setPhoneNumber("");
       setName("");
       setMessage("");
+      setLinkInvitation("");
     } catch (error: any) {
       toast.error(`Error enviando SMS: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Check if current template has variables
+  const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
+  const hasNameVariable = currentTemplate?.message.includes("{nombre}");
+  const hasLinkVariable = currentTemplate?.message.includes("{link_invitation}");
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -132,27 +170,37 @@ export function TwilioSMSForm() {
             />
           </div>
 
-          <div>
-            <Label htmlFor="name">Nombre</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (selectedTemplateId) {
-                  const template = templates?.find(t => t.id === selectedTemplateId);
-                  if (template) {
-                    let processedMessage = template.message;
-                    processedMessage = processedMessage.replace("{nombre}", e.target.value || "[nombre]");
-                    processedMessage = processedMessage.replace("{link_invitation}", "[link_invitation]");
-                    setMessage(processedMessage);
-                  }
-                }
-              }}
-              placeholder="Juan Pérez"
-              required
-            />
-          </div>
+          {hasNameVariable && (
+            <div>
+              <Label htmlFor="name">Nombre</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  setName(newName);
+                  updateMessageWithVariables(selectedTemplateId, newName, linkInvitation);
+                }}
+                placeholder="Juan Pérez"
+              />
+            </div>
+          )}
+
+          {hasLinkVariable && (
+            <div>
+              <Label htmlFor="link">Link de invitación</Label>
+              <Input
+                id="link"
+                value={linkInvitation}
+                onChange={(e) => {
+                  const newLink = e.target.value;
+                  setLinkInvitation(newLink);
+                  updateMessageWithVariables(selectedTemplateId, name, newLink);
+                }}
+                placeholder="https://example.com/invitation/123"
+              />
+            </div>
+          )}
 
           <div>
             <Label htmlFor="message">Mensaje</Label>
