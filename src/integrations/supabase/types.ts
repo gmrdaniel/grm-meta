@@ -660,6 +660,44 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          message: string
+          name: string
+          project_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message: string
+          name: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message?: string
+          name?: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_templates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           admin_id: string | null
