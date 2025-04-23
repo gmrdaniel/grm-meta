@@ -89,6 +89,36 @@ export type Database = {
         }
         Relationships: []
       }
+      country_phone_codes: {
+        Row: {
+          created_at: string
+          id: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status: Database["public"]["Enums"]["country_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status?: Database["public"]["Enums"]["country_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_en?: string
+          name_es?: string
+          phone_code?: string
+          status?: Database["public"]["Enums"]["country_status"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       creator_inventory: {
         Row: {
           apellido: string
@@ -908,12 +938,22 @@ export type Database = {
         Args: { stage_id: string; project_id_param: string }
         Returns: boolean
       }
+      search_countries: {
+        Args: { search_term: string }
+        Returns: {
+          id: string
+          name_es: string
+          name_en: string
+          phone_code: string
+        }[]
+      }
       update_stages_order: {
         Args: { stages_data: Json[] }
         Returns: undefined
       }
     }
     Enums: {
+      country_status: "active" | "inactive"
       invitation_status: "pending" | "accepted" | "rejected" | "completed"
       nombre_real_status: "pendiente" | "proceso" | "error" | "completado"
       notification_channel: "sms" | "email"
@@ -1036,6 +1076,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      country_status: ["active", "inactive"],
       invitation_status: ["pending", "accepted", "rejected", "completed"],
       nombre_real_status: ["pendiente", "proceso", "error", "completado"],
       notification_channel: ["sms", "email"],

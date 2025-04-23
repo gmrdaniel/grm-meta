@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram, Phone } from "lucide-react";
+import { CountryPhoneSelector } from "@/components/ui/country-phone-selector";
 import { CreatorInvitation } from "@/types/invitation";
 
 interface PinterestWelcomeFormProps {
@@ -79,11 +80,16 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               <Phone className="h-4 w-4" /> Número de Teléfono
             </Label>
             <div className="flex gap-2">
-              <Input
-                value="+52"
-                className="w-20 bg-gray-50 border-pink-100"
-                readOnly
-              />
+              <div className="w-40">
+                <CountryPhoneSelector
+                  value={formData.phoneCountryCode || "+52"}
+                  onChange={(code) => 
+                    onInputChange({
+                      target: { name: "phoneCountryCode", value: code }
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                />
+              </div>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
