@@ -47,14 +47,15 @@ serve(async (req) => {
     );
 
     const twilioData = await twilioResponse.json();
-
-    // Log the SMS attempt with template_id
+    
+    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    await supabase.from('sms_logs').insert({
+    // Log the SMS in the database
+    const { error: logError } = await supabase.from('sms_logs').insert({
       phone_number: phoneNumber,
       country_code: countryCode,
       recipient_name: name,
@@ -64,8 +65,13 @@ serve(async (req) => {
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
       sent_by: req.headers.get('authorization')?.split('Bearer ')[1],
-      template_id: templateId // Add template_id to the log
+      template_id: templateId,
+      sent_at: new Date().toISOString()
     });
+
+    if (logError) {
+      console.error("Error logging SMS:", logError);
+    }
 
     if (!twilioResponse.ok) {
       throw new Error(twilioData.message || "Failed to send SMS");
