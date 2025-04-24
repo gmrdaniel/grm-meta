@@ -99,7 +99,7 @@ export function TwilioSMSForm() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-6">Envío de SMS con Twilio</h2>
+      <h2 className="text-xl font-semibold mb-6">Send SMS with Twilio</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
@@ -142,7 +142,7 @@ export function TwilioSMSForm() {
           className="w-full"
           disabled={isLoading}
         >
-          {isLoading ? "Enviando..." : "Enviar SMS"}
+          {isLoading ? "Sending..." : "Send SMS"}
         </Button>
       </form>
     </div>

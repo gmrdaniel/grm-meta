@@ -94,11 +94,11 @@ export function SMSLogsList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Teléfono</TableHead>
-            <TableHead>Plantilla</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Fecha de envío</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Template</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Sent At</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -119,7 +119,7 @@ export function SMSLogsList() {
       </Table>
 
       <div className="text-sm text-gray-500 mt-4">
-        Total: {logs?.count || 0} registros
+        Total: {logs?.count || 0} records
       </div>
     </div>
   );

@@ -20,10 +20,10 @@ export default function AdminSMS() {
             
             <Tabs defaultValue="send" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="send">Enviar SMS</TabsTrigger>
-                <TabsTrigger value="bulk">Envío Masivo</TabsTrigger>
-                <TabsTrigger value="templates">Plantillas</TabsTrigger>
-                <TabsTrigger value="logs">Historial</TabsTrigger>
+                <TabsTrigger value="send">Send SMS</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk Send</TabsTrigger>
+                <TabsTrigger value="templates">Templates</TabsTrigger>
+                <TabsTrigger value="logs">Logs</TabsTrigger>
               </TabsList>
 
               <TabsContent value="send">

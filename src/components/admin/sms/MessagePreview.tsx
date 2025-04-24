@@ -10,12 +10,12 @@ interface MessagePreviewProps {
 export function MessagePreview({ message, onChange }: MessagePreviewProps) {
   return (
     <div>
-      <Label htmlFor="message">Mensaje</Label>
+      <Label htmlFor="message">Message</Label>
       <Textarea
         id="message"
         value={message}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Escribe tu mensaje aquí..."
+        placeholder="Write your message here..."
         className="min-h-[100px]"
         required
       />

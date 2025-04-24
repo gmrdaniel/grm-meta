@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,24 +92,24 @@ export function SMSTemplateForm({ initialData, onSuccess }: SMSTemplateFormProps
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h2 className="text-xl font-semibold mb-6">
-        {initialData ? "Editar" : "Crear"} Plantilla SMS
+        {initialData ? "Edit" : "Create"} SMS Template
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name">Nombre de la plantilla</Label>
+            <Label htmlFor="name">Template Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Bienvenida"
+              placeholder="E.g. Welcome"
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="project">Proyecto</Label>
+            <Label htmlFor="project">Project</Label>
             <select
               id="project"
               value={projectId}
@@ -116,7 +117,7 @@ export function SMSTemplateForm({ initialData, onSuccess }: SMSTemplateFormProps
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               required
             >
-              <option value="">Seleccionar proyecto</option>
+              <option value="">Select project</option>
               {projects?.map((project) => (
                 <option key={project.id} value={project.id}>
                   {project.name}
@@ -126,15 +127,15 @@ export function SMSTemplateForm({ initialData, onSuccess }: SMSTemplateFormProps
           </div>
 
           <div>
-            <Label htmlFor="message">Mensaje</Label>
+            <Label htmlFor="message">Message</Label>
             <div className="mb-2 text-sm text-gray-500">
-              Puedes usar las variables {"{nombre}"} y {"{link_invitation}"} en tu mensaje
+              You can use variables {"{name}"} and {"{link_invitation}"} in your message
             </div>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Escribe tu mensaje aquí..."
+              placeholder="Write your message here..."
               className="min-h-[100px]"
               required
             />
@@ -147,8 +148,8 @@ export function SMSTemplateForm({ initialData, onSuccess }: SMSTemplateFormProps
           disabled={isLoading}
         >
           {isLoading ? 
-            (initialData ? "Actualizando..." : "Guardando...") : 
-            (initialData ? "Actualizar plantilla" : "Guardar plantilla")
+            (initialData ? "Updating..." : "Saving...") : 
+            (initialData ? "Update template" : "Save template")
           }
         </Button>
       </form>

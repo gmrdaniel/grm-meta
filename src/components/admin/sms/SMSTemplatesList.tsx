@@ -89,10 +89,10 @@ export function SMSTemplatesList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Proyecto</TableHead>
-            <TableHead>Mensaje</TableHead>
-            <TableHead>Acciones</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Project</TableHead>
+            <TableHead>Message</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -131,20 +131,20 @@ export function SMSTemplatesList() {
           onClick={() => setPage(p => Math.max(1, p - 1))}
           disabled={page === 1}
         >
-          Anterior
+          Previous
         </Button>
         <Button
           onClick={() => setPage(p => p + 1)}
           disabled={!templates || templates.length < pageSize}
         >
-          Siguiente
+          Next
         </Button>
       </div>
 
       <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Plantilla</DialogTitle>
+            <DialogTitle>Edit Template</DialogTitle>
           </DialogHeader>
           {editingTemplate && (
             <SMSTemplateForm
