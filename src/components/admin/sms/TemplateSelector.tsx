@@ -22,13 +22,13 @@ export function TemplateSelector({
 }: TemplateSelectorProps) {
   return (
     <div>
-      <Label htmlFor="template">Plantilla</Label>
+      <Label htmlFor="template">Template</Label>
       <Select
         value={selectedTemplateId}
         onValueChange={onTemplateSelect}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Seleccionar plantilla" />
+          <SelectValue placeholder="Select template" />
         </SelectTrigger>
         <SelectContent>
           {templates?.map((template) => (
@@ -41,3 +41,4 @@ export function TemplateSelector({
     </div>
   );
 }
+
