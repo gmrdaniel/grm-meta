@@ -27,12 +27,12 @@ interface SMSLog {
   template_name: string | null;
   template_id: string | null;
   status: string;
+  sent_at: string;
 }
 
 export function SMSLogsList() {
   const [pageSize, setPageSize] = useState("10");
 
-  // Updated query to include template_id and name
   const { data: logs, isLoading } = useQuery({
     queryKey: ['sms_logs', pageSize],
     queryFn: async () => {
@@ -41,7 +41,7 @@ export function SMSLogsList() {
         .select('*, sms_templates(name)', { count: 'exact' });
 
       const { data, error, count } = await query
-        .order('created_at', { ascending: false })
+        .order('sent_at', { ascending: false })
         .range(0, parseInt(pageSize) - 1);
 
       if (error) throw error;
@@ -54,7 +54,8 @@ export function SMSLogsList() {
         country_code: log.country_code,
         template_name: log.sms_templates?.name || null,
         template_id: log.template_id,
-        status: log.status
+        status: log.status,
+        sent_at: new Date(log.sent_at).toLocaleString()
       }));
 
       return {
@@ -97,6 +98,7 @@ export function SMSLogsList() {
             <TableHead>Teléfono</TableHead>
             <TableHead>Plantilla</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Fecha de envío</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -110,6 +112,7 @@ export function SMSLogsList() {
                   {log.status}
                 </Badge>
               </TableCell>
+              <TableCell>{log.sent_at}</TableCell>
             </TableRow>
           ))}
         </TableBody>

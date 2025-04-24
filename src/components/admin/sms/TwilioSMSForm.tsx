@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Template {
   id: string;
@@ -30,6 +30,7 @@ export function TwilioSMSForm() {
   const [linkInvitation, setLinkInvitation] = useState("");
   const [message, setMessage] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const queryClient = useQueryClient();
 
   const { data: templates } = useQuery<Template[]>({
     queryKey: ['sms_templates'],
@@ -102,7 +103,7 @@ export function TwilioSMSForm() {
           countryCode: phoneCode,
           name,
           message,
-          templateId: selectedTemplateId  // Add template ID to the request
+          templateId: selectedTemplateId
         }
       });
 
@@ -113,6 +114,7 @@ export function TwilioSMSForm() {
       setName("");
       setMessage("");
       setLinkInvitation("");
+      queryClient.invalidateQueries({ queryKey: ['sms_logs'] });
     } catch (error: any) {
       toast.error(`Error enviando SMS: ${error.message}`);
     } finally {
@@ -120,7 +122,6 @@ export function TwilioSMSForm() {
     }
   };
 
-  // Check if current template has variables
   const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
   const hasNameVariable = currentTemplate?.message.includes("{nombre}");
   const hasLinkVariable = currentTemplate?.message.includes("{link_invitation}");
