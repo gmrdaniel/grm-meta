@@ -14,8 +14,6 @@ import AdminProjectDetail from "./pages/admin/projects/[id]";
 import AdminInventory from "./pages/admin/inventory";
 import AdminInventoryStats from "./pages/admin/inventory-stats";
 import AdminInvitations from "./pages/admin/invitations";
-import AdminTasks from "./pages/admin/tasks";
-import AdminTaskCreate from "./pages/admin/tasks/create";
 import AdminTest from "./pages/admin/test";
 import AdminCreateEmail from "./pages/admin/create-email"; 
 import AdminNotificationSettings from "./pages/admin/notification-settings";
@@ -122,22 +120,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminNotificationLogs />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/tasks"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminTasks />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/tasks/create"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <AdminTaskCreate />
                   </ProtectedRoute>
                 }
               />
