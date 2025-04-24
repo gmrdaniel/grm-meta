@@ -1,12 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { WelcomeForm } from "@/components/invitation/WelcomeForm";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { toast } from "sonner";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
-import { checkExistingTask } from "@/services/tasksService";
 
 export default function WelcomePage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -84,12 +84,7 @@ export default function WelcomePage() {
       
       setIsSubmitting(true);
       
-      const hasExistingTask = await checkExistingTask(null, invitation.id);
-      
-      if (hasExistingTask) {
-        toast.error("This invitation has already been processed");
-        return;
-      }
+      // Remove task check since tasks functionality has been removed
       
       const { error } = await supabase
         .from('creator_invitations')

@@ -1,3 +1,4 @@
+
 // 🧩 Libs
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -31,7 +32,6 @@ import {
   updateInvitationStatus,
 } from "@/services/invitation";
 import { fetchProjectStages } from "@/services/projectService";
-import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
 import { validateFacebookPageUrl } from "@/utils/validationUtils";
@@ -208,11 +208,7 @@ export default function InvitationStepperPage() {
     if (!invitation) return;
     setIsSubmitting(true);
 
-    const hasExistingTask = await checkExistingTask(null, invitation.id);
-    if (hasExistingTask) {
-      toast.error("This invitation has already been processed");
-      return;
-    }
+    // Remove task check since tasks functionality has been removed
 
     const { error } = await supabase
       .from("creator_invitations")
