@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { FileUploader } from "../inventory/import-templates/components/FileUploader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import * as XLSX from 'xlsx';
+import { Download } from "lucide-react";
 
 interface Contact {
   countryCode: string;
@@ -43,7 +43,6 @@ export function BulkSMSForm() {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      // Validate and transform the data
       const parsedContacts: Contact[] = [];
       let hasErrors = false;
 
@@ -98,10 +97,8 @@ export function BulkSMSForm() {
       return;
     }
 
-    // Process contacts sequentially to avoid overwhelming the SMS service
     for (const contact of contacts) {
       try {
-        // Prepare the message by replacing variables
         let processedMessage = template.message;
         
         if (contact.name) {
@@ -112,7 +109,6 @@ export function BulkSMSForm() {
           processedMessage = processedMessage.replace(/\{link_invitation\}/g, contact.linkInvitation);
         }
         
-        // Remove any remaining variables
         processedMessage = processedMessage.replace(/\{nombre\}/g, "");
         processedMessage = processedMessage.replace(/\{link_invitation\}/g, "");
 
@@ -134,7 +130,6 @@ export function BulkSMSForm() {
           successCount++;
         }
 
-        // Add a small delay between requests to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 300));
       } catch (error) {
         console.error(`Error sending SMS to ${contact.name}:`, error);
@@ -152,9 +147,33 @@ export function BulkSMSForm() {
     }
   };
 
+  const downloadTemplate = () => {
+    const templateData = [
+      ["Country code", "Phone number", "Name", "Invitation link"],
+      ["1", "1234567890", "John Doe", "https://example.com/invite/123"],
+      ["44", "2345678901", "Jane Smith", ""]
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    XLSX.utils.book_append_sheet(wb, ws, "SMS Contacts Template");
+    XLSX.writeFile(wb, "sms_contacts_template.xlsx");
+    toast.success("Template downloaded successfully");
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow space-y-6">
-      <h2 className="text-xl font-semibold mb-6">Envío Masivo de SMS</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Bulk SMS Sending</h2>
+        <Button 
+          variant="outline" 
+          onClick={downloadTemplate}
+          className="flex items-center gap-2"
+        >
+          <Download className="h-4 w-4" />
+          Download Template
+        </Button>
+      </div>
 
       <div className="space-y-4">
         <div className="rounded-lg border border-dashed p-4">
