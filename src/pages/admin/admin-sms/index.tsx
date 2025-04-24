@@ -5,6 +5,7 @@ import { TwilioSMSForm } from "@/components/admin/sms/TwilioSMSForm";
 import { SMSTemplateForm } from "@/components/admin/sms/SMSTemplateForm";
 import { SMSTemplatesList } from "@/components/admin/sms/SMSTemplatesList";
 import { SMSLogsList } from "@/components/admin/sms/SMSLogsList";
+import { BulkSMSForm } from "@/components/admin/sms/BulkSMSForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminSMS() {
@@ -20,12 +21,17 @@ export default function AdminSMS() {
             <Tabs defaultValue="send" className="space-y-4">
               <TabsList>
                 <TabsTrigger value="send">Enviar SMS</TabsTrigger>
+                <TabsTrigger value="bulk">Envío Masivo</TabsTrigger>
                 <TabsTrigger value="templates">Plantillas</TabsTrigger>
                 <TabsTrigger value="logs">Historial</TabsTrigger>
               </TabsList>
 
               <TabsContent value="send">
                 <TwilioSMSForm />
+              </TabsContent>
+
+              <TabsContent value="bulk">
+                <BulkSMSForm />
               </TabsContent>
 
               <TabsContent value="templates" className="space-y-6">
