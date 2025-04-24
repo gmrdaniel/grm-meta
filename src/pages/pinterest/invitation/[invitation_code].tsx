@@ -6,7 +6,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
 import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
 import { InvitationError } from "@/components/invitation/InvitationError";
-import { Stepper} from "@/components/ui/stepper";
+import { Stepper } from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 
@@ -19,13 +19,13 @@ const stepList = [
 type Step = (typeof stepList)[number];
 
 const defaultFormData = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    socialMediaHandle: "",
-    termsAccepted: false,
-    phoneNumber: "",
-  };
+  firstName: "",
+  lastName: "",
+  email: "",
+  socialMediaHandle: "",
+  termsAccepted: false,
+  phoneNumber: "",
+};
 
 export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
@@ -44,6 +44,7 @@ export default function InvitationStepperPage() {
     isAutoPublishEnabled: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [phoneCountryCode, setPhoneCountryCode] = useState<string>("+52"); // Nuevo estado
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -64,7 +65,8 @@ export default function InvitationStepperPage() {
         }
 
         const invitationData = data[0];
-        
+        console.log("Fetched invitation data:", invitationData);
+
         if (invitationData.status === "completed") {
           setError("This invitation has already been accepted");
           return;
@@ -75,11 +77,10 @@ export default function InvitationStepperPage() {
           firstName: invitationData.first_name || "",
           lastName: invitationData.last_name || "",
           email: invitationData.email || "",
-          socialMediaHandle: invitationData.social_media_handle || "",
+          socialMediaHandle: invitationData.instagram_user || "",
           termsAccepted: false,
           phoneNumber: invitationData.phone_number || "",
         });
-
       } catch (err) {
         console.error("Error loading invitation:", err);
         setError("Failed to load invitation details");
@@ -115,7 +116,7 @@ export default function InvitationStepperPage() {
   };
 
   const handleProfileCheckboxChange = (
-    key: 'isConnected' | 'isAutoPublishEnabled',
+    key: "isConnected" | "isAutoPublishEnabled",
     checked: boolean
   ) => {
     setProfileData((prev) => ({ ...prev, [key]: checked }));
@@ -128,13 +129,14 @@ export default function InvitationStepperPage() {
     try {
       const { error } = await supabase
         .from("creator_invitations")
-        .update({ 
-          status: "accepted", 
+        .update({
+          status: "accepted",
           first_name: formData.firstName,
           last_name: formData.lastName,
           social_media_handle: formData.socialMediaHandle,
-          phone_number: formData.phoneNumber, // Add this new field
-          updated_at: new Date().toISOString() 
+          phone_number: formData.phoneNumber,
+          phone_country_code: phoneCountryCode, // Agrega este campo
+          updated_at: new Date().toISOString(),
         })
         .eq("id", invitation.id);
 
@@ -165,9 +167,9 @@ export default function InvitationStepperPage() {
     try {
       const { error } = await supabase
         .from("creator_invitations")
-        .update({ 
+        .update({
           status: "completed",
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString(),
         })
         .eq("id", invitation.id);
 
@@ -198,15 +200,16 @@ export default function InvitationStepperPage() {
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
         {/* Centered column for text */}
         <div className="w-full max-w-2xl text-center space-y-8">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
             Únete al Reto de Creadores de Pinterest y Gana
           </h1>
-          
+
           <div className="prose prose-pink max-w-none">
-            <p className="text-xl text-gray-700 leading-relaxed">
-              ¡Pinterest está buscando creadores como tú! Crea una cuenta de Pinterest, 
-              conéctala a tu Instagram y estarás participando por un giftcard de $1,000 USD 
-              en Amazon o una de las 10 giftcards de $100 USD que tenemos para ti.
+            <p className="text-lg text-left lg:text-lg text-gray-700 leading-relaxed sm:text-justify">
+              ¡Pinterest está buscando creadores como tú! Crea una cuenta de
+              Pinterest, conéctala a tu Instagram y estarás participando por un
+              giftcard de $1,000 USD en Amazon o una de las 10 giftcards de $100
+              USD que tenemos para ti.
             </p>
           </div>
         </div>
@@ -214,8 +217,12 @@ export default function InvitationStepperPage() {
         {/* Right column - Form card */}
         <Card className="w-full lg:w-2/4 shadow-2xl bg-white/95 backdrop-blur">
           <div className="p-8">
-            <Stepper steps={stepList} currentStep={currentStep.id}  variant="pink"/>
-            
+            <Stepper
+              steps={stepList}
+              currentStep={currentStep.id}
+              variant="pink"
+            />
+
             {currentStep.id === "welcome" && (
               <PinterestWelcomeForm
                 invitation={invitation}
@@ -224,6 +231,8 @@ export default function InvitationStepperPage() {
                 onCheckboxChange={handleCheckboxChange}
                 onContinue={handleContinueWelcome}
                 isSubmitting={isSubmitting}
+                phoneCountryCode={phoneCountryCode} // Pasar el estado
+                onPhoneCodeChange={setPhoneCountryCode} // Pasar la función de actualización
               />
             )}
 
@@ -237,8 +246,6 @@ export default function InvitationStepperPage() {
                 isSubmitting={isSubmitting}
               />
             )}
-
-            
           </div>
         </Card>
       </div>

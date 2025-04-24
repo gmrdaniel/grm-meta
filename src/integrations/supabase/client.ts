@@ -24,3 +24,28 @@ export const findInvitationByCode = async (code: string) => {
 
   return { data, error: null };
 };
+
+export const fetchCountries = async (projectId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('project_allowed_countries')
+    .select(`
+      country_id,
+      countries (
+        id,
+        name_es,
+        iso2,
+        phone_code
+      )
+    `)
+    .eq('project_id', projectId);
+
+  if (error) {
+    console.error('Error fetching allowed countries:', error);
+    return [];
+  }
+
+  return data; // 👈 devuelve los datos
+};
+
+
