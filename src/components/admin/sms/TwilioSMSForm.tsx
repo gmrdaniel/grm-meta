@@ -1,26 +1,14 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CountrySelect } from "@/components/pinterest/CountrySelect";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface Template {
-  id: string;
-  name: string;
-  message: string;
-}
+import { useTemplates } from "@/hooks/useTemplates";
+import { PhoneInput } from "./PhoneInput";
+import { TemplateSelector } from "./TemplateSelector";
+import { MessageVariables } from "./MessageVariables";
+import { MessagePreview } from "./MessagePreview";
 
 export function TwilioSMSForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,22 +19,25 @@ export function TwilioSMSForm() {
   const [message, setMessage] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const queryClient = useQueryClient();
+  const { data: templates } = useTemplates();
 
-  const { data: templates } = useQuery<Template[]>({
-    queryKey: ['sms_templates'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sms_templates')
-        .select('id, name, message')
-        .order('name');
+  const updateMessageWithVariables = (templateId: string, newName: string, newLink: string) => {
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
+      let processedMessage = template.message;
       
-      if (error) throw error;
-      return data;
+      if (newName) {
+        processedMessage = processedMessage.replace("{nombre}", newName);
+      }
+      if (newLink) {
+        processedMessage = processedMessage.replace("{link_invitation}", newLink);
+      }
+      
+      processedMessage = processedMessage.replace("{nombre}", newName || "");
+      processedMessage = processedMessage.replace("{link_invitation}", newLink || "");
+      
+      setMessage(processedMessage);
     }
-  });
-
-  const handleCountrySelect = (_countryId: string, code: string) => {
-    setPhoneCode(code);
   };
 
   const handleTemplateSelect = (templateId: string) => {
@@ -55,7 +46,6 @@ export function TwilioSMSForm() {
       setSelectedTemplateId(templateId);
       let processedMessage = template.message;
       
-      // Replace variables only if they have values
       if (name) {
         processedMessage = processedMessage.replace("{nombre}", name);
       }
@@ -63,30 +53,8 @@ export function TwilioSMSForm() {
         processedMessage = processedMessage.replace("{link_invitation}", linkInvitation);
       }
       
-      // Replace remaining placeholders with empty strings if no values
       processedMessage = processedMessage.replace("{nombre}", name || "");
       processedMessage = processedMessage.replace("{link_invitation}", linkInvitation || "");
-      
-      setMessage(processedMessage);
-    }
-  };
-
-  const updateMessageWithVariables = (templateId: string, newName: string, newLink: string) => {
-    const template = templates?.find(t => t.id === templateId);
-    if (template) {
-      let processedMessage = template.message;
-      
-      // Replace variables only if they have values
-      if (newName) {
-        processedMessage = processedMessage.replace("{nombre}", newName);
-      }
-      if (newLink) {
-        processedMessage = processedMessage.replace("{link_invitation}", newLink);
-      }
-      
-      // Replace remaining placeholders with empty strings if no values
-      processedMessage = processedMessage.replace("{nombre}", newName || "");
-      processedMessage = processedMessage.replace("{link_invitation}", newLink || "");
       
       setMessage(processedMessage);
     }
@@ -132,89 +100,38 @@ export function TwilioSMSForm() {
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="template">Plantilla</Label>
-            <Select
-              value={selectedTemplateId}
-              onValueChange={handleTemplateSelect}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar plantilla" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates?.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TemplateSelector
+            templates={templates}
+            selectedTemplateId={selectedTemplateId}
+            onTemplateSelect={handleTemplateSelect}
+          />
 
-          <div>
-            <Label htmlFor="country">Código de país</Label>
-            <CountrySelect
-              onSelect={handleCountrySelect}
-              className="w-full"
-              placeholder="Seleccionar país"
-            />
-          </div>
+          <PhoneInput
+            phoneCode={phoneCode}
+            phoneNumber={phoneNumber}
+            onPhoneCodeChange={setPhoneCode}
+            onPhoneNumberChange={setPhoneNumber}
+          />
 
-          <div>
-            <Label htmlFor="phone">Número de teléfono</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="123456789"
-              required
-            />
-          </div>
+          <MessageVariables
+            hasNameVariable={hasNameVariable}
+            hasLinkVariable={hasLinkVariable}
+            name={name}
+            linkInvitation={linkInvitation}
+            onNameChange={(newName) => {
+              setName(newName);
+              updateMessageWithVariables(selectedTemplateId, newName, linkInvitation);
+            }}
+            onLinkChange={(newLink) => {
+              setLinkInvitation(newLink);
+              updateMessageWithVariables(selectedTemplateId, name, newLink);
+            }}
+          />
 
-          {hasNameVariable && (
-            <div>
-              <Label htmlFor="name">Nombre</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => {
-                  const newName = e.target.value;
-                  setName(newName);
-                  updateMessageWithVariables(selectedTemplateId, newName, linkInvitation);
-                }}
-                placeholder="Juan Pérez"
-              />
-            </div>
-          )}
-
-          {hasLinkVariable && (
-            <div>
-              <Label htmlFor="link">Link de invitación</Label>
-              <Input
-                id="link"
-                value={linkInvitation}
-                onChange={(e) => {
-                  const newLink = e.target.value;
-                  setLinkInvitation(newLink);
-                  updateMessageWithVariables(selectedTemplateId, name, newLink);
-                }}
-                placeholder="https://example.com/invitation/123"
-              />
-            </div>
-          )}
-
-          <div>
-            <Label htmlFor="message">Mensaje</Label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Escribe tu mensaje aquí..."
-              className="min-h-[100px]"
-              required
-            />
-          </div>
+          <MessagePreview
+            message={message}
+            onChange={setMessage}
+          />
         </div>
 
         <Button 
