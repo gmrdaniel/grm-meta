@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { phoneNumber, countryCode, name, message, templateId } = await req.json();
+    const { phoneNumber, countryCode, name, message, templateId, sentBy } = await req.json();
     
     if (!phoneNumber || !countryCode || !message) {
       return new Response(
@@ -64,7 +64,7 @@ serve(async (req) => {
       twilio_message_id: twilioData.sid,
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
-      sent_by: req.headers.get('authorization')?.split('Bearer ')[1],
+      sent_by: sentBy, // Add the user ID who sent the SMS
       template_id: templateId,
       sent_at: new Date().toISOString()
     });

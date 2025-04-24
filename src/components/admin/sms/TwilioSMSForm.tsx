@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { useTemplates } from "@/hooks/useTemplates";
 import { PhoneInput } from "./PhoneInput";
 import { TemplateSelector } from "./TemplateSelector";
@@ -19,6 +20,7 @@ export function TwilioSMSForm() {
   const [message, setMessage] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // Get the authenticated user
   const { data: templates } = useTemplates();
 
   const updateMessageWithVariables = (templateId: string, newName: string, newLink: string) => {
@@ -71,7 +73,8 @@ export function TwilioSMSForm() {
           countryCode: phoneCode,
           name,
           message,
-          templateId: selectedTemplateId
+          templateId: selectedTemplateId,
+          sentBy: user?.id // Include the authenticated user's ID
         }
       });
 
