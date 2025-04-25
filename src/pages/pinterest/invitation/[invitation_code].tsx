@@ -44,7 +44,8 @@ export default function InvitationStepperPage() {
     isAutoPublishEnabled: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [phoneCountryCode, setPhoneCountryCode] = useState<string>("+52"); // Nuevo estado
+  const [phoneCountryCode, setPhoneCountryCode] = useState<string>("+52"); 
+  
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -136,6 +137,7 @@ export default function InvitationStepperPage() {
           social_media_handle: formData.socialMediaHandle,
           phone_number: formData.phoneNumber,
           phone_country_code: phoneCountryCode, 
+          
           updated_at: new Date().toISOString(),
         })
         .eq("id", invitation.id);
@@ -232,7 +234,7 @@ export default function InvitationStepperPage() {
                 onContinue={handleContinueWelcome}
                 isSubmitting={isSubmitting}
                 phoneCountryCode={phoneCountryCode} // Pasar el estado
-                onPhoneCodeChange={setPhoneCountryCode} // Pasar la función de actualización
+                onPhoneCodeChange={setPhoneCountryCode} // Pasar la función de actualizació
               />
             )}
 
