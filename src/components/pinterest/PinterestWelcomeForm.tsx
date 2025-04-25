@@ -116,14 +116,12 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     const { name, value } = e.target;
 
     const isValidName = (name: string) => {
-      const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/; // permite letras, espacios, apóstrofes y guiones
+      const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
       return nameRegex.test(name.trim());
     };
 
-    // Validar solo firstName y lastName
     if (name === "firstName" || name === "lastName") {
       const isValid = isValidName(value);
-
       setFormErrors((prev) => ({
         ...prev,
         [name]: isValid
@@ -286,7 +284,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               <Instagram className="h-4 w-4" /> Usuario de Instagram
             </Label>
             <div className="relative">
-              
               <Input
                 id="socialMediaHandle"
                 name="socialMediaHandle"
@@ -434,9 +431,11 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="flex items-center space-x-2 pt-4">
             <TermsCheckbox
+            
               formData={formData}
               onCheckboxChange={onCheckboxChange}
               onAcceptTerms={handleAcceptTerms}
+              formType="pinterest"
             />
           </div>
         </div>
