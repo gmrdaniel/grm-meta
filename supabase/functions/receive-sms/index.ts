@@ -27,6 +27,8 @@ serve(async (req) => {
       twilio_response: Object.fromEntries(formData.entries())
     }
 
+    console.log('Received SMS data:', messageData)
+
     // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -42,6 +44,8 @@ serve(async (req) => {
       console.error('Error storing SMS:', error)
       throw error
     }
+
+    console.log('SMS stored successfully')
 
     // Return success response to Twilio
     return new Response(
