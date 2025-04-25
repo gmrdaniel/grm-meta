@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
-const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER");
+const TWILIO_PHONE_NUMBER = "+17438875079"; // Fixed phone number
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +40,7 @@ serve(async (req) => {
         },
         body: new URLSearchParams({
           To: formattedPhone,
-          From: TWILIO_PHONE_NUMBER!,
+          From: TWILIO_PHONE_NUMBER,
           Body: message
         }).toString(),
       }
@@ -64,7 +64,7 @@ serve(async (req) => {
       twilio_message_id: twilioData.sid,
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
-      sent_by: sentBy, // Add the user ID who sent the SMS
+      sent_by: sentBy,
       template_id: templateId,
       sent_at: new Date().toISOString()
     });
