@@ -419,7 +419,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                       size="sm"
                       onClick={handleVerifyCode}
                       disabled={verificationCode.length !== 4 || isVerifying}
-                      className="bg-pink-200 hover:bg-pink-300 text-black" 
+                      className="bg-pink-100 hover:bg-pink-300 text-black" 
                     >
                       {isVerifying ? "Verificando..." : "Verificar"}
                     </Button>
