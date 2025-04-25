@@ -28,7 +28,7 @@ jobs:
         shell: bash
         
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
-      - run: supabase db push  --include-all
+      - run: supabase db push
       
       # ✅ New step: Deploy all edge functions in supabase/functions/
       - name: Deploy Supabase Edge Functions
