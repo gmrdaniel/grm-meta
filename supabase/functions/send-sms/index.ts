@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
-const TWILIO_PHONE_NUMBER = "+17438875079"; // Fixed phone number
+const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,8 +19,6 @@ serve(async (req) => {
   try {
     const { phoneNumber, countryCode, name, message, templateId, sentBy } = await req.json();
     
-    console.log("SMS Request:", { phoneNumber, countryCode, message: message.substring(0, 20) + "..." });
-    
     if (!phoneNumber || !countryCode || !message) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
@@ -30,8 +28,6 @@ serve(async (req) => {
 
     const formattedPhone = `+${countryCode}${phoneNumber}`;
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
-    
-    console.log(`Sending SMS to ${formattedPhone} from ${TWILIO_PHONE_NUMBER}`);
     
     // Send SMS via Twilio API
     const twilioResponse = await fetch(
@@ -44,14 +40,13 @@ serve(async (req) => {
         },
         body: new URLSearchParams({
           To: formattedPhone,
-          From: TWILIO_PHONE_NUMBER,
+          From: TWILIO_PHONE_NUMBER!,
           Body: message
         }).toString(),
       }
     );
 
     const twilioData = await twilioResponse.json();
-    console.log("Twilio API Response:", twilioData);
     
     // Initialize Supabase client
     const supabase = createClient(
@@ -69,7 +64,7 @@ serve(async (req) => {
       twilio_message_id: twilioData.sid,
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
-      sent_by: sentBy,
+      sent_by: sentBy, // Add the user ID who sent the SMS
       template_id: templateId,
       sent_at: new Date().toISOString()
     });
@@ -79,11 +74,7 @@ serve(async (req) => {
     }
 
     if (!twilioResponse.ok) {
-      console.error("Twilio API error:", twilioData);
-      return new Response(
-        JSON.stringify({ success: false, error: twilioData.message || "Failed to send SMS", details: twilioData }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      throw new Error(twilioData.message || "Failed to send SMS");
     }
 
     return new Response(
