@@ -1,16 +1,15 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Instagram, Phone } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckboxPinterest } from "../terms-and-conditions/TermsAndConditionsPinterest";
-import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
+import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate"; 
 import { fetchCountries } from "@/integrations/supabase/client";
-import { CountrySelect } from "@/components/pinterest/CountrySelect"; // Importa CountrySelect
+import { CountrySelect } from "@/components/pinterest/CountrySelect";
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -24,10 +23,8 @@ interface PinterestWelcomeFormProps {
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;
-  onContinue: () => void;
+  onContinue: (formData: PinterestWelcomeFormProps['formData'] & { phoneCountryCode: string }) => void; 
   isSubmitting?: boolean;
-  phoneCountryCode: string;
-  onPhoneCodeChange: (code: string) => void;
 }
 
 export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
@@ -37,8 +34,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   onCheckboxChange,
   onContinue,
   isSubmitting = false,
-  phoneCountryCode,
-  onPhoneCodeChange,
 }) => {
   const [formErrors, setFormErrors] = useState<{
     firstName?: string;
@@ -54,6 +49,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [residencePhoneCode, setResidencePhoneCode] = useState<
     string | undefined
   >(undefined);
+  const [localPhoneCountryCode, setLocalPhoneCountryCode] = useState<string>("");
 
   const handleResidenceCountryChange = (
     countryId: string,
@@ -81,7 +77,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           : "Must be at least 2 letters. No spaces or special characters.",
       }));
     } else {
-      onInputChange(e); // Para otros campos, usa la función onInputChange recibida
+      onInputChange(e);
     }
   };
 
@@ -193,8 +189,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                   phone_code: c.countries.phone_code,
                 },
               }))}
-              selectedPhoneCode={phoneCountryCode}
-              onPhoneCodeChange={onPhoneCodeChange}
               phoneNumber={formData.phoneNumber}
               onPhoneNumberChange={(value) => {
                 const syntheticEvent = {
@@ -205,6 +199,8 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 } as React.ChangeEvent<HTMLInputElement>;
                 onInputChange(syntheticEvent);
               }}
+              onPhoneCodeChange={setLocalPhoneCountryCode}
+              selectedPhoneCode={localPhoneCountryCode} // ADICIÓN: Pasamos el selectedPhoneCode
             />
           </div>
 
@@ -220,7 +216,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
       <CardFooter className="flex justify-end">
         <Button
-          onClick={onContinue}
+          onClick={() => onContinue({ ...formData, phoneCountryCode: localPhoneCountryCode })} // MODIFICACIÓN: Pasamos el objeto completo a onContinue
           disabled={!formData.termsAccepted || isSubmitting}
           className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white"
         >
