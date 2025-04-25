@@ -8,8 +8,10 @@ import { Instagram } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate"; 
-import { fetchCountries } from "@/integrations/supabase/client";
+
 import { CountrySelect } from "@/components/pinterest/CountrySelect";
+import { fetchCountries } from "@/services/countryService";
+
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;

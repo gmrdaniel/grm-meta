@@ -136,7 +136,7 @@ export default function InvitationStepperPage() {
                     last_name: allFormData.lastName,
                     social_media_handle: allFormData.socialMediaHandle,
                     phone_number: allFormData.phoneNumber,
-                    phone_country_code: allFormData.phoneCountryCode, // MODIFICACIÓN: Usamos el phoneCountryCode del objeto recibido
+                    phone_country_code: allFormData.phoneCountryCode, 
                     updated_at: new Date().toISOString(),
                 })
                 .eq("id", invitation.id);
