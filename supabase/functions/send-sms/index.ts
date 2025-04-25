@@ -26,27 +26,39 @@ serve(async (req) => {
       );
     }
 
-    const formattedPhone = `+${countryCode}${phoneNumber}`;
+    // Ensure countryCode doesn't have a plus sign already
+    const formattedCountryCode = countryCode.startsWith('+') ? countryCode.substring(1) : countryCode;
+    const formattedPhone = `+${formattedCountryCode}${phoneNumber}`;
+    
+    // Log the values to help with debugging
+    console.log("Sending SMS to:", formattedPhone);
+    console.log("From:", TWILIO_PHONE_NUMBER);
+    console.log("Using Account SID:", TWILIO_ACCOUNT_SID?.substring(0, 5) + "...");
+    console.log("Auth token present:", !!TWILIO_AUTH_TOKEN);
+
+    // Ensure proper encoding of auth header
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
     
     // Send SMS via Twilio API
-    const twilioResponse = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          To: formattedPhone,
-          From: TWILIO_PHONE_NUMBER!,
-          Body: message
-        }).toString(),
-      }
-    );
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+    console.log("Sending request to:", twilioUrl);
+    
+    const twilioResponse = await fetch(twilioUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: formattedPhone,
+        From: TWILIO_PHONE_NUMBER!,
+        Body: message
+      }).toString(),
+    });
 
     const twilioData = await twilioResponse.json();
+    console.log("Twilio response status:", twilioResponse.status);
+    console.log("Twilio response:", JSON.stringify(twilioData).substring(0, 200));
     
     // Initialize Supabase client
     const supabase = createClient(
@@ -57,14 +69,14 @@ serve(async (req) => {
     // Log the SMS in the database
     const { error: logError } = await supabase.from('sms_logs').insert({
       phone_number: phoneNumber,
-      country_code: countryCode,
+      country_code: formattedCountryCode,
       recipient_name: name,
       message,
       status: twilioResponse.ok ? 'sent' : 'failed',
       twilio_message_id: twilioData.sid,
       twilio_response: twilioData,
       error_message: !twilioResponse.ok ? twilioData.message : null,
-      sent_by: sentBy, // Add the user ID who sent the SMS
+      sent_by: sentBy,
       template_id: templateId,
       sent_at: new Date().toISOString()
     });
