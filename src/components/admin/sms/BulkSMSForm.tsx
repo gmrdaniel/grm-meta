@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,6 +20,14 @@ interface Contact {
   linkInvitation: string;
 }
 
+// Expected column names and their alternatives
+const COLUMN_MAPPINGS = {
+  countryCode: ["Código de país", "Country code", "CountryCode", "Country Code", "código país", "codigo pais", "codigo de pais"],
+  phoneNumber: ["Número de teléfono", "Phone number", "PhoneNumber", "Phone Number", "telefono", "teléfono", "numero", "número"],
+  name: ["Nombre", "Name", "nombre", "FullName", "Full Name", "Nombre Completo"],
+  linkInvitation: ["Link de invitación", "Invitation link", "InvitationLink", "Invitation Link", "link", "enlace", "url"]
+};
+
 export function BulkSMSForm() {
   const [file, setFile] = useState<File | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -26,9 +35,21 @@ export function BulkSMSForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { data: templates } = useTemplates();
+
+  // Find the matching column name in the Excel file
+  const findColumnInData = (data: any, columnOptions: string[]): string | null => {
+    const headers = Object.keys(data[0] || {});
+    for (const option of columnOptions) {
+      if (headers.includes(option)) {
+        return option;
+      }
+    }
+    return null;
+  };
 
   const handleFileUpload = async () => {
     if (!file) {
@@ -37,37 +58,89 @@ export function BulkSMSForm() {
     }
 
     setIsUploading(true);
+    setUploadErrors([]);
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      if (jsonData.length === 0) {
+        toast.error("El archivo no contiene datos");
+        setIsUploading(false);
+        return;
+      }
+
+      console.log("Excel data:", jsonData);
+      
+      // Find matching column names
+      const countryCodeCol = findColumnInData(jsonData, COLUMN_MAPPINGS.countryCode);
+      const phoneNumberCol = findColumnInData(jsonData, COLUMN_MAPPINGS.phoneNumber);
+      const nameCol = findColumnInData(jsonData, COLUMN_MAPPINGS.name);
+      const linkCol = findColumnInData(jsonData, COLUMN_MAPPINGS.linkInvitation);
+      
+      // Validate required columns
+      const missingColumns = [];
+      if (!countryCodeCol) missingColumns.push("Código de país");
+      if (!phoneNumberCol) missingColumns.push("Número de teléfono");
+      if (!nameCol) missingColumns.push("Nombre");
+      
+      if (missingColumns.length > 0) {
+        toast.error(`Columnas requeridas no encontradas: ${missingColumns.join(", ")}`);
+        setIsUploading(false);
+        return;
+      }
 
       const parsedContacts: Contact[] = [];
-      let hasErrors = false;
+      const errors: string[] = [];
 
       jsonData.forEach((row: any, index) => {
-        if (!row["Código de país"] || !row["Número de teléfono"] || !row["Nombre"]) {
-          toast.error(`Fila ${index + 2}: Faltan campos obligatorios`);
-          hasErrors = true;
+        const rowNumber = index + 2; // +2 because Excel rows start at 1 and we have a header row
+        
+        const countryCode = row[countryCodeCol];
+        const phoneNumber = row[phoneNumberCol];
+        const name = row[nameCol];
+        const link = linkCol ? row[linkCol] : '';
+        
+        if (!countryCode) {
+          errors.push(`Fila ${rowNumber}: Falta el código de país`);
+          return;
+        }
+        
+        if (!phoneNumber) {
+          errors.push(`Fila ${rowNumber}: Falta el número de teléfono`);
+          return;
+        }
+        
+        if (!name) {
+          errors.push(`Fila ${rowNumber}: Falta el nombre`);
           return;
         }
 
         parsedContacts.push({
-          countryCode: String(row["Código de país"]).replace(/\D/g, ''),
-          phoneNumber: String(row["Número de teléfono"]).replace(/\D/g, ''),
-          name: row["Nombre"],
-          linkInvitation: row["Link de invitación"] || ""
+          countryCode: String(countryCode).replace(/\D/g, ''),
+          phoneNumber: String(phoneNumber).replace(/\D/g, ''),
+          name: String(name),
+          linkInvitation: link ? String(link) : ""
         });
       });
 
-      if (!hasErrors) {
+      setUploadErrors(errors);
+      
+      if (parsedContacts.length > 0) {
         setContacts(parsedContacts);
-        toast.success(`${parsedContacts.length} contactos cargados correctamente`);
+        
+        if (errors.length > 0) {
+          toast.warning(`${parsedContacts.length} contactos cargados con ${errors.length} errores`);
+        } else {
+          toast.success(`${parsedContacts.length} contactos cargados correctamente`);
+        }
+      } else {
+        toast.error("No se pudieron cargar contactos. Verifica el formato del archivo.");
       }
     } catch (error) {
       console.error("Error processing file:", error);
-      toast.error("Error al procesar el archivo");
+      toast.error("Error al procesar el archivo. Verifica que sea un archivo Excel válido.");
     } finally {
       setIsUploading(false);
     }
@@ -149,7 +222,7 @@ export function BulkSMSForm() {
 
   const downloadTemplate = () => {
     const templateData = [
-      ["Country code", "Phone number", "Name", "Invitation link"],
+      ["Código de país", "Número de teléfono", "Nombre", "Link de invitación"],
       ["1", "1234567890", "John Doe", "https://example.com/invite/123"],
       ["44", "2345678901", "Jane Smith", ""]
     ];
@@ -192,6 +265,19 @@ export function BulkSMSForm() {
               {isUploading ? "Procesando..." : "Cargar contactos"}
             </Button>
           </div>
+          
+          {uploadErrors.length > 0 && (
+            <div className="mt-4 p-3 bg-red-50 rounded-md border border-red-100">
+              <h4 className="text-sm font-medium text-red-800 mb-1">Errores encontrados:</h4>
+              <div className="max-h-32 overflow-y-auto">
+                <ul className="text-xs text-red-700 list-disc pl-5">
+                  {uploadErrors.map((error, index) => (
+                    <li key={index} className="mb-1">{error}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
         {contacts.length > 0 && (
