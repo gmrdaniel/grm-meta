@@ -135,7 +135,7 @@ export default function InvitationStepperPage() {
           last_name: formData.lastName,
           social_media_handle: formData.socialMediaHandle,
           phone_number: formData.phoneNumber,
-          phone_country_code: phoneCountryCode, // Agrega este campo
+          phone_country_code: phoneCountryCode, 
           updated_at: new Date().toISOString(),
         })
         .eq("id", invitation.id);

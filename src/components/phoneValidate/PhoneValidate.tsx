@@ -41,7 +41,7 @@ export const PhoneValidate: React.FC<PhoneInputProps> = ({
                 value={`+${country.countries.phone_code}`}
                 className="px-4 py-2 text-black pl-7  hover:bg-pink-200"
               >
-                +{country.countries.phone_code}
+                +{country.countries.phone_code} ({country.countries.name_es})
               </SelectItem>
             ))}
           </SelectContent>
