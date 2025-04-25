@@ -30,11 +30,29 @@ serve(async (req) => {
     const formattedCountryCode = countryCode.startsWith('+') ? countryCode.substring(1) : countryCode;
     const formattedPhone = `+${formattedCountryCode}${phoneNumber}`;
     
+    // Validate phone number format
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(formattedPhone)) {
+      console.error("Invalid phone number format:", formattedPhone);
+      return new Response(
+        JSON.stringify({ error: "Invalid phone number format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     // Log the values to help with debugging
     console.log("Sending SMS to:", formattedPhone);
     console.log("From:", TWILIO_PHONE_NUMBER);
     console.log("Using Account SID:", TWILIO_ACCOUNT_SID?.substring(0, 5) + "...");
     console.log("Auth token present:", !!TWILIO_AUTH_TOKEN);
+
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+      console.error("Missing Twilio credentials");
+      return new Response(
+        JSON.stringify({ error: "Server configuration error: Missing Twilio credentials" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Ensure proper encoding of auth header
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
@@ -51,7 +69,7 @@ serve(async (req) => {
       },
       body: new URLSearchParams({
         To: formattedPhone,
-        From: TWILIO_PHONE_NUMBER!,
+        From: TWILIO_PHONE_NUMBER,
         Body: message
       }).toString(),
     });
@@ -59,6 +77,19 @@ serve(async (req) => {
     const twilioData = await twilioResponse.json();
     console.log("Twilio response status:", twilioResponse.status);
     console.log("Twilio response:", JSON.stringify(twilioData).substring(0, 200));
+    
+    // Handle specific Twilio error codes
+    if (twilioData.code === 21612) {
+      console.error("Twilio error 21612: Invalid 'To' and 'From' combination");
+      return new Response(
+        JSON.stringify({ 
+          error: "This phone number combination is not allowed. The 'From' number may not be authorized to send messages to this region.",
+          code: 21612,
+          twilioError: twilioData.message
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     
     // Initialize Supabase client
     const supabase = createClient(
