@@ -214,6 +214,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             formData={formData}
             onCheckboxChange={onCheckboxChange}
             onAcceptTerms={handleAcceptTerms}
+            formType="meta"
           />
         </div>
       </CardContent>

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
-import { TermsCheckboxPinterest } from "../terms-and-conditions/TermsAndConditionsPinterest";
+import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate"; 
 import { fetchCountries } from "@/integrations/supabase/client";
 import { CountrySelect } from "@/components/pinterest/CountrySelect";
@@ -200,15 +200,16 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 onInputChange(syntheticEvent);
               }}
               onPhoneCodeChange={setLocalPhoneCountryCode}
-              selectedPhoneCode={localPhoneCountryCode} // ADICIÓN: Pasamos el selectedPhoneCode
+              selectedPhoneCode={localPhoneCountryCode} 
             />
           </div>
 
           <div className="flex items-center space-x-2 pt-4">
-            <TermsCheckboxPinterest
+            <TermsCheckbox
               formData={formData}
               onCheckboxChange={onCheckboxChange}
               onAcceptTerms={handleAcceptTerms}
+              formType="pinterest"
             />
           </div>
         </div>
