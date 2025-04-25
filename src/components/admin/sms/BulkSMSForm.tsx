@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -26,9 +27,26 @@ export function BulkSMSForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { data: templates } = useTemplates();
+
+  // Function to normalize column names to handle variations
+  const normalizeColumnName = (name: string): string => {
+    const lowerName = name.toLowerCase();
+    
+    if (lowerName.includes('país') || lowerName.includes('pais') || lowerName.includes('country')) 
+      return 'countryCode';
+    if (lowerName.includes('teléfono') || lowerName.includes('telefono') || lowerName.includes('phone')) 
+      return 'phoneNumber';
+    if (lowerName.includes('nombre') || lowerName.includes('name')) 
+      return 'name';
+    if (lowerName.includes('link') || lowerName.includes('invitación') || lowerName.includes('invitacion') || lowerName.includes('invitation')) 
+      return 'linkInvitation';
+    
+    return name;
+  };
 
   const handleFileUpload = async () => {
     if (!file) {
@@ -37,6 +55,7 @@ export function BulkSMSForm() {
     }
 
     setIsUploading(true);
+    setUploadErrors([]);
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
@@ -44,30 +63,72 @@ export function BulkSMSForm() {
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       const parsedContacts: Contact[] = [];
-      let hasErrors = false;
+      const errors: string[] = [];
+      
+      if (jsonData.length === 0) {
+        errors.push("El archivo no contiene datos");
+        setUploadErrors(errors);
+        toast.error("El archivo no contiene datos");
+        setIsUploading(false);
+        return;
+      }
+
+      // Check if required columns exist in any format
+      const firstRow = jsonData[0] as any;
+      const headers = Object.keys(firstRow);
+      
+      const hasCountryCode = headers.some(header => 
+        normalizeColumnName(header) === 'countryCode');
+      const hasPhoneNumber = headers.some(header => 
+        normalizeColumnName(header) === 'phoneNumber');
+      const hasName = headers.some(header => 
+        normalizeColumnName(header) === 'name');
+
+      if (!hasCountryCode || !hasPhoneNumber || !hasName) {
+        const missingColumns = [];
+        if (!hasCountryCode) missingColumns.push("Código de país");
+        if (!hasPhoneNumber) missingColumns.push("Número de teléfono");
+        if (!hasName) missingColumns.push("Nombre");
+        
+        errors.push(`El archivo no contiene las columnas requeridas: ${missingColumns.join(", ")}`);
+        setUploadErrors(errors);
+        toast.error(`Faltan columnas requeridas: ${missingColumns.join(", ")}`);
+        setIsUploading(false);
+        return;
+      }
 
       jsonData.forEach((row: any, index) => {
-        if (!row["Código de país"] || !row["Número de teléfono"] || !row["Nombre"]) {
-          toast.error(`Fila ${index + 2}: Faltan campos obligatorios`);
-          hasErrors = true;
+        // Find the appropriate column names in this specific file
+        const countryCodeColumn = headers.find(header => normalizeColumnName(header) === 'countryCode') || '';
+        const phoneNumberColumn = headers.find(header => normalizeColumnName(header) === 'phoneNumber') || '';
+        const nameColumn = headers.find(header => normalizeColumnName(header) === 'name') || '';
+        const linkInvitationColumn = headers.find(header => normalizeColumnName(header) === 'linkInvitation') || '';
+        
+        // Validate required fields
+        if (!row[countryCodeColumn] || !row[phoneNumberColumn] || !row[nameColumn]) {
+          errors.push(`Fila ${index + 2}: Faltan campos obligatorios`);
           return;
         }
 
         parsedContacts.push({
-          countryCode: String(row["Código de país"]).replace(/\D/g, ''),
-          phoneNumber: String(row["Número de teléfono"]).replace(/\D/g, ''),
-          name: row["Nombre"],
-          linkInvitation: row["Link de invitación"] || ""
+          countryCode: String(row[countryCodeColumn]).replace(/\D/g, ''),
+          phoneNumber: String(row[phoneNumberColumn]).replace(/\D/g, ''),
+          name: row[nameColumn],
+          linkInvitation: linkInvitationColumn ? (row[linkInvitationColumn] || "") : ""
         });
       });
 
-      if (!hasErrors) {
+      if (errors.length > 0) {
+        setUploadErrors(errors);
+        toast.error(`${errors.length} errores encontrados al procesar el archivo`);
+      } else {
         setContacts(parsedContacts);
         toast.success(`${parsedContacts.length} contactos cargados correctamente`);
       }
     } catch (error) {
       console.error("Error processing file:", error);
       toast.error("Error al procesar el archivo");
+      setUploadErrors(["Error al procesar el archivo. Verifica el formato."]);
     } finally {
       setIsUploading(false);
     }
@@ -149,7 +210,7 @@ export function BulkSMSForm() {
 
   const downloadTemplate = () => {
     const templateData = [
-      ["Country code", "Phone number", "Name", "Invitation link"],
+      ["Código de país", "Número de teléfono", "Nombre", "Link de invitación"],
       ["1", "1234567890", "John Doe", "https://example.com/invite/123"],
       ["44", "2345678901", "Jane Smith", ""]
     ];
@@ -158,7 +219,7 @@ export function BulkSMSForm() {
     const ws = XLSX.utils.aoa_to_sheet(templateData);
     XLSX.utils.book_append_sheet(wb, ws, "SMS Contacts Template");
     XLSX.writeFile(wb, "sms_contacts_template.xlsx");
-    toast.success("Template downloaded successfully");
+    toast.success("Plantilla descargada correctamente");
   };
 
   return (
@@ -193,6 +254,17 @@ export function BulkSMSForm() {
             </Button>
           </div>
         </div>
+
+        {uploadErrors.length > 0 && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <h3 className="text-sm font-medium text-red-800 mb-2">Errores encontrados:</h3>
+            <ul className="text-sm text-red-700 list-disc pl-5 space-y-1">
+              {uploadErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {contacts.length > 0 && (
           <>

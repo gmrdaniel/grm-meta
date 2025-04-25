@@ -616,6 +616,7 @@ export type Database = {
         Row: {
           country_code: string
           created_at: string | null
+          direction: Database["public"]["Enums"]["sms_direction"]
           error_message: string | null
           id: string
           message: string
@@ -632,6 +633,7 @@ export type Database = {
         Insert: {
           country_code: string
           created_at?: string | null
+          direction?: Database["public"]["Enums"]["sms_direction"]
           error_message?: string | null
           id?: string
           message: string
@@ -648,6 +650,7 @@ export type Database = {
         Update: {
           country_code?: string
           created_at?: string | null
+          direction?: Database["public"]["Enums"]["sms_direction"]
           error_message?: string | null
           id?: string
           message?: string
@@ -1027,6 +1030,7 @@ export type Database = {
       notification_channel: "sms" | "email"
       notification_status: "sent" | "failed" | "pending"
       notification_types: "reminder" | "notification" | "alert"
+      sms_direction: "inbound" | "outbound"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
@@ -1150,6 +1154,7 @@ export const Constants = {
       notification_channel: ["sms", "email"],
       notification_status: ["sent", "failed", "pending"],
       notification_types: ["reminder", "notification", "alert"],
+      sms_direction: ["inbound", "outbound"],
       task_status: ["pending", "in_progress", "completed", "review"],
       user_role: ["admin", "creator"],
     },
