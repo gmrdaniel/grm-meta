@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Country {
@@ -27,7 +26,7 @@ export const searchCountries = async (searchTerm: string = ''): Promise<Country[
     
     if (!data) return [];
     
-    return data.map((country: any) => ({
+    const countriesWithPhoneCodes = data.map((country: any) => ({
       id: country.id,
       code: country.phone_code || '',
       name_es: country.name_es,
@@ -35,6 +34,34 @@ export const searchCountries = async (searchTerm: string = ''): Promise<Country[
       phone_code: country.phone_code,
       active: true
     })) as Country[];
+
+    const usaCanada = [
+      {
+        id: 'usa',
+        code: '1',
+        name_es: 'Estados Unidos',
+        name_en: 'United States',
+        phone_code: '1',
+        active: true
+      },
+      {
+        id: 'canada',
+        code: '1',
+        name_es: 'Canadá',
+        name_en: 'Canada',
+        phone_code: '1',
+        active: true
+      }
+    ];
+
+    const combinedCountries = [
+      ...countriesWithPhoneCodes,
+      ...usaCanada.filter(
+        country => !countriesWithPhoneCodes.some(c => c.id === country.id)
+      )
+    ];
+
+    return combinedCountries;
   } catch (err) {
     console.error("Exception in searchCountries:", err);
     return [];
@@ -45,7 +72,28 @@ export const getCountryById = async (countryId: string): Promise<Country | null>
   if (!countryId) return null;
   
   try {
-    // Use direct country lookup instead of filtering all countries
+    if (countryId === 'usa') {
+      return {
+        id: 'usa',
+        code: '1',
+        name_es: 'Estados Unidos',
+        name_en: 'United States',
+        phone_code: '1',
+        active: true
+      };
+    }
+
+    if (countryId === 'canada') {
+      return {
+        id: 'canada',
+        code: '1',
+        name_es: 'Canadá',
+        name_en: 'Canada',
+        phone_code: '1',
+        active: true
+      };
+    }
+    
     const { data, error } = await supabase
       .from('country_phone_codes')
       .select('id, name_es, name_en, phone_code')
