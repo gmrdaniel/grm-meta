@@ -1,5 +1,6 @@
 
 export interface CreatorInvitation {
+  residence_country_id: any;
   id: string;
   project_id?: string | null;
   email: string;

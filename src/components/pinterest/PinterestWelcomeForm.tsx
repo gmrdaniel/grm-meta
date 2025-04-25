@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,14 @@ import { Instagram, Phone } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckboxPinterest } from "../terms-and-conditions/TermsAndConditionsPinterest";
 import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
-
-
+import { fetchCountries, supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -26,6 +32,8 @@ interface PinterestWelcomeFormProps {
   onCheckboxChange: (checked: boolean) => void;
   onContinue: () => void;
   isSubmitting?: boolean;
+  phoneCountryCode: string; // Nueva prop
+  onPhoneCodeChange: (code: string) => void; // Nueva prop
 }
 
 export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
@@ -35,11 +43,26 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   onCheckboxChange,
   onContinue,
   isSubmitting = false,
+  phoneCountryCode, // Recibir la prop
+  onPhoneCodeChange, // Recibir la prop
 }) => {
   const [formErrors, setFormErrors] = useState<{
     firstName?: string;
     lastName?: string;
   }>({});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [countries, setCountries] = useState<any[]>([]);
+
+  const [selectedCountry, setSelectedCountry] = useState<string | undefined>(
+    undefined
+  );
+
+  const [residenceCountry, setResidenceCountry] = useState("");
+
+  const handleCountryChange = (value: string) => {
+    setSelectedCountry(value);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -65,6 +88,18 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const handleAcceptTerms = () => {
     onCheckboxChange(true); // Marca el checkbox de términos y condiciones
   };
+
+  useEffect(() => {
+    const loadCountries = async () => {
+      if (invitation.project_id) {
+        const countriesData = await fetchCountries(invitation.project_id);
+        console.log("Países permitidos por proyecto:", countriesData);
+        setCountries(countriesData);
+      }
+    };
+
+    loadCountries();
+  }, [invitation.project_id]);
 
   return (
     <>
@@ -120,7 +155,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               <Instagram className="h-4 w-4" /> Usuario de Instagram
             </Label>
             <div className="relative">
-              
               <Input
                 id="socialMediaHandle"
                 name="socialMediaHandle"
@@ -133,13 +167,39 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber" className="flex items-center gap-2">
-              
-            </Label>
+            <Label htmlFor="residenceCountry">pais de residencia</Label>
+            <Select
+             value={residenceCountry}
+             onValueChange={setResidenceCountry}
+            >
+              <SelectTrigger className="w-full border border-pink-400 rounded-md px-4 py-2 text-black focus:outline-none focus:ring-0 focus:border-pink-500">
+                <SelectValue placeholder="Selecciona el código de país" />
+              </SelectTrigger>
+              <SelectContent className="bg-white rounded-md shadow-lg mt-1 w-full">
+                {countries.map((item) => (
+                  <SelectItem
+                    key={item.country_id}
+                    value={`+${item.countries.phone_code}`}
+                    className="px-4 py-2 text-black hover:bg-pink-200"
+                  >
+                    <span className="pl-3">{item.countries.name_es}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="phoneNumber"
+              className="flex items-center gap-2"
+            ></Label>
             <PhoneValidate
-              phoneCountryCode={invitation.phone_country_code}
+              countries={countries}
+              selectedPhoneCode={phoneCountryCode}
+              onPhoneCodeChange={onPhoneCodeChange}
               phoneNumber={formData.phoneNumber}
-              onPhoneChange={(value) => {
+              onPhoneNumberChange={(value) => {
                 const syntheticEvent = {
                   target: {
                     name: "phoneNumber",
