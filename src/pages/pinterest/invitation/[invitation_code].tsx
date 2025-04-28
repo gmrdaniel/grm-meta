@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
 import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
+import { PinterestVerificationSuccess } from "@/components/pinterest/PinterestVerificationSuccess";
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { Stepper } from "@/components/ui/stepper";
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
@@ -245,6 +246,11 @@ export default function InvitationStepperPage() {
                 onCheckboxChange={handleProfileCheckboxChange}
                 onSubmit={handleProfileSubmit}
                 isSubmitting={isSubmitting}
+              />
+            )}
+             {currentStep.id === "verification" && (
+              <PinterestVerificationSuccess
+
               />
             )}
           </div>
