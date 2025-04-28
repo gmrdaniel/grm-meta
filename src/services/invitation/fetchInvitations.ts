@@ -68,7 +68,7 @@ export const fetchInvitationsWithPagination = async (
     // --- Paso 1: Obtener el count con filtro si aplica
     let countQuery = supabase
       .from('creator_invitations')
-      .select('*', { count: 'exact', head: true });
+      .select('*, project_stages!inner(projects!inner(name))', { count: 'exact', head: true });
 
     if (statusFilter) {
       countQuery = countQuery.eq('status', statusFilter);
@@ -81,27 +81,41 @@ export const fetchInvitationsWithPagination = async (
       return { data: [], count: 0 };
     }
 
-    // --- Paso 2: Obtener los datos paginados
-    let dataQuery = supabase
+    // --- Paso 2: Obtener los datos paginados con la información del proyecto
+    const { data, error } = await supabase
       .from('creator_invitations')
-      .select('*')
+      .select(`
+        *,
+        project_stages!inner(
+          projects!inner(
+            name
+          )
+        )
+      `)
       .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(from, to);
-
-    if (statusFilter) {
-      dataQuery = dataQuery.eq('status', statusFilter);
-    }
-
-    const { data, error } = await dataQuery;
+      .range(from, to)
+      .then((res) => {
+        if (res.data) {
+          return {
+            ...res,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data: res.data.map((invitation: any) => ({
+              ...invitation,
+              project: invitation.project_stages?.projects || null,
+            })),
+          };
+        }
+        return res;
+      });
 
     if (error) {
-      console.error('Error fetching paginated invitations:', error);
+      console.error('Error fetching paginated invitations with project:', error);
       return { data: [], count: count || 0 };
     }
 
-    return { 
-      data: data as CreatorInvitation[], 
-      count: count || 0 
+    return {
+      data: data as CreatorInvitation[],
+      count: count || 0
     };
   } catch (err) {
     console.error('Unexpected error in fetchInvitationsWithPagination:', err);

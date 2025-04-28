@@ -285,6 +285,7 @@ const { data, isLoading, error } = useQuery({
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Invitation Code</TableHead>
+            <TableHead>Project</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
@@ -317,6 +318,7 @@ const { data, isLoading, error } = useQuery({
                   )}
                 </div>
               </TableCell>
+              <TableCell>{invitation.project?.name || "Sin proyecto"}</TableCell>
               <TableCell>
                 {invitation.invitation_type === "new_user"
                   ? "New User"
