@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProjects } from "@/services/projectService";
+import { fetchProjects } from "@/services/project/projectService";
 import { createInvitation } from "@/services/invitation/createInvitation";
 import { CreateInvitationData } from "@/types/invitation";
 import { toast } from "sonner";

@@ -9,7 +9,7 @@ import { ProjectForm } from "@/components/admin/projects/ProjectForm";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
-import { fetchProjectById } from "@/services/projectService";
+import { fetchProjectById } from "@/services/project/projectService";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

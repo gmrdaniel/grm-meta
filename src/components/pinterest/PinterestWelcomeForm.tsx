@@ -7,11 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
-import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate"; 
+import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
 
 import { CountrySelect } from "@/components/pinterest/CountrySelect";
-import { fetchCountries } from "@/services/countryService";
-
+import { fetchCountries } from "@/services/project/countryService";
 
 interface PinterestWelcomeFormProps {
   invitation: CreatorInvitation;
@@ -25,7 +24,11 @@ interface PinterestWelcomeFormProps {
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;
-  onContinue: (formData: PinterestWelcomeFormProps['formData'] & { phoneCountryCode: string }) => void; 
+  onContinue: (
+    formData: PinterestWelcomeFormProps["formData"] & {
+      phoneCountryCode: string;
+    }
+  ) => void;
   isSubmitting?: boolean;
 }
 
@@ -40,6 +43,10 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [formErrors, setFormErrors] = useState<{
     firstName?: string;
     lastName?: string;
+    socialMediaHandle?: string;
+    residenceCountryId?: string;
+    phoneNumber?: string;
+    termsAccepted?: string;
   }>({});
 
   const [countries, setCountries] = useState<
@@ -51,7 +58,8 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [residencePhoneCode, setResidencePhoneCode] = useState<
     string | undefined
   >(undefined);
-  const [localPhoneCountryCode, setLocalPhoneCountryCode] = useState<string>("");
+  const [localPhoneCountryCode, setLocalPhoneCountryCode] =
+    useState<string>("");
 
   const handleResidenceCountryChange = (
     countryId: string,
@@ -64,12 +72,12 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
+  
     const isValidName = (name: string) => {
       const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
       return nameRegex.test(name.trim());
     };
-
+  
     if (name === "firstName" || name === "lastName") {
       const isValid = isValidName(value);
       setFormErrors((prev) => ({
@@ -78,10 +86,11 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           ? undefined
           : "Must be at least 2 letters. No spaces or special characters.",
       }));
-    } else {
-      onInputChange(e);
     }
+  
+    onInputChange(e); // 👈 Llamarlo siempre
   };
+  
 
   const handleAcceptTerms = () => {
     onCheckboxChange(true);
@@ -98,6 +107,39 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
     loadCountries();
   }, [invitation.project_id]);
+
+  const validateForm = () => {
+    const errors: typeof formErrors = {};
+
+    const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
+
+    if (!nameRegex.test(formData.firstName.trim())) {
+      errors.firstName = "El nombre debe tener al menos 2 letras.";
+    }
+
+    if (!nameRegex.test(formData.lastName.trim())) {
+      errors.lastName = "El apellido debe tener al menos 2 letras.";
+    }
+
+    if (!formData.socialMediaHandle.trim()) {
+      errors.socialMediaHandle = "El usuario de Instagram es obligatorio.";
+    }
+
+    if (!residenceCountryId) {
+      errors.residenceCountryId = "El país de residencia es obligatorio.";
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = "El número de teléfono es obligatorio.";
+    }
+
+    if (!formData.termsAccepted) {
+      errors.termsAccepted = "Debes aceptar los términos y condiciones.";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   return (
     <>
@@ -160,6 +202,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 onChange={onInputChange}
                 placeholder="usuario"
                 className="pl-8 border-pink-100 focus-visible:ring-pink-200"
+                disabled
               />
             </div>
           </div>
@@ -202,7 +245,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 onInputChange(syntheticEvent);
               }}
               onPhoneCodeChange={setLocalPhoneCountryCode}
-              selectedPhoneCode={localPhoneCountryCode} 
+              selectedPhoneCode={localPhoneCountryCode}
             />
           </div>
 
@@ -219,7 +262,14 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
       <CardFooter className="flex justify-end">
         <Button
-          onClick={() => onContinue({ ...formData, phoneCountryCode: localPhoneCountryCode })} // MODIFICACIÓN: Pasamos el objeto completo a onContinue
+          onClick={() => {
+            if (validateForm()) {
+              onContinue({
+                ...formData,
+                phoneCountryCode: localPhoneCountryCode,
+              });
+            }
+          }}
           disabled={!formData.termsAccepted || isSubmitting}
           className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white"
         >

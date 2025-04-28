@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { searchCountries } from "@/services/countryService";
-import type { Country } from "@/services/countryService";
+import { searchCountries } from "@/services/project/countryService";
+import type { Country } from "@/services/project/countryService";
 import { useState, useEffect } from "react";
 
 export type { Country };
