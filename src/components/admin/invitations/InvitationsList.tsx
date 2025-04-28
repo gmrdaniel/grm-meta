@@ -318,7 +318,7 @@ const { data, isLoading, error } = useQuery({
                   )}
                 </div>
               </TableCell>
-              <TableCell>{invitation.project?.name || "Sin proyecto"}</TableCell>
+              <TableCell>{invitation.project?.name || "Project not found"}</TableCell>
               <TableCell>
                 {invitation.invitation_type === "new_user"
                   ? "New User"

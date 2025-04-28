@@ -148,3 +148,4 @@ export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
   const { data } = await fetchInvitationsWithPagination(1, 10);
   return data;
 };
+
