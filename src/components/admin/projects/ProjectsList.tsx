@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
-import { fetchProjects } from "@/services/projectService";
+import { fetchProjects } from "@/services/project/projectService";
 import { useQuery } from "@tanstack/react-query";
 
 export function ProjectsList() {

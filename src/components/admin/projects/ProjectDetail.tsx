@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Project, ProjectStage } from "@/types/project";
-import { updateProject } from "@/services/projectService";
+import { updateProject } from "@/services/project/projectService";
 
 interface ProjectDetailProps {
   project: Project;

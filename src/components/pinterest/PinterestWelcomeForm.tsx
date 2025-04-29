@@ -8,8 +8,9 @@ import { Instagram, Phone, Shield } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
+
 import { CountrySelect } from "@/components/pinterest/CountrySelect";
-import { fetchCountries } from "@/services/countryService";
+import { fetchCountries } from "@/services/project/countryService";
 import { toast } from "sonner";
 import {
   InputOTP,
@@ -51,6 +52,10 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [formErrors, setFormErrors] = useState<{
     firstName?: string;
     lastName?: string;
+    socialMediaHandle?: string;
+    residenceCountryId?: string;
+    phoneNumber?: string;
+    termsAccepted?: string;
   }>({});
   const [countries, setCountries] = useState<
     { country_id: string; countries: { name_es: string; phone_code: string } }[]
@@ -114,12 +119,12 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
+  
     const isValidName = (name: string) => {
       const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
       return nameRegex.test(name.trim());
     };
-
+  
     if (name === "firstName" || name === "lastName") {
       const isValid = isValidName(value);
       setFormErrors((prev) => ({
@@ -133,7 +138,10 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     } else {
       onInputChange(e);
     }
+  
+    onInputChange(e); // 👈 Llamarlo siempre
   };
+  
 
   const handleAcceptTerms = () => {
     onCheckboxChange(true);
@@ -291,6 +299,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 onChange={onInputChange}
                 placeholder="usuario"
                 className="pl-8 border-pink-100 focus-visible:ring-pink-200"
+                disabled
               />
             </div>
           </div>

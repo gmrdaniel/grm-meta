@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createInvitation } from "@/services/invitationService";
-import { fetchProjects } from "@/services/projectService";
+import { fetchProjects } from "@/services/project/projectService";
 import {
   Form,
   FormControl,

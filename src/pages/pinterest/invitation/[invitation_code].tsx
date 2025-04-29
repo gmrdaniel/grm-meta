@@ -161,29 +161,6 @@ export default function InvitationStepperPage() {
         toast.success("¡Perfil guardado exitosamente!");
     };
 
-    const handleVerificationComplete = async () => {
-        if (!invitation) return;
-        setIsSubmitting(true);
-
-        try {
-            const { error } = await supabase
-                .from("creator_invitations")
-                .update({
-                    status: "completed",
-                    updated_at: new Date().toISOString(),
-                })
-                .eq("id", invitation.id);
-
-            if (error) throw error;
-
-            toast.success("¡Verificación completada exitosamente!");
-        } catch (err) {
-            toast.error("Error al completar la verificación");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -237,6 +214,7 @@ export default function InvitationStepperPage() {
 
                         {currentStep.id === "profile" && (
                             <PinterestProfileForm
+                                invitation={invitation}
                                 profileData={profileData}
                                 onInputChange={handleProfileInputChange}
                                 onContentTypeChange={handleContentTypeChange}

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/projectService";
+import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/project/projectService";
 import { ProjectStage } from "@/types/project";
 
 const formSchema = z.object({

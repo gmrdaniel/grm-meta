@@ -18,7 +18,7 @@ import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import {
   updateFacebookPage,
 } from "@/services/invitation";
-import { fetchProjectStages } from "@/services/projectService";
+import { fetchProjectStages } from "@/services/project/projectService";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
