@@ -158,34 +158,11 @@ export default function InvitationStepperPage() {
     }
   };
 
-  const handleProfileSubmit = async () => {
-    // Simply advance to the next step without validations or saving data
-    setCurrentStep(stepList[2]); // Move to verification step
-    toast.success("¡Perfil guardado exitosamente!");
-  };
-
-  const handleVerificationComplete = async () => {
-    if (!invitation) return;
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase
-        .from("creator_invitations")
-        .update({
-          status: "completed",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", invitation.id);
-
-      if (error) throw error;
-
-      toast.success("¡Verificación completada exitosamente!");
-    } catch (err) {
-      toast.error("Error al completar la verificación");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    const handleProfileSubmit = async () => {
+        // Simply advance to the next step without validations or saving data
+        setCurrentStep(stepList[2]); // Move to verification step
+        toast.success("¡Perfil guardado exitosamente!");
+    };
 
   if (loading) {
     return (
@@ -238,24 +215,20 @@ export default function InvitationStepperPage() {
               />
             )}
 
-            {currentStep.id === "profile" && (
-              <PinterestProfileForm
-                profileData={profileData}
-                onInputChange={handleProfileInputChange}
-                onContentTypeChange={handleContentTypeChange}
-                onCheckboxChange={handleProfileCheckboxChange}
-                onSubmit={handleProfileSubmit}
-                isSubmitting={isSubmitting}
-              />
-            )}
-             {currentStep.id === "verification" && (
-              <PinterestVerificationSuccess
-
-              />
-            )}
-          </div>
-        </Card>
-      </div>
-    </div>
-  );
+                        {currentStep.id === "profile" && (
+                            <PinterestProfileForm
+                                invitation={invitation}
+                                profileData={profileData}
+                                onInputChange={handleProfileInputChange}
+                                onContentTypeChange={handleContentTypeChange}
+                                onCheckboxChange={handleProfileCheckboxChange}
+                                onSubmit={handleProfileSubmit}
+                                isSubmitting={isSubmitting}
+                            />
+                        )}
+                    </div>
+                </Card>
+            </div>
+        </div>
+    );
 }
