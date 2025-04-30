@@ -243,13 +243,13 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
       <CardContent className="space-y-6 pt-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName">Nombre</Label>
             <Input
               id="firstName"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
-              placeholder="Your first name"
+              placeholder="Nombre"
               className={formErrors.firstName ? "border-red-500" : ""}
             />
             {formErrors.firstName && (
@@ -257,13 +257,13 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName">Apellido</Label>
             <Input
               id="lastName"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
-              placeholder="Your last name"
+              placeholder="Apellido"
               className={formErrors.lastName ? "border-red-500" : ""}
             />
             {formErrors.lastName && (
@@ -308,7 +308,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             <Label htmlFor="residenceCountry">País de residencia</Label>
             <CountrySelect
               onSelect={handleResidenceCountryChange}
-              placeholder="Selecciona el país de residencia"
+              placeholder="País de residencia"
               value={residenceCountryId}
               countries={countries.map((c) => ({
                 id: c.country_id,
@@ -356,7 +356,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                   >
                     {isVerifying
                       ? "Enviando..."
-                      : "Verificar número de teléfono."}
+                      : "Verificar número de teléfono"}
                   </Button>
                 )}
               </div>
