@@ -416,3 +416,25 @@ entrypoint = "./functions/send-creators--pending-sms/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/send-creators--pending-sms/*.html" ]
+
+[functions.alter_table_creator_invitations]
+enabled = true
+verify_jwt = true
+import_map = "./functions/alter_table_creator_invitations/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/alter_table_creator_invitations/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/alter_table_creator_invitations/*.html" ]
+
+[functions.update-pinterest-profile]
+enabled = true
+verify_jwt = true
+import_map = "./functions/update-pinterest-profile/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/update-pinterest-profile/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/update-pinterest-profile/*.html" ]

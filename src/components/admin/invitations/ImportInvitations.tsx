@@ -20,6 +20,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download } from "lucide-react";
 import { ImportResultCard } from "./ImportResultCard";
+import { sendEmail } from "@/services/email/sendIEmail";
+import { getPinterestRegisterEmail } from "@/utils/emails/emailsContent";
+import { fetchEmailTemplate } from "@/services/email/fetchEmailTemplate";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ImportInvitationsProps {
   onSuccess?: () => void;
@@ -64,7 +69,16 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     queryFn: fetchProjects,
   });
 
+  const getProjectNameById = (projectId: string) => {
+    return projects.find((project) => project.id === projectId)
+  }
+
   const handleImport = async (values: FormValues) => {
+
+    // Process data rows (skip the header row)
+    const errors: ImportError[] = [];
+    let successCount = 0;
+
     if (!file) {
       toast.error("Please select a file to import");
       return;
@@ -74,84 +88,71 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     setImportErrors([]);
     setImportSuccess(0);
 
-    try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
 
-      // Validate headers
-      const headers = jsonData[0];
-      const requiredHeaders = [
-        "Creator First Name",
-        "Creator Last Name",
-        "Email Address",
-        "Social Media Handle",
-        "Social Media Platform",
-      ];
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
 
-      // Check if all required headers are present
-      const missingHeaders = requiredHeaders.filter(
-        (header) => !headers.includes(header)
-      );
-      if (missingHeaders.length > 0) {
-        toast.error(`Missing required headers: ${missingHeaders.join(", ")}`);
-        setIsImporting(false);
-        return;
-      }
+    // Validate headers
+    const headers = jsonData[0];
+    const requiredHeaders = [
+      "Creator First Name",
+      "Creator Last Name",
+      "Email Address",
+      "Social Media Handle",
+      "Social Media Platform",
+    ];
 
-      // Get column indices
-      const firstNamIendex = headers.indexOf("Creator First Name");
-      const lastNameIndex = headers.indexOf("Creator Last Name");
-      const emailIndex = headers.indexOf("Email Address");
-      const handleIndex = headers.indexOf("Social Media Handle");
-      const platformIndex = headers.indexOf("Social Media Platform");
+    // Check if all required headers are present
+    const missingHeaders = requiredHeaders.filter(
+      (header) => !headers.includes(header)
+    );
+    if (missingHeaders.length > 0) {
+      toast.error(`Missing required headers: ${missingHeaders.join(", ")}`);
+      setIsImporting(false);
+      return;
+    }
 
-      // Process data rows (skip the header row)
-      const errors: ImportError[] = [];
-      let successCount = 0;
+    // Get column indices
+    const firstNamIendex = headers.indexOf("Creator First Name");
+    const lastNameIndex = headers.indexOf("Creator Last Name");
+    const emailIndex = headers.indexOf("Email Address");
+    const handleIndex = headers.indexOf("Social Media Handle");
+    const platformIndex = headers.indexOf("Social Media Platform");
 
-      // Process data rows one by one
-      for (let i = 1; i < jsonData.length; i++) {
-        const row = jsonData[i];
-        const rowNumber = i + 1;
-      
-        // Skip empty rows
-        if (!row || row.length === 0) continue;
-      
+    // Process data rows one by one
+    for (let i = 1; i < jsonData.length; i++) {
+      console.log("operation ", i, 'legnth: ', jsonData.length)
+      const row = jsonData[i];
+      const rowNumber = i + 1;
+
+      // Skip empty rows
+      if (!(!row || row.length === 0)) {
         const firstName = row[firstNamIendex]?.toString().trim();
         const lastName = row[lastNameIndex]?.toString().trim();
         const email = row[emailIndex]?.toString().trim();
         const socialMediaHandle = row[handleIndex]?.toString().trim();
         const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() || "tiktok";
-      
-        // Validate row data
-        const rowErrors = [];
-        
-        if (!firstName) rowErrors.push("Creator First Name is required");
 
-        if (!lastName) rowErrors.push("Creator Last Name is required");
-        
+        // Validate row data
+        const rowErrorFieldsEmpty = []
+        const rowErrors = [];
+
+        if (!firstName) rowErrorFieldsEmpty.push("Creator First Name");
+
+        if (!lastName) rowErrorFieldsEmpty.push("Creator Last Name");
+
         if (!email) {
-          rowErrors.push("Email Address is required");
+          rowErrorFieldsEmpty.push("Email Address");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           rowErrors.push("Invalid email format");
         }
-      
-        if (rowErrors.length > 0) {
-          errors.push({
-            row: rowNumber,
-            data: {
-              firstName: firstName ?? "",
-              email: email || "",
-              socialMediaHandle: socialMediaHandle || "",
-              socialMediaType: socialMediaType,
-            },
-            error: rowErrors.join(", "),
-          });
-          continue;
+
+        if (rowErrorFieldsEmpty.length > 0) {
+          rowErrors.push(`You must indicate required fields (${rowErrorFieldsEmpty.join(',')})`)
         }
-      
+
         // Prepare invitation data dynamically
         const invitationData: CreateInvitationData = {
           first_name: firstName,
@@ -161,61 +162,86 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           invitation_type: values.invitationType,
           social_media_type: socialMediaType
         };
-      
+
         // Set handle field based on platform
-        switch (socialMediaType) {
-          case "tiktok":
+        switch (socialMediaType.toUpperCase()) {
+          case "TIKTOK":
             invitationData.social_media_handle = socialMediaHandle || null;
             break;
-          case "youtube":
+          case "YOUTUBE":
             invitationData.youtube_channel = socialMediaHandle || null;
             break;
+          case "INSTAGRAM":
+            invitationData.instagram_user = socialMediaHandle || null;
+            break;
           default:
-            invitationData.social_media_handle = socialMediaHandle || null;
+            rowErrors.push(`Imports for this social media (${socialMediaType}) are not allowed.`)
             break;
         }
-      
+
         try {
-          console.log("Creating invitation with data:", invitationData);
-          await createInvitation(invitationData);
+          const res = await createInvitation(invitationData);
           successCount++;
+          if (getProjectNameById(values.projectId).name.toUpperCase() === "PINTEREST") {
+            let html = await fetchEmailTemplate("pinterest_frame")
+            let url = `${window.location.origin}${res.invitation_url}`
+            html = html.replace("{{content}}", getPinterestRegisterEmail(firstName, url))
+            sendEmail({ email: invitationData.email, subject: '¡Súmate a Pinterest y gana! ($2,000 USD en premios)', html: String(html) })
+          }
+
         } catch (error) {
           console.error("Error creating invitation:", error);
           const errorMessage = error instanceof Error ? error.message : "Unknown error";
           errors.push({
             row: rowNumber,
             data: {
-              name: fullName || "",
+              name: firstName ?? "",
               email: email || "",
               socialMediaHandle: socialMediaHandle || "",
               socialMediaType: socialMediaType,
             },
             error: errorMessage,
           });
+          console.log("after push error")
+        } finally {
+          console.log("execute el finally")
+          if (rowErrors.length > 0) {
+            errors.push({
+              row: rowNumber,
+              data: {
+                name: firstName ?? "",
+                email: email || "",
+                socialMediaHandle: socialMediaHandle || "",
+                socialMediaType: socialMediaType,
+              },
+              error: rowErrors.join(", "),
+            });
+          }
         }
       }
-      
-
-      setImportErrors(errors);
-      setImportSuccess(successCount);
-
-      // Show toast message based on results
-      if (errors.length === 0 && successCount > 0) {
-        toast.success(`${successCount} invitations imported successfully`);
-        if (onSuccess) onSuccess();
-      } else if (errors.length > 0 && successCount > 0) {
-        toast.info(
-          `Partial import: ${successCount} invitations imported, ${errors.length} errors`
-        );
-      } else if (errors.length > 0 && successCount === 0) {
-        toast.error(`Import failed with ${errors.length} errors`);
-      }
-    } catch (error) {
-      console.error("Error importing invitations:", error);
-      toast.error("Error processing Excel file");
-    } finally {
-      setIsImporting(false);
     }
+
+    console.log("after de todo, ", errors)
+    // Show toast message based on results
+    if (errors.length === 0 && successCount > 0) {
+      toast.success(`${successCount} invitations imported successfully`);
+      if (onSuccess) onSuccess();
+    } else if (errors.length > 0 && successCount > 0) {
+      toast.info(
+        `Partial import: ${successCount} invitations imported, ${errors.length} errors`
+      );
+    } else if (errors.length > 0 && successCount === 0) {
+      toast.error(`Import failed with ${errors.length} errors`);
+    }
+    /* } catch (error) {
+      console.error("Error importing invitations:", error);
+      toast.error("Error processing Excel file"); */
+    //} finally {
+    setIsImporting(false);
+    setImportErrors([...errors]);
+    setImportSuccess(successCount);
+    console.log("errores: ", errors)
+    //}
   };
 
   const generateExcelTemplate = () => {

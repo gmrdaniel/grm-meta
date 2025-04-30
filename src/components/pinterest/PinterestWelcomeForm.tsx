@@ -113,18 +113,22 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     phoneCode: string
   ) => {
     setResidenceCountryId(countryId);
-    setLocalPhoneCountryCode(`+${phoneCode}`);
-    console.log("País de residencia seleccionado:", countryId, phoneCode);
+
+    // Call handleInputChange manually
+    handleInputChange({
+      target: { name: 'countryOfResidenceId', value: countryId },
+    } as React.ChangeEvent<HTMLInputElement>);
+
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-  
+
     const isValidName = (name: string) => {
       const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
       return nameRegex.test(name.trim());
     };
-  
+
     if (name === "firstName" || name === "lastName") {
       const isValid = isValidName(value);
       setFormErrors((prev) => ({
@@ -138,10 +142,10 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     } else {
       onInputChange(e);
     }
-  
-    onInputChange(e); // 👈 Llamarlo siempre
+
+    onInputChange(e); // Call the parent function to update the form data
   };
-  
+
 
   const handleAcceptTerms = () => {
     onCheckboxChange(true);
@@ -187,7 +191,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     } finally {
       setIsVerifying(false);
     }
-  };
+  }
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 4) {
@@ -428,7 +432,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                       size="sm"
                       onClick={handleVerifyCode}
                       disabled={verificationCode.length !== 4 || isVerifying}
-                      className="bg-pink-100 hover:bg-pink-300 text-black" 
+                      className="bg-pink-100 hover:bg-pink-300 text-black"
                     >
                       {isVerifying ? "Verificando..." : "Verificar"}
                     </Button>
@@ -440,7 +444,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="flex items-center space-x-2 pt-4">
             <TermsCheckbox
-            
+
               formData={formData}
               onCheckboxChange={onCheckboxChange}
               onAcceptTerms={handleAcceptTerms}

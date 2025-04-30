@@ -17,8 +17,10 @@ interface AuthFormProps {
 export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormProps) {
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(true);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,6 +74,39 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
     }
   }
 
+  async function handleMagicLink(e: React.MouseEvent) {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error("Email is required");
+      return;
+    }
+
+    setMagicLinkLoading(true);
+
+    try {
+      // Get the current URL for redirection
+      const redirectTo = window.location.origin;
+      console.log("Magic link redirect URL:", redirectTo);
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectTo,
+        },
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Magic link sent to your email!");
+    } catch (error: any) {
+      console.error("Magic link error:", error);
+      toast.error(error.message || "Failed to send magic link");
+    } finally {
+      setMagicLinkLoading(false);
+    }
+  }
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-2">
@@ -87,30 +122,32 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
         />
       </div>
       
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password" className="block text-sm font-medium">Password</Label>
-          {isLogin && (
-            <button
-              type="button"
-              onClick={() => setIsRecoveryOpen(true)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Forgot password?
-            </button>
-          )}
+      {showPassword && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="password" className="block text-sm font-medium">Password</Label>
+            {isLogin && (
+              <button
+                type="button"
+                onClick={() => setIsRecoveryOpen(true)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Forgot password?
+              </button>
+            )}
+          </div>
+          <Input
+            id="password"
+            type="password"
+            required={showPassword}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            minLength={6}
+            className="w-full"
+          />
         </div>
-        <Input
-          id="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          minLength={6}
-          className="w-full"
-        />
-      </div>
+      )}
 
       <Button
         type="submit"
@@ -119,6 +156,29 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
       >
         {authLoading ? "Loading..." : (isLogin ? "Sign in" : "Sign up")}
       </Button>
+
+      {isLogin && (
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+      )}
+      
+      {isLogin && (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={magicLinkLoading || !email}
+          onClick={handleMagicLink}
+        >
+          {magicLinkLoading ? "Sending..." : "Email Magic Link"}
+        </Button>
+      )}
 
       <div className="text-center text-sm">
         <button
