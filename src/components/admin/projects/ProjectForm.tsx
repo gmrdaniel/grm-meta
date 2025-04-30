@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Project } from "@/types/project";
-import { createProject, updateProject } from "@/services/projectService";
+import { createProject, updateProject } from "@/services/project/projectService";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),

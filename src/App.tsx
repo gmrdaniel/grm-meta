@@ -17,6 +17,7 @@ import AdminTest from "./pages/admin/test";
 import CreatorDashboard from "./pages/creator/Dashboard";
 import CreatorProfile from "./pages/creator/Profile";
 import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
+import InvitationStepperPagePinterest from "./pages/pinterest/invitation/[invitation_code]";
 import NotificationLogs from "./pages/admin/notification-logs";
 import NotificationSettings from "./pages/admin/notification-settings";
 
@@ -40,6 +41,10 @@ function App() {
                 <Route
                   path="/meta/invitation/:invitation_code?"
                   element={<InvitationStepperPage />}
+                />
+                 <Route
+                  path="/pinterest/invitation/:invitation_code?"
+                  element={<InvitationStepperPagePinterest />}
                 />
                 
 
@@ -102,7 +107,7 @@ function App() {
                   
                 />
                 <Route
-                  path="/admin/Notification-Logs"
+                  path="/admin/notification-logs"
                   element={
                     <ProtectedRoute allowedRoles={["admin"]}>
                       <NotificationLogs />

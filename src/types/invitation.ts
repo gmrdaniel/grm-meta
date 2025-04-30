@@ -1,5 +1,6 @@
 
 export interface CreatorInvitation {
+  residence_country_id: any;
   id: string;
   project_id?: string | null;
   email: string;
@@ -32,6 +33,7 @@ export type CreateInvitationData = {
   email: string;
   social_media_handle?: string | null; // Para TikTok
   youtube_channel?: string | null;     // Para YouTube
+  instagram_user?: string | null; // Para Instagram
   social_media_type?: string | null;
   project_id: string;
   invitation_type: string;

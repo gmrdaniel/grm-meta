@@ -102,7 +102,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Fisrt Name</Label>
+            <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
               name="firstName"
@@ -214,6 +214,7 @@ export const WelcomeForm: React.FC<WelcomeFormProps> = ({
             formData={formData}
             onCheckboxChange={onCheckboxChange}
             onAcceptTerms={handleAcceptTerms}
+            formType="meta"
           />
         </div>
       </CardContent>

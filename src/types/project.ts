@@ -1,10 +1,17 @@
 export interface Project {
   id: string;
   name: string;
+  slug: string;
   status: "draft" | "active" | "pending" | "archived";
   created_at: string;
   updated_at: string;
   stage_count?: number;
+  platforms?: SocialMediaPlatform[]
+}
+
+export interface SocialMediaPlatform {
+  id: string;
+  name: string;
 }
 
 export interface ProjectStage {

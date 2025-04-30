@@ -24,3 +24,7 @@ export const findInvitationByCode = async (code: string) => {
 
   return { data, error: null };
 };
+
+
+
+

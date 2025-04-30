@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Trash, Edit, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { ProjectStage } from "@/types/project";
-import { fetchProjectStages, updateProjectStage, deleteProjectStage } from "@/services/projectService";
+import { fetchProjectStages, updateProjectStage, deleteProjectStage } from "@/services/project/projectService";
 import { useQuery } from "@tanstack/react-query";
 
 interface ProjectStagesListProps {
