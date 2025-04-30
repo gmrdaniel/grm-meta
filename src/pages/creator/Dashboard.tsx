@@ -99,6 +99,34 @@ export default function CreatorDashboard() {
                   </p>
                 </div>
               </div>
+              <div>
+                {/* Tarjeta de estado de verificación pinterest */}
+            
+              {/* <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md flex flex-col items-center justify-center">
+                <div className="flex justify-center mb-6">
+                  <div className="bg-pink-100 rounded-full p-3">
+                    <EyeIcon className="h-8 w-8 text-pink-300" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-center text-gray-800 mb-4 whitespace-nowrap">
+                  ¡Bienvenido! Tu envío está en revisión
+                </h2>
+                <p className="text-center text-gray-600 mb-6 text-sm mx-auto">
+                  Hemos recibido tus datos y estamos verificándolos.
+                  <br className="hidden md:block" />
+                  
+                </p>
+                <div className="flex items-start mt-6 gap-2">
+                  <EnvelopeIcon className="h-4 w-4 text-pink-300 flex-shrink-0 mt-0.5" />
+                  <p className="text-gray-600 text-center whitespace-normal max-w-[250px] sm:max-w-full">
+                    Te notificaremos por correo electrónico/SMS{" "}
+                    <br className="sm:hidden" /> una vez que sea aprobado.
+                  </p>
+                </div>
+              </div>
+           */}
+
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">       
               {/* Tarjetas StatsCard: Se muestran solo si el usuario está aprobado */}
               {verificationStatus === "approved" && (

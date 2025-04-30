@@ -1,5 +1,6 @@
 
 export interface CreatorInvitation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   residence_country_id: any;
   id: string;
   project_id?: string | null;
@@ -25,6 +26,12 @@ export interface CreatorInvitation {
   current_stage_id: string | null;
   fb_step_completed: boolean
   is_professional_account?: boolean
+  project?: { // Agrega la propiedad project aquí
+    name: string;
+    id: string; // O los campos que necesites del proyecto
+    // ... otras propiedades del proyecto si las necesitas
+  } | null;
+
 }
 
 export type CreateInvitationData = {
