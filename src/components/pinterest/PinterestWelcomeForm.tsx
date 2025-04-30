@@ -3,8 +3,7 @@ import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Instagram, Phone, Shield } from "lucide-react";
+import { Instagram, Shield } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
 import { PhoneValidate } from "@/components/phoneValidate/PhoneValidate";
@@ -165,7 +164,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
         body: {
           action: "send",
           phoneNumber: localPhoneNumber,
-          countryCode: localPhoneCountryCode,
+          countryCode: localPhoneCountryCode
         },
       });
 
