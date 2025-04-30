@@ -15,7 +15,7 @@ BEGIN
     NEW.last_name := COALESCE(user_metadata->>'last_name', NEW.last_name);
     NEW.phone_country_code := user_metadata->>'phone_country_code';
     NEW.phone_number := user_metadata->>'phone_number';
-    NEW.social_media_handle := user_metadata->>'social_media_handle';
+    /* NEW.social_media_handle := user_metadata->>'social_media_handle'; */
     NEW.country_of_residence_id := user_metadata->>'country_of_residence_id';
   END IF;
 
