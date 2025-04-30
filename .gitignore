@@ -34,3 +34,5 @@ src\integrations\supabase\client.ts
 *.env.example
 *.env.local
 *.env.staging
+
+local-files/

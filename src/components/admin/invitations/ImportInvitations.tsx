@@ -20,6 +20,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download } from "lucide-react";
 import { ImportResultCard } from "./ImportResultCard";
+import { sendEmail } from "@/services/email/sendIEmail";
+import { getPinterestRegisterEmail } from "@/utils/emails/emailsContent";
+import { fetchEmailTemplate } from "@/services/email/fetchEmailTemplate";
 
 interface ImportInvitationsProps {
   onSuccess?: () => void;
@@ -63,6 +66,10 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
     queryKey: ["projects"],
     queryFn: fetchProjects,
   });
+
+  const getProjectNameById = (projectId: string) => {
+    return projects.find((project) => project.id === projectId)
+  }
 
   const handleImport = async (values: FormValues) => {
     if (!file) {
@@ -115,29 +122,29 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         const rowNumber = i + 1;
-      
+
         // Skip empty rows
         if (!row || row.length === 0) continue;
-      
+
         const firstName = row[firstNamIendex]?.toString().trim();
         const lastName = row[lastNameIndex]?.toString().trim();
         const email = row[emailIndex]?.toString().trim();
         const socialMediaHandle = row[handleIndex]?.toString().trim();
         const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() || "tiktok";
-      
+
         // Validate row data
         const rowErrors = [];
-        
+
         if (!firstName) rowErrors.push("Creator First Name is required");
 
         if (!lastName) rowErrors.push("Creator Last Name is required");
-        
+
         if (!email) {
           rowErrors.push("Email Address is required");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           rowErrors.push("Invalid email format");
         }
-      
+
         if (rowErrors.length > 0) {
           errors.push({
             row: rowNumber,
@@ -151,7 +158,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           });
           continue;
         }
-      
+
         // Prepare invitation data dynamically
         const invitationData: CreateInvitationData = {
           first_name: firstName,
@@ -161,24 +168,37 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           invitation_type: values.invitationType,
           social_media_type: socialMediaType
         };
-      
+
         // Set handle field based on platform
-        switch (socialMediaType) {
-          case "tiktok":
+        switch (socialMediaType.toUpperCase()) {
+          case "TIKTOK":
             invitationData.social_media_handle = socialMediaHandle || null;
             break;
-          case "youtube":
+          case "YOUTUBE":
             invitationData.youtube_channel = socialMediaHandle || null;
+            break;
+          case "INSTAGRAM":
+            invitationData.instagram_user = socialMediaHandle || null;
             break;
           default:
             invitationData.social_media_handle = socialMediaHandle || null;
             break;
         }
-      
+
+        /* switch(values.projectId){
+          
+        } */
+
         try {
-          console.log("Creating invitation with data:", invitationData);
-          await createInvitation(invitationData);
+          const res = await createInvitation(invitationData);
           successCount++;
+          if (getProjectNameById(values.projectId).name.toUpperCase() === "PINTEREST") {
+            let html = await fetchEmailTemplate("pinterest_frame")
+            let url = `${window.location.origin}${res.invitation_url}`
+            html = html.replace("{{content}}", getPinterestRegisterEmail(firstName, url))
+            sendEmail({ email: invitationData.email, subject: '¡Súmate a Pinterest y gana! ($2,000 USD en premios)', html: html })
+          }
+
         } catch (error) {
           console.error("Error creating invitation:", error);
           const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -194,7 +214,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
           });
         }
       }
-      
+
 
       setImportErrors(errors);
       setImportSuccess(successCount);
