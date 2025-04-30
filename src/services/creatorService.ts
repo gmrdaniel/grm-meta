@@ -95,4 +95,36 @@ export const deleteCreator = async (id: string): Promise<void> => {
     console.error('Error deleting creator:', error);
     throw new Error(error.message);
   }
+}
+
+export const getProfileIdByInvitationId = async (
+  invitationId: string
+): Promise<string | null> => {
+  // 1. Obtener el email desde la invitación
+  const { data: invitation, error: invitationError } = await supabase
+    .from("creator_invitations")
+    .select("email")
+    .eq("id", invitationId)
+    .single();
+
+  if (invitationError || !invitation) {
+    console.error("Error obteniendo la invitación:", invitationError);
+    return null;
+  }
+
+  const email = invitation.email;
+
+  // 2. Buscar el perfil por ese email
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (profileError || !profile) {
+    console.error("Error obteniendo el perfil:", profileError);
+    return null;
+  }
+
+  return profile.id;
 };

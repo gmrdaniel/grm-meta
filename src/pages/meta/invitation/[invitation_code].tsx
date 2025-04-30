@@ -14,11 +14,10 @@ import { TikTokForm } from "@/components/invitation/TikTokForm";
 import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 
 // 🛠️ Services
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import {
   updateFacebookPage,
 } from "@/services/invitation";
-import { fetchProjectStages } from "@/services/project/projectService";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
@@ -32,6 +31,7 @@ import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageD
 import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
 import { ProfileFormData } from "@/types/forms-type";
+import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 
 // 🧭 Steps
 const stepList = [
@@ -74,8 +74,6 @@ export default function InvitationStepperPage() {
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
   const [currentStep, setCurrentStep] = useState<Step>(stepList[0]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState(defaultFormData);
   const [facebookFormData, setFacebookFormData] = useState(defaultFacebookData);
   const [passwordData, setPasswordData] = useState(defaultPasswordData);
@@ -87,69 +85,14 @@ export default function InvitationStepperPage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   // 🔃 Fetch invitation and stages
-  useEffect(() => {
-    const fetchInvitationAndStages = async () => {
-      console.log("Fetching invitation and stages...");
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        if (!invitation_code) {
-          setError("No invitation code provided");
-          return;
-        }
-
-        const { data, error } = await findInvitationByCode(invitation_code);
-        // Agregar un console.log para inspeccionar los datos recibidos
-        console.log("Data fetched from backend:", data);
-
-        if (error || !data?.length) {
-          setError("Invalid invitation code or invitation not found");
-          return;
-        }
-
-        const invitationData = data[0];
-
-        if (invitationData.status === "completed") {
-          setError("This invitation has already been accepted");
-          return;
-        }
-
-        setInvitation(invitationData);
-        setFormData({
-          firstName: invitationData.first_name ?? "",
-          lastName: invitationData.last_name ?? "",
-          email: invitationData.email ?? "",
-          socialMediaHandle: invitationData.social_media_handle ?? "",
-          termsAccepted: false,
-        });
-
-        const stagesData = await fetchProjectStages(invitationData.project_id);
-        setProjectStages(stagesData);
-
-        if (invitationData.current_stage_id) {
-          const currentStage = stagesData.find(
-            (s) => s.id === invitationData.current_stage_id
-          );
-          if (currentStage) {
-            const currentStep = stepList.find(
-              (step) => step.id == currentStage.slug
-            );
-
-            setCurrentStep(currentStep);
-          }
-        }
-      } catch (err) {
-        console.error("Error loading invitation:", err);
-        setError("Failed to load invitation details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInvitationAndStages();
-  }, [invitation_code]);
+  const { loading, error } = useInvitationLoader({
+    invitation_code,
+    setFormData,
+    setInvitation,
+    setProjectStages,
+    setCurrentStep,
+    stepList, // <-- ahora tú le pasas la lista adecuada
+  });
 
   interface YouTubeProfileFormData {
     youtubeChannel: string;
@@ -442,11 +385,14 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       const { error } = await supabase.auth.signUp({
         email: invitation.email,
         password: passwordData.password,
-        phone: invitation.phone_country_code + invitation.phone_number,
         options: {
           data: {
             first_name: invitation.first_name,
+            last_name: invitation.last_name,
+            phone_country_code: invitation.phone_country_code || null,
             phone_number: invitation.phone_number || null,
+            social_media_handle: invitation.instagram_user || null,
+            country_of_residence_id: null,
           },
         },
       });
@@ -478,6 +424,10 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
 
   if (error || !invitation) {
     return <InvitationError message={error || "Invitation not found"} />;
+  }
+
+  if (invitation.status === "completed") {
+    return <InvitationError message={error || "Invitation was completed"} />;
   }
 
   return (

@@ -275,6 +275,8 @@ export type Database = {
           id: string
           last_name: string | null
           profile_photo_url: string | null
+          pinterest_url: string | null
+          country_of_residence_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -295,10 +297,24 @@ export type Database = {
           id?: string
           last_name?: string | null
           profile_photo_url?: string | null
+          pinterest_url: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "creator_profile_categories_creator_profile_id_fkey",
+            columns: ["creator_profile_id"],
+            referencedRelation: "profiles",
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_profile_categories_content_category_id_fkey",
+            columns: ["content_category_id"],
+            referencedRelation: "content_categories",
+            referencedColumns: ["id"]
+          }
+        ]
       }
       project_stages: {
         Row: {

@@ -61,15 +61,20 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [localPhoneCountryCode, setLocalPhoneCountryCode] =
     useState<string>("");
 
-  const handleResidenceCountryChange = (
-    countryId: string,
-    phoneCode: string
-  ) => {
-    setResidenceCountryId(countryId);
-    setResidencePhoneCode(phoneCode);
-    console.log("País de residencia seleccionado:", countryId, phoneCode);
-  };
+    const handleResidenceCountryChange = (
+      countryId: string,
+      phoneCode: string
+    ) => {
+      setResidenceCountryId(countryId);
+    
+      // Call handleInputChange manually
+      handleInputChange({
+        target: { name: 'countryOfResidenceId', value: countryId },
+      } as React.ChangeEvent<HTMLInputElement>);
+    
 
+    };
+    
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
   
@@ -88,7 +93,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
       }));
     }
   
-    onInputChange(e); // 👈 Llamarlo siempre
+    onInputChange(e); // Call the parent function to update the form data
   };
   
 
@@ -100,7 +105,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     const loadCountries = async () => {
       if (invitation.project_id) {
         const countriesData = await fetchCountries(invitation.project_id);
-        console.log("Países permitidos por proyecto:", countriesData);
         setCountries(countriesData);
       }
     };
