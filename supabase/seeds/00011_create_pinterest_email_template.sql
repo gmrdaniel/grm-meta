@@ -1,12 +1,9 @@
-INSERT INTO email_templates (
-  id,
-  name,
-  html,
-  created_at
-) VALUES (
-  '8e7a32d4-ef41-4d77-bf90-2e7d98f9c72a', -- ID generado, cámbialo si usas otro generador
-  'Pinterest Invitation',         -- Nombre del template
-  $$<!DOCTYPE html>
+INSERT INTO public.email_templates (id, name, html, created_at)
+VALUES (
+  'e8eae740-c609-435b-9630-93dc7c064b11',
+  'pinterest_frame',
+    $$ 
+    <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="UTF-8">
@@ -62,6 +59,7 @@ INSERT INTO email_templates (
     </div>
   </div>
   </body>
-  </html>$$,
-  NOW()
-);
+</html>
+$$,
+'2025-04-29 16:00:00.196425+00'
+)
