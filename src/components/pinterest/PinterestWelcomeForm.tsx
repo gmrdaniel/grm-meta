@@ -1,9 +1,8 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
+import React, { useState, useEffect } from "react";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Instagram } from "lucide-react";
 import { CreatorInvitation } from "@/types/invitation";
 import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
@@ -18,7 +17,7 @@ interface PinterestWelcomeFormProps {
     firstName: string;
     lastName: string;
     email: string;
-    socialMediaHandle: string;
+    instagramUser: string;
     termsAccepted: boolean;
     phoneNumber: string;
   };
@@ -43,7 +42,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [formErrors, setFormErrors] = useState<{
     firstName?: string;
     lastName?: string;
-    socialMediaHandle?: string;
+    instagramUser?: string;
     residenceCountryId?: string;
     phoneNumber?: string;
     termsAccepted?: string;
@@ -55,9 +54,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [residenceCountryId, setResidenceCountryId] = useState<
     string | undefined
   >(undefined);
-  const [residencePhoneCode, setResidencePhoneCode] = useState<
-    string | undefined
-  >(undefined);
+
   const [localPhoneCountryCode, setLocalPhoneCountryCode] =
     useState<string>("");
 
@@ -79,9 +76,11 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     const { name, value } = e.target;
   
     const isValidName = (name: string) => {
-      const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/;
-      return nameRegex.test(name.trim());
+      const normalized = name.trim().replace(/\s+/g, ' ');
+      const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,}$/;
+      return nameRegex.test(normalized);
     };
+    
   
     if (name === "firstName" || name === "lastName") {
       const isValid = isValidName(value);
@@ -89,7 +88,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
         ...prev,
         [name]: isValid
           ? undefined
-          : "Must be at least 2 letters. No spaces or special characters.",
+          : "Must be at least 2 letters. No special characters.",
       }));
     }
   
@@ -125,8 +124,8 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
       errors.lastName = "El apellido debe tener al menos 2 letras.";
     }
 
-    if (!formData.socialMediaHandle.trim()) {
-      errors.socialMediaHandle = "El usuario de Instagram es obligatorio.";
+    if (!formData.instagramUser.trim()) {
+      errors.instagramUser = "El usuario de Instagram es obligatorio.";
     }
 
     if (!residenceCountryId) {
@@ -193,16 +192,16 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="space-y-2">
             <Label
-              htmlFor="socialMediaHandle"
+              htmlFor="instagramUser"
               className="flex items-center gap-2"
             >
               <Instagram className="h-4 w-4" /> Usuario de Instagram
             </Label>
             <div className="relative">
               <Input
-                id="socialMediaHandle"
-                name="socialMediaHandle"
-                value={formData.socialMediaHandle}
+                id="instagramUser"
+                name="instagramUser"
+                value={formData.instagramUser}
                 onChange={onInputChange}
                 placeholder="usuario"
                 className="pl-8 border-pink-100 focus-visible:ring-pink-200"

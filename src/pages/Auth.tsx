@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthContainer } from "@/components/auth/AuthContainer";
@@ -11,7 +11,6 @@ import { toast } from "sonner";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { session, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);

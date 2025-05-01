@@ -32,9 +32,9 @@ function App() {
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <>
+
               <Routes>
-                <Route path="/" element={<Navigate to="/auth" replace />} />
+               {/*  <Route path="/" element={<Navigate to="/auth" replace />} /> */}
                 <Route path="/auth" element={<Auth />} />
 
                 {/* Public routes */}
@@ -145,7 +145,6 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
