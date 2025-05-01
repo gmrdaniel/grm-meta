@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Link } from "react-router-dom";
 import { CreatorInvitation } from "@/types/invitation";
 import { getContentCategoriesByProject } from "@/services/project/getContentCategoriesByProject";
 import { ContentCategory } from "@/types/contentCategory";
@@ -73,16 +71,17 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
   ) => {
     setProfileData((prev) => ({ ...prev, [key]: checked }));
   };
-
-  const isValidPinterestUrl = (url: string) => {
-    return /^https?:\/\/(www\.)?pinterest\.[a-z]{2,}(\/)?/i.test(url);
+  
+  const isValidPinterestUsername = (username: string) => {
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
+    return usernameRegex.test(username.trim());
   };
 
   const handleClick = () => {
     const { pinterestUrl, isConnected, isAutoPublishEnabled, contentTypes } =
       profileData;
 
-    if (!isValidPinterestUrl(pinterestUrl)) {
+    if (!isValidPinterestUsername(pinterestUrl)) {
       toast.error("Por favor ingresa una URL válida de Pinterest.");
       return;
     }
@@ -123,14 +122,25 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="pinterestUrl">Nuevo perfil de Pinterest</Label>
-          <Input
-            id="pinterestUrl"
-            name="pinterestUrl"
-            value={profileData.pinterestUrl}
-            onChange={handlePinterestUrlChange}
-            className="border-pink-100 focus-visible:ring-pink-200"
-            placeholder="Tu URL de Pinterest"
-          />
+          <div className="relative w-full max-w-md">
+            {/* Prefix */}
+            <div className="absolute inset-y-0 left-0 flex items-center">
+              <span className="bg-slate-50 text-slate-500 text-sm px-3 py-2 rounded-l-md border border-r-0 border-pink-100">
+                pinterest.com/
+              </span>
+            </div>
+
+            {/* Input */}
+            <Input
+              id="pinterestUrl"
+              name="pinterestUrl"
+              value={profileData.pinterestUrl}
+              onChange={handlePinterestUrlChange}
+              className="pl-[120px] border-pink-100 focus-visible:ring-pink-200 rounded-md transition-all shadow-sm placeholder:text-slate-400"
+              placeholder="username"
+            />
+          </div>
+
           <div className="text-xs text-blue-600 hover:underline">
             <a
               href="https://help.pinterest.com/es/article/get-a-pinterest-account#section-18681"
