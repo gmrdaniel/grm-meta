@@ -34,7 +34,7 @@ function App() {
           <AuthProvider>
 
               <Routes>
-               {/*  <Route path="/" element={<Navigate to="/auth" replace />} /> */}
+               <Route path="/" element={<Navigate to="/auth" replace />} />
                 <Route path="/auth" element={<Auth />} />
 
                 {/* Public routes */}
