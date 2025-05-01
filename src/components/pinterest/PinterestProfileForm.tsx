@@ -129,8 +129,6 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                 pinterest.com/
               </span>
             </div>
-
-            {/* Input */}
             <Input
               id="pinterestUrl"
               name="pinterestUrl"
