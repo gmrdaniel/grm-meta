@@ -21,21 +21,40 @@ export default function CreatorDashboard() {
   const [verificationStatus, setVerificationStatus] = useState("review");
   const [projectName, setProjectName] = useState<string>()
 
+  const texts = {
+    "PINTEREST": {
+      headerTitle: "Panel del Creador",
+      title: "¡Bienvenido! Tu envío está en revisión",
+      descriptionOne: "Hemos recibido tus datos y estamos verificándolos.",
+      descriptionTwo: "Esto puede tardar entre 1 y 3 días hábiles.",
+      note: "Te notificaremos por correo electrónico/SMS una vez que sea aprobado."
+    },
+    "META": {
+      headerTitle: "Creator Dashboard",
+      title: "Welcome! Your Submission is Under Review",
+      descriptionOne: "We've received your details and are currently verifying",
+      descriptionTwo: "your information (takes 1-3 business days).",
+      note: "You'll be notified via email/SMS once approved."
+    }
+  }
+
+  const getTextByKey = (key: string) => {
+    let name = 'META'
+    if (projectName) name = projectName.toUpperCase()
+    return texts[name][key]
+  }
+
   const getProject = async () => {
-    if(!user) return
-    if(!user.email) return
-    if(projectName != null) return
+    if (!user) return
+    if (!user.email) return
+    if (projectName != null) return
     const name = await fetchProjectNameByInvitationEmail(user.email)
     setProjectName(name)
   }
 
-  const getBackgroundClass = () => {
-    if(projectName?.toUpperCase() === "PINTEREST"){
-      return 'bg-gradient-to-br from-pink-50 to-rose-100'
-    }else{
-      return ''
-    }
-    
+  const isPinterest = () => {
+    if (projectName?.toUpperCase() === "PINTEREST") return true
+    return false
   }
 
   useEffect(() => {
@@ -68,11 +87,11 @@ export default function CreatorDashboard() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className={cn(`flex-1 overflow-y-auto p-6 ${getBackgroundClass()}`, isMobile && "pb-20")}>
+        <main className={cn(`flex-1 overflow-y-auto p-6`, isMobile && "pb-20")}>
           <div className={`max-w-7xl mx-auto space-y-6`}>
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-semibold text-gray-800">
-                Creator Dashboard
+                {getTextByKey("headerTitle")}
               </h1>
             </div>
 
@@ -80,8 +99,8 @@ export default function CreatorDashboard() {
             {/* Tarjeta de estado de verificación */}
             <div className="flex flex-col items-center bg-white rounded-lg shadow-md p-8 w-full max-w-md">
               <div className="flex justify-center mb-6">
-                <div className="bg-blue-100 rounded-full p-3">
-                  <EyeIcon className="h-8 w-8 text-blue-500" />
+                <div className={cn('bg-blue-100 rounded-full p-3', isPinterest() && 'bg-[#FCE8F3]')}>
+                  <EyeIcon className={cn('w-8 text-blue-500', isPinterest() && 'text-[#F4A8D2]')} />
                 </div>
               </div>
               <h2 className=" flex text-xl gap-1 font-semibold text-center text-gray-800 mb-4    whitespace-nowrap">
@@ -89,7 +108,7 @@ export default function CreatorDashboard() {
                   <>
 
                     <span className="whitespace-normal md:whitespace-nowrap">
-                      Welcome! Your Submission is Under Review
+                      {getTextByKey("title")}
                     </span>
                   </>
                 )}
@@ -100,13 +119,9 @@ export default function CreatorDashboard() {
               <p className="text-center text-gray-600 mb-6 text-sm mx-auto ">
                 {verificationStatus === "review" && (
                   <>
-                    We've received your details and are currently verifying
+                    {getTextByKey("descriptionOne")}
                     <br className="hidden md:block" />{" "}
-                    {/* Salto de línea en desktop */}
-                    your
-                    <br className="block md:hidden" />{" "}
-                    {/* Salto de línea solo en móvil */}
-                    information (takes 1-3 business days).
+                    {getTextByKey("descriptionTwo")}
                   </>
                 )}
                 {verificationStatus === "approved" &&
@@ -115,10 +130,10 @@ export default function CreatorDashboard() {
                   "Unfortunately, your submission was rejected. Please check your email for more details."}
               </p>
 
-              <div className="flex items-center mt-6 gap-2">
-                <EnvelopeIcon className="h-4 w-4 text-blue-500 sm:ml-[-15px] flex-shrink-0" />
-                <p className="text-gray-600 sm:whitespace-nowrap whitespace-normal max-w-[250px] sm:max-w-full">
-                  You'll be notified via email/SMS once approved.
+              <div className="flex items-start text-center mt-6 gap-2 px-2">
+                <EnvelopeIcon className={cn("h-4 w-4 text-blue-500 sm:ml-[-15px] flex-shrink-0 mt-[5px]", isPinterest() && 'text-[#F4A8D2]')} />
+                <p className="text-gray-600 whitespace-normal max-w-[250px] sm:max-w-full">
+                  {getTextByKey("note")}
                 </p>
               </div>
             </div>
