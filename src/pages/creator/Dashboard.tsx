@@ -24,10 +24,10 @@ export default function CreatorDashboard() {
   const texts = {
     "PINTEREST": {
       headerTitle: "Panel del Creador",
-      title: "¡Bienvenido! Tu envío está en revisión",
-      descriptionOne: "Hemos recibido tus datos y estamos verificándolos.",
-      descriptionTwo: "Esto puede tardar entre 1 y 3 días hábiles.",
-      note: "Te notificaremos por correo electrónico/SMS una vez que sea aprobado."
+      title: "¡Bienvenido!",
+      descriptionOne: "Pronto podrás acceder a oportunidades",
+      descriptionTwo: "comerciales y otras actividades.",
+      note: "Te notificaremos por correo electrónico/SMS/WhatsApp una vez que sea aprobado."
     },
     "META": {
       headerTitle: "Creator Dashboard",
