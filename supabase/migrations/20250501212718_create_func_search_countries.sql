@@ -1,10 +1,5 @@
 CREATE OR REPLACE FUNCTION public.search_countries(search_term TEXT)
-RETURNS TABLE (
-    id UUID,
-    name_es TEXT,
-    name_en TEXT,
-    phone_code TEXT
-)
+RETURNS SETOF RECORD
 LANGUAGE plpgsql
 AS $$
 BEGIN
