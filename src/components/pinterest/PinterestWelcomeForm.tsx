@@ -459,6 +459,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             onContinue({
               ...formData,
               phoneCountryCode: localPhoneCountryCode,
+              phoneNumber: localPhoneNumber,
               phoneVerified: phoneVerified,
             })
           }
