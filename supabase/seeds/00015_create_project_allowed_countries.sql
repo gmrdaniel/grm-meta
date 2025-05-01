@@ -1,7 +1,7 @@
 -- Asociar países faltantes al proyecto b1e23456-7f89-4abc-9d12-34567890abcd
 INSERT INTO public.project_allowed_countries (project_id, country_id)
 VALUES
-('b1e23456-7f89-4abc-9d12-34567890abcd', 'e504963e-6bb1-4b91-9f7d-927f75f451b8'); -- USA
+('b1e23456-7f89-4abc-9d12-34567890abcd', 'e504963e-6bb1-4b91-9f7d-927f75f451b8'), -- USA
 ('b1e23456-7f89-4abc-9d12-34567890abcd', '3fc5c208-fac3-4f13-94dc-92ae60be0c01'), -- Bolivia
 ('b1e23456-7f89-4abc-9d12-34567890abcd', '0f2a942a-5e36-4325-80f3-1ae6c9c11b87'), -- Costa Rica
 ('b1e23456-7f89-4abc-9d12-34567890abcd', 'b118be03-0501-4211-81e1-d362c612bc8c'), -- Ecuador
