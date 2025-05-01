@@ -174,7 +174,7 @@ export function AuthForm({ isLogin, setIsLogin, setIsRecoveryOpen }: AuthFormPro
           variant="outline"
           className="w-full"
           disabled={magicLinkLoading || !email}
-          onClick={}
+          onClick={handleMagicLink}
         >
           {magicLinkLoading ? "Sending..." : "Email Magic Link"}
         </Button>
