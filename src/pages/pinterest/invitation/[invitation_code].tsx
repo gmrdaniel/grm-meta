@@ -30,7 +30,7 @@ const defaultFormData = {
   firstName: "",
   lastName: "",
   email: "",
-  socialMediaHandle: "",
+  instagramUser: "",
   termsAccepted: false,
   phoneNumber: "",
   phoneCountryCode: "",
@@ -85,7 +85,7 @@ export default function InvitationStepperPage() {
           status: "accepted",
           first_name: allFormData.firstName,
           last_name: allFormData.lastName,
-          social_media_handle: allFormData.socialMediaHandle,
+          instagram_user: allFormData.instagramUser,
           phone_number: allFormData.phoneNumber,
           phone_country_code: allFormData.phoneCountryCode,
           updated_at: new Date().toISOString(),
@@ -108,7 +108,7 @@ export default function InvitationStepperPage() {
               last_name: allFormData.lastName,
               phone_country_code: allFormData.phoneCountryCode,
               phone_number: allFormData.phoneNumber,
-              social_media_handle: allFormData.socialMediaHandle,
+              social_media_handle: allFormData.instagramUser,
               country_of_residence_id: allFormData.countryOfResidenceId,
             },
           },
@@ -176,7 +176,7 @@ export default function InvitationStepperPage() {
       // 2. Actualizar la URL de Pinterest
       const { error: urlError } = await updatePinterestUrl(
         profileId,
-        pinterestUrl
+        'https://pinterest.com/' + pinterestUrl
       );
 
       if (urlError) {
