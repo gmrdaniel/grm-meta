@@ -76,15 +76,18 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               rel="noopener noreferrer"
               className="flex items-center text-blue-500 hover:underline text-sm"
             >
-              <span className="inline-flex items-center">
+              <span className="inline-flex items-center text-xs">
                 Need to create a Facebook page? See here how.
               </span>
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 text-xs ml-[0.5px]" />
             </a>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="facebookPageUrl">Facebook Business Page URL</Label>
+            <Label htmlFor="facebookPageUrl" className="font-semibold">Facebook Business Page URL</Label>
+            <p className="text-xs text-gray-600 font-semibold">
+              <span className="text-gray-600 font-semibold">This is the new page you created</span>
+            </p>
             <div className="flex items-center">
               <Input
                 id="facebookPageUrl"
@@ -111,17 +114,34 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 onCheckboxChange("verifyPageOwnership", checked as boolean)
               }
             />
-            <Label htmlFor="verifyPageOwnership" className="text-sm">
-            I verify that I own this page.
+            <Label htmlFor="verifyPageOwnership" className="text-sm font-semibold">
+              I verify that I own this page.
             </Label>
           </div>
 
           <hr className="my-8 border-[2px] rounded-lg" />
 
           <div className="space-y-2">
-            <Label htmlFor="facebookProfileUrl">
+            <Label htmlFor="facebookProfileUrl" className="font-semibold">
               Facebook Personal Profile URL
             </Label>
+            <p className="text-xs text-gray-600 font-semibold">
+              <span className="text-gray-500 font-normal">This is your personal and unique profile and is NOT the same as the page.</span>
+            </p>
+            <p className="text-xs text-gray-600 font-semibold">
+              <span className="text-gray-500 font-normal">If you need to understand the difference </span>
+              <a
+                href="https://www.facebook.com/help/337881706729661/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline items-center text-blue-500 hover:underline text-sm font-normal"
+              >
+                <span className="inline-flex items-center font-normal text-xs">
+                  Please click here
+                </span>
+                <ExternalLink className="h-4 w-4 inline ml-[0.5px] text-xs" />
+              </a>
+            </p>
             <div className="flex items-center">
               <Input
                 id="facebookProfileUrl"
