@@ -184,8 +184,8 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             rel="noopener noreferrer"
             className="flex items-center text-blue-500 hover:underline text-sm"
           >
-            <span>Instructions here</span>
-            <ExternalLink className="h-4 w-4 ml-1" />
+            <span className="text-xs">Instructions here</span>
+            <ExternalLink className="h-4 w-4 ml-1 text-xs ml-[0.5px]" />
           </a>
 
           <div className="flex items-center space-x-2">
