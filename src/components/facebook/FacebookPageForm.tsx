@@ -126,7 +126,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               Facebook Personal Profile URL
             </Label>
             <p className="text-xs text-gray-600 font-semibold">
-              <span className="text-gray-500 font-normal">This is your personal and unique profile and is NOT the same as the page.</span>
+              <span className="text-gray-500 font-normal">This is your personal and unique profile and is NOT the same as your page.</span>
             </p>
             <p className="text-xs text-gray-600 font-semibold">
               <span className="text-gray-500 font-normal">If you need to understand the difference </span>
