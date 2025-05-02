@@ -27,7 +27,7 @@ export default function CreatorDashboard() {
       title: "¡Bienvenido!",
       descriptionOne: "Pronto podrás acceder a oportunidades",
       descriptionTwo: "comerciales y otras actividades.",
-      note: "Te notificaremos por correo electrónico/SMS/WhatsApp una vez que sea aprobado."
+      note: "Te notificaremos por correo electrónico/SMS/WhatsApp en cuanto se activen."
     },
     "META": {
       headerTitle: "Creator Dashboard",
