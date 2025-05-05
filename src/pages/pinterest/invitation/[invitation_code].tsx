@@ -224,11 +224,11 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100">
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
         {/* Left column - Text */}
 
-        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
+        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8">
           {/* Left column - Text */}
           <div className="w-full text-center space-y-8">
             <h1 className="text-lg font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
@@ -247,7 +247,7 @@ export default function InvitationStepperPage() {
 
           {/* Right column - Form card */}
           <Card className="w-full shadow-2xl bg-white/95 backdrop-blur">
-            <div className="p-8">
+            <div className="px-4 py-8">
               <Stepper
                 steps={stepList}
                 currentStep={currentStep.id}
