@@ -322,6 +322,11 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       return;
     }
 
+    if(facebookFormData.facebookPageUrl === facebookFormData.facebookProfileUrl) {
+      toast.error("Facebook Page and Profile URLs cannot be the same.");
+      return
+    }
+
     if (!invitation_code || !invitation) {
       toast.error("Missing invitation data");
       return;

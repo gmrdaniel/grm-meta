@@ -152,11 +152,11 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 type="url"
                 pattern="https://www\.facebook\.com/.*"
                 required
-                placeholder="https://www.facebook.com/yourprofile"
+                placeholder="https://facebook.com/profile.php?id=..."
               />
             </div>
             <p className="text-xs text-gray-600 font-semibold">
-              Example: <span className="text-gray-500 font-normal">https://www.facebook.com/yourprofile</span>
+              Example: <span className="text-gray-500 font-normal">https://facebook.com/profile.php?id=...</span>
             </p>
           </div>
 
