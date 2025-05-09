@@ -1,3 +1,4 @@
+import { Project } from "./project";
 
 export interface CreatorInvitation {
   
@@ -5,6 +6,7 @@ export interface CreatorInvitation {
   residence_country_id: any;
   id: string;
   project_id?: string | null;
+  projects?: Project
   email: string;
   first_name: string;
   last_name: string;
@@ -38,6 +40,7 @@ export type CreateInvitationData = {
   instagram_user?: string | null; // Para Instagram
   social_media_type?: string | null;
   project_id: string;
+  projects?: Project
   invitation_type: string;
 };
 
