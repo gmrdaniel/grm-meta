@@ -57,6 +57,10 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import InvitationsPagination from "./InvitationsPagination";
+import { ModalInvitationList } from "@/components/invitation/ModalInvitationList";
+import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
+//import { Cross2Icon } from "@radix-ui/react-icons";
+
 
 const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
@@ -70,18 +74,18 @@ const InvitationsList = () => {
 
   const queryClient = useQueryClient();
 
- // Normalizamos el filtro para que "all" no aplique ningún filtro
-const normalizedStatusFilter =
-  filterStatus === "all" ? undefined : (filterStatus as 
-    "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
+  // Normalizamos el filtro para que "all" no aplique ningún filtro
+  const normalizedStatusFilter =
+    filterStatus === "all" ? undefined : (filterStatus as
+      "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
 
-const { data, isLoading, error } = useQuery({
-  queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
-  queryFn: () =>
-    fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
-});
-  
-  
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
+    queryFn: () =>
+      fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
+  });
+
+
 
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
@@ -232,23 +236,25 @@ const { data, isLoading, error } = useQuery({
   }
 
   const filteredInvitations =
-  filterStatus === "all"
-  ? invitations
-  : invitations.filter(
-    (invitation: CreatorInvitation) => invitation.status === filterStatus
-  );
-  
+    filterStatus === "all"
+      ? invitations
+      : invitations.filter(
+        (invitation: CreatorInvitation) => invitation.status === filterStatus
+      );
+
   if (filteredInvitations.length === 0 && filterStatus !== "all") {
     setFilterStatus("all");
     toast.info("No invitations found for the selected filter");
   }
-  
+
   if (!invitations || invitations.length === 0) {
     return <div className="text-center p-4">No invitations found</div>;
   }
   return (
     <div>
       <div className="flex justify-end mb-4">
+        <ModalInvitationList />
+        <ModalRegisteredsList />
         <Button
           onClick={handleExportInvitations}
           disabled={isExporting}
