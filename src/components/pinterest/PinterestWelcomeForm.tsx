@@ -151,7 +151,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   };
 
   const handleSendVerificationCode = async () => {
-    if (!localPhoneNumber || localPhoneNumber.length < 10) {
+    if (!localPhoneNumber || localPhoneNumber.length < 9) {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -353,7 +353,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                     disabled={
                       isVerifying ||
                       !localPhoneNumber ||
-                      localPhoneNumber.length < 10
+                      localPhoneNumber.length < 9
                     }
                     className="mt-2"
                   >
