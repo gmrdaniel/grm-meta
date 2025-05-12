@@ -49,8 +49,22 @@ export const ModalRegisteredsList = () => {
 
         try {
             setExporting(true)
-            const data = await fetchInvitationsWithProfile(currentProject.id, dateSelected)
-            exportToExcel(data, 'invitations', dateSelected)
+            const data = await fetchInvitationsWithProfile(currentProject.id)
+
+            const newDataArray = []
+            data.forEach((item) => {
+                const obj = {
+                    id: item.id,
+                    first_name: item.first_name,
+                    email: item.email,
+                    project: item.projects.name,
+                    step: item.project_stages.name,
+                    invitation_url: item.invitation_url,
+                    pinterest_url: item.pinterest_url,
+                }
+                newDataArray.push(obj)
+            })
+            exportToExcel(newDataArray, 'invitations', dateSelected)
             setExporting(false)
         } catch (e) {
             toast.error("An error has occurred")
@@ -92,14 +106,6 @@ export const ModalRegisteredsList = () => {
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="w-full">
-                        <label className="mb-1 mt-3 block text-sm font-medium">From date: (*)</label>
-                        <input
-                            type="date"
-                            onChange={handleDateSelected}
-                            className="border px-2 py-2 rounded w-full max-w-sm"
-                        />
                     </div>
                 </div>
             </Modal>
