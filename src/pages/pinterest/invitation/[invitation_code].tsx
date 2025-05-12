@@ -224,18 +224,18 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-50 to-rose-100">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
         {/* Left column - Text */}
 
         <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8">
           {/* Left column - Text */}
           <div className="w-full text-center space-y-8">
-            <h1 className="text-lg font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-clip-text">
               Únete al Reto de Creadores de Pinterest y Gana
             </h1>
 
-            <div className="prose prose-pink max-w-none">
+            <div className="prose prose-blue max-w-none">
               <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
                 ¡Pinterest está buscando creadores como tú! Crea una cuenta de
                 Pinterest, conéctala a tu Instagram y estarás participando por
@@ -251,7 +251,7 @@ export default function InvitationStepperPage() {
               <Stepper
                 steps={stepList}
                 currentStep={currentStep.id}
-                variant="pink"
+                variant="blue"
               />
 
               {currentStep.id === "createAccount" && (

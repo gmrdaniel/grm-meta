@@ -12,7 +12,7 @@ export const PinterestVerificationSuccess = () => {
 
   return (
     <CardContent className="space-y-6 text-center py-12">
-      <h2 className="text-3xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-6">
+      <h2 className="text-3xl font-bold bg-clip-text mb-6">
         ¡YA VERIFICAMOS TU CUENTA, MUCHA SUERTE!
       </h2>
       <p className="text-gray-700 text-lg leading-relaxed mb-8">
@@ -23,7 +23,7 @@ export const PinterestVerificationSuccess = () => {
       </p>
       <Button
         onClick={handleRedirect}
-        className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white text-lg py-6 h-auto"
+        className="text-white text-lg py-6 h-auto"
       >
         ACCEDE A TU CUENTA AQUÍ
       </Button>
