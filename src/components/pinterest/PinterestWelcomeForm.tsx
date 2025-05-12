@@ -464,7 +464,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             })
           }
           disabled={!formData.termsAccepted || isSubmitting || !phoneVerified}
-          className="bg-gradient-to-r from-rose-600 to-blue-600 hover:from-rose-700 hover:to-blue-700 text-white"
+          className="text-white"
         >
           {isSubmitting ? "Procesando..." : "Siguiente"}
         </Button>
