@@ -112,7 +112,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
     <CardContent className="space-y-2 pt-4">
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold text-center text-[#C2185B] mb-4">
+          <h2 className="text-2xl font-bold text-center mb-4">
             ¡Excelente! Ahora completa tu perfil de Pinterest
           </h2>
           <p className="text-xs text-gray-700 mb-6">
@@ -237,7 +237,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
       <CardFooter className="flex justify-end px-0">
         <Button
           onClick={handleClick}
-          className="bg-[#C2185B] hover:bg-[#A01648] text-white w-full"
+          className="text-white w-full"
         >
           {isSubmitting ? "Guardando..." : "GUARDAR Y CONTINUAR"}
         </Button>

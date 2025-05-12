@@ -231,7 +231,7 @@ export default function InvitationStepperPage() {
         <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8">
           {/* Left column - Text */}
           <div className="w-full text-center space-y-8">
-            <h1 className="text-lg font-bold bg-gradient-to-r from-rose-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-clip-text">
               Únete al Reto de Creadores de Pinterest y Gana
             </h1>
 
