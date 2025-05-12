@@ -128,7 +128,7 @@ export function TermsCheckbox({
             </p>
             <div className="flex justify-center">
               <button
-                className="text-pink-800 hover:font-semibold mt-4"
+                className="text-blue-800 hover:font-semibold mt-4"
                 onClick={() => {
                   setIsDialogOpen(false);
                   onAcceptTerms(); // Llama al callback para marcar el checkbox
@@ -273,7 +273,7 @@ export function TermsCheckbox({
   };
 
   const termsText = formType === "pinterest" ? "términos y condiciones" : "terms and conditions";
-  const termsColor = formType === "pinterest" ? "text-pink-600" : "text-blue-600";
+  const termsColor = formType === "pinterest" ? "text-blue-600" : "text-blue-600";
 
   return (
     <div className="flex items-start space-x-2 pt-4">
