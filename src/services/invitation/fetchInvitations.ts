@@ -147,14 +147,21 @@ export const fetchInvitationsByRange = async (projectId: string, fechaDesde: Dat
 };
 
 
-export const fetchInvitationsWithProfile = async (projectId: string, fechaDesde: Date): Promise<CreatorInvitation[]> => {
+export const fetchInvitationsWithProfile = async (projectId: string): Promise<CreatorInvitation[]> => {
   const { data, error } = await supabase
-  .from('profiles')
-  .select('*',
-    //'profiles(*)'
-  )
-  //.eq('project_id', projectId)
-  //.eq('email', 'profiles.email')
+  .from('creator_invitations')
+  .select(`
+    *,
+    projects (
+      name
+    ),
+    project_stages (
+      name
+    )
+  `)
+  .eq('project_id', projectId)
+  .eq('status', 'completed')
+  .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching all invitations:', error);
