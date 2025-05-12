@@ -23,7 +23,7 @@ export const PinterestVerificationSuccess = () => {
       </p>
       <Button
         onClick={handleRedirect}
-        className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white text-lg py-6 h-auto"
+        className="text-white text-lg py-6 h-auto"
       >
         ACCEDE A TU CUENTA AQUÍ
       </Button>

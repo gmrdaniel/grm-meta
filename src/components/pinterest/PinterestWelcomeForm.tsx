@@ -282,7 +282,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               type="email"
               value={formData.email}
               readOnly
-              className="bg-gray-50 border-pink-100"
+              className="bg-gray-50 border-blue-100"
               placeholder="tu@correo.com"
             />
           </div>
@@ -301,7 +301,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 value={formData.instagramUser}
                 onChange={onInputChange}
                 placeholder="usuario"
-                className="pl-8 border-pink-100 focus-visible:ring-pink-200"
+                className="pl-8 border-blue-100 focus-visible:ring-blue-200"
                 disabled
               />
             </div>
@@ -431,7 +431,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                       size="sm"
                       onClick={handleVerifyCode}
                       disabled={verificationCode.length !== 4 || isVerifying}
-                      className="bg-pink-100 hover:bg-pink-300 text-black"
+                      className="bg-blue-100 hover:bg-blue-300 text-black"
                     >
                       {isVerifying ? "Verificando..." : "Verificar"}
                     </Button>
@@ -464,7 +464,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             })
           }
           disabled={!formData.termsAccepted || isSubmitting || !phoneVerified}
-          className="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white"
+          className="bg-gradient-to-r from-rose-600 to-blue-600 hover:from-rose-700 hover:to-blue-700 text-white"
         >
           {isSubmitting ? "Procesando..." : "Siguiente"}
         </Button>

@@ -8,7 +8,7 @@ type Step = {
 type StepperProps = {
   steps: readonly Step[];
   currentStep: string;
-  variant?: "blue" | "pink";
+  variant?: "blue" | "blue";
 };
 
 export const Stepper = ({
@@ -24,9 +24,9 @@ export const Stepper = ({
           const stepNumber = index + 1;
 
           const activeCircleColor =
-            variant === "pink" ? "bg-pink-600" : "bg-indigo-600";
+            variant === "blue" ? "bg-blue-600" : "bg-indigo-600";
           const activeTextColor =
-            variant === "pink" ? "text-pink-600" : "text-indigo-600";
+            variant === "blue" ? "text-blue-600" : "text-indigo-600";
 
           return (
             <div

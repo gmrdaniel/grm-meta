@@ -125,7 +125,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
           <div className="relative w-full max-w-md">
             {/* Prefix */}
             <div className="absolute inset-y-0 left-0 flex items-center">
-              <span className="bg-slate-50 text-slate-500 text-sm px-3 py-2 rounded-l-md border border-r-0 border-pink-100">
+              <span className="bg-slate-50 text-slate-500 text-sm px-3 py-2 rounded-l-md border border-r-0 border-blue-100">
                 pinterest.com/
               </span>
             </div>
@@ -134,7 +134,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
               name="pinterestUrl"
               value={profileData.pinterestUrl}
               onChange={handlePinterestUrlChange}
-              className="pl-[120px] border-pink-100 focus-visible:ring-pink-200 rounded-md transition-all shadow-sm placeholder:text-slate-400"
+              className="pl-[120px] border-blue-100 focus-visible:ring-blue-200 rounded-md transition-all shadow-sm placeholder:text-slate-400"
               placeholder="username"
             />
           </div>
@@ -196,7 +196,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
               onCheckedChange={(checked) =>
                 handleCheckboxChange("isConnected", Boolean(checked))
               }
-              className="border-pink-300 text-pink-600"
+              className="border-blue-300 text-blue-600"
             />
             <label htmlFor="isConnected" className="text-sm font-medium">
               Confirmo que he conectado mi cuenta de Pinterest con mi cuenta de
@@ -211,7 +211,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
               onCheckedChange={(checked) =>
                 handleCheckboxChange("isAutoPublishEnabled", Boolean(checked))
               }
-              className="border-pink-300 text-pink-600"
+              className="border-blue-300 text-blue-600"
             />
             <div className="space-y-1">
               <label
