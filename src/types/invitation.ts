@@ -55,3 +55,5 @@ export interface TaskWithInvitation {
   title: string;
   created_at: string;
 }
+
+export type EditInvitationData = Omit<CreatorInvitation, "id">;

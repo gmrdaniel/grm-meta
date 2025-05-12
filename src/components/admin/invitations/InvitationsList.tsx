@@ -57,8 +57,12 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import InvitationsPagination from "./InvitationsPagination";
+import { useNavigate } from "react-router-dom";
 
 const InvitationsList = () => {
+
+  const navigate = useNavigate();
+  
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
@@ -70,18 +74,32 @@ const InvitationsList = () => {
 
   const queryClient = useQueryClient();
 
- // Normalizamos el filtro para que "all" no aplique ningún filtro
-const normalizedStatusFilter =
-  filterStatus === "all" ? undefined : (filterStatus as 
-    "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
+  // Normalizamos el filtro para que "all" no aplique ningún filtro
+  const normalizedStatusFilter =
+    filterStatus === "all"
+      ? undefined
+      : (filterStatus as
+          | "pending"
+          | "accepted"
+          | "rejected"
+          | "completed"
+          | "in process"
+          | "sended");
 
-const { data, isLoading, error } = useQuery({
-  queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
-  queryFn: () =>
-    fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
-});
-  
-  
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      "invitations",
+      { page: currentPage, pageSize, statusFilter: normalizedStatusFilter },
+    ],
+    queryFn: () =>
+      fetchInvitationsWithPagination(
+        currentPage,
+        pageSize,
+        "created_at",
+        "desc",
+        normalizedStatusFilter
+      ),
+  });
 
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
@@ -232,17 +250,17 @@ const { data, isLoading, error } = useQuery({
   }
 
   const filteredInvitations =
-  filterStatus === "all"
-  ? invitations
-  : invitations.filter(
-    (invitation: CreatorInvitation) => invitation.status === filterStatus
-  );
-  
+    filterStatus === "all"
+      ? invitations
+      : invitations.filter(
+          (invitation: CreatorInvitation) => invitation.status === filterStatus
+        );
+
   if (filteredInvitations.length === 0 && filterStatus !== "all") {
     setFilterStatus("all");
     toast.info("No invitations found for the selected filter");
   }
-  
+
   if (!invitations || invitations.length === 0) {
     return <div className="text-center p-4">No invitations found</div>;
   }
@@ -346,6 +364,14 @@ const { data, isLoading, error } = useQuery({
                     >
                       <Copy className="mr-2 h-4 w-4" />
                       Copy invitation link
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate(`/edit/${invitation.id}`)}
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Edit invitation
                     </DropdownMenuItem>
 
                     <DropdownMenuItem

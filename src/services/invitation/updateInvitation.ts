@@ -86,3 +86,19 @@ export const updateFacebookPage = async (
     return null;
   }
 };
+
+
+export const updateInvitation = async (id: string, data: CreatorInvitation) => {
+  // Simulamos actualizar una invitación en la API
+  console.log("Updating invitation with ID:", id, "Data:", data);
+  return new Promise<CreatorInvitation>((resolve) => {
+    setTimeout(() => {
+      const updatedInvitation = {
+        id,
+        ...data,
+        updated_at: new Date().toISOString()
+      } as CreatorInvitation;
+      resolve(updatedInvitation);
+    }, 1000);
+  });
+};
