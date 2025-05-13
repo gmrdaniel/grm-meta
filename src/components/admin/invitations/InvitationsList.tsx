@@ -367,7 +367,7 @@ const InvitationsList = () => {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
-                      onClick={() => navigate(`/edit/${invitation.id}`)}
+                      onClick={() => navigate(`/admin/invitations/edit/${invitation.id}`)}
                       className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                     >
                       <Copy className="mr-2 h-4 w-4" />

@@ -22,7 +22,7 @@ const EditInvitation = () => {
   });
 
   const handleSuccess = () => {
-    navigate("/invitations");
+    navigate("/admin/invitations");
   };
 
   if (error) {
@@ -51,7 +51,7 @@ const EditInvitation = () => {
     <div className="container mx-auto py-8 px-4">
       <Button
         variant="ghost"
-        onClick={() => navigate("/invitations")}
+        onClick={() => navigate("/admin/invitations")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -76,7 +76,6 @@ const EditInvitation = () => {
             <InvitationForm
               initialData={invitation}
               isEditMode={true}
-              invitationId={id}
               onSuccess={handleSuccess}
             />
           ) : (
