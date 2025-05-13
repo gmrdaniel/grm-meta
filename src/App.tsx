@@ -20,6 +20,7 @@ import InvitationStepperPage from "./pages/meta/invitation/[invitation_code]";
 import InvitationStepperPagePinterest from "./pages/pinterest/invitation/[invitation_code]";
 import NotificationLogs from "./pages/admin/notification-logs";
 import NotificationSettings from "./pages/admin/notification-settings";
+import EditInvitation from "./pages/admin/invitations/edit/[id]";
 
 
 const queryClient = new QueryClient();
@@ -86,6 +87,14 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["admin"]}>
                       <AdminInvitations />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/invitations/edit/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <EditInvitation />
                     </ProtectedRoute>
                   }
                 />

@@ -57,12 +57,16 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import InvitationsPagination from "./InvitationsPagination";
+import { useNavigate } from "react-router-dom";
 import { ModalInvitationList } from "@/components/invitation/ModalInvitationList";
 import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
 //import { Cross2Icon } from "@radix-ui/react-icons";
 
 
 const InvitationsList = () => {
+
+  const navigate = useNavigate();
+  
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
@@ -239,8 +243,8 @@ const InvitationsList = () => {
     filterStatus === "all"
       ? invitations
       : invitations.filter(
-        (invitation: CreatorInvitation) => invitation.status === filterStatus
-      );
+          (invitation: CreatorInvitation) => invitation.status === filterStatus
+        );
 
   if (filteredInvitations.length === 0 && filterStatus !== "all") {
     setFilterStatus("all");
@@ -352,6 +356,14 @@ const InvitationsList = () => {
                     >
                       <Copy className="mr-2 h-4 w-4" />
                       Copy invitation link
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => navigate(`/admin/invitations/edit/${invitation.id}`)}
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Edit invitation
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
