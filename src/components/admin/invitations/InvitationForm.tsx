@@ -287,7 +287,7 @@ const InvitationForm = ({
 
   const updateInvitationMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CreateInvitationData }) => {
-      return updateInvitation(id, data); // Asegúrate de tener esta función en tus servicios
+      return updateInvitation(id, {...data, status: data.status}); // Asegúrate de tener esta función en tus servicios
     },
     onSuccess: () => {
       toast.success("Invitation updated!");

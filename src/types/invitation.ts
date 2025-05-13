@@ -45,6 +45,7 @@ export type CreateInvitationData = {
   phone_verified?: boolean | null;
   fb_step_completed?: boolean | null;
   is_professional_account?: boolean | null;
+  status?: string
 };
 
 export type UpdateFacebookPageData = {

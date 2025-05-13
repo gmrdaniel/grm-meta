@@ -31,8 +31,6 @@ export const fetchInvitationByCode = async (code: string): Promise<CreatorInvita
  */
 export const fetchInvitationById = async (id: string): Promise<CreatorInvitation | null> => {
   try {
-    console.log(`Fetching invitation with ID: ${id}`);
-    
     const { data, error } = await supabase
       .from('creator_invitations')
       .select('*')
