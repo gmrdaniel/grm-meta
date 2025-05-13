@@ -1,8 +1,11 @@
+import { Project } from "./project";
+
 export interface CreatorInvitation {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   residence_country_id: any;
   id: string;
   project_id?: string | null;
+  projects?: Project
   email: string;
   first_name: string;
   last_name: string;
@@ -37,6 +40,7 @@ export type CreateInvitationData = {
   instagram_user?: string | null; // Para Instagram
   social_media_type?: string | null;
   project_id: string;
+  projects?: Project
   invitation_type: string;
   phone_number?: string | null;
   phone_country_code?: string | null;

@@ -31,7 +31,7 @@ export const PhoneValidate: React.FC<PhoneInputProps> = ({
       </Label>
       <div className="flex gap-2">
         <Select value={selectedPhoneCode} onValueChange={onPhoneCodeChange}>
-          <SelectTrigger className="w-20 border border-pink-100 rounded-md px-2 py-1.5 text-black focus:outline-none focus:ring-0 focus:border-pink-500">
+          <SelectTrigger className="w-20 border border-blue-100 rounded-md px-2 py-1.5 text-black focus:outline-none focus:ring-0 focus:border-blue-500">
             <SelectValue placeholder="codigo" />
           </SelectTrigger>
           <SelectContent className="bg-white rounded-md shadow-lg mt-1 w-full max-h-40 overflow-y-auto">
@@ -39,7 +39,7 @@ export const PhoneValidate: React.FC<PhoneInputProps> = ({
               <SelectItem
                 key={country.country_id}
                 value={`+${country.countries.phone_code}`}
-                className="px-4 py-2 text-black pl-7  hover:bg-pink-200"
+                className="px-4 py-2 text-black pl-7  hover:bg-blue-200"
               >
                 +{country.countries.phone_code} ({country.countries.name_es})
               </SelectItem>
@@ -52,7 +52,7 @@ export const PhoneValidate: React.FC<PhoneInputProps> = ({
           value={phoneNumber}
           onChange={(e) => onPhoneNumberChange(e.target.value.replace(/\D/g, ""))}
           placeholder="Tu número de teléfono"
-          className="flex-1 border-pink-100 focus-visible:ring-pink-200"
+          className="flex-1 border-blue-100 focus-visible:ring-blue-200"
           type="tel"
         />
       </div>

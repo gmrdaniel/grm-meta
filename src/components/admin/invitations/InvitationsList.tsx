@@ -58,6 +58,10 @@ import {
 } from "@/components/ui/select";
 import InvitationsPagination from "./InvitationsPagination";
 import { useNavigate } from "react-router-dom";
+import { ModalInvitationList } from "@/components/invitation/ModalInvitationList";
+import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
+//import { Cross2Icon } from "@radix-ui/react-icons";
+
 
 const InvitationsList = () => {
 
@@ -76,30 +80,16 @@ const InvitationsList = () => {
 
   // Normalizamos el filtro para que "all" no aplique ningún filtro
   const normalizedStatusFilter =
-    filterStatus === "all"
-      ? undefined
-      : (filterStatus as
-          | "pending"
-          | "accepted"
-          | "rejected"
-          | "completed"
-          | "in process"
-          | "sended");
+    filterStatus === "all" ? undefined : (filterStatus as
+      "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      "invitations",
-      { page: currentPage, pageSize, statusFilter: normalizedStatusFilter },
-    ],
+    queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
     queryFn: () =>
-      fetchInvitationsWithPagination(
-        currentPage,
-        pageSize,
-        "created_at",
-        "desc",
-        normalizedStatusFilter
-      ),
+      fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
   });
+
+
 
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
@@ -267,6 +257,8 @@ const InvitationsList = () => {
   return (
     <div>
       <div className="flex justify-end mb-4">
+        <ModalInvitationList />
+        <ModalRegisteredsList />
         <Button
           onClick={handleExportInvitations}
           disabled={isExporting}
