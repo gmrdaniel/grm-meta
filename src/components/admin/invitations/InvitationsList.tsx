@@ -60,13 +60,13 @@ import InvitationsPagination from "./InvitationsPagination";
 import { useNavigate } from "react-router-dom";
 import { ModalInvitationList } from "@/components/invitation/ModalInvitationList";
 import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
+import { useDebounce } from "@/hooks/use-debounce";
 //import { Cross2Icon } from "@radix-ui/react-icons";
 
-
 const InvitationsList = () => {
-
   const navigate = useNavigate();
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
@@ -80,16 +80,36 @@ const InvitationsList = () => {
 
   // Normalizamos el filtro para que "all" no aplique ningún filtro
   const normalizedStatusFilter =
-    filterStatus === "all" ? undefined : (filterStatus as
-      "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended");
+    filterStatus === "all"
+      ? undefined
+      : (filterStatus as
+          | "pending"
+          | "accepted"
+          | "rejected"
+          | "completed"
+          | "in process"
+          | "sended");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["invitations", { page: currentPage, pageSize, statusFilter: normalizedStatusFilter }],
+    queryKey: [
+      "invitations",
+      {
+        page: currentPage,
+        pageSize,
+        statusFilter: normalizedStatusFilter,
+        searchQuery: debouncedSearchQuery, 
+      },
+    ],
     queryFn: () =>
-      fetchInvitationsWithPagination(currentPage, pageSize, 'created_at', 'desc', normalizedStatusFilter),
+      fetchInvitationsWithPagination(
+        currentPage,
+        pageSize,
+        "created_at",
+        "desc",
+        normalizedStatusFilter,
+        debouncedSearchQuery 
+      ),
   });
-
-
 
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
@@ -269,7 +289,17 @@ const InvitationsList = () => {
           {isExporting ? "Exporting..." : "Export All Invitations"}
         </Button>
       </div>
-      <div className="mt-4 md:mt-0">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by name, email, or code"
+          className="border rounded px-3 py-2 w-full md:w-80"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1); // resetear página al filtrar
+          }}
+        />
         <Select
           onValueChange={(value) => {
             setFilterStatus(value);
@@ -359,7 +389,9 @@ const InvitationsList = () => {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
-                      onClick={() => navigate(`/admin/invitations/edit/${invitation.id}`)}
+                      onClick={() =>
+                        navigate(`/admin/invitations/edit/${invitation.id}`)
+                      }
                       className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                     >
                       <Copy className="mr-2 h-4 w-4" />
