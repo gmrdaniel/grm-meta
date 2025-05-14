@@ -57,19 +57,28 @@ export const fetchInvitationsWithPagination = async (
   pageSize: number = 10,
   sortBy: string = 'created_at',
   sortOrder: 'asc' | 'desc' = 'desc',
-  statusFilter?: "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended"
+  statusFilter?: "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended",
+  searchQuery?: string,
 ): Promise<{ data: CreatorInvitation[], count: number }> => {
   try {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // --- Paso 1: Obtener el count con filtro si aplica
+    const likeFilter = searchQuery?.trim()
+      ? `first_name.ilike.%${searchQuery.trim()}%,last_name.ilike.%${searchQuery.trim()}%,email.ilike.%${searchQuery.trim()}%,invitation_code.ilike.%${searchQuery.trim()}%`
+      : undefined;
+
+    // --- Paso 1: Obtener el count
     let countQuery = supabase
       .from('creator_invitations')
       .select('*', { count: 'exact', head: true });
 
     if (statusFilter) {
       countQuery = countQuery.eq('status', statusFilter);
+    }
+
+    if (likeFilter) {
+      countQuery = countQuery.or(likeFilter);
     }
 
     const { count, error: countError } = await countQuery;
@@ -88,6 +97,10 @@ export const fetchInvitationsWithPagination = async (
 
     if (statusFilter) {
       dataQuery = dataQuery.eq('status', statusFilter);
+    }
+
+    if (likeFilter) {
+      dataQuery = dataQuery.or(likeFilter);
     }
 
     const { data, error } = await dataQuery;
