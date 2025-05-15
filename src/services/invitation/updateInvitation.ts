@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { CreatorInvitation } from "@/types/invitation";
+import { CreateInvitationData, CreatorInvitation } from "@/types/invitation";
 
 /**
  * Update invitation status
@@ -85,4 +85,29 @@ export const updateFacebookPage = async (
     console.error('Unexpected error in updateFacebookPage:', err);
     return null;
   }
+};
+
+export const updateInvitation = async (
+  id: string,
+  data: CreatorInvitation | CreateInvitationData
+): Promise<CreatorInvitation> => {
+  // 🔒 Bloquear modificación del email
+  const { email, project_id, ...safeData } = data;
+
+  const { data: updatedInvitation, error } = await supabase
+    .from("creator_invitations")
+    .update({
+      ...safeData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("❌ Supabase update error:", error.message);
+    throw new Error("Failed to update invitation");
+  }
+
+  return updatedInvitation as CreatorInvitation;
 };
