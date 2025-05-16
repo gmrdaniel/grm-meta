@@ -228,28 +228,28 @@ export default function InvitationStepperPage() {
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
         {/* Left column - Text */}
 
-        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8">
+        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-2">
           {/* Left column - Text */}
           <div className="w-full text-center space-y-8">
-            <h1 className="text-lg font-bold bg-clip-text">
+            <h1 className="sm:text-lg font-bold bg-clip-text text-sm">
               📌 ¡Únete al programa de creadores en Pinterest!
             </h1>
             <div className="prose prose-blue max-w-none">
-              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
                 Somos La Neta, socios estratégicos de Pinterest en LATAM, y estamos invitando a creadores como tú a formar parte de esta gran red social.
               </p>
             </div>
             <div className="prose prose-blue max-w-none">
-              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
                 Regístrate y obtén acceso a webinars exclusivos de Pinterest donde aprenderás a llevar tu creatividad al siguiente nivel.
               </p>
             </div>
             <div className="prose prose-blue max-w-none">
-              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
                 Amplía tu alcance como creador, gana visibilidad frente a marcas líderes en la región y accede a oportunidades comerciales reales y exclusivas.              </p>
             </div>
             <div className="prose prose-blue max-w-none">
-              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
                 🎯 Completa tu registro y da el siguiente paso con Pinterest.
               </p>
             </div>
