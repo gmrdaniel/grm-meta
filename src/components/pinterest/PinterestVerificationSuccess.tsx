@@ -13,13 +13,10 @@ export const PinterestVerificationSuccess = () => {
   return (
     <CardContent className="space-y-6 text-center py-12">
       <h2 className="text-3xl font-bold bg-clip-text mb-6">
-        ¡YA VERIFICAMOS TU CUENTA, MUCHA SUERTE!
+        ¡YA VERIFICAMOS TU CUENTA!
       </h2>
       <p className="text-gray-700 text-lg leading-relaxed mb-8">
-        Ya puedes acceder a tu cuenta, donde recibirás la invitación al evento
-        exclusivo de Pinterest, podrás revisar el estatus de tu participación en
-        el sorteo y acceder a recursos diseñados para ayudarte a crecer más
-        rápido como creador de contenido ¡Y más!
+        Ya puedes acceder a tu cuenta, donde recibirás la invitación a eventos exclusivos de Pinterest, acceder a recursos diseñados para ayudarte a crecer más rápido como creador de contenido, oportunidades comerciales ¡Y más!
       </p>
       <Button
         onClick={handleRedirect}

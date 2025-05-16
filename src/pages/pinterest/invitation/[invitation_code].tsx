@@ -96,7 +96,7 @@ export default function InvitationStepperPage() {
         toast.error("Failed to save your information");
         return;
       }
-      
+
       // Paso 2: Crear el usuario en Supabase Auth
       const { error: signupError } =
         await supabase.auth.signUp({
@@ -195,16 +195,16 @@ export default function InvitationStepperPage() {
         toast.error("No se pudieron actualizar las categorías.");
         return;
       }
-      
+
       toast.success("¡Perfil guardado exitosamente!");
 
 
-    if (error) {
-      toast.error("Failed to save progress");
-      return;
-    }
+      if (error) {
+        toast.error("Failed to save progress");
+        return;
+      }
       console.log(error)
-      goToNextStep(); 
+      goToNextStep();
     } catch (error) {
       console.error("Error inesperado al guardar el perfil:", error);
       toast.error("Hubo un error inesperado al guardar el perfil.");
@@ -232,19 +232,28 @@ export default function InvitationStepperPage() {
           {/* Left column - Text */}
           <div className="w-full text-center space-y-8">
             <h1 className="text-lg font-bold bg-clip-text">
-              Únete al Reto de Creadores de Pinterest y Gana
+              📌 ¡Únete al programa de creadores en Pinterest!
             </h1>
-
             <div className="prose prose-blue max-w-none">
               <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
-                ¡Pinterest está buscando creadores como tú! Crea una cuenta de
-                Pinterest, conéctala a tu Instagram y estarás participando por
-                un giftcard de $1,000 USD en Amazon o una de las 10 giftcards de
-                $100 USD que tenemos para ti.
+                Somos La Neta, socios estratégicos de Pinterest en LATAM, y estamos invitando a creadores como tú a formar parte de esta gran red social.
+              </p>
+            </div>
+            <div className="prose prose-blue max-w-none">
+              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+                Regístrate y obtén acceso a webinars exclusivos de Pinterest donde aprenderás a llevar tu creatividad al siguiente nivel.
+              </p>
+            </div>
+            <div className="prose prose-blue max-w-none">
+              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+                Amplía tu alcance como creador, gana visibilidad frente a marcas líderes en la región y accede a oportunidades comerciales reales y exclusivas.              </p>
+            </div>
+            <div className="prose prose-blue max-w-none">
+              <p className="text-lg text-gray-700 leading-relaxed sm:text-justify">
+                🎯 Completa tu registro y da el siguiente paso con Pinterest.
               </p>
             </div>
           </div>
-
           {/* Right column - Form card */}
           <Card className="w-full shadow-2xl bg-white/95 backdrop-blur">
             <div className="px-4 py-8">
