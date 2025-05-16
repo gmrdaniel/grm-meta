@@ -228,9 +228,9 @@ export default function InvitationStepperPage() {
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
         {/* Left column - Text */}
 
-        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-2">
+        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 pt-8 px-2">
           {/* Left column - Text */}
-          <div className="w-full text-center space-y-8">
+          <div className="w-full text-center space-y-4 sm:space-y-8">
             <h1 className="sm:text-lg font-bold bg-clip-text text-sm">
               📌 ¡Únete al programa de creadores en Pinterest!
             </h1>
