@@ -1,15 +1,20 @@
+// index.ts — Supabase Edge Function para enviar correo con Mailjet
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
+// ✅ Credenciales desde variables de entorno
 const apiKey = Deno.env.get("MAILJET_API_KEY");
 const apiSecret = Deno.env.get("MAILJET_API_SECRET");
 const senderEmail = Deno.env.get("MAILJET_SENDER_EMAIL");
 
+// ✅ Encabezados CORS para permitir peticiones desde cualquier origen
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-environment",
 };
 
+// ✅ Manejador principal de la función
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -18,13 +23,26 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, subject, html } = await req.json();
 
+    if (!email || !subject || !html) {
+      return new Response(
+        JSON.stringify({
+          error: "Missing required fields: email, subject, html",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     const body = {
       Messages: [
         {
-          From: { Email: senderEmail },
-          To: [{ Email: email }],
+          From: { Email: senderEmail, Name: "Laneta" },
+          To: [{ Email: email, Name: "Usuario" }],
           Subject: subject,
           HTMLPart: html,
+          TextPart: html.replace(/<[^>]*>/g, ""), // Extrae texto simple como respaldo
         },
       ],
     };
@@ -32,26 +50,30 @@ const handler = async (req: Request): Promise<Response> => {
     const response = await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
       headers: {
-        "Authorization": "Basic " + btoa(`${apiKey}:${apiSecret}`),
+        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
     });
 
-    const responseBody = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(JSON.stringify(responseBody));
+      console.error("Mailjet error:", data);
+      return new Response(JSON.stringify({ error: data }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
-    return new Response(JSON.stringify(responseBody), {
+    return new Response(JSON.stringify({ success: true, data }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error) {
     console.error("Error sending email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Unexpected error" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -60,6 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
+// ✅ Inicia el servidor
 serve(handler);
 
 
