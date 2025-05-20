@@ -7,6 +7,7 @@ import InvitationsList from "@/components/admin/invitations/InvitationsList";
 import InvitationForm from "@/components/admin/invitations/InvitationForm";
 import { Plus } from "lucide-react";
 import ImportInvitations from "@/components/admin/invitations/ImportInvitations";
+import ImportProcessedCreators from "@/components/admin/invitations/ImportProcessedCreators";
 
 const InvitationsPage = () => {
 
@@ -40,6 +41,7 @@ const InvitationsPage = () => {
             <TabsTrigger value="list">Invitations List</TabsTrigger>
             <TabsTrigger value="create">Create Invitation</TabsTrigger>
             <TabsTrigger value="import">Import Invitations</TabsTrigger>
+            <TabsTrigger value="import_meta">Import Meta Processed Invitations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
@@ -70,6 +72,16 @@ const InvitationsPage = () => {
               </CardHeader>
               <CardContent>
                 <ImportInvitations onSuccess={handleInvitationCreated} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="import_meta">
+            <Card>
+              <CardHeader>
+                <CardTitle>Import Meta Processed Creators</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImportProcessedCreators />
               </CardContent>
             </Card>
           </TabsContent>
