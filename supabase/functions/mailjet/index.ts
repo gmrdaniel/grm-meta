@@ -38,11 +38,11 @@ const handler = async (req: Request): Promise<Response> => {
     const body = {
       Messages: [
         {
-          From: { Email: senderEmail, Name: "Laneta" },
+          From: { Email: senderEmail, Name: "La Neta" },   
           To: [{ Email: email, Name: "Usuario" }],
           Subject: subject,
           HTMLPart: html,
-          TextPart: html.replace(/<[^>]*>/g, ""), 
+          TextPart: html.replace(/<[^>]*>/g, ""),
         },
       ],
     };
