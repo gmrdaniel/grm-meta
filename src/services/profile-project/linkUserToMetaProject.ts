@@ -39,7 +39,7 @@ export async function linkProfileToProjectById({
       updated_at: new Date().toISOString(),
     },
     {
-      onConflict: ["profile_id", "project_id"],
+       onConflict: "profile_id,project_id",
     }
   );
 
