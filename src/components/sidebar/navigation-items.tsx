@@ -1,5 +1,5 @@
 
-import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare,List,Bell } from "lucide-react";
+import { Home, Package, PenSquare, User, Users, Mail, TestTube, CheckSquare, List, Bell, Megaphone } from "lucide-react";
 
 export const adminNavigationItems = [
   {
@@ -49,6 +49,12 @@ export const adminNavigationItems = [
     shortLabel: "Test",
     icon: <List size={24} />,
     to: "/admin/notification-logs",
+  },
+  {
+    label: "Campaign",
+    shortLabel: "Campaign",
+    icon: <Megaphone size={24} />,
+    to: "/admin/campaign",
   },
 ];
 
