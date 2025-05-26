@@ -157,7 +157,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
         const invitationData: CreateInvitationData = {
           first_name: firstName,
           last_name: lastName,
-          email: email,
+          email: email.toLowerCase(),
           project_id: values.projectId,
           invitation_type: values.invitationType,
           social_media_type: socialMediaType
