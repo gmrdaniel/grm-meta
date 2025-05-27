@@ -78,7 +78,7 @@ const InvitationsPage = () => {
           <TabsContent value="import_meta">
             <Card>
               <CardHeader>
-                <CardTitle>Import Meta Processed Creators</CardTitle>
+                <CardTitle>Import Processed Creators</CardTitle>
               </CardHeader>
               <CardContent>
                 <ImportProcessedCreators />

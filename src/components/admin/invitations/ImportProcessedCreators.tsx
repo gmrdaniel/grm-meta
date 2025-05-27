@@ -20,7 +20,10 @@ interface ProcessedCreator {
   email: string;
   status: string;
   approvalDate: string;
+  fbProfileId: string;
+  fbProfileOwnerId: string;
 }
+
 
 interface ImportError {
   row: number;
@@ -66,7 +69,13 @@ const ImportProcessedCreators: React.FC = () => {
     const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
 
     const headers = jsonData[0];
-    const requiredHeaders = ["Email", "Status", "Approval Date"];
+    const requiredHeaders = [
+      "Email",
+      "Status",
+      "Approval Date",
+      "FB Profile ID",
+      "FB Profile Owner ID",
+    ];
     const missingHeaders = requiredHeaders.filter((h) => !headers.includes(h));
 
     if (missingHeaders.length > 0) {
@@ -78,6 +87,8 @@ const ImportProcessedCreators: React.FC = () => {
     const emailIndex = headers.indexOf("Email");
     const statusIndex = headers.indexOf("Status");
     const dateIndex = headers.indexOf("Approval Date");
+    const fbPageIdIndex = headers.indexOf("FB Page ID");
+    const fbPageOwnerIdIndex = headers.indexOf("FB Page Owner ID");
 
     const processedData: ProcessedCreator[] = [];
     const errors: ImportError[] = [];
@@ -88,19 +99,35 @@ const ImportProcessedCreators: React.FC = () => {
       const email = row[emailIndex]?.toString().trim();
       const status = row[statusIndex]?.toString().trim();
       const approvalDate = row[dateIndex]?.toString().trim();
+      const fbProfileId = row[fbPageIdIndex]?.toString().trim();
+      const fbProfileOwnerId = row[fbPageOwnerIdIndex]?.toString().trim();
 
-      if (!email || !status || !approvalDate) {
+      if (
+        !email ||
+        !status ||
+        !approvalDate ||
+        !fbProfileId ||
+        !fbProfileOwnerId
+      ) {
         errors.push({
           row: rowNumber,
           data: { email, status, approvalDate },
-          error: "One or more fields are missing",
+          error: "One or more required fields are missing",
         });
         continue;
       }
 
       try {
-        await linkProfileToProjectById({ email, projectId: selectedProjectId, adminId: user?.id, status });
-        processedData.push({ email, status, approvalDate });
+        await linkProfileToProjectById({
+          email,
+          projectId: selectedProjectId,
+          adminId: user?.id,
+          status,
+          fbProfileId,
+          fbProfileOwnerId,
+        });
+
+        processedData.push({ email, status, approvalDate, fbProfileId, fbProfileOwnerId });
       } catch (err: any) {
         console.error(err);
         errors.push({
@@ -127,8 +154,14 @@ const ImportProcessedCreators: React.FC = () => {
 
   const generateExcelTemplate = () => {
     const templateData = [
-      ["Email", "Status", "Approval Date"],
-      ["user@example.com", "approved", "2025-05-20"],
+      ["Email", "Status", "Approval Date", "FB Page ID", "FB Page Owner ID"],
+      [
+        "user@example.com",
+        "approved",
+        "2025-05-20",
+        "123456789",
+        "987654321",
+      ],
     ];
 
     const wb = XLSX.utils.book_new();
@@ -148,7 +181,9 @@ const ImportProcessedCreators: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="project" className="text-sm font-medium">Select Project</label>
+        <label htmlFor="project" className="text-sm font-medium">
+          Select Project
+        </label>
         <Select
           onValueChange={(val) => setSelectedProjectId(val)}
           disabled={isLoadingProjects || isImporting}

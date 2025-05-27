@@ -1,18 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
 
-
 interface LinkProfileParams {
   email: string;
   projectId: string;
   adminId: string;
   status?: "approved" | "rejected";
+  fbProfileId: string;
+  fbProfileOwnerId: string;
 }
 
 export async function linkProfileToProjectById({
   email,
   projectId,
   adminId,
-  status = "approved", // default si no se pasa
+  status = "approved",
+  fbProfileId,
+  fbProfileOwnerId,
 }: LinkProfileParams) {
   // 1. Buscar perfil con rol 'creator'
   const { data: profileData, error: profileErr } = await supabase
@@ -33,13 +36,15 @@ export async function linkProfileToProjectById({
       profile_id: profileData.id,
       project_id: projectId,
       admin_id: adminId,
-      status, 
+      status,
+      fb_profile_id: fbProfileId,
+      fb_profile_owner_id: fbProfileOwnerId,
       joined_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
     {
-       onConflict: "profile_id,project_id",
+      onConflict: "profile_id,project_id",
     }
   );
 
@@ -47,5 +52,7 @@ export async function linkProfileToProjectById({
     throw insertErr;
   }
 
-  console.log(`✅ Relación creada o actualizada: ${email} ↔ proyecto ${projectId} con status "${status}"`);
+  console.log(
+    `✅ Relación creada o actualizada: ${email} ↔ proyecto ${projectId} con status "${status}", page: ${fbProfileId}, owner: ${fbProfileOwnerId}`
+  );
 }
