@@ -29,8 +29,7 @@ interface ImportError {
   data: {
     email: string;
     name?: string;
-    subject: string;
-    variables: Record<string, string>;
+    paragraph: string;
   };
   error: string;
 }
@@ -41,6 +40,9 @@ const formSchema = z.object({
   templateId: z.string().optional(),
   plainText: z.string().optional(),
   htmlContent: z.string().optional(),
+  customCampaign: z.string().min(1, "Debes ingresar un nombre para la campaña"),
+  deduplicateCampaign: z.boolean().optional(),
+  subject: z.string().min(1, "Debes ingresar un asunto para el correo")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,6 +61,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       templateId: "",
       plainText: "",
       htmlContent: "",
+      subject: ""
     },
   });
 
@@ -67,8 +70,8 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
 
   const handleDownloadTemplate = () => {
     const template = [
-      ["Email", "Name", "Subject", "Variables"],
-      ["ejemplo@email.com", "Nombre Ejemplo", "Asunto del Email", '{"nombre":"Juan","empresa":"MiEmpresa"}']
+      ["Email", "Name", "Paragraph"],
+      ["ejemplo@email.com", "Nombre Ejemplo", "Contenido del párrafo para el email"]
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(template);
@@ -95,7 +98,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
 
       // Validate headers
       const headers = jsonData[0];
-      const requiredHeaders = ["Email", "Name", "Subject", "Variables"];
+      const requiredHeaders = ["Email", "Name", "Paragraph"];
 
       const missingHeaders = requiredHeaders.filter(
         (header) => !headers.includes(header)
@@ -109,25 +112,16 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       // Get column indices
       const emailIndex = headers.indexOf("Email");
       const nameIndex = headers.indexOf("Name");
-      const subjectIndex = headers.indexOf("Subject");
-      const variablesIndex = headers.indexOf("Variables");
+      const paragraphIndex = headers.indexOf("Paragraph");
 
       // Process rows
-      const rows = jsonData.slice(1).map((row: any) => {
-        try {
-          return {
-            email: row[emailIndex],
-            name: row[nameIndex],
-            subject: row[subjectIndex],
-            variables: JSON.parse(row[variablesIndex] || "{}")
-          };
-        } catch (error) {
-          throw new Error(`Error al procesar variables: ${error.message}`);
-        }
-      });
+      const rows = jsonData.slice(1).map((row: any) => ({
+        email: row[emailIndex],
+        name: row[nameIndex],
+        paragraph: row[paragraphIndex]
+      }));
 
       if (channel === "email") {
-        // Send campaign using Supabase Edge Function mailjet-campaign
         const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
           body: {
             templateId: values.messageType === 'template' ? values.templateId : undefined,
@@ -136,15 +130,18 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
             recipients: rows.map(row => ({
               email: row.email,
               name: row.name,
-              variables: row.variables
+              variables: {
+                paragraph: row.paragraph
+              }
             })),
-            subject: rows[0].subject // Usando el primer subject como subject general
+            subject: values.subject,
+            customCampaign: values.customCampaign,
+            deduplicateCampaign: values.deduplicateCampaign
           }
         });
 
         if (error) throw error;
       } else {
-        // Aquí se implementará la lógica para otros canales
         throw new Error(`El canal ${channel} aún no está implementado`);
       }
 
@@ -157,7 +154,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       toast.error(`Error al enviar la campaña: ${error.message}`);
       setImportErrors([{
         row: 0,
-        data: { email: '', subject: '', variables: {} },
+        data: { email: '', name: '', paragraph: '' },
         error: error.message
       }]);
     } finally {
@@ -193,7 +190,36 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
               </FormItem>
             )}
           />
-
+          <FormField
+          control={form.control}
+          name="customCampaign"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre de la Campaña</FormLabel>
+              <input
+                {...field}
+                type="text"
+                placeholder="Ej: Promocion_Mayo_2025"
+                className="w-full border rounded-md px-3 py-2"
+              />
+            </FormItem>
+          )}
+        />
+          <FormField
+            control={form.control}
+            name="subject"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Asunto del Correo</FormLabel>
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="Ej: Invitación especial para ti"
+                  className="w-full border rounded-md px-3 py-2"
+                />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="messageType"
@@ -270,13 +296,11 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
           <div className="space-y-4">
           <Card className="mb-6">
             <CardContent className="pt-6">
-              
-                <AlertDescription>
-                  Estructura del archivo Excel para importación masiva:<br />
-                  <strong>Email</strong> | <strong>Name</strong> | <strong>Subject</strong> | <strong>Variables</strong><br />
-                  ejemplo@email.com | Nombre Ejemplo | Asunto del Email | ""nombre":"Juan","empresa":"MiEmpresa"
-                </AlertDescription>
-              
+              <AlertDescription>
+                Estructura del archivo Excel para importación masiva:<br />
+                <strong>Email</strong> | <strong>Name</strong> | <strong>Paragraph</strong><br />
+                ejemplo@email.com | Nombre Ejemplo | Contenido del párrafo para el email
+              </AlertDescription>
             </CardContent>
           </Card>
             <div className="flex items-center gap-4">

@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { templateId, recipients, subject, variables, textContent, htmlContent } = await req.json();
+    const { templateId, recipients, subject, variables, textContent, htmlContent, customCampaign, deduplicateCampaign } = await req.json();
 
     // Validación de campos requeridos
     if (!recipients || !recipients.length) {
@@ -50,7 +50,12 @@ serve(async (req) => {
         From: { Email: senderEmail, Name: "La Neta" },
         To: [{ Email: recipient.email, Name: recipient.name || "Usuario" }],
         Subject: subject,
-        Variables: { ...variables, ...recipient.variables }
+        TemplateID:templateId,
+        TemplateLanguage: true,
+        TextPart:"",
+        HTMLPart:"",
+        Variables: { ...variables, ...recipient.variables },
+        CustomCampaign: recipient.customCampaign
       };
 
       if (templateId) {
@@ -60,6 +65,10 @@ serve(async (req) => {
         if (textContent) message.TextPart = textContent;
         if (htmlContent) message.HTMLPart = htmlContent;
       }
+
+      // Agregar opciones de campaña personalizada
+      if (customCampaign) message.CustomCampaign = customCampaign;
+      //if (deduplicateCampaign !== undefined) message.DeduplicateCampaign = deduplicateCampaign;
 
       return message;
     });
