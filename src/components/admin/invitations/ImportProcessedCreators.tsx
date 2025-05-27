@@ -20,8 +20,8 @@ interface ProcessedCreator {
   email: string;
   status: string;
   approvalDate: string;
-  fbPageId: string;
-  fbPageOwnerId: string;
+  fbProfileId: string;
+  fbProfileOwnerId: string;
 }
 
 
@@ -99,15 +99,15 @@ const ImportProcessedCreators: React.FC = () => {
       const email = row[emailIndex]?.toString().trim();
       const status = row[statusIndex]?.toString().trim();
       const approvalDate = row[dateIndex]?.toString().trim();
-      const fb_profile_id = row[fbPageIdIndex]?.toString().trim();
-      const fb_profile_owner_id = row[fbPageOwnerIdIndex]?.toString().trim();
+      const fbProfileId = row[fbPageIdIndex]?.toString().trim();
+      const fbProfileOwnerId = row[fbPageOwnerIdIndex]?.toString().trim();
 
       if (
         !email ||
         !status ||
         !approvalDate ||
-        !fb_profile_id ||
-        !fb_profile_owner_id
+        !fbProfileId ||
+        !fbProfileOwnerId
       ) {
         errors.push({
           row: rowNumber,
@@ -123,11 +123,11 @@ const ImportProcessedCreators: React.FC = () => {
           projectId: selectedProjectId,
           adminId: user?.id,
           status,
-          fb_profile_id,
-          fb_profile_owner_id,
+          fbProfileId,
+          fbProfileOwnerId,
         });
 
-        processedData.push({ email, status, approvalDate, fbPageId: fb_page_id, fbPageOwnerId: fb_page_owner_id });
+        processedData.push({ email, status, approvalDate, fbProfileId, fbProfileOwnerId });
       } catch (err: any) {
         console.error(err);
         errors.push({
