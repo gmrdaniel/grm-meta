@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import {
@@ -19,6 +19,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+// Importar la función createInvitation
+import { createInvitation } from '@/services/invitation/createInvitation';
 
 interface ImportCampaignProps {
   onSuccess?: () => void;
@@ -42,12 +44,33 @@ const formSchema = z.object({
   htmlContent: z.string().optional(),
   customCampaign: z.string().min(1, "Debes ingresar un nombre para la campaña"),
   deduplicateCampaign: z.boolean().optional(),
-  subject: z.string().min(1, "Debes ingresar un asunto para el correo")
+  subject: z.string().min(1, "Debes ingresar un asunto para el correo"),
+  generateInvitations: z.boolean().default(false),
+  projectId: z.string().min(1, "Debes seleccionar un proyecto")
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
+  const [projects, setProjects] = useState<Array<{ id: string, name: string }>>([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        toast.error('Error al cargar los proyectos');
+        return;
+      }
+
+      setProjects(data || []);
+    };
+
+    fetchProjects();
+  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState(0);
@@ -61,7 +84,9 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       templateId: "",
       plainText: "",
       htmlContent: "",
-      subject: ""
+      subject: "",
+      generateInvitations: false,
+      projectId: null
     },
   });
 
@@ -122,24 +147,52 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       }));
 
       if (channel === "email") {
+        // Procesar las filas y generar invitaciones si es necesario
+        const processedRows = await Promise.all(rows.map(async (row) => {
+          let invitationData = {};
+          if (values.projectId && values.projectId !="Ninguno") {
+            try {
+              const invitation = await createInvitation({
+                project_id: values.projectId,
+                email: row.email,
+                first_name: row.name.split(' ')[0] || row.email.split('@')[0],
+                last_name:row.name.split(' ').slice(1).join(' ') || '',
+                invitation_type:"new_user",
+                social_media_type: "pinterest"
+              });
+              
+              invitationData = {
+                invitation_code: invitation.invitation_code,
+                invitation_url: invitation.invitation_url
+              };
+            } catch (error) {
+              console.error('Error generating invitation:', error);
+            }
+          }
+
+          return {
+            email: row.email,
+            name: row.name,
+            variables: {
+              paragraph: row.paragraph,
+              invitationCode: invitationData.invitation_code || "NO CODE", 
+              invitationUrl: invitationData.invitation_url || "NO URL"
+            }
+          };
+        }));
+
         const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
           body: {
             templateId: values.messageType === 'template' ? values.templateId : undefined,
             textContent: values.messageType === 'plaintext' ? values.plainText : undefined,
             htmlContent: values.htmlContent,
-            recipients: rows.map(row => ({
-              email: row.email,
-              name: row.name,
-              variables: {
-                paragraph: row.paragraph
-              }
-            })),
+            recipients: processedRows,
             subject: values.subject,
             customCampaign: values.customCampaign,
-            deduplicateCampaign: values.deduplicateCampaign
+            //deduplicateCampaign: values.deduplicateCampaign
           }
         });
-
+        console.log(processedRows)
         if (error) throw error;
       } else {
         throw new Error(`El canal ${channel} aún no está implementado`);
@@ -167,6 +220,33 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleImport)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="projectId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Proyecto de invitación</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un proyecto de invitación" />
+                  </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem key="none" value="Ninguno">
+                        Ninguno
+                      </SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="channel"
