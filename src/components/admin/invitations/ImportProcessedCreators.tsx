@@ -87,8 +87,8 @@ const ImportProcessedCreators: React.FC = () => {
     const emailIndex = headers.indexOf("Email");
     const statusIndex = headers.indexOf("Status");
     const dateIndex = headers.indexOf("Approval Date");
-    const fbPageIdIndex = headers.indexOf("FB Page ID");
-    const fbPageOwnerIdIndex = headers.indexOf("FB Page Owner ID");
+    const fbPageIdIndex = headers.indexOf("FB Profile ID");
+    const fbPageOwnerIdIndex = headers.indexOf("FB Profile Owner ID");
 
     const processedData: ProcessedCreator[] = [];
     const errors: ImportError[] = [];
