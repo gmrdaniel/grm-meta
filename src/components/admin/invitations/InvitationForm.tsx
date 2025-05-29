@@ -233,7 +233,7 @@ const InvitationForm = ({
     const invitationData: CreateInvitationData = {
       first_name: data.first_name,
       last_name: data.last_name,
-      email: data.email,
+      email: data.email.toLowerCase(),
       social_media_handle: data.social_media_handle,
       youtube_channel: null,
       social_media_type: data.social_media_type || null,

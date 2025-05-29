@@ -20,15 +20,19 @@ serve(async (req) => {
   }
 
   const apiKey = Deno.env.get("RAPIDAPI_KEY");
-  const apiHost = "instagram230.p.rapidapi.com";
-  console.log('apiKey', apiKey)
+  const apiHost = "instagram120.p.rapidapi.com";
+  console.log("apiKey", apiKey);
   try {
-    const apiRes = await fetch(`https://${apiHost}/user/details?username=${username}`, {
-      method: "GET",
+    const apiRes = await fetch(`https://${apiHost}/api/instagram/userInfo`, {
+      method: "POST",
       headers: {
         "x-rapidapi-key": apiKey ?? "",
         "x-rapidapi-host": apiHost,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        username: username,
+      }),
     });
 
     const data = await apiRes.json();
@@ -47,6 +51,7 @@ serve(async (req) => {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Content-Type": "application/json",
 };

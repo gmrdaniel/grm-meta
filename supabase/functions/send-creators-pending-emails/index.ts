@@ -1,15 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-// Inicializa Supabase y Resend
+// Inicializa Supabase y variables de entorno
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const senderEmail = Deno.env.get("RESEND_SENDER_EMAIL");
+const apiKey = Deno.env.get("MAILJET_API_KEY");
+const apiSecret = Deno.env.get("MAILJET_API_SECRET");
+const senderEmail = Deno.env.get("MAILJET_SENDER_EMAIL");
 const baseAppUrl = Deno.env.get("BASE_APP_URL");
 
 const MAX_BATCH = 100; // máximo por ejecución
@@ -139,19 +139,37 @@ async function sendNotification(
   const subject = renderTemplate(setting.subject || "Notification", variables);
 
   if (channel === "email") {
-    const response = await resend.emails.send({
-      from: senderEmail,
-      to: [invitation.email],
-      subject,
-      html,
+    const body = {
+      Messages: [
+        {
+          From: { Email: senderEmail, Name: "La Neta" },
+          To: [{ Email: invitation.email, Name: invitation.first_name || "Usuario" }],
+          Subject: subject,
+          HTMLPart: html,
+          TextPart: html.replace(/<[^>]*>/g, ""),
+        },
+      ],
+    };
+
+    const response = await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: {
+        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
-  
-    if (response.error) {
-      throw new Error(response.error.message || "Resend error");
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Mailjet error");
     }
-  
+
     return true;
   }
+
+  return false;
 }
 
 
