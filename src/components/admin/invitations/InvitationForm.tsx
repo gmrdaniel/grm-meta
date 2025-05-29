@@ -88,7 +88,8 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "accepted", "completed"]),
+    status: z.enum(["pending", "in process", "accepted", "completed"]),
+    instagram_user: z.string().optional().default(""),
   })
   .superRefine((data, ctx) => {
     // 🔒 Requiere teléfono completo para marcar como verificado
@@ -188,6 +189,7 @@ const InvitationForm = ({
       fb_step_completed: false,
       is_professional_account: false,
       status: "pending",
+      instagram_user: "",
     },
   });
 
@@ -246,6 +248,8 @@ const InvitationForm = ({
       phone_verified: data.phone_verified || false,
       fb_step_completed: data.fb_step_completed || false,
       is_professional_account: data.is_professional_account || false,
+      status: data.status || "pending",
+      instagram_user: data.instagram_user || "",
     };
 
     // Map social_media_handle to the correct property
@@ -574,6 +578,23 @@ const InvitationForm = ({
 
               <FormField
                 control={form.control}
+                name="instagram_user"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="facebook.com/yourprofile"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
@@ -586,6 +607,7 @@ const InvitationForm = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in process">In Process</SelectItem>
                         <SelectItem value="accepted">Accepted</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
