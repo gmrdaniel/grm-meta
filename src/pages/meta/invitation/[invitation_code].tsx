@@ -248,7 +248,10 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
     // Validación 3: existencia del usuario
     try {
       const result = await fetchInstagramUser(instagramUsername);
-      const user = result[0]?.user;
+      
+      
+      const user = result.result[0]?.user;
+
 
       if (
         !user?.username ||
