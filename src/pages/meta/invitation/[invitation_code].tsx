@@ -248,7 +248,7 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
     // Validación 3: existencia del usuario
     try {
       const result = await fetchInstagramUser(instagramUsername);
-      const user = result?.data?.user;
+      const user = result[0]?.user;
 
       if (
         !user?.username ||
@@ -259,8 +259,8 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
         return;
       }
 
-      isBusinessAccount = user.is_business_account;
-      isProfessionalAccount = user.is_professional_account;
+      isBusinessAccount = user.is_business;
+      isProfessionalAccount = false;
     } catch (error) {
       console.log(error)
       toast.error("Failed to verify Instagram user.");
@@ -271,9 +271,6 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
       instagram_user: instagramUsername,
-      /* phone_country_code: formData.phoneCountryCode || null,
-      phone_number: formData.phoneNumber || null,
-      phone_verified: formData.phoneVerified, */
       is_business_account: isBusinessAccount,
       is_professional_account: isProfessionalAccount,
       
