@@ -1,14 +1,10 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CreatorInvitation } from "@/types/invitation";
-import { AlertTriangle, Sparkles, Check } from "lucide-react";
 
 interface WelcomeFormProps {
   invitation: CreatorInvitation;
@@ -21,103 +17,119 @@ interface WelcomeFormProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (checked: boolean) => void;
   onContinue: () => void;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
 }
 
-export const WelcomeForm: React.FC<WelcomeFormProps> = ({
+export function WelcomeForm({
   invitation,
   formData,
   onInputChange,
   onCheckboxChange,
   onContinue,
-  isSubmitting = false,
-}) => {
-  const handleContinue = () => {
-    if (!formData.termsAccepted) {
-      toast.error("You must accept the terms and conditions to continue");
-      return;
-    }
-    onContinue();
-  };
-
+  isSubmitting,
+}: WelcomeFormProps) {
   return (
-    <>
-     
-
-      <CardContent className="space-y-6">
-        {/* Join Meta Creator Program Section (Moved from CardHeader) */}
-        <div className="mt-4 border-gray-200 pt-4">
-          <h2 className="text-2xl font-bold text-gray-800">Join Meta Creator Program</h2>
-          <p className="text-gray-600">
-            You've been invited to join Meta's exclusive content creator program
-          </p>
+    <div className="space-y-6">
+      {/* Form Fields */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            name="fullName"
+            value={formData.fullName.split(" ")[0] || ""}
+            onChange={onInputChange}
+            placeholder="Your first name"
+            className="bg-gray-50 border-gray-200"
+          />
         </div>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={onInputChange}
-              placeholder="Your full name"
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            value={formData.fullName.split(" ").slice(1).join(" ") || ""}
+            onChange={onInputChange}
+            placeholder="Your last name"
+            className="bg-gray-50 border-gray-200"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="instagram">Instagram URL</Label>
+        <div className="flex">
+          <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-md">
+            instagram.com/
+          </span>
+          <Input
+            id="instagram"
+            name="socialMediaHandle"
+            value={formData.socialMediaHandle}
+            onChange={onInputChange}
+            placeholder="yourusername"
+            className="rounded-l-none bg-gray-50 border-gray-200"
+          />
+        </div>
+      </div>
+
+      {/* Eligibility Requirements - Purple Background */}
+      <div className="bg-purple-50 p-6 rounded-lg space-y-4">
+        <h3 className="text-lg font-semibold text-purple-800 mb-4">Eligibility Requirements</h3>
+        
+        <div className="space-y-3">
+          <div className="flex items-start space-x-3">
+            <Checkbox 
+              id="us-resident" 
+              className="mt-1 border-purple-300 data-[state=checked]:bg-purple-600"
             />
+            <label htmlFor="us-resident" className="text-sm text-gray-700 leading-relaxed">
+              I confirm that I am a resident of the United States
+            </label>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              readOnly
-              className="bg-gray-50"
-              placeholder="your@email.com"
+          <div className="flex items-start space-x-3">
+            <Checkbox 
+              id="age-18" 
+              className="mt-1 border-purple-300 data-[state=checked]:bg-purple-600"
             />
+            <label htmlFor="age-18" className="text-sm text-gray-700 leading-relaxed">
+              I confirm that I am 18 years of age or older
+            </label>
           </div>
 
-          {invitation.social_media_type && (
-            <div className="space-y-2">
-              <Label htmlFor="socialMediaHandle">
-                {invitation.social_media_type === 'tiktok' ? 'TikTok Username' : 'Pinterest Username'}
-              </Label>
-              <Input
-                id="socialMediaHandle"
-                name="socialMediaHandle"
-                value={formData.socialMediaHandle}
-                readOnly
-                className="bg-gray-50"
-                placeholder={invitation.social_media_type === 'tiktok' ? '@username' : 'username'}
-              />
-            </div>
-          )}
-
-          <div className="flex items-center space-x-2 pt-4">
-            <Checkbox
-              id="termsAccepted"
-              checked={formData.termsAccepted}
-              onCheckedChange={onCheckboxChange}
+          <div className="flex items-start space-x-3">
+            <Checkbox 
+              id="no-previous-meta" 
+              className="mt-1 border-purple-300 data-[state=checked]:bg-purple-600"
             />
-            <label
-              htmlFor="termsAccepted"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              I accept the <a href="#" className="text-blue-600 hover:underline">terms and conditions</a>
+            <label htmlFor="no-previous-meta" className="text-sm text-gray-700 leading-relaxed">
+              I confirm that I have not previously participated in a Meta program or monetized with Facebook
             </label>
           </div>
         </div>
-      </CardContent>
+      </div>
 
-      <CardFooter className="flex justify-end">
-        <Button 
-          onClick={handleContinue} 
-          disabled={!formData.termsAccepted || isSubmitting}
-        >
-          {isSubmitting ? "Processing..." : "Continue"}
-        </Button>
-      </CardFooter>
-    </>
+      {/* Updated Button with Gradient and Rounded Style */}
+      <Button
+        onClick={onContinue}
+        disabled={!formData.termsAccepted || isSubmitting}
+        className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      >
+        {isSubmitting ? "Processing..." : "Next: Facebook Setup →"}
+      </Button>
+
+      {/* Terms */}
+      <div className="text-center text-sm text-gray-500">
+        By applying, you agree to our{" "}
+        <a href="#" className="text-purple-600 hover:underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="#" className="text-purple-600 hover:underline">
+          Privacy Policy
+        </a>
+      </div>
+    </div>
   );
-};
-
+}
