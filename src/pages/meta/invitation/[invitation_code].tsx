@@ -433,28 +433,31 @@ export default function InvitationStepperPage() {
       </div>
 
       {/* Right Side - Form Area */}
-      <div className="w-1/2 bg-white flex items-center justify-center p-8">
+      <div className="w-1/2 bg-gray-50 flex items-center justify-center p-8">
         <div className="w-full max-w-lg">
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Join Meta Creator Program</h2>
-            <p className="text-purple-600 font-medium mb-4">We're La Neta, an official partner of Meta</p>
+          <Card className="bg-white shadow-xl rounded-2xl border-0">
+            <CardHeader className="text-center pb-6">
+              <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+                Join Meta Creator Program
+              </CardTitle>
+              <CardDescription className="text-purple-600 font-medium mb-4">
+                We're La Neta, an official partner of Meta
+              </CardDescription>
+              
+              {currentStep.id === "welcome" && (
+                <div className="text-left space-y-3 text-sm text-gray-600">
+                  <p>Welcome to the Meta Creator Breakthrough Bonus Program</p>
+                  <p>
+                    Earn up to <span className="font-bold text-purple-600">$5,000 in bonuses</span> just by posting Reels on Facebook
+                  </p>
+                  <p>Start monetizing right away + get a free trial of Meta Verified</p>
+                  <p>Limited spots available for high-potential creators like you</p>
+                  <p className="font-medium">Fill out the form below to get started.</p>
+                </div>
+              )}
+            </CardHeader>
             
-            {currentStep.id === "welcome" && (
-              <>
-                <p className="text-gray-600 mb-4">Welcome to the Meta Creator Breakthrough Bonus Program</p>
-                <p className="text-gray-600 mb-4">
-                  Earn up to <span className="font-bold text-purple-600">$5,000 in bonuses</span> just by posting Reels on Facebook
-                </p>
-                <p className="text-gray-600 mb-4">Start monetizing right away + get a free trial of Meta Verified</p>
-                <p className="text-gray-600 mb-4">Limited spots available for high-potential creators like you</p>
-                <p className="text-gray-600 mb-6">Fill out the form below to get started.</p>
-              </>
-            )}
-          </div>
-
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-8">
+            <CardContent className="px-8 pb-8">
               <Stepper steps={stepList} currentStep={currentStep.id} className="mb-8" />
               
               {currentStep.id === "welcome" && (
