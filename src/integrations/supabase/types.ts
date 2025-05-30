@@ -144,6 +144,7 @@ export type Database = {
           lada_telefono: string | null
           nombre: string
           page_facebook: string | null
+          region: string | null
           secuid_tiktok: string | null
           seguidores_pinterest: number | null
           seguidores_tiktok: number | null
@@ -178,6 +179,7 @@ export type Database = {
           lada_telefono?: string | null
           nombre: string
           page_facebook?: string | null
+          region?: string | null
           secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
@@ -212,6 +214,7 @@ export type Database = {
           lada_telefono?: string | null
           nombre?: string
           page_facebook?: string | null
+          region?: string | null
           secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
@@ -320,6 +323,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          instagram_link: string | null
           link_invitation: string | null
           prompt: string | null
           prompt_output: string | null
@@ -333,6 +337,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          instagram_link?: string | null
           link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
@@ -346,6 +351,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          instagram_link?: string | null
           link_invitation?: string | null
           prompt?: string | null
           prompt_output?: string | null
@@ -789,6 +795,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tiktok_users: {
+        Row: {
+          create_time: number | null
+          created_at: string
+          custom_verify: string | null
+          email: string | null
+          enterprise_verify_reason: string | null
+          favoriting_count: number | null
+          follower_count: number | null
+          following_count: number | null
+          google_account: string | null
+          has_email: boolean | null
+          id: string
+          language: string | null
+          nickname: string | null
+          region: string | null
+          sec_user_id: string
+          share_desc: string | null
+          share_desc_info: string | null
+          share_title: string | null
+          share_title_myself: string | null
+          share_title_other: string | null
+          share_url: string | null
+          signature: string | null
+          total_favorited: number | null
+          uid: string | null
+          unique_id: string | null
+          updated_at: string
+          user_rate: number | null
+          user_tags: Json | null
+          verification_type: number | null
+          verify_info: string | null
+        }
+        Insert: {
+          create_time?: number | null
+          created_at?: string
+          custom_verify?: string | null
+          email?: string | null
+          enterprise_verify_reason?: string | null
+          favoriting_count?: number | null
+          follower_count?: number | null
+          following_count?: number | null
+          google_account?: string | null
+          has_email?: boolean | null
+          id?: string
+          language?: string | null
+          nickname?: string | null
+          region?: string | null
+          sec_user_id: string
+          share_desc?: string | null
+          share_desc_info?: string | null
+          share_title?: string | null
+          share_title_myself?: string | null
+          share_title_other?: string | null
+          share_url?: string | null
+          signature?: string | null
+          total_favorited?: number | null
+          uid?: string | null
+          unique_id?: string | null
+          updated_at?: string
+          user_rate?: number | null
+          user_tags?: Json | null
+          verification_type?: number | null
+          verify_info?: string | null
+        }
+        Update: {
+          create_time?: number | null
+          created_at?: string
+          custom_verify?: string | null
+          email?: string | null
+          enterprise_verify_reason?: string | null
+          favoriting_count?: number | null
+          follower_count?: number | null
+          following_count?: number | null
+          google_account?: string | null
+          has_email?: boolean | null
+          id?: string
+          language?: string | null
+          nickname?: string | null
+          region?: string | null
+          sec_user_id?: string
+          share_desc?: string | null
+          share_desc_info?: string | null
+          share_title?: string | null
+          share_title_myself?: string | null
+          share_title_other?: string | null
+          share_url?: string | null
+          signature?: string | null
+          total_favorited?: number | null
+          uid?: string | null
+          unique_id?: string | null
+          updated_at?: string
+          user_rate?: number | null
+          user_tags?: Json | null
+          verification_type?: number | null
+          verify_info?: string | null
+        }
+        Relationships: []
       }
       tiktok_video: {
         Row: {
