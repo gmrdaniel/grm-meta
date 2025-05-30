@@ -350,169 +350,118 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 lg:flex">
-      {/* Left Sidebar - Purple Gradient - Hidden on mobile */}
-      <div className="hidden lg:block lg:w-1/2 p-8 flex-col justify-center text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20"></div>
-          <div className="absolute bottom-20 right-10 w-24 h-24 rounded-full bg-white/10"></div>
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 rounded-full bg-white/15"></div>
-        </div>
-
-        <div className="relative z-10 max-w-lg flex flex-col justify-center h-full">
-          {/* Official Badge */}
-          <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8 w-fit">
-            <Check className="h-4 w-4 mr-2" />
-            <span className="text-sm font-medium">Official Announcement</span>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden">
+        {/* Purple Header Section */}
+        <div className="bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 p-8 text-white relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20"></div>
+            <div className="absolute bottom-20 right-10 w-24 h-24 rounded-full bg-white/10"></div>
+            <div className="absolute top-1/2 left-1/4 w-16 h-16 rounded-full bg-white/15"></div>
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-5xl font-bold mb-6 leading-tight">
-            Join Meta Creator Breakthrough Bonus Program
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-xl mb-8 opacity-90">Get access to:</p>
-
-          {/* Benefits Cards */}
-          <div className="space-y-4">
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                  <DollarSign className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl">$5,000 in bonuses</h3>
-                  <p className="text-white/80">Earn while creating content you love</p>
-                </div>
-              </div>
+          <div className="relative z-10">
+            {/* Official Badge */}
+            <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6 w-fit">
+              <Check className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">Official Announcement</span>
             </div>
 
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                  <Clock className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl">Monetize on Facebook Instantly</h3>
-                  <p className="text-white/80">No waiting period for eligibility</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                  <Shield className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl">Free Meta Verified</h3>
-                  <p className="text-white/80">Get the blue checkmark & exclusive features</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                  <Zap className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl">Fast-track application</h3>
-                  <p className="text-white/80">Skip the line with our partner program</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="text-white/80 font-medium">Limited spots available. Apply now!</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Top Section - Visible only on mobile */}
-      <div className="lg:hidden bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 p-6 text-white">
-        {/* Official Badge */}
-        <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6 w-fit">
-          <Check className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Official Announcement</span>
-        </div>
-
-        {/* Main Title */}
-        <h1 className="text-3xl font-bold mb-6 leading-tight">
-          Join Meta Creator Breakthrough Bonus Program
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-lg mb-6 opacity-90">Get access to:</p>
-
-        {/* Benefits Cards - Compact for mobile */}
-        <div className="space-y-3 mb-6">
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                <DollarSign className="h-4 w-4" />
-              </div>
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+              {/* Left side - Main content */}
               <div>
-                <h3 className="font-bold text-lg">$5,000 in bonuses</h3>
-                <p className="text-white/80 text-sm">Earn while creating content you love</p>
-              </div>
-            </div>
-          </div>
+                {/* Main Title */}
+                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                  Join Meta Creator Breakthrough Bonus Program
+                </h1>
 
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                <Clock className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Monetize on Facebook Instantly</h3>
-                <p className="text-white/80 text-sm">No waiting period for eligibility</p>
-              </div>
-            </div>
-          </div>
+                {/* Subtitle */}
+                <p className="text-lg lg:text-xl mb-6 opacity-90">Get access to:</p>
 
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                <Shield className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Free Meta Verified</h3>
-                <p className="text-white/80 text-sm">Get the blue checkmark & exclusive features</p>
-              </div>
-            </div>
-          </div>
+                {/* Benefits Cards */}
+                <div className="space-y-3">
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <DollarSign className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">$5,000 in bonuses</h3>
+                        <p className="text-white/80 text-sm">Earn while creating content you love</p>
+                      </div>
+                    </div>
+                  </div>
 
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                <Zap className="h-4 w-4" />
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">Monetize on Facebook Instantly</h3>
+                        <p className="text-white/80 text-sm">No waiting period for eligibility</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <Shield className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">Free Meta Verified</h3>
+                        <p className="text-white/80 text-sm">Get the blue checkmark & exclusive features</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <Zap className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">Fast-track application</h3>
+                        <p className="text-white/80 text-sm">Skip the line with our partner program</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="text-white/80 font-medium">Limited spots available. Apply now!</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-lg">Fast-track application</h3>
-                <p className="text-white/80 text-sm">Skip the line with our partner program</p>
+
+              {/* Right side - Form preview on desktop */}
+              <div className="hidden lg:block">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <h3 className="text-xl font-bold mb-4">Join Meta Creator Program</h3>
+                  <p className="text-white/90 mb-4">We're La Neta, an official partner of Meta</p>
+                  <div className="space-y-3 text-sm">
+                    <p>Welcome to the Meta Creator Breakthrough Bonus Program</p>
+                    <p>Earn up to <span className="font-bold">$5,000 in bonuses</span> just by posting Reels on Facebook</p>
+                    <p>Start monetizing right away + get a free trial of Meta Verified</p>
+                    <p>Limited spots available for high-potential creators like you</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <p className="text-white/80 font-medium text-center">Limited spots available. Apply now!</p>
-      </div>
-
-      {/* Form Area - Full width on mobile, half width on desktop */}
-      <div className="lg:w-1/2 bg-gray-50 flex items-center justify-center p-4 lg:p-8">
-        <div className="w-full max-w-lg">
-          <Card className="bg-white shadow-xl rounded-2xl border-0">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+        {/* Form Section */}
+        <div className="p-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Join Meta Creator Program
-              </CardTitle>
-              <CardDescription className="text-purple-600 font-medium mb-4">
+              </h2>
+              <p className="text-purple-600 font-medium mb-4">
                 We're La Neta, an official partner of Meta
-              </CardDescription>
+              </p>
               
               {currentStep.id === "welcome" && (
                 <div className="text-left space-y-3 text-sm text-gray-600">
@@ -525,54 +474,52 @@ export default function InvitationStepperPage() {
                   <p className="font-medium">Fill out the form below to get started.</p>
                 </div>
               )}
-            </CardHeader>
+            </div>
             
-            <CardContent className="px-8 pb-8">
-              <Stepper steps={stepList} currentStep={currentStep.id} className="mb-8" />
-              
-              {currentStep.id === "welcome" && (
-                <WelcomeForm
-                  invitation={invitation}
-                  formData={formData}
-                  onInputChange={handleInputChange}
-                  onCheckboxChange={handleCheckboxChange}
-                  onContinue={handleContinueWelcome}
-                  isSubmitting={isSubmitting}
-                />
-              )}
+            <Stepper steps={stepList} currentStep={currentStep.id} className="mb-8" />
+            
+            {currentStep.id === "welcome" && (
+              <WelcomeForm
+                invitation={invitation}
+                formData={formData}
+                onInputChange={handleInputChange}
+                onCheckboxChange={handleCheckboxChange}
+                onContinue={handleContinueWelcome}
+                isSubmitting={isSubmitting}
+              />
+            )}
 
-              {currentStep.id === "completeProfile" && (
-                <CompleteProfileForm
-                  onSubmit={handleCompleteProfileSubmit}
-                  isSubmitting={saving}
-                  invitationId={invitation.id}
-                />
-              )}
+            {currentStep.id === "completeProfile" && (
+              <CompleteProfileForm
+                onSubmit={handleCompleteProfileSubmit}
+                isSubmitting={saving}
+                invitationId={invitation.id}
+              />
+            )}
 
-              {currentStep.id === "fbcreation" &&
-                (submissionComplete ? (
-                  <SubmissionCompleteScreen
-                    showPasswordForm={showPasswordForm}
-                    passwordData={passwordData}
-                    submitting={submitting}
-                    onPasswordChange={handlePasswordChange}
-                    onSetPassword={handleSetPassword}
-                    onShowPasswordForm={() => setShowPasswordForm(true)}
-                  />
-                ) : (
-                  <FacebookPageForm
-                    formData={facebookFormData}
-                    submitting={submitting}
-                    error={error}
-                    onInputChange={handleFacebookInputChange}
-                    onCheckboxChange={handleCheckboxFacebookChange}
-                    onSubmit={handleSubmit}
-                  />
-                ))}
-            </CardContent>
-          </Card>
+            {currentStep.id === "fbcreation" &&
+              (submissionComplete ? (
+                <SubmissionCompleteScreen
+                  showPasswordForm={showPasswordForm}
+                  passwordData={passwordData}
+                  submitting={submitting}
+                  onPasswordChange={handlePasswordChange}
+                  onSetPassword={handleSetPassword}
+                  onShowPasswordForm={() => setShowPasswordForm(true)}
+                />
+              ) : (
+                <FacebookPageForm
+                  formData={facebookFormData}
+                  submitting={submitting}
+                  error={error}
+                  onInputChange={handleFacebookInputChange}
+                  onCheckboxChange={handleCheckboxFacebookChange}
+                  onSubmit={handleSubmit}
+                />
+              ))}
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
