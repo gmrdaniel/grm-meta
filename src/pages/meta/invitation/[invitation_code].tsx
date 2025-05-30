@@ -350,9 +350,9 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 flex">
-      {/* Left Sidebar - Purple Gradient */}
-      <div className="w-1/2 p-8 flex flex-col justify-center text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 lg:flex">
+      {/* Left Sidebar - Purple Gradient - Hidden on mobile */}
+      <div className="hidden lg:block lg:w-1/2 p-8 flex-col justify-center text-white relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20"></div>
@@ -360,9 +360,9 @@ export default function InvitationStepperPage() {
           <div className="absolute top-1/2 left-1/4 w-16 h-16 rounded-full bg-white/15"></div>
         </div>
 
-        <div className="relative z-10 max-w-lg">
+        <div className="relative z-10 max-w-lg flex flex-col justify-center h-full">
           {/* Official Badge */}
-          <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
+          <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8 w-fit">
             <Check className="h-4 w-4 mr-2" />
             <span className="text-sm font-medium">Official Announcement</span>
           </div>
@@ -432,8 +432,78 @@ export default function InvitationStepperPage() {
         </div>
       </div>
 
-      {/* Right Side - Form Area */}
-      <div className="w-1/2 bg-gray-50 flex items-center justify-center p-8">
+      {/* Mobile Top Section - Visible only on mobile */}
+      <div className="lg:hidden bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 p-6 text-white">
+        {/* Official Badge */}
+        <div className="inline-flex items-center bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6 w-fit">
+          <Check className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">Official Announcement</span>
+        </div>
+
+        {/* Main Title */}
+        <h1 className="text-3xl font-bold mb-6 leading-tight">
+          Join Meta Creator Breakthrough Bonus Program
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-lg mb-6 opacity-90">Get access to:</p>
+
+        {/* Benefits Cards - Compact for mobile */}
+        <div className="space-y-3 mb-6">
+          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                <DollarSign className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">$5,000 in bonuses</h3>
+                <p className="text-white/80 text-sm">Earn while creating content you love</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Monetize on Facebook Instantly</h3>
+                <p className="text-white/80 text-sm">No waiting period for eligibility</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                <Shield className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Free Meta Verified</h3>
+                <p className="text-white/80 text-sm">Get the blue checkmark & exclusive features</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Fast-track application</h3>
+                <p className="text-white/80 text-sm">Skip the line with our partner program</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-white/80 font-medium text-center">Limited spots available. Apply now!</p>
+      </div>
+
+      {/* Form Area - Full width on mobile, half width on desktop */}
+      <div className="lg:w-1/2 bg-gray-50 flex items-center justify-center p-4 lg:p-8">
         <div className="w-full max-w-lg">
           <Card className="bg-white shadow-xl rounded-2xl border-0">
             <CardHeader className="text-center pb-6">
