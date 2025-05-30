@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 
 type Step = {
@@ -8,11 +9,12 @@ type Step = {
 type StepperProps = {
   steps: readonly Step[];
   currentStep: string;
+  className?: string;
 };
 
-export const Stepper = ({ steps, currentStep }: StepperProps) => {
+export const Stepper = ({ steps, currentStep, className }: StepperProps) => {
   return (
-    <div className="mb-8">
+    <div className={cn("mb-8", className)}>
       <div className="flex md:justify-between gap-4 overflow-x-auto no-scrollbar px-1">
         {steps.map((step, index) => {
           const isActive = currentStep === step.id;
