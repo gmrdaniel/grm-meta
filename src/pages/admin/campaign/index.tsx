@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layout } from "@/components/Layout";
 import ImportCampaign from "@/components/admin/campaigns/SendCampaign";
 import { CampaignStats } from "@/components/admin/campaigns/CampaignStats";
+import EventInvitation from "@/components/admin/campaigns/EventInvitation";
 
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
@@ -19,6 +20,7 @@ export default function CampaignPage() {
           <TabsList className="mb-4">
             <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
             <TabsTrigger value="send">Enviar Campaña</TabsTrigger>
+            <TabsTrigger value="event">Crear Invitación a Evento</TabsTrigger>
           </TabsList>
 
           <TabsContent value="statistics">
@@ -39,6 +41,17 @@ export default function CampaignPage() {
               </CardHeader>
               <CardContent>
                 <ImportCampaign />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="event">
+            <Card>
+              <CardHeader>
+                <CardTitle>Crear Invitación a Evento</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EventInvitation />
               </CardContent>
             </Card>
           </TabsContent>

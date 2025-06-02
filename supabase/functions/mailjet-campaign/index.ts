@@ -50,10 +50,10 @@ serve(async (req) => {
         From: { Email: senderEmail, Name: "La Neta" },
         To: [{ Email: recipient.email, Name: recipient.name || "Usuario" }],
         Subject: subject,
-        TemplateID:templateId,
+        TemplateID: templateId,
         TemplateLanguage: true,
-        TextPart:"",
-        HTMLPart:"",
+        TextPart: "",
+        HTMLPart: "",
         Variables: { ...variables, ...recipient.variables },
         CustomCampaign: recipient.customCampaign
       };
@@ -93,7 +93,19 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, data }), {
+    // Obtener el CampaignID
+    const campaignResponse = await fetch(`https://api.mailjet.com/v3/REST/campaign?CustomCampaign=${customCampaign}`, {
+      headers: {
+        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`)
+      }
+    });
+    const campaignData = await campaignResponse.json();
+    const campaignId = campaignData.Data[0]?.ID || null;
+    return new Response(JSON.stringify({ 
+      success: true, 
+      data,
+      campaignId // Incluir el campaignId en la respuesta
+    }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
