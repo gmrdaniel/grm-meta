@@ -11,7 +11,6 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 import { InvitationError } from "@/components/invitation/InvitationError";
 import { TikTokForm } from "@/components/invitation/TikTokForm";
-import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 
 // 🛠️ Services
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +36,7 @@ import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 const stepList = [
   { id: "welcome", label: "Accept Invitation" },
   { id: "completeProfile", label: "Complete Your Profile" },
-  { id: "fbcreation", label: "Connect Facebook Page" },
+  { id: "fbcreation", label: "Connect Facebook Page" }
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -509,29 +508,9 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
               />
             )}
             {invitation?.social_media_type === "youtube" && (
-              <YouTubeForm
-                currentStep={currentStep}
-                invitation={invitation}
-                formData={formData}
-                saving={saving}
-                isSubmitting={isSubmitting}
-                submissionComplete={submissionComplete}
-                facebookFormData={facebookFormData}
-                submitting={submitting}
-                error={error}
-                showPasswordForm={showPasswordForm}
-                passwordData={passwordData}
-                handleInputChange={handleInputChange}
-                handleCheckboxChange={handleCheckboxChange}
-                handleContinueWelcome={handleContinueWelcome}
-                handleCompleteProfileYtbSubmit={handleCompleteProfileYtbSubmit}
-                handleFacebookInputChange={handleFacebookInputChange}
-                handleCheckboxFacebookChange={handleCheckboxFacebookChange}
-                handleFacebookSubmit={handleFacebookSubmit}
-                handlePasswordChange={handlePasswordChange}
-                handleSetPassword={handleSetPassword}
-                setShowPasswordForm={setShowPasswordForm}
-              />
+              <div className="text-center p-4">
+                <p className="text-gray-600">YouTube integration is currently being updated.</p>
+              </div>
             )}
           </CardContent>
         </Card>
