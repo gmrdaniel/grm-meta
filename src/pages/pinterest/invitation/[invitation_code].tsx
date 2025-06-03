@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -56,7 +55,7 @@ const stepList = [
   {
     id: "profile",
     label: "Profile",
-  },
+  }
 ] as const;
 
 type Step = typeof stepList[number];
