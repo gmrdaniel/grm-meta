@@ -14,13 +14,11 @@ export function useNotificationSettings() {
     queryKey: ["notification-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
-              // @ts-expect-error:  tabla no incluida en el tipado de supabase aún
         .from("notification_settings")
         .select("id, type, message, channel")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-              // @ts-expect-error:  tabla no incluida en el tipado de supabase aún
       return data as NotificationSetting[];
     },
   });

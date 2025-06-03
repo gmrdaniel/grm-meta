@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CreateInvitationData, CreatorInvitation } from "@/types/invitation";
 
@@ -28,7 +27,6 @@ export const updateInvitationStatus = async (
 
   return data as CreatorInvitation;
 };
-
 
 /**
  * Update Facebook page URL
@@ -92,7 +90,7 @@ export const updateInvitation = async (
   data: CreatorInvitation | CreateInvitationData
 ): Promise<CreatorInvitation> => {
   // 🔒 Bloquear modificación del email
-  const { email, project_id, ...safeData } = data;
+  const { email, project_id, projects, ...safeData } = data;
 
   const { data: updatedInvitation, error } = await supabase
     .from("creator_invitations")

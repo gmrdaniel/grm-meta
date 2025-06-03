@@ -14,7 +14,7 @@ export type BulkCreatorInvitation = {
 export type BulkCreatorInvitationDetail = {
   id: string;
   bulk_invitation_id: string;
-  first_name: string;
+  full_name: string;
   email: string;
   is_active: boolean;
   status: string;

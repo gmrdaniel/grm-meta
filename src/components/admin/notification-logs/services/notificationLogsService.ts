@@ -1,12 +1,11 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationLog } from "../types";
 
 export async function fetchNotificationLogs(): Promise<NotificationLog[]> {
   // Join with invitations, notification_settings, and project_stages to get more details
   const { data, error } = await supabase
-    // @ts-expect-error:  tabla no incluida en el tipado de supabase aún
     .from("notification_logs")
-
     .select(
       `
       *,

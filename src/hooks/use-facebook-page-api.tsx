@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useFacebookPageApi() {
   const [pageUrl, setPageUrl] = useState<string>('');
@@ -6,7 +8,6 @@ export function useFacebookPageApi() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔁 Renamed from handleTest to fetchPageDetails
   const fetchPageDetails = async (pageUrl: string) => {
     if (!pageUrl.trim()) {
       setError("Please enter a valid Facebook page URL.");
@@ -18,8 +19,11 @@ export function useFacebookPageApi() {
 
     try {
       // Call the edge function via Supabase client
-      const { data } =  fetchPageDetails(
-        pageUrl 
+      const { data, error: functionError } = await supabase.functions.invoke(
+        'facebook-page-details',
+        {
+          body: { pageUrl }
+        }
       );
 
       if (functionError) {
@@ -53,6 +57,6 @@ export function useFacebookPageApi() {
     result,
     loading,
     error,
-    fetchPageDetails, // ✅ Exporting the new name
+    fetchPageDetails,
   };
 }

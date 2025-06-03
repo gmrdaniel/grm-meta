@@ -1,30 +1,54 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { PinterestWelcomeForm } from "@/components/pinterest/PinterestWelcomeForm";
-import { PinterestProfileForm } from "@/components/pinterest/PinterestProfileForm";
-import { InvitationError } from "@/components/invitation/InvitationError";
-import { Stepper } from "@/components/ui/stepper";
-import { supabase } from "@/integrations/supabase/client";
-import { CreatorInvitation } from "@/types/invitation";
-import { useInvitationLoader } from "@/hooks/use-invitationLoader";
-import { ProjectStage } from "@/types/project";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/router';
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+
 import {
-  replaceProfileCategories,
-  updatePinterestUrl,
-} from "@/services/profile-content-categories/creatorProfileService";
-import { getProfileIdByInvitationId } from "@/services/creatorService";
-import { PinterestVerificationSuccess } from "@/components/pinterest/PinterestVerificationSuccess";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
-const stepList = [
-  { id: "createAccount", label: "Crear cuenta" },
-  { id: "createPinterest", label: "Perfil" },
-  { id: "sendedApplication", label: "Iniciar sesión" },
-] as const;
+import { fetchCountries } from "@/services/project/countryService";
+import { createProfile } from "@/services/profile-content-categories/creatorProfileService";
+import { updateInvitationStatus } from "@/services/invitation/updateInvitation";
+import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 
-type Step = (typeof stepList)[number];
+const formSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "First name must be at least 2 characters.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Last name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+  instagramUser: z.string().min(2, {
+    message: "Instagram user must be at least 2 characters.",
+  }),
+  termsAccepted: z.boolean().refine((value) => value === true, {
+    message: "You must accept the terms and conditions.",
+  }),
+  phoneNumber: z.string().optional(),
+  phoneCountryCode: z.string().optional(),
+});
 
 const defaultFormData = {
   firstName: "",
@@ -37,24 +61,28 @@ const defaultFormData = {
   countryOfResidenceId: "",
 };
 
-export default function InvitationStepperPage() {
-  const { invitation_code } = useParams<{ invitation_code: string }>();
+const stepList = [
+  {
+    id: "terms",
+    label: "Terms & Conditions",
+  },
+  {
+    id: "profile",
+    label: "Profile",
+  },
+];
 
-  // State
-  const [currentStep, setCurrentStep] = useState<Step>(stepList[0]);
-  const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
-  const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
+const Page = () => {
+  const [invitation, setInvitation] = useState<any>(null);
   const [formData, setFormData] = useState(defaultFormData);
-  const [profileData, setProfileData] = useState({
-    pinterestUrl: "",
-    contentTypes: [] as string[],
-    isConnected: false,
-    isAutoPublishEnabled: false,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projectStages, setProjectStages] = useState<any[]>([]);
+  const [currentStep, setCurrentStep] = useState(stepList[0]);
+  const router = useRouter();
+  const { invitation_code } = router.query;
+  const [countries, setCountries] = useState([]);
 
   const { loading, error } = useInvitationLoader({
-    invitation_code,
+    invitation_code: invitation_code as string | undefined,
     setFormData,
     setInvitation,
     setProjectStages,
@@ -62,235 +90,300 @@ export default function InvitationStepperPage() {
     stepList,
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const data = await fetchCountries();
+        setCountries(data);
+      } catch (err) {
+        console.error("Error fetching countries:", err);
+        toast.error("Failed to load countries");
+      }
+    };
+
+    loadCountries();
+  }, []);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: formData?.firstName,
+      lastName: formData?.lastName,
+      email: formData?.email,
+      instagramUser: formData?.instagramUser,
+      termsAccepted: formData?.termsAccepted,
+      phoneNumber: formData?.phoneNumber,
+      phoneCountryCode: formData?.phoneCountryCode,
+    },
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    form.reset(formData);
+  }, [formData, form.reset]);
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, termsAccepted: e.target.checked });
+    form.setValue("termsAccepted", e.target.checked);
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, termsAccepted: checked }));
+  const handleAcceptTerms = () => {
+    if (formData.termsAccepted) {
+      goToNextStep({
+        currentStep,
+        stepList,
+        setCurrentStep,
+        projectStages,
+        invitation,
+      });
+    } else {
+      toast.error("You must accept the terms and conditions.");
+    }
   };
 
-  const handleContinueWelcome = async (
-    allFormData: typeof defaultFormData & { phoneCountryCode: string }
-  ) => {
-    if (!invitation) return;
-    setIsSubmitting(true);
+  const mutation = useMutation({
+    mutationFn: createProfile,
+    onSuccess: () => {
+      toast.success("Profile created successfully!");
+      updateInvitationStatusMutation.mutate({
+        id: invitation.id,
+        status: "completed",
+      });
+    },
+    onError: (error: any) => {
+      toast.error(`Something went wrong! ${error.message}`);
+    },
+  });
 
+  const updateInvitationStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => {
+      return updateInvitationStatus(id, status as any);
+    },
+    onSuccess: () => {
+      toast.success("Invitation completed!");
+      if (invitation?.projects?.slug) {
+        router.push(`/${invitation?.projects?.slug}/success`);
+      } else {
+        router.push(`/success`);
+      }
+    },
+    onError: (error: any) => {
+      toast.error(`Something went wrong! ${error.message}`);
+    },
+  });
+
+  const handleFormSubmission = async (data: any) => {
     try {
-      // Paso 1: Actualizar la invitación
-      const { error: updateError } = await supabase
-        .from("creator_invitations")
-        .update({
-          status: "accepted",
-          first_name: allFormData.firstName,
-          last_name: allFormData.lastName,
-          instagram_user: allFormData.instagramUser,
-          phone_number: allFormData.phoneNumber,
-          phone_country_code: allFormData.phoneCountryCode,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", invitation.id);
-
-      if (updateError) {
-        toast.error("Failed to save your information");
+      if (!invitation) {
+        toast.error("Invitation data not loaded.");
         return;
       }
 
-      // Paso 2: Crear el usuario en Supabase Auth
-      const { error: signupError } =
-        await supabase.auth.signUp({
-          email: allFormData.email,
-          password: crypto.randomUUID(),
-          options: {
-            data: {
-              first_name: allFormData.firstName,
-              last_name: allFormData.lastName,
-              phone_country_code: allFormData.phoneCountryCode,
-              phone_number: allFormData.phoneNumber,
-              social_media_handle: allFormData.instagramUser,
-              country_of_residence_id: allFormData.countryOfResidenceId,
-            },
-          },
-        });
+      const profileData = {
+        ...data,
+        creator_invitation_id: invitation.id,
+      };
 
-      if (signupError) {
-        toast.error("Error creating your account");
-        return;
-      }
-
-      toast.success("Information saved and account created successfully!");
-      goToNextStep(); // Move to profile step
-    } catch (err) {
-      console.error(err);
-      toast.error("An error occurred while saving your information");
-    } finally {
-      setIsSubmitting(false);
+      mutation.mutate(profileData);
+    } catch (error: any) {
+      toast.error(`Something went wrong! ${error.message}`);
     }
   };
 
-  const goToNextStep = async () => {
-    if (!invitation || !projectStages.length) return;
-    const currentIndex = projectStages.findIndex(
-      (s) => s.slug === currentStep.id
-    );
-    const nextStage = projectStages[currentIndex + 1];
-    if (!nextStage) return;
-    console.log("Next stage:", nextStage);
-    const { error } = await supabase
-      .from("creator_invitations")
-      .update({
-        current_stage_id: nextStage.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", invitation.id);
-
-    if (error) {
-      toast.error("Failed to save progress");
-      return;
-    }
-
-    const nextStep = stepList.find((step) => step.id === nextStage.slug);
-    setCurrentStep(nextStep);
-    setInvitation(
-      (prev) => prev && { ...prev, current_stage_id: nextStage.id }
-    );
-  };
-
-  const handleProfileSubmit = async () => {
-    try {
-      const { pinterestUrl, contentTypes } = profileData;
-
-      if (!invitation.id || !pinterestUrl || !contentTypes?.length) {
-        toast.error("Por favor completa todos los campos.");
-        return;
-      }
-
-      // 1. Buscar el ID del perfil por email
-      const profileId = await getProfileIdByInvitationId(invitation.id);
-      if (!profileId) {
-        toast.error("No se encontró un perfil con este correo.");
-        return;
-      }
-
-      // 2. Actualizar la URL de Pinterest
-      const { error: urlError } = await updatePinterestUrl(
-        profileId,
-        'https://pinterest.com/' + pinterestUrl
-      );
-
-      if (urlError) {
-        console.error("Error actualizando URL:", urlError);
-        toast.error("No se pudo guardar la URL de Pinterest.");
-        return;
-      }
-
-      // 3. Reemplazar categorías
-      const { error: categoryError } = await replaceProfileCategories(
-        profileId,
-        contentTypes
-      );
-      if (categoryError) {
-        console.error("Error actualizando categorías:", categoryError);
-        toast.error("No se pudieron actualizar las categorías.");
-        return;
-      }
-
-      toast.success("¡Perfil guardado exitosamente!");
-
-
-      if (error) {
-        toast.error("Failed to save progress");
-        return;
-      }
-      console.log(error)
-      goToNextStep();
-    } catch (error) {
-      console.error("Error inesperado al guardar el perfil:", error);
-      toast.error("Hubo un error inesperado al guardar el perfil.");
-    }
+  const handleSubmit = async (formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    instagramUser: string;
+    termsAccepted: boolean;
+    phoneNumber: string;
+  } & { phoneCountryCode: string; phoneVerified: boolean }) => {
+    const allFormData = {
+      ...defaultFormData,
+      ...formData,
+      countryOfResidenceId: formData.phoneCountryCode || ""
+    };
+    
+    await handleFormSubmission(allFormData);
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <LoadingSpinner />
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
-  if (error || !invitation) {
-    return <InvitationError message={error ?? "Invitation not found"} />;
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 py-8 px-4">
-        {/* Left column - Text */}
-
-        <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-12 pt-8 px-2">
-          {/* Left column - Text */}
-          <div className="w-full text-center space-y-4 sm:space-y-8">
-            <h1 className="sm:text-lg font-bold bg-clip-text text-sm">
-              📌 ¡Únete al programa de creadores en Pinterest!
-            </h1>
-            <div className="prose prose-blue max-w-none">
-              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Somos La Neta, socios estratégicos de Pinterest en LATAM, y estamos invitando a creadores como tú a formar parte de esta gran red social.
-              </p>
-            </div>
-            <div className="prose prose-blue max-w-none">
-              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Regístrate y obtén acceso a webinars exclusivos de Pinterest donde aprenderás a llevar tu creatividad al siguiente nivel.
-              </p>
-            </div>
-            <div className="prose prose-blue max-w-none">
-              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Amplía tu alcance como creador, gana visibilidad frente a marcas líderes en la región y accede a oportunidades comerciales reales y exclusivas.              </p>
-            </div>
-            <div className="prose prose-blue max-w-none">
-              <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                🎯 Completa tu registro y da el siguiente paso con Pinterest.
-              </p>
-            </div>
-          </div>
-          {/* Right column - Form card */}
-          <Card className="w-full shadow-2xl bg-white/95 backdrop-blur">
-            <div className="px-4 py-8">
-              <Stepper
-                steps={stepList}
-                currentStep={currentStep.id}
-                variant="blue"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      {currentStep.id === "terms" && (
+        <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg space-y-6">
+          <h2 className="text-2xl font-semibold text-center">
+            Terms and Conditions
+          </h2>
+          <p className="text-gray-600 text-center">
+            Please read and accept the terms and conditions to proceed.
+          </p>
+          <Form {...form}>
+            <form className="space-y-4">
+              <FormField
+                control={form.control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        onValueChange={handleCheckboxChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-tight">
+                      <FormLabel className="text-base font-semibold">
+                        I agree to the terms and conditions
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
               />
-
-              {currentStep.id === "createAccount" && (
-                <PinterestWelcomeForm
-                  invitation={invitation}
-                  formData={formData}
-                  onInputChange={handleInputChange}
-                  onCheckboxChange={handleCheckboxChange}
-                  onContinue={handleContinueWelcome}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-
-              {currentStep.id === "createPinterest" && (
-                <PinterestProfileForm
-                  invitation={invitation}
-                  profileData={profileData}
-                  setProfileData={setProfileData}
-                  onSubmit={handleProfileSubmit}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-
-              {currentStep.id === "sendedApplication" && (
-                <PinterestVerificationSuccess />
-              )}
-            </div>
-          </Card>
+              <Button
+                type="button"
+                className="w-full bg-green-600 text-white hover:bg-green-500"
+                onClick={handleAcceptTerms}
+                disabled={!formData.termsAccepted}
+              >
+                Accept Terms and Continue
+              </Button>
+            </form>
+          </Form>
         </div>
-      </div>
+      )}
+
+      {currentStep.id === "profile" && (
+        <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg space-y-6">
+          <h2 className="text-2xl font-semibold text-center">
+            Complete Your Profile
+          </h2>
+          <p className="text-gray-600 text-center">
+            Enter your personal details to create your profile.
+          </p>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="john.doe@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="instagramUser"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram User</FormLabel>
+                    <FormControl>
+                      <Input placeholder="johndoe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123-456-7890" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phoneCountryCode"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a country" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {countries.map((country: any) => (
+                            <SelectItem
+                              key={country.id}
+                              value={country.phone_code}
+                            >
+                              {country.name} ({country.phone_code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 text-white hover:bg-blue-500"
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? "Submitting..." : "Create Profile"}
+              </Button>
+            </form>
+          </Form>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default Page;
