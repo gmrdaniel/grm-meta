@@ -1,3 +1,4 @@
+
 import { findInvitationByCode } from "@/integrations/supabase/client";
 import { fetchProjectStages } from "@/services/project/projectService";
 import { useEffect, useState } from "react";
@@ -8,7 +9,7 @@ interface UseInvitationLoaderProps {
   setInvitation: (data: any) => void;
   setProjectStages: (data: any[]) => void;
   setCurrentStep: (step: any) => void;
-  stepList: readonly { id: string; [key: string]: any }[]; // Step list is dynamic now
+  stepList: readonly { id: string; [key: string]: any }[];
 }
 
 export const useInvitationLoader = ({
@@ -41,11 +42,7 @@ export const useInvitationLoader = ({
         }
 
         const invitationData = data[0];
-        /* 
-          if (invitationData.status === 'completed') {
-            setError('This invitation has already been accepted');
-            return;
-          } */
+        
         setInvitation(invitationData);
         setFormData({
           firstName: invitationData.first_name ?? "",
@@ -55,7 +52,7 @@ export const useInvitationLoader = ({
           termsAccepted: false,
           phoneNumber: invitationData.phone_number ?? "",
           phoneCountryCode: invitationData.phone_country_code ?? "",
-          countryOfResidenceId: invitationData.country_of_residence_id ?? "",
+          countryOfResidenceId: "",
           instagramUser: invitationData.instagram_user ?? "",
         });
 
@@ -84,7 +81,7 @@ export const useInvitationLoader = ({
     };
 
     fetchInvitationAndStages();
-  }, [invitation_code, stepList]); // stepList now included in deps
+  }, [invitation_code, stepList]);
 
   return { loading, error };
 };

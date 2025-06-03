@@ -1,8 +1,7 @@
+
 import { Project } from "./project";
 
 export interface CreatorInvitation {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  residence_country_id: any;
   id: string;
   project_id?: string | null;
   projects?: Project
@@ -29,6 +28,8 @@ export interface CreatorInvitation {
   current_stage_id: string | null;
   fb_step_completed: boolean;
   is_professional_account?: boolean;
+  stage_updated_at?: string | null;
+  is_business_account?: boolean | null;
 }
 
 export type CreateInvitationData = {

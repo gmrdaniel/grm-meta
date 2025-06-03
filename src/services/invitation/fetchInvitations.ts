@@ -16,7 +16,7 @@ export const fetchInvitationByCode = async (code: string): Promise<CreatorInvita
     }
 
     if (data && data.length > 0) {
-      return data[0] as unknown as CreatorInvitation;
+      return data[0] as CreatorInvitation;
     }
 
     return null;
@@ -120,7 +120,6 @@ export const fetchInvitationsWithPagination = async (
   }
 };
 
-
 /**
  * Fetch all invitations (no pagination, for export)
  */
@@ -156,7 +155,6 @@ export const fetchInvitationsByRange = async (projectId: string, fechaDesde: Dat
 
   return data as CreatorInvitation[];
 };
-
 
 export const fetchInvitationsWithProfile = async (projectId: string): Promise<CreatorInvitation[]> => {
   const { data, error } = await supabase

@@ -196,7 +196,7 @@ const InvitationForm = ({
       initialData &&
       isEditMode &&
       projects &&
-      projects.length > 0 // nos aseguramos de que la lista esté lista
+      projects.length > 0
     ) {
       const sanitizedData = sanitizeInitialData(initialData);
       form.reset({
@@ -249,10 +249,7 @@ const InvitationForm = ({
     };
 
     // Map social_media_handle to the correct property
-    const socialMediaPropertyMap: Record<
-      string,
-      keyof CreateInvitationData | null
-    > = {
+    const socialMediaPropertyMap: Record<string, keyof CreateInvitationData | null> = {
       tiktok: "social_media_handle",
       youtube: "youtube_channel",
       instagram: "instagram_user",
@@ -260,10 +257,10 @@ const InvitationForm = ({
 
     const targetProperty = socialMediaPropertyMap[data.social_media_type || ""];
     if (targetProperty && data.social_media_handle) {
-      invitationData[targetProperty] = data.social_media_handle;
+      (invitationData as any)[targetProperty] = data.social_media_handle;
     }
 
-    // 🚀 Switch between create or update
+    // Switch between create or update
     if (isEditMode && initialData?.id) {
       updateInvitationMutation.mutate(
         { id: initialData.id, data: invitationData },
@@ -318,7 +315,7 @@ const InvitationForm = ({
 
   useEffect(() => {
     if (isEditMode && selectedProject && initialData?.social_media_type) {
-      form.setValue("social_media_type", initialData.social_media_type);
+      form.setValue("social_media_type", initialData.social_media_type as any);
     }
   }, [selectedProject, isEditMode, initialData?.social_media_type]);
 
@@ -420,17 +417,12 @@ const InvitationForm = ({
                 <Select
                   disabled={!selectedProjectId}
                   onValueChange={(value) => {
-                    form.setValue(
-                      "social_media_type",
-                      value as "tiktok" | "pinterest" | "youtube" | "instagram"
-                    );
-
-                    // Solo limpiar el handle si estás creando
+                    form.setValue("social_media_type", value as any);
                     if (!isEditMode) {
                       form.setValue("social_media_handle", "");
                     }
                   }}
-                  value={field.value}
+                  value={field.value || ""}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -677,27 +669,6 @@ const InvitationForm = ({
           <Button type="submit" disabled={isSubmitting} className="min-w-32">
             {buttonText}
           </Button>
-
-          {/* 
-          
-          I will comment this code temporarily because
-          the form redirect to the list. 
-
-          So the user wont see this button ever.
-            
-          {createdInvitation && (
-            <div className="flex justify-end pt-4">
-              <Button
-                variant="outline"
-                onClick={handleSendEmail}
-                disabled={sendEmail.isPending}
-              >
-                {sendEmail.isPending
-                  ? "Sending Email..."
-                  : "Send Invitation Email"}
-              </Button>
-            </div>
-          )} */}
         </div>
       </form>
     </Form>

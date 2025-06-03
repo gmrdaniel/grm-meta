@@ -8,6 +8,18 @@ export interface CreatorImportData {
   estatus: 'activo' | 'inactivo' | 'pendiente';
 }
 
+export interface BulkCreatorInvitationDetail {
+  bulk_invitation_id: string;
+  created_at: string;
+  email: string;
+  error_message: string | null;
+  full_name: string; // Keep full_name as it exists in the database
+  id: string;
+  is_active: boolean;
+  status: string;
+  updated_at: string;
+}
+
 export interface ImportError {
   row: number;
   error: string;
