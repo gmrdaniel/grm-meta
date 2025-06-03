@@ -22,8 +22,8 @@ interface YouTubeFormProps {
   handleContinueWelcome: () => void;
   handleCompleteProfileYtbSubmit: (data: any) => void;
   handleFacebookInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleCheckboxFacebookChange: (checked: boolean) => void;
-  handleFacebookSubmit: (e: React.FormEvent) => void;
+  handleCheckboxFacebookChange: (name: string, checked: boolean) => void;
+  handleFacebookSubmit: () => void;
   handlePasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSetPassword: () => void;
   setShowPasswordForm: (show: boolean) => void;
@@ -83,7 +83,7 @@ export const YouTubeForm: React.FC<YouTubeFormProps> = ({
             submitting={submitting}
             error={error}
             onInputChange={handleFacebookInputChange}
-            onCheckboxChange={handleCheckboxFacebookChange}
+            onCheckboxChange={(checked) => handleCheckboxFacebookChange('default', checked)}
             onSubmit={handleFacebookSubmit}
           />
         )}

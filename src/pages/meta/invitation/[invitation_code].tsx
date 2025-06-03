@@ -67,9 +67,6 @@ export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
 
-
-  
-
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
   const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
@@ -104,8 +101,6 @@ export default function InvitationStepperPage() {
     socialMediaHandle: string; // Para el "TikTok Channel" que se guarda aquí
   }
 
-  
-
 const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) => {
   if (!invitation) return;
   setSaving(true);
@@ -135,9 +130,6 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
 
   setSaving(false);
 };
-
-
-
 
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
