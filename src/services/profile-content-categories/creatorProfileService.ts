@@ -6,12 +6,14 @@ export const createProfile = async (profileData: any) => {
   const { data, error } = await supabase
     .from("profiles")
     .insert({
+      id: profileData.id || crypto.randomUUID(),
       first_name: profileData.firstName,
       last_name: profileData.lastName,
       email: profileData.email,
       phone_number: profileData.phoneNumber,
       phone_country_code: profileData.phoneCountryCode,
       country_of_residence_id: profileData.countryOfResidenceId,
+      role: 'creator',
     })
     .select()
     .single();

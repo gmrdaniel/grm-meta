@@ -1,10 +1,35 @@
+
 import React from "react";
 import { WelcomeFormYoutube } from "@/components/invitation/WelcomFormYouTube";
 import { CompleteProfileFormYtb } from "@/components/invitation/CompleteProfileFormYtb";
 import { FacebookPageForm } from "@/components/facebook/FacebookPageForm";
 import { SubmissionCompleteScreen } from "@/components/facebook/SubmissionCompleteScreen";
 
-export const YouTubeForm = ({
+interface YouTubeFormProps {
+  currentStep: any;
+  invitation: any;
+  formData: any;
+  saving: boolean;
+  isSubmitting: boolean;
+  submissionComplete: boolean;
+  facebookFormData: any;
+  submitting: boolean;
+  error: any;
+  showPasswordForm: boolean;
+  passwordData: any;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleCheckboxChange: (checked: boolean) => void;
+  handleContinueWelcome: () => void;
+  handleCompleteProfileYtbSubmit: (data: any) => void;
+  handleFacebookInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleCheckboxFacebookChange: (checked: boolean) => void;
+  handleFacebookSubmit: (e: React.FormEvent) => void;
+  handlePasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSetPassword: () => void;
+  setShowPasswordForm: (show: boolean) => void;
+}
+
+export const YouTubeForm: React.FC<YouTubeFormProps> = ({
   currentStep,
   invitation,
   formData,
@@ -26,19 +51,11 @@ export const YouTubeForm = ({
   handlePasswordChange,
   handleSetPassword,
   setShowPasswordForm,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) => {
+}) => {
   return (
     <>
       {currentStep.id === "welcome" && (
-        <WelcomeFormYoutube
-          invitation={invitation}
-          formData={formData}
-          onInputChange={handleInputChange}
-          onCheckboxChange={handleCheckboxChange}
-          onContinue={handleContinueWelcome}
-          isSubmitting={isSubmitting}
-        />
+        <WelcomeFormYoutube />
       )}
       {currentStep.id === "completeProfile" && (
         <CompleteProfileFormYtb
