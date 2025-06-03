@@ -69,10 +69,10 @@ const InvitationPage = () => {
               .eq('id', rpcData[0].project_id)
               .maybeSingle();
               
-            invitationData = rpcData[0];
-            if (projectData) {
-              invitationData.projects = projectData;
-            }
+            invitationData = {
+              ...rpcData[0],
+              projects: projectData
+            };
           }
         }
 

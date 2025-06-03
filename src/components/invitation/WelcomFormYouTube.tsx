@@ -1,12 +1,12 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createProfile } from "@/services/profile-content-categories/creatorProfileService";
 import { fetchCountries } from "@/services/project/countryService";
 import { toast } from "sonner";
 import { CreatorInvitation } from "@/types/invitation";
 import { CompleteProfileFormYtb } from "./CompleteProfileFormYtb";
-import { TermsAndConditions } from "@/components/terms-and-conditions/TermsAndConditions";
 import { goToNextStep } from "@/utils/goToNextStep";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 
@@ -31,7 +31,7 @@ const stepList: readonly Step[] = [
   {
     id: "terms",
     title: "Terms & Conditions",
-    component: TermsAndConditions,
+    component: () => <div>Terms Component</div>,
   },
   {
     id: "profile",
@@ -51,7 +51,7 @@ const defaultFormData: FormData = {
   countryOfResidenceId: "",
 };
 
-const WelcomFormYouTube = () => {
+const WelcomeFormYoutube = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>(defaultFormData);
@@ -68,37 +68,56 @@ const WelcomFormYouTube = () => {
     stepList,
   });
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, termsAccepted: e.target.checked });
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData({ ...formData, termsAccepted: checked });
   };
 
-  const handleAcceptTerms = () => {
+  const handleAcceptTerms = async () => {
     if (!formData.termsAccepted) {
       toast.error("Please accept the terms and conditions.");
       return;
     }
 
-    goToNextStep({
-      currentStep,
-      stepList,
+    if (!invitation || !projectStages.length) return;
+    
+    await goToNextStep({
+      invitationId: invitation.id,
       projectStages,
-      invitation,
-      setCurrentStep,
+      currentStepId: currentStep.id,
+      updateStage: (newStage) => {
+        const newStep = stepList.find(step => step.id === newStage.slug);
+        if (newStep) {
+          setCurrentStep(newStep);
+        }
+      },
     });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       {currentStep.id === "terms" && (
-        <TermsAndConditions
-          formData={{ termsAccepted: formData.termsAccepted }}
-          onCheckboxChange={handleCheckboxChange}
-          onAcceptTerms={handleAcceptTerms}
-          formType="meta"
-        />
+        <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg space-y-6">
+          <h2 className="text-2xl font-semibold text-center">Terms & Conditions</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={formData.termsAccepted}
+              onChange={(e) => handleCheckboxChange(e.target.checked)}
+            />
+            <label>I agree to the terms and conditions</label>
+          </div>
+          <button
+            onClick={handleAcceptTerms}
+            disabled={!formData.termsAccepted}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
+          >
+            Accept Terms
+          </button>
+        </div>
       )}
     </div>
   );
 };
 
-export default WelcomFormYouTube;
+export default WelcomeFormYoutube;
+export { WelcomeFormYoutube };

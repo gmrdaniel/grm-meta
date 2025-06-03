@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/router';
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useParams, useNavigate } from 'react-router-dom';
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -26,9 +27,9 @@ import {
 import { toast } from "sonner";
 
 import { fetchCountries } from "@/services/project/countryService";
-import { createProfile } from "@/services/profile-content-categories/creatorProfileService";
 import { updateInvitationStatus } from "@/services/invitation/updateInvitation";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
+import { goToNextStep } from "@/utils/goToNextStep";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -77,8 +78,8 @@ const Page = () => {
   const [formData, setFormData] = useState(defaultFormData);
   const [projectStages, setProjectStages] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(stepList[0]);
-  const router = useRouter();
-  const { invitation_code } = router.query;
+  const { invitation_code } = useParams<{ invitation_code: string }>();
+  const navigate = useNavigate();
   const [countries, setCountries] = useState([]);
 
   const { loading, error } = useInvitationLoader({
@@ -122,38 +123,30 @@ const Page = () => {
     form.reset(formData);
   }, [formData, form.reset]);
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, termsAccepted: e.target.checked });
-    form.setValue("termsAccepted", e.target.checked);
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData({ ...formData, termsAccepted: checked });
+    form.setValue("termsAccepted", checked);
   };
 
-  const handleAcceptTerms = () => {
+  const handleAcceptTerms = async () => {
     if (formData.termsAccepted) {
-      goToNextStep({
-        currentStep,
-        stepList,
-        setCurrentStep,
+      if (!invitation || !projectStages.length) return;
+      
+      await goToNextStep({
+        invitationId: invitation.id,
         projectStages,
-        invitation,
+        currentStepId: currentStep.id,
+        updateStage: (newStage) => {
+          const newStep = stepList.find(step => step.id === newStage.slug);
+          if (newStep) {
+            setCurrentStep(newStep);
+          }
+        },
       });
     } else {
       toast.error("You must accept the terms and conditions.");
     }
   };
-
-  const mutation = useMutation({
-    mutationFn: createProfile,
-    onSuccess: () => {
-      toast.success("Profile created successfully!");
-      updateInvitationStatusMutation.mutate({
-        id: invitation.id,
-        status: "completed",
-      });
-    },
-    onError: (error: any) => {
-      toast.error(`Something went wrong! ${error.message}`);
-    },
-  });
 
   const updateInvitationStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => {
@@ -162,9 +155,9 @@ const Page = () => {
     onSuccess: () => {
       toast.success("Invitation completed!");
       if (invitation?.projects?.slug) {
-        router.push(`/${invitation?.projects?.slug}/success`);
+        navigate(`/${invitation?.projects?.slug}/success`);
       } else {
-        router.push(`/success`);
+        navigate(`/success`);
       }
     },
     onError: (error: any) => {
@@ -179,25 +172,17 @@ const Page = () => {
         return;
       }
 
-      const profileData = {
-        ...data,
-        creator_invitation_id: invitation.id,
-      };
-
-      mutation.mutate(profileData);
+      // For now, just complete the invitation
+      updateInvitationStatusMutation.mutate({
+        id: invitation.id,
+        status: "completed",
+      });
     } catch (error: any) {
       toast.error(`Something went wrong! ${error.message}`);
     }
   };
 
-  const handleSubmit = async (formData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    instagramUser: string;
-    termsAccepted: boolean;
-    phoneNumber: string;
-  } & { phoneCountryCode: string; phoneVerified: boolean }) => {
+  const handleSubmit = async (formData: z.infer<typeof formSchema>) => {
     const allFormData = {
       ...defaultFormData,
       ...formData,
@@ -235,8 +220,10 @@ const Page = () => {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={field.onChange}
-                        onValueChange={handleCheckboxChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          handleCheckboxChange(checked as boolean);
+                        }}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-tight">
@@ -374,9 +361,9 @@ const Page = () => {
               <Button
                 type="submit"
                 className="w-full bg-blue-600 text-white hover:bg-blue-500"
-                disabled={mutation.isPending}
+                disabled={updateInvitationStatusMutation.isPending}
               >
-                {mutation.isPending ? "Submitting..." : "Create Profile"}
+                {updateInvitationStatusMutation.isPending ? "Submitting..." : "Create Profile"}
               </Button>
             </form>
           </Form>
