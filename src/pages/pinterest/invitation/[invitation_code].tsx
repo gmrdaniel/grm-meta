@@ -110,12 +110,12 @@ const Page = () => {
     form.reset(formData);
   }, [formData, form.reset]);
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (checked: boolean) => {
     setFormData({
       ...formData,
-      termsAccepted: e.target.checked,
+      termsAccepted: checked,
     });
-    form.setValue("termsAccepted", e.target.checked);
+    form.setValue("termsAccepted", checked);
   };
 
   const handleAcceptTerms = async () => {
@@ -142,7 +142,7 @@ const Page = () => {
       toast.success("Profile created successfully!");
       updateInvitationStatusMutation.mutate({
         id: invitation.id,
-        status: "completed",
+        status: "completed" as const,
       });
     },
     onError: (error: any) => {
@@ -151,7 +151,7 @@ const Page = () => {
   });
 
   const updateInvitationStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => {
+    mutationFn: ({ id, status }: { id: string; status: "completed" }) => {
       return updateInvitationStatus(id, status);
     },
     onSuccess: () => {
@@ -222,7 +222,11 @@ const Page = () => {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                        onCheckedChange={(checked) => {
+                          const isChecked = checked === true;
+                          field.onChange(isChecked);
+                          handleCheckboxChange(isChecked);
+                        }}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-tight">
