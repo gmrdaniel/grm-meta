@@ -59,11 +59,13 @@ const stepList = [
   },
 ] as const;
 
+type Step = typeof stepList[number];
+
 const Page = () => {
   const [invitation, setInvitation] = useState<any>(null);
   const [formData, setFormData] = useState(defaultFormData);
   const [projectStages, setProjectStages] = useState<any[]>([]);
-  const [currentStep, setCurrentStep] = useState(stepList[0]);
+  const [currentStep, setCurrentStep] = useState<Step>(stepList[0]);
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
   const [countries, setCountries] = useState<any[]>([]);
@@ -123,7 +125,7 @@ const Page = () => {
         projectStages,
         currentStepId: currentStep.id,
         updateStage: (newStage) => {
-          const newStep = stepList.find(step => step.id === newStage.slug);
+          const newStep = stepList.find(step => step.id === newStage.slug) as Step;
           if (newStep) {
             setCurrentStep(newStep);
           }
@@ -220,7 +222,7 @@ const Page = () => {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-tight">
