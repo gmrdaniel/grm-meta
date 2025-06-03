@@ -7,13 +7,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { EyeIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { fetchProjectNameByInvitationEmail } from "@/services/project/getProjectByUser";
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
 
 export default function CreatorDashboard() {
   const isMobile = useIsMobile();
