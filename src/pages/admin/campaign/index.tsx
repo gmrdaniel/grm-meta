@@ -20,7 +20,7 @@ export default function CampaignPage() {
           <TabsList className="mb-4">
             <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
             <TabsTrigger value="send">Enviar Campaña</TabsTrigger>
-            <TabsTrigger value="event">Crear Invitación a Evento</TabsTrigger>
+            <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
           </TabsList>
 
           <TabsContent value="statistics">
@@ -48,7 +48,7 @@ export default function CampaignPage() {
           <TabsContent value="event">
             <Card>
               <CardHeader>
-                <CardTitle>Crear Invitación a Evento</CardTitle>
+                <CardTitle>Enviar Invitación a Evento</CardTitle>
               </CardHeader>
               <CardContent>
                 <EventInvitation />

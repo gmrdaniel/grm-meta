@@ -38,7 +38,8 @@ interface ImportError {
 // Define el esquema del formulario
 const formSchema = z.object({
   projectId: z.string().min(1, "Debes seleccionar un proyecto"),
-  templateId: z.string().min(1, "Debes seleccionar una plantilla"),
+  eventId: z.string().min(1, "Debes seleccionar un evento"),
+  notificationId: z.string().min(1, "Debes seleccionar una notificación")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -50,21 +51,30 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
-
+  const [invitationEvents, setInvitationEvents] = useState<any[]>([]);
+  const [selectedEventNotifications, setSelectedEventNotifications] = useState<any[]>([]);
   // Inicializar formulario
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectId: "",
-      templateId: "",
+      eventId: "",
+      notificationId: ""
     },
   });
 
   // Cargar proyectos al montar el componente
   useEffect(() => {
     fetchProjects();
-    fetchTemplates();
   }, []);
+
+  // Añadir un nuevo useEffect para escuchar cambios en projectId
+  useEffect(() => {
+    const projectId = form.watch('projectId');
+    if (projectId) {
+      fetchInvitationEvents(projectId);
+    }
+  }, [form.watch('projectId')]);
 
   // Función para obtener proyectos desde Supabase
   const fetchProjects = async () => {
@@ -87,13 +97,63 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
     }
   };
 
+  const fetchInvitationEvents = async (projectId?: string) => {
+    try {
+      const query = supabase
+        .from('invitation_events')
+        .select('id, event_name')
+
+      // Si hay un projectId, filtrar por ese proyecto
+      if (projectId) {
+        query.eq('id_project', projectId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        toast.error('Error al cargar los eventos');
+        console.error(error);
+        return;
+      }
+
+      setInvitationEvents(data || []);
+      // Limpiar la selección de evento y notificación cuando cambia el proyecto
+      form.setValue('eventId', '');
+      form.setValue('notificationId', '');
+      setSelectedEventNotifications([]);
+    } catch (error) {
+      console.error('Error al cargar eventos:', error);
+      toast.error('Error al cargar los eventos');
+    }
+  };
+
+  const fetchEventNotifications = async (eventId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('notification_settings')
+        .select('id, type, subject,message,campaign_id,campaign_name')
+        .eq('invitation_event_id', eventId)
+        .order('created_at', { ascending: false });
+  
+      if (error) {
+        toast.error('Error al cargar las notificaciones del evento');
+        console.error(error);
+        return;
+      }
+  
+      setSelectedEventNotifications(data || []);
+    } catch (error) {
+      console.error('Error al cargar notificaciones:', error);
+      toast.error('Error al cargar las notificaciones del evento');
+    }
+  };
   // Función para obtener plantillas de notificación desde Supabase
   const fetchTemplates = async () => {
     try {
       const { data, error } = await supabase
         //@ts-expect-error: tabla no incluida en el tipado de supabase aún
         .from('notification_settings')
-        .select('id, subject, message, channel')
+        .select('id, subject, message, channel,campaign_id, campaign_name')
         .eq('channel', 'email')
         .order('created_at', { ascending: false });
 
@@ -225,13 +285,13 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
       const errors: ImportError[] = [];
       let successCount = 0;
 
-      // Obtener la plantilla seleccionada
-      const selectedTemplate = templates.find(t => t.id === values.templateId);
-      if (!selectedTemplate) {
-        toast.error("No se encontró la plantilla seleccionada");
-        setIsImporting(false);
-        return;
-      }
+       // Obtener la notificación seleccionada
+       const selectedNotification = selectedEventNotifications.find(n => n.id === values.notificationId);
+       if (!selectedNotification) {
+         toast.error("No se encontró la notificación seleccionada");
+         setIsImporting(false);
+         return;
+       }
 
       // Array para almacenar los destinatarios que recibirán correo (status pending)
       const recipients = [];
@@ -245,15 +305,14 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
         // Omitir filas vacías
         if (!(!row || row.length === 0)) {
           const nombre = row[nombreIndex]?.toString().trim();
-          const apellido = row[apellidoIndex]?.toString().trim();
+          const apellido = row[apellidoIndex]?.toString().trim()||"";
           const email = row[emailIndex]?.toString().trim();
 
           // Validar datos de la fila
           const rowErrorFieldsEmpty = [];
           const rowErrors = [];
 
-          if (!nombre) rowErrorFieldsEmpty.push("Nombre");
-          if (!apellido) rowErrorFieldsEmpty.push("Apellido");
+          if (!nombre) rowErrorFieldsEmpty.push("Usuario");
 
           if (!email) {
             rowErrorFieldsEmpty.push("Email");
@@ -307,14 +366,14 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
                   name: `${nombre} ${apellido}`,
                   variables: {
                     name: `${nombre} ${apellido}`,
-                    invitationUrl: `${window.location.origin}${invitation.invitation_url}`
+                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?campaign=${selectedNotification.campaign_id}`
                   }
                 });
                 
                 successCount++;
               } catch (error) {
                 console.error(`Error al crear usuario: ${email}`, error);
-                throw new Error(`No se pudo crear el usuario: ${error.message}`);
+                throw new Error(`No se pudo crear la invitación: ${error.message}`);
               }
             } 
             // Si existe y su estado es pending, enviamos correo
@@ -348,7 +407,7 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
                   name: `${nombre} ${apellido}`,
                   variables: {
                     name: `${nombre} ${apellido}`,
-                    invitationUrl: `${window.location.origin}${invitation.invitation_url}`
+                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?campaign=${selectedNotification.campaign_id}`
                   }
                 });
                 
@@ -381,17 +440,25 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
       if (recipients.length > 0) {
         try {
           // Preparar el contenido HTML con variables de Mailjet
-          let htmlContent = selectedTemplate.message;
+          let htmlContent = selectedNotification.message;
           // Reemplazar las variables en el formato de Mailjet
           htmlContent = htmlContent.replace(/\{\{full_name\}\}/g, "{{var:name}}");
           htmlContent = htmlContent.replace(/\{\{url\}\}/g, "{{var:invitationUrl}}");
           
+          // Obtener el evento seleccionado
+          const selectedEvent = invitationEvents.find(e => e.id === values.eventId);
+          if (!selectedEvent) {
+            toast.error("No se encontró el evento seleccionado");
+            setIsImporting(false);
+            return;
+          }
+
           const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
             body: {
               htmlContent: htmlContent,
               recipients: recipients,
-              subject: selectedTemplate.subject || "Invitación a Evento",
-              customCampaign: "event_invitation"
+              subject: selectedNotification.subject || "Invitación a Evento",
+              customCampaign: selectedNotification.campaign_name
             }
           });
           
@@ -400,40 +467,21 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
           // Extraer campaign_id de la respuesta de Mailjet
           const campaignId = response?.campaignId || null;
           if (campaignId) {
-            // 1. Insertar en invitation_events
-            const { data: invitationEvent, error: invitationEventError } = await supabase
-              .from('invitation_events')
-              .insert({
-                id_project: form.getValues().projectId,  // Cambiado de project_id a id_project
-                campaign_id: campaignId,
-                campaign_name: "event_invitation" // Valor de customCampaign
-              })
-              .select()
-              .single();
-            
-            if (invitationEventError) {
-              console.error("Error al crear invitation_events:", invitationEventError);
-              throw invitationEventError;
+            // Actualizar campaign_id en notification_settings
+            const { error: updateError } = await supabase
+              .from('notification_settings')
+              .update({ campaign_id: campaignId })
+              .eq('campaign_name', selectedNotification.campaign_name);
+
+            if (updateError) {
+              console.error("Error al actualizar campaign_id en notification_settings:", updateError);
+              throw updateError;
             }
-            
-            // 2. Insertar en creator_invitation_events para cada invitación procesada
-            if (invitationEvent && processedInvitations.length > 0) {
+            if (processedInvitations.length > 0) {
               const creatorInvitationEvents = processedInvitations.map(invitation => ({
                 creator_invitation_id: invitation.id,  
-                invitation_event_id: invitationEvent.id,  
-                // sending_date se establecerá por defecto en la base de datos
+                invitation_event_id: selectedEvent.id  // Usar selectedEvent.id en lugar de selectedEvent
               }));
-              
-              // Actualizar registration_event_id en creator_invitations
-              const { error: updateError } = await supabase
-                .from('creator_invitations')
-                .update({ registration_event_id: invitationEvent.id })
-                .in('id', processedInvitations.map(inv => inv.id));
-
-              if (updateError) {
-                console.error("Error al actualizar registration_event_id:", updateError);
-                throw updateError;
-              }
               
               const { error: creatorInvitationEventsError } = await supabase
                 .from('creator_invitations_events')
@@ -497,32 +545,60 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="templateId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plantilla de Invitación</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isImporting}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona una plantilla" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates?.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.subject || "Plantilla sin asunto"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-
+        <FormField
+          control={form.control}
+          name="eventId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Seleccionar Evento</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  fetchEventNotifications(value);
+                  form.setValue('notificationId', ''); // Resetear la notificación seleccionada
+                }}
+                defaultValue={field.value}
+                disabled={isImporting}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona un evento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {invitationEvents?.map((event) => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {`${event.event_name}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="notificationId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Seleccionar Notificación</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={isImporting || !form.getValues().eventId}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona una notificación" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedEventNotifications?.map((notification) => (
+                    <SelectItem key={notification.id} value={notification.id}>
+                      {`Campaign: ${notification.campaign_name} - ${notification.type} - ${notification.subject}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
           <div className="space-y-2">
             <Card className="mb-6">
               <CardContent className="pt-6">
