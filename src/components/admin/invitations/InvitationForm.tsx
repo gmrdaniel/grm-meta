@@ -91,7 +91,6 @@ const formSchema = z
     status: z.enum(["pending", "accepted", "completed"]),
   })
   .superRefine((data, ctx) => {
-    // 🔒 Requiere teléfono completo para marcar como verificado
     if (data.phone_verified) {
       if (!data.phone_number || !data.phone_country_code) {
         ctx.addIssue({
@@ -102,7 +101,7 @@ const formSchema = z
         });
       }
     }
-    // Validación: que `facebook_page` y `facebook_profile` no sean iguales
+    
     if (
       data.facebook_page &&
       data.facebook_profile &&
@@ -115,7 +114,6 @@ const formSchema = z
       });
     }
 
-    // 🔒 Requiere URLs válidas para marcar paso de FB como completo
     if (data.facebook_page) {
       const result = validateFacebookPageUrl(data.facebook_page);
       if (!result.isValid) {
@@ -127,7 +125,6 @@ const formSchema = z
       }
     }
 
-    // Facebook profile
     if (data.facebook_profile) {
       const result = validateFacebookPageUrl(data.facebook_profile);
       if (!result.isValid) {
@@ -139,7 +136,6 @@ const formSchema = z
       }
     }
 
-    // Paso FB completo solo si ambas URLs están presentes y válidas
     const pageValid =
       data.facebook_page && validateFacebookPageUrl(data.facebook_page).isValid;
     const profileValid =
@@ -248,7 +244,6 @@ const InvitationForm = ({
       is_professional_account: data.is_professional_account || false,
     };
 
-    // Map social_media_handle to the correct property
     const socialMediaPropertyMap: Record<string, keyof CreateInvitationData | null> = {
       tiktok: "social_media_handle",
       youtube: "youtube_channel",
@@ -260,7 +255,6 @@ const InvitationForm = ({
       (invitationData as any)[targetProperty] = data.social_media_handle;
     }
 
-    // Switch between create or update
     if (isEditMode && initialData?.id) {
       updateInvitationMutation.mutate(
         { id: initialData.id, data: invitationData },
@@ -284,7 +278,7 @@ const InvitationForm = ({
 
   const updateInvitationMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CreateInvitationData }) => {
-      return updateInvitation(id, {...data, status: data.status}); // Asegúrate de tener esta función en tus servicios
+      return updateInvitation(id, {...data, status: data.status});
     },
     onSuccess: () => {
       toast.success("Invitation updated!");
@@ -315,7 +309,10 @@ const InvitationForm = ({
 
   useEffect(() => {
     if (isEditMode && selectedProject && initialData?.social_media_type) {
-      form.setValue("social_media_type", initialData.social_media_type as any);
+      const validTypes = ["tiktok", "pinterest", "youtube", "instagram"] as const;
+      if (validTypes.includes(initialData.social_media_type as any)) {
+        form.setValue("social_media_type", initialData.social_media_type as any);
+      }
     }
   }, [selectedProject, isEditMode, initialData?.social_media_type]);
 
@@ -474,6 +471,7 @@ const InvitationForm = ({
               </FormItem>
             )}
           />
+          
           {!isEditMode && (
             <FormField
               control={form.control}

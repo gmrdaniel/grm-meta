@@ -2,12 +2,8 @@
 import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 
-/**
- * Fetch a single invitation by its code
- */
 export const fetchInvitationByCode = async (code: string): Promise<CreatorInvitation | null> => {
   try {
-    // Use the RPC function to find invitation by code (fuzzy matching)
     const { data, error } = await findInvitationByCode(code);
 
     if (error) {
@@ -26,9 +22,6 @@ export const fetchInvitationByCode = async (code: string): Promise<CreatorInvita
   }
 };
 
-/**
- * Fetch a single invitation by ID
- */
 export const fetchInvitationById = async (id: string): Promise<CreatorInvitation | null> => {
   try {
     const { data, error } = await supabase
@@ -49,9 +42,6 @@ export const fetchInvitationById = async (id: string): Promise<CreatorInvitation
   }
 };
 
-/**
- * Fetch all invitations with pagination support
- */
 export const fetchInvitationsWithPagination = async (
   page: number = 1,
   pageSize: number = 10,
@@ -68,7 +58,6 @@ export const fetchInvitationsWithPagination = async (
       ? `first_name.ilike.%${searchQuery.trim()}%,last_name.ilike.%${searchQuery.trim()}%,email.ilike.%${searchQuery.trim()}%,invitation_code.ilike.%${searchQuery.trim()}%`
       : undefined;
 
-    // --- Paso 1: Obtener el count
     let countQuery = supabase
       .from('creator_invitations')
       .select('*', { count: 'exact', head: true });
@@ -88,7 +77,6 @@ export const fetchInvitationsWithPagination = async (
       return { data: [], count: 0 };
     }
 
-    // --- Paso 2: Obtener los datos paginados
     let dataQuery = supabase
       .from('creator_invitations')
       .select('*')
@@ -120,9 +108,6 @@ export const fetchInvitationsWithPagination = async (
   }
 };
 
-/**
- * Fetch all invitations (no pagination, for export)
- */
 export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
   const { data, error } = await supabase
     .from('creator_invitations')
@@ -180,9 +165,6 @@ export const fetchInvitationsWithProfile = async (projectId: string): Promise<Cr
   return data as CreatorInvitation[];
 };
 
-/**
- * Legacy function for backwards compatibility
- */
 export const fetchInvitations = async (): Promise<CreatorInvitation[]> => {
   const { data } = await fetchInvitationsWithPagination(1, 10);
   return data;

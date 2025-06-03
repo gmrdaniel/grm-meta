@@ -13,7 +13,7 @@ export interface BulkCreatorInvitationDetail {
   created_at: string;
   email: string;
   error_message: string | null;
-  full_name: string; // Keep full_name as it exists in the database
+  full_name: string;
   id: string;
   is_active: boolean;
   status: string;

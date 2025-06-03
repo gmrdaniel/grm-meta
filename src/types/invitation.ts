@@ -4,7 +4,7 @@ import { Project } from "./project";
 export interface CreatorInvitation {
   id: string;
   project_id?: string | null;
-  projects?: Project
+  projects?: Project;
   email: string;
   first_name: string;
   last_name: string;
@@ -30,18 +30,20 @@ export interface CreatorInvitation {
   is_professional_account?: boolean;
   stage_updated_at?: string | null;
   is_business_account?: boolean | null;
+  project_stages?: { name: string };
+  pinterest_url?: string | null;
 }
 
 export type CreateInvitationData = {
   first_name: string;
   last_name: string;
   email: string;
-  social_media_handle?: string | null; // Para TikTok
-  youtube_channel?: string | null; // Para YouTube
-  instagram_user?: string | null; // Para Instagram
+  social_media_handle?: string | null;
+  youtube_channel?: string | null;
+  instagram_user?: string | null;
   social_media_type?: string | null;
   project_id: string;
-  projects?: Project
+  projects?: Project;
   invitation_type: string;
   phone_number?: string | null;
   phone_country_code?: string | null;
@@ -50,7 +52,7 @@ export type CreateInvitationData = {
   phone_verified?: boolean | null;
   fb_step_completed?: boolean | null;
   is_professional_account?: boolean | null;
-  status?: string
+  status?: string;
 };
 
 export type UpdateFacebookPageData = {
@@ -59,7 +61,6 @@ export type UpdateFacebookPageData = {
   linkInstagram: boolean;
 };
 
-// Define a type for task with creator invitation relation
 export interface TaskWithInvitation {
   taskId: string;
   creatorInvitationId: string | null;
