@@ -1,32 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-
 import { fetchCountries } from "@/services/project/countryService";
+import { createProfile } from "@/services/profile-content-categories/creatorProfileService";
 import { updateInvitationStatus } from "@/services/invitation/updateInvitation";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 import { goToNextStep } from "@/utils/goToNextStep";
@@ -71,7 +57,7 @@ const stepList = [
     id: "profile",
     label: "Profile",
   },
-];
+] as const;
 
 const Page = () => {
   const [invitation, setInvitation] = useState<any>(null);
@@ -80,10 +66,10 @@ const Page = () => {
   const [currentStep, setCurrentStep] = useState(stepList[0]);
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
-  const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState<any[]>([]);
 
   const { loading, error } = useInvitationLoader({
-    invitation_code: invitation_code as string | undefined,
+    invitation_code: invitation_code,
     setFormData,
     setInvitation,
     setProjectStages,
@@ -101,11 +87,10 @@ const Page = () => {
         toast.error("Failed to load countries");
       }
     };
-
     loadCountries();
   }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: formData?.firstName,
@@ -123,15 +108,16 @@ const Page = () => {
     form.reset(formData);
   }, [formData, form.reset]);
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData({ ...formData, termsAccepted: checked });
-    form.setValue("termsAccepted", checked);
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      termsAccepted: e.target.checked,
+    });
+    form.setValue("termsAccepted", e.target.checked);
   };
 
   const handleAcceptTerms = async () => {
     if (formData.termsAccepted) {
-      if (!invitation || !projectStages.length) return;
-      
       await goToNextStep({
         invitationId: invitation.id,
         projectStages,
@@ -148,9 +134,23 @@ const Page = () => {
     }
   };
 
+  const mutation = useMutation({
+    mutationFn: createProfile,
+    onSuccess: () => {
+      toast.success("Profile created successfully!");
+      updateInvitationStatusMutation.mutate({
+        id: invitation.id,
+        status: "completed",
+      });
+    },
+    onError: (error: any) => {
+      toast.error(`Something went wrong! ${error.message}`);
+    },
+  });
+
   const updateInvitationStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => {
-      return updateInvitationStatus(id, status as any);
+      return updateInvitationStatus(id, status);
     },
     onSuccess: () => {
       toast.success("Invitation completed!");
@@ -172,23 +172,23 @@ const Page = () => {
         return;
       }
 
-      // For now, just complete the invitation
-      updateInvitationStatusMutation.mutate({
-        id: invitation.id,
-        status: "completed",
-      });
+      const profileData = {
+        ...data,
+        creator_invitation_id: invitation.id,
+      };
+
+      mutation.mutate(profileData);
     } catch (error: any) {
       toast.error(`Something went wrong! ${error.message}`);
     }
   };
 
-  const handleSubmit = async (formData: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (formData: any) => {
     const allFormData = {
       ...defaultFormData,
       ...formData,
-      countryOfResidenceId: formData.phoneCountryCode || ""
+      countryOfResidenceId: formData.phoneCountryCode || "",
     };
-    
     await handleFormSubmission(allFormData);
   };
 
@@ -220,15 +220,15 @@ const Page = () => {
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          handleCheckboxChange(checked as boolean);
-                        }}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-tight">
-                      <FormLabel className="text-base font-semibold">
-                        I agree to the terms and conditions
+                      <FormLabel>
+                        I accept the{" "}
+                        <a href="#" className="text-blue-600 hover:underline">
+                          terms and conditions
+                        </a>
                       </FormLabel>
                       <FormMessage />
                     </div>
@@ -237,11 +237,11 @@ const Page = () => {
               />
               <Button
                 type="button"
-                className="w-full bg-green-600 text-white hover:bg-green-500"
                 onClick={handleAcceptTerms}
                 disabled={!formData.termsAccepted}
+                className="w-full"
               >
-                Accept Terms and Continue
+                Accept Terms
               </Button>
             </form>
           </Form>
@@ -253,14 +253,8 @@ const Page = () => {
           <h2 className="text-2xl font-semibold text-center">
             Complete Your Profile
           </h2>
-          <p className="text-gray-600 text-center">
-            Enter your personal details to create your profile.
-          </p>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="firstName"
@@ -268,12 +262,13 @@ const Page = () => {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} />
+                      <Input placeholder="Enter your first name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="lastName"
@@ -281,12 +276,13 @@ const Page = () => {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} />
+                      <Input placeholder="Enter your last name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="email"
@@ -294,76 +290,80 @@ const Page = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="john.doe@example.com" {...field} />
+                      <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="instagramUser"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Instagram User</FormLabel>
+                    <FormLabel>Instagram Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="johndoe" {...field} />
+                      <Input placeholder="Enter your Instagram username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="phoneCountryCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your country" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {countries.map((country: any) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            {country.name_en}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="123-456-7890" {...field} />
+                      <Input
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="phoneCountryCode"
-                render={({ field }) => {
-                  return (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a country" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {countries.map((country: any) => (
-                            <SelectItem
-                              key={country.id}
-                              value={country.phone_code}
-                            >
-                              {country.name} ({country.phone_code})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
+
               <Button
                 type="submit"
-                className="w-full bg-blue-600 text-white hover:bg-blue-500"
-                disabled={updateInvitationStatusMutation.isPending}
+                disabled={mutation.isPending}
+                className="w-full"
               >
-                {updateInvitationStatusMutation.isPending ? "Submitting..." : "Create Profile"}
+                {mutation.isPending ? "Creating Profile..." : "Complete Profile"}
               </Button>
             </form>
           </Form>
