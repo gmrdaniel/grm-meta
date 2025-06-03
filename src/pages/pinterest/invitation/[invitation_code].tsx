@@ -11,11 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { fetchCountries } from "@/services/project/countryService";
-import { createProfile } from "@/services/profile-content-categories/creatorProfileService";
-import { updateInvitationStatus } from "@/services/invitation/updateInvitation";
-import { useInvitationLoader } from "@/hooks/use-invitationLoader";
-import { goToNextStep } from "@/utils/goToNextStep";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -56,7 +52,7 @@ const stepList = [
   {
     id: "profile",
     label: "Profile",
-  }
+  },
 ] as const;
 
 type Step = typeof stepList[number];
@@ -69,21 +65,96 @@ const Page = () => {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
   const [countries, setCountries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { loading, error } = useInvitationLoader({
-    invitation_code: invitation_code,
-    setFormData,
-    setInvitation,
-    setProjectStages,
-    setCurrentStep,
-    stepList,
-  });
+  // Load invitation data directly from Supabase
+  useEffect(() => {
+    const loadInvitationData = async () => {
+      if (!invitation_code) {
+        setError("No invitation code provided");
+        setLoading(false);
+        return;
+      }
 
+      try {
+        setLoading(true);
+        
+        // Find invitation by code
+        const { data: invitationData, error: invitationError } = await supabase
+          .rpc('find_invitation_by_code', { code_param: invitation_code });
+
+        if (invitationError || !invitationData?.length) {
+          setError("Invalid invitation code or invitation not found");
+          setLoading(false);
+          return;
+        }
+
+        const invitation = invitationData[0];
+        setInvitation(invitation);
+
+        // Set form data from invitation
+        setFormData({
+          firstName: invitation.first_name || "",
+          lastName: invitation.last_name || "",
+          email: invitation.email || "",
+          instagramUser: invitation.instagram_user || "",
+          termsAccepted: false,
+          phoneNumber: invitation.phone_number || "",
+          phoneCountryCode: invitation.phone_country_code || "",
+          countryOfResidenceId: "",
+        });
+
+        // Fetch project stages
+        const { data: stagesData, error: stagesError } = await supabase
+          .from('project_stages')
+          .select('*')
+          .eq('project_id', invitation.project_id)
+          .order('order_index');
+
+        if (stagesError) {
+          console.error('Error fetching stages:', stagesError);
+        } else {
+          setProjectStages(stagesData || []);
+
+          // Set current step based on invitation stage
+          if (invitation.current_stage_id) {
+            const currentStage = stagesData?.find(s => s.id === invitation.current_stage_id);
+            if (currentStage) {
+              const currentStep = stepList.find(step => step.id === currentStage.slug);
+              if (currentStep) {
+                setCurrentStep(currentStep);
+              }
+            }
+          }
+        }
+
+      } catch (err) {
+        console.error("Error loading invitation:", err);
+        setError("Failed to load invitation details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInvitationData();
+  }, [invitation_code]);
+
+  // Load countries
   useEffect(() => {
     const loadCountries = async () => {
       try {
-        const data = await fetchCountries();
-        setCountries(data);
+        const { data, error } = await supabase
+          .from('countries')
+          .select('*')
+          .order('name_en');
+
+        if (error) {
+          console.error("Error fetching countries:", error);
+          toast.error("Failed to load countries");
+        } else {
+          setCountries(data || []);
+        }
       } catch (err) {
         console.error("Error fetching countries:", err);
         toast.error("Failed to load countries");
@@ -120,24 +191,47 @@ const Page = () => {
 
   const handleAcceptTerms = async () => {
     if (formData.termsAccepted) {
-      await goToNextStep({
-        invitationId: invitation.id,
-        projectStages,
-        currentStepId: currentStep.id,
-        updateStage: (newStage) => {
-          const newStep = stepList.find(step => step.id === newStage.slug) as Step;
+      try {
+        const currentIndex = projectStages.findIndex(s => s.slug === currentStep.id);
+        const nextStage = projectStages[currentIndex + 1];
+        
+        if (nextStage) {
+          const { error } = await supabase
+            .from('creator_invitations')
+            .update({
+              current_stage_id: nextStage.id,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', invitation.id);
+
+          if (error) {
+            toast.error('Failed to save progress');
+            return;
+          }
+
+          const newStep = stepList.find(step => step.id === nextStage.slug) as Step;
           if (newStep) {
             setCurrentStep(newStep);
           }
-        },
-      });
+        }
+      } catch (error) {
+        console.error('Error proceeding to next step:', error);
+        toast.error('Failed to proceed to next step');
+      }
     } else {
       toast.error("You must accept the terms and conditions.");
     }
   };
 
   const mutation = useMutation({
-    mutationFn: createProfile,
+    mutationFn: async (profileData: any) => {
+      const { data, error } = await supabase
+        .from('creator_profile_categories')
+        .insert([profileData]);
+
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       toast.success("Profile created successfully!");
       updateInvitationStatusMutation.mutate({
@@ -151,8 +245,14 @@ const Page = () => {
   });
 
   const updateInvitationStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: "completed" }) => {
-      return updateInvitationStatus(id, status);
+    mutationFn: async ({ id, status }: { id: string; status: "completed" }) => {
+      const { data, error } = await supabase
+        .from('creator_invitations')
+        .update({ status })
+        .eq('id', id);
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       toast.success("Invitation completed!");
