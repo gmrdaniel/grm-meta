@@ -147,7 +147,7 @@ export function WelcomeForm({
         <MetaTermsAndConditions />
         &nbsp;and&nbsp;
         <a
-          href="https://www.laneta.com/vidcon-pass-giveaway"
+          href="https://www.laneta.com/policess"
           target="_blanck"
           className="text-purple-600 hover:underline"
         >

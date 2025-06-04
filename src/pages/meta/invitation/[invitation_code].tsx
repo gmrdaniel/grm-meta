@@ -563,7 +563,7 @@ export default function InvitationStepperPage() {
                     <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
                       Connect Your Facebook Accounts
                     </h1>
-                    <p>
+                    <p className="mb-8">
                       We need to verify your facebook accounts to secure your
                       application and continue with the registration process.
                     </p>
