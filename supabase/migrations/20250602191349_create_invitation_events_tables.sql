@@ -1,5 +1,5 @@
 -- Create invitation_events table
-CREATE TABLE invitation_events (
+CREATE TABLE IF NOT EXISTS invitation_events (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     id_project UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     event_name TEXT NOT NULL
@@ -17,7 +17,7 @@ REFERENCES notification_settings(id)
 ON DELETE SET NULL;
 
 -- Create creator_invitations_events table
-CREATE TABLE creator_invitations_events (
+CREATE TABLE IF NOT EXISTS creator_invitations_events (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     creator_invitation_id UUID NOT NULL REFERENCES creator_invitations(id) ON DELETE CASCADE,
     invitation_event_id UUID NOT NULL REFERENCES invitation_events(id) ON DELETE CASCADE,
