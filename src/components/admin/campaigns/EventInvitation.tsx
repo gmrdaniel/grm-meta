@@ -311,7 +311,8 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
         if (!(!row || row.length === 0)) {
           const nombre = row[nombreIndex]?.toString().trim();
           const apellido = row[apellidoIndex]?.toString().trim() || "";
-          const email = row[emailIndex]?.toString().trim();
+          let email = row[emailIndex]?.toString().trim();
+          email = email?.toLowerCase()
           const socialHandle = row[socialHandleIndex]?.toString().trim()
           const socialPlatform = row[socialPlatformIndex]?.toString().trim()
 
