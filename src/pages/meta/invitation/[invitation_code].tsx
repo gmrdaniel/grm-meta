@@ -24,7 +24,17 @@ import { validateFacebookPageUrl } from "@/utils/validateFacebookPageUrl";
 // 🗃️ Types
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
-import { Check, Clock, DollarSign, Shield, Zap } from "lucide-react";
+import {
+  Check,
+  Clock,
+  DollarSign,
+  Info,
+  LockKeyhole,
+  Shield,
+  ShieldCheck,
+  Waypoints,
+  Zap,
+} from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
@@ -34,9 +44,9 @@ import BonusCard from "@/components/ui/bonus-card";
 
 // 🧭 Steps
 const stepList = [
-  { id: "welcome", label: "Accept Invitation" },
-  { id: "completeProfile", label: "Complete Your Profile" },
-  { id: "fbcreation", label: "Connect Facebook Page" },
+  { id: "welcome", label: "Account" },
+  { id: "completeProfile", label: "Verification" },
+  { id: "fbcreation", label: "Connect" },
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -452,104 +462,135 @@ export default function InvitationStepperPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-7xl mx-auto my-8 md:my-12 ">
-        <div className="lg:grid lg:grid-cols-[1fr_1.25fr]">
+        <div
+          className={`lg:grid ${
+            !submissionComplete && !invitation.fb_step_completed
+              ? "lg:grid-cols-[1fr_1.25fr]"
+              : ""
+          } `}
+        >
           {/* Left Side - Purple Section */}
-          <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 opacity-90 p-12 text-white relative overflow-hidden flex flex-col rounded-t-2xl md:rounded-tr-none md:rounded-s-2xl">
-            <div className="relative z-10">
-              {/* Official Badge */}
-              <a
-                href="https://www.facebook.com/FacebookforCreators/posts/pfbid02cZ1b5PweXBEdJhXz7XDBXSGVt1ELbkZNkSCR7vUAKeNmebbyQvk6in7AjJnboskNl"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="badge inline-flex items-center bg-white bg-opacity-30 rounded-full px-4 py-2 mb-6 no-underline hover:bg-opacity-40 transition"
-              >
-                <Check className="h-4 w-4 mr-2 text-white" />
-                <span className="text-white font-medium text-sm">
-                  Official Announcement
-                </span>
-              </a>
 
-              {/* Main Title */}
-              <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
-                Join Meta
-                <br className="lg:block" />
-                Creator Breakthrough Bonus Program
-              </h1>
+          {!submissionComplete && !invitation.fb_step_completed && (
+            <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 opacity-90 p-12 text-white relative overflow-hidden flex flex-col rounded-t-2xl md:rounded-tr-none md:rounded-s-2xl">
+              <div className="relative z-10">
+                {/* Official Badge */}
+                <a
+                  href="https://www.facebook.com/FacebookforCreators/posts/pfbid02cZ1b5PweXBEdJhXz7XDBXSGVt1ELbkZNkSCR7vUAKeNmebbyQvk6in7AjJnboskNl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="badge inline-flex items-center bg-white bg-opacity-30 rounded-full px-4 py-2 mb-6 no-underline hover:bg-opacity-40 transition"
+                >
+                  <Check className="h-4 w-4 mr-2 text-white" />
+                  <span className="text-white font-medium text-sm">
+                    Official Announcement
+                  </span>
+                </a>
+                {stepList.find((step) => step.id === currentStep.id).label ==
+                  "Account" && (
+                  <>
+                    {/* Main Title */}
+                    <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
+                      Join Meta
+                      <br className="lg:block" />
+                      Creator Breakthrough Bonus Program
+                    </h1>
 
-              {/* Subtitle */}
-              <p className="relative z-10 text-xl text-white mb-8">
-                Get access to:
-              </p>
+                    {/* Subtitle */}
+                    <p className="relative z-10 text-xl text-white mb-8">
+                      Get access to:
+                    </p>
 
-              {/* Benefits Cards */}
-              <div className="space-y-4">
-                <BonusCard
-                  icon={<DollarSign className="h-5 w-5" />}
-                  title="$5,000 in bonuses"
-                  subtitle="Earn while creating content you love"
-                />
+                    {/* Benefits Cards */}
+                    <div className="space-y-4">
+                      <BonusCard
+                        icon={<DollarSign className="h-5 w-5" />}
+                        title="$5,000 in bonuses"
+                        subtitle="Earn while creating content you love."
+                      />
 
-                <BonusCard
-                  icon={<Clock className="h-5 w-5" />}
-                  title="Monetize on Facebook Instantly"
-                  subtitle="No waiting period for eligibility"
-                />
-                <BonusCard
-                  icon={<Shield className="h-5 w-5" />}
-                  title="Free Meta Verified"
-                  subtitle="Get the blue checkmark & exclusive features"
-                />
-                <BonusCard
-                  icon={<Zap className="h-5 w-5" />}
-                  title="Fast-track application"
-                  subtitle="Skip the line with our partner program"
-                />
-              </div>
+                      <BonusCard
+                        icon={<Clock className="h-5 w-5" />}
+                        title="Monetize on Facebook Instantly"
+                        subtitle="No waiting period for eligibility."
+                      />
+                      <BonusCard
+                        icon={<Shield className="h-5 w-5" />}
+                        title="Free Meta Verified"
+                        subtitle="Get the blue checkmark & exclusive features."
+                      />
+                      <BonusCard
+                        icon={<Zap className="h-5 w-5" />}
+                        title="Fast-track application"
+                        subtitle="Skip the line with our partner program."
+                      />
+                    </div>
 
-              <div className="mt-8">
-                <p className="text-white/80 font-medium">
-                  Limited spots available. Apply now!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Form Section */}
-          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-e-2xl">
-            <div className=" w-full">
-              <div className="text-left mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
-                  Join Meta Creator Program
-                </h2>
-                <p className="text-purple-600 font-medium mb-4">
-                  We're La Neta, an official partner of Meta
-                </p>
-
-                {currentStep.id === "welcome" && (
-                  <div className="space-y-3 text-gray-600">
+                    <div className="mt-8">
+                      <p className="text-white/80 font-medium">
+                        Limited spots available. Apply now!
+                      </p>
+                    </div>
+                  </>
+                )}
+                {stepList.find((step) => step.id === currentStep.id).label ==
+                  "Verification" && (
+                  <>
+                    <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
+                      Verify your Identity
+                    </h1>
+                    <p className="mb-8">
+                      We need to verify your phone number to secure your account
+                      and continue with the registration process.
+                    </p>
+                    <div className="space-y-4">
+                      <BonusCard
+                        icon={<LockKeyhole className="h-5 w-5" />}
+                        title="Secure Verification"
+                        subtitle="We verify your identity to ensure program integrity and protect your account."
+                      />
+                      <BonusCard
+                        icon={<ShieldCheck className="h-5 w-5" />}
+                        title="Almost there"
+                        subtitle="You're just a few steps away from applying to the Meta Creator Breakthrough Program."
+                      />
+                    </div>
+                  </>
+                )}
+                {stepList.find((step) => step.id === currentStep.id).label ==
+                  "Connect" && (
+                  <>
+                    <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
+                      Connect Your Facebook Accounts
+                    </h1>
                     <p>
-                      Welcome to the Meta Creator Breakthrough Bonus Program
+                      We need to verify your facebook accounts to secure your
+                      application and continue with the registration process.
                     </p>
-                    <p>
-                      Earn up to{" "}
-                      <span className="font-semibold">$5,000 in bonuses</span>{" "}
-                      just by posting Reels on Facebook
-                    </p>
-                    <p>
-                      Start monetizing right away + get a free trial of Meta
-                      Verified
-                    </p>
-                    <p>
-                      Limited spots available for high-potential creators like
-                      you
-                    </p>
-                    <p className="mt-4 text-gray-700">
-                      Fill out the form below to get started.
-                    </p>
-                  </div>
+                    <div className="space-y-4">
+                      <BonusCard
+                        icon={<Info className="h-5 w-5" />}
+                        title="Important Information"
+                        subtitle="Both your personal profile and business page are required for the  Meta Creator Breakthrough Program."
+                      />
+                      <BonusCard
+                        icon={<Waypoints className="h-5 w-5" />}
+                        title="Connection Required"
+                        subtitle="Your Facebook Page must be connected to your Instagram account for your application to be valid."
+                      />
+                    </div>
+                  </>
                 )}
               </div>
+            </div>
+          )}
+          {/* Right Side - Form Section */}
 
+          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-e-2xl">
+            <div className=" w-full">
+              {!submissionComplete && !invitation.fb_step_completed && (
+                <Stepper steps={stepList} currentStep={currentStep.id} />
+              )}
               {invitation?.social_media_type === "tiktok" && (
                 <TikTokForm
                   currentStep={currentStep}
