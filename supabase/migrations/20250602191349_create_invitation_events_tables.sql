@@ -2,19 +2,18 @@
 CREATE TABLE invitation_events (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     id_project UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    campaign_id BIGINT NOT NULL,
-    campaign_name TEXT NOT NULL
+    event_name TEXT NOT NULL
 );
 
 -- Add registration_event_id column to creator_invitations
 ALTER TABLE creator_invitations
-ADD COLUMN registration_event_id UUID;
+ADD COLUMN registration_notification_id UUID;
 
 -- Add foreign key constraint to creator_invitations
 ALTER TABLE creator_invitations
-ADD CONSTRAINT fk_registration_event
-FOREIGN KEY (registration_event_id)
-REFERENCES invitation_events(id)
+ADD CONSTRAINT fk_registration_notification
+FOREIGN KEY (registration_notification_id)
+REFERENCES notification_settings(id)
 ON DELETE SET NULL;
 
 -- Create creator_invitations_events table

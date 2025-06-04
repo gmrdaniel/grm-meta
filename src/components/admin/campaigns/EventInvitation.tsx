@@ -20,6 +20,7 @@ import { AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { createInvitation } from "@/services/invitation/createInvitation";
 import { sendEmail } from "@/services/email/sendIEmail";
+import { CreateInvitationData } from "@/types/invitation";
 
 interface EventInvitationProps {
   onSuccess?: () => void;
@@ -134,13 +135,13 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
         .select('id, type, subject,message,campaign_id,campaign_name')
         .eq('invitation_event_id', eventId)
         .order('created_at', { ascending: false });
-  
+
       if (error) {
         toast.error('Error al cargar las notificaciones del evento');
         console.error(error);
         return;
       }
-  
+
       setSelectedEventNotifications(data || []);
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
@@ -174,9 +175,9 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
   const handleDownloadTemplate = () => {
     // Crear datos de plantilla con encabezados y fila de ejemplo
     const templateData = [
-      ["nombre", "apellido", "email"],
-      ["Juan", "Pérez", "juan@ejemplo.com"],
-      ["María", "González", "maria@ejemplo.com"],
+      ["nombre", "apellido", "email", "social media handle", "social media platform"],
+      ["Juan", "Pérez", "juan@ejemplo.com", "juanpe", "tiktok"],
+      ["María", "González", "maria@ejemplo.com", "mariig", "tiktok"],
     ];
 
     // Crear nuevo libro y hoja de trabajo
@@ -208,16 +209,16 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
       return { exists: false, status: null };
     }
 
-    return { 
-      exists: !!invitationData, 
-      status: invitationData?.status || null 
+    return {
+      exists: !!invitationData,
+      status: invitationData?.status || null
     };
   };
 
   // Función para crear un usuario en Supabase si no existe
   const createUserIfNotExists = async (email: string, firstName: string, lastName: string) => {
     const { exists, status } = await checkUserExistsAndStatus(email);
-    
+
     // Si el usuario no existe, lo creamos
     if (!exists) {
       try {
@@ -231,7 +232,7 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
           fb_step_completed: false,
           status: "pending"
         });
-        
+
         console.log(`Usuario creado exitosamente: ${email}`, invitation);
         return { created: true, status: "pending", invitation };
       } catch (error) {
@@ -239,7 +240,7 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
         throw new Error(`No se pudo crear el usuario: ${error.message}`);
       }
     }
-    
+
     return { created: false, status, invitation: null };
   };
 
@@ -263,13 +264,13 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
       // Validar encabezados
       const headers = jsonData[0];
-      const requiredHeaders = ["nombre", "apellido", "email"];
+      const requiredHeaders = ["nombre", "apellido", "email", "social media handle", "social media platform"];
 
       // Verificar que todos los encabezados requeridos estén presentes
       const missingHeaders = requiredHeaders.filter(
         (header) => !headers.includes(header)
       );
-      
+
       if (missingHeaders.length > 0) {
         toast.error(`Faltan encabezados requeridos: ${missingHeaders.join(", ")}`);
         setIsImporting(false);
@@ -280,18 +281,22 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
       const nombreIndex = headers.indexOf("nombre");
       const apellidoIndex = headers.indexOf("apellido");
       const emailIndex = headers.indexOf("email");
+      const socialHandleIndex = headers.indexOf("social media handle")
+      const socialPlatformIndex = headers.indexOf("social media platform")
 
       // Procesar filas de datos
       const errors: ImportError[] = [];
       let successCount = 0;
 
-       // Obtener la notificación seleccionada
-       const selectedNotification = selectedEventNotifications.find(n => n.id === values.notificationId);
-       if (!selectedNotification) {
-         toast.error("No se encontró la notificación seleccionada");
-         setIsImporting(false);
-         return;
-       }
+      // Obtener la notificación seleccionada
+      const selectedNotification = selectedEventNotifications.find(n => n.id === values.notificationId);
+      console.log("check the invitation ", selectedNotification, selectedNotification.id)
+
+      if (!selectedNotification) {
+        toast.error("No se encontró la notificación seleccionada");
+        setIsImporting(false);
+        return;
+      }
 
       // Array para almacenar los destinatarios que recibirán correo (status pending)
       const recipients = [];
@@ -305,8 +310,10 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
         // Omitir filas vacías
         if (!(!row || row.length === 0)) {
           const nombre = row[nombreIndex]?.toString().trim();
-          const apellido = row[apellidoIndex]?.toString().trim()||"";
+          const apellido = row[apellidoIndex]?.toString().trim() || "";
           const email = row[emailIndex]?.toString().trim();
+          const socialHandle = row[socialHandleIndex]?.toString().trim()
+          const socialPlatform = row[socialPlatformIndex]?.toString().trim()
 
           // Validar datos de la fila
           const rowErrorFieldsEmpty = [];
@@ -319,6 +326,9 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
           } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             rowErrors.push("Formato de email inválido");
           }
+
+          if (!socialHandle) rowErrorFieldsEmpty.push("Social Handle")
+          if (!socialPlatform) rowErrorFieldsEmpty.push("Social Platform")
 
           if (rowErrorFieldsEmpty.length > 0) {
             rowErrors.push(`Debes indicar los campos requeridos (${rowErrorFieldsEmpty.join(',')})`);
@@ -341,41 +351,64 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
           try {
             // Verificar si el usuario existe y su estado
             const { exists, status } = await checkUserExistsAndStatus(email);
-            
+
             let invitation;
-            
+
             // Si el usuario ya existe pero no tiene una invitación para este evento, creamos una
             if (!exists && status !== "pending") {
+
+
+              // Prepare invitation data dynamically
+              const invitationData: CreateInvitationData = {
+                project_id: form.getValues().projectId,
+                email: email.toLowerCase(),
+                first_name: nombre,
+                last_name: apellido,
+                invitation_type: "new_user",
+                fb_step_completed: false,
+                status: "pending",
+                social_media_type: socialPlatform
+              };
+
+              // Set handle field based on platform
+              switch (socialPlatform.toUpperCase()) {
+                case "TIKTOK":
+                  invitationData.social_media_handle = socialHandle || null;
+                  break;
+                case "YOUTUBE":
+                  invitationData.youtube_channel = socialHandle || null;
+                  break;
+                case "INSTAGRAM":
+                  invitationData.instagram_user = socialHandle || null;
+                  break;
+                default:
+                  rowErrors.push(`Imports for this social media (${socialPlatform}) are not allowed.`)
+                  break;
+              }
+
+
               try {
-                invitation = await createInvitation({
-                  project_id: form.getValues().projectId,
-                  email: email,
-                  first_name: nombre,
-                  last_name: apellido,
-                  invitation_type: "new_user",
-                  fb_step_completed: false,
-                  status: "pending"
-                });
-                
+                invitation = await createInvitation(invitationData);
+
                 console.log(`Usuario creado exitosamente: ${email}`, invitation);
                 processedInvitations.push(invitation);
-                
+
                 // Añadir a la lista de destinatarios para enviar correo
                 recipients.push({
                   email: email,
                   name: `${nombre} ${apellido}`,
                   variables: {
                     name: `${nombre} ${apellido}`,
-                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?campaign=${selectedNotification.campaign_id}`
+                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?notif=${selectedNotification.id}`
                   }
                 });
-                
+
                 successCount++;
               } catch (error) {
                 console.error(`Error al crear usuario: ${email}`, error);
                 throw new Error(`No se pudo crear la invitación: ${error.message}`);
               }
-            } 
+            }
             // Si existe y su estado es pending, enviamos correo
             else if (status === "pending") {
               try {
@@ -388,29 +421,29 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
                   .eq('status', 'pending')
                   .order('created_at', { ascending: false })
                   .maybeSingle();
-                
+
                 if (fetchError) {
                   throw new Error(`Error al obtener la invitación existente: ${fetchError.message}`);
                 }
-                
+
                 if (!existingInvitation) {
                   throw new Error(`No se encontró una invitación pendiente para ${email}`);
                 }
-                
+
                 // Usar la invitación existente
                 invitation = existingInvitation;
                 processedInvitations.push(invitation);
-                
+
                 // Añadir a la lista de destinatarios para enviar correo
                 recipients.push({
                   email: email,
                   name: `${nombre} ${apellido}`,
                   variables: {
                     name: `${nombre} ${apellido}`,
-                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?campaign=${selectedNotification.campaign_id}`
+                    invitationUrl: `${window.location.origin}${invitation.invitation_url}?notif=${selectedNotification.id}`
                   }
                 });
-                
+
                 successCount++;
                 console.log(`Usando invitación existente para ${email}:`, invitation);
               } catch (error) {
@@ -444,7 +477,7 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
           // Reemplazar las variables en el formato de Mailjet
           htmlContent = htmlContent.replace(/\{\{full_name\}\}/g, "{{var:name}}");
           htmlContent = htmlContent.replace(/\{\{url\}\}/g, "{{var:invitationUrl}}");
-          
+
           // Obtener el evento seleccionado
           const selectedEvent = invitationEvents.find(e => e.id === values.eventId);
           if (!selectedEvent) {
@@ -461,9 +494,9 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
               customCampaign: selectedNotification.campaign_name
             }
           });
-          
+
           if (error) throw error;
-          
+
           // Extraer campaign_id de la respuesta de Mailjet
           const campaignId = response?.campaignId || null;
           if (campaignId) {
@@ -479,21 +512,21 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
             }
             if (processedInvitations.length > 0) {
               const creatorInvitationEvents = processedInvitations.map(invitation => ({
-                creator_invitation_id: invitation.id,  
+                creator_invitation_id: invitation.id,
                 invitation_event_id: selectedEvent.id  // Usar selectedEvent.id en lugar de selectedEvent
               }));
-              
+
               const { error: creatorInvitationEventsError } = await supabase
                 .from('creator_invitations_events')
                 .insert(creatorInvitationEvents);
-              
+
               if (creatorInvitationEventsError) {
                 console.error("Error al crear creator_invitation_events:", creatorInvitationEventsError);
                 throw creatorInvitationEventsError;
               }
             }
           }
-          
+
           toast.success(`Invitaciones enviadas exitosamente a ${successCount} destinatarios`);
         } catch (error) {
           console.error("Error al enviar correos:", error);
@@ -545,71 +578,71 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
             )}
           />
 
-        <FormField
-          control={form.control}
-          name="eventId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Seleccionar Evento</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  fetchEventNotifications(value);
-                  form.setValue('notificationId', ''); // Resetear la notificación seleccionada
-                }}
-                defaultValue={field.value}
-                disabled={isImporting}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecciona un evento" />
-                </SelectTrigger>
-                <SelectContent>
-                  {invitationEvents?.map((event) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      {`${event.event_name}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="notificationId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Seleccionar Notificación</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                disabled={isImporting || !form.getValues().eventId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecciona una notificación" />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedEventNotifications?.map((notification) => (
-                    <SelectItem key={notification.id} value={notification.id}>
-                      {`Campaign: ${notification.campaign_name} - ${notification.type} - ${notification.subject}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="eventId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seleccionar Evento</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    fetchEventNotifications(value);
+                    form.setValue('notificationId', ''); // Resetear la notificación seleccionada
+                  }}
+                  defaultValue={field.value}
+                  disabled={isImporting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona un evento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {invitationEvents?.map((event) => (
+                      <SelectItem key={event.id} value={event.id}>
+                        {`${event.event_name}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="notificationId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seleccionar Notificación</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={isImporting || !form.getValues().eventId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona una notificación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedEventNotifications?.map((notification) => (
+                      <SelectItem key={notification.id} value={notification.id}>
+                        {`Campaign: ${notification.campaign_name} - ${notification.type} - ${notification.subject}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
           <div className="space-y-2">
             <Card className="mb-6">
               <CardContent className="pt-6">
                 <AlertDescription>
                   Estructura del archivo Excel para importación:<br />
-                  <strong>nombre</strong> | <strong>apellido</strong> | <strong>email</strong><br />
-                  Juan | Pérez | juan@ejemplo.com
+                  <strong>nombre</strong> | <strong>apellido</strong> | <strong>email</strong> | <strong>social media handle</strong> | <strong>social media platform</strong><br />
+                  Juan | Pérez | juan@ejemplo.com | usertiktok | tiktok
                 </AlertDescription>
               </CardContent>
             </Card>
-            
+
             <div className="flex items-center gap-4">
               <Button
                 type="button"

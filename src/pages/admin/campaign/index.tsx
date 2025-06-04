@@ -19,7 +19,7 @@ export default function CampaignPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
-            <TabsTrigger value="send">Enviar Campaña</TabsTrigger>
+            {/* <TabsTrigger value="send">Enviar Campaña</TabsTrigger> */}
             <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
           </TabsList>
 
@@ -34,7 +34,7 @@ export default function CampaignPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="send">
+          {/* <TabsContent value="send">
             <Card>
               <CardHeader>
                 <CardTitle>Enviar Campaña</CardTitle>
@@ -43,7 +43,7 @@ export default function CampaignPage() {
                 <ImportCampaign />
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="event">
             <Card>
