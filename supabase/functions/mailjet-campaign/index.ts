@@ -47,7 +47,7 @@ serve(async (req) => {
     // Preparar mensajes para cada destinatario
     const messages = recipients.map((recipient) => {
       const message = {
-        From: { Email: senderEmail, Name: "La Neta" },
+        From: { Email: senderEmail },
         To: [{ Email: recipient.email, Name: recipient.name || "Usuario" }],
         Subject: subject,
         TemplateID: templateId,
