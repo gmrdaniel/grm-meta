@@ -12,7 +12,6 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { supabase } from "@/integrations/supabase/client";
-import { Checkbox } from "../ui/checkbox";
 import { sanitizeInputBeforeUpdate } from "@/utils/sanitizeInputBeforeUpdate";
 import { CreatorInvitation } from "@/types/invitation";
 import { ProfileFormData } from "@/types/forms-type";
@@ -23,8 +22,6 @@ interface CompleteProfileFormProps {
   invitation: CreatorInvitation;
 }
 
-
-
 export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   onSubmit,
   isSubmitting,
@@ -32,11 +29,9 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     youtubeChannel: "",
-    instagramUser: "",
     phoneCountryCode: "+1",
     phoneNumber: "",
     phoneVerified: false,
-    isIGProfessional: false,
   });
 
   const [verificationStep, setVerificationStep] = useState<
@@ -46,18 +41,13 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [instagramError, setInstagramError] = useState<string | null>(null);
-  const [needsInstagramRevalidation, setNeedsInstagramRevalidation] =
-    useState(false);
 
   useEffect(() => {
     setFormData({
       youtubeChannel: invitation.youtube_channel,
-      instagramUser: invitation.instagram_user,
-      phoneCountryCode: invitation.phone_country_code ?? '+1',
+      phoneCountryCode: invitation.phone_country_code ?? "+1",
       phoneNumber: invitation.phone_number,
       phoneVerified: invitation.phone_verified,
-      isIGProfessional: invitation.is_professional_account,
     });
   }, [invitation]);
 
@@ -71,10 +61,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     }
   }, [countdown]);
 
-  useEffect(() => {
-    validateInstagramUsername(formData.instagramUser)
-  }, [formData.instagramUser])
-
   // Format countdown as mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -82,36 +68,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
-  };
-  
-
-  const validateInstagramUsername = (username: string): boolean => {
-    if (!username) {
-      setInstagramError(null);
-      setNeedsInstagramRevalidation(false);
-      return true;
-    }
-
-    const cleanUsername = username.startsWith("@")
-      ? username.substring(1)
-      : username;
-
-    if (cleanUsername.length < 5 || cleanUsername.length > 30) {
-      setInstagramError("Username must be between 5 and 30 characters long");
-      return false;
-    }
-
-    const validRegex = /^[a-zA-Z0-9._]+$/;
-    if (!validRegex.test(cleanUsername)) {
-      setInstagramError(
-        "Only letters, numbers, periods, and underscores are allowed"
-      );
-      return false;
-    }
-
-    setInstagramError(null);
-    setNeedsInstagramRevalidation(false);
-    return true;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,22 +79,12 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         ...formData,
         [name]: value.replace(/\D/g, ""),
       });
-    } else if (name === "instagramUser") {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-      setNeedsInstagramRevalidation(true);
     } else {
       setFormData({
         ...formData,
         [name]: value,
       });
     }
-  };
-
-  const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleSendVerificationCode = async () => {
@@ -156,13 +102,13 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         body: {
           action: "send",
           phoneNumber: formData.phoneNumber,
-          countryCode: formData.phoneCountryCode ?? '+1',
+          countryCode: formData.phoneCountryCode ?? "+1",
         },
       });
 
       if (error) {
         console.error("Error sending verification code:", error);
-        setError(error.message || "Failed to send verification code");
+        setError(error.message ?? "Failed to send verification code");
         toast.error("Failed to send verification code");
         return;
       }
@@ -172,8 +118,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         setVerificationStep("verification");
         setCountdown(600); // 10-minute countdown (Twilio default)
       } else {
-        setError(data.message || "Failed to send verification code");
-        toast.error(data.message || "Failed to send verification code");
+        setError(data.message ?? "Failed to send verification code");
+        toast.error(data.message ?? "Failed to send verification code");
       }
     } catch (err) {
       console.error("Error in verification process:", err);
@@ -206,7 +152,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
 
       if (error) {
         console.error("Error verifying code:", error);
-        setError(error.message || "Failed to verify code");
+        setError(error.message ?? "Failed to verify code");
         toast.error("Failed to verify code");
         return;
       }
@@ -219,8 +165,8 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
         });
         setVerificationStep("input");
       } else {
-        setError(data.message || "Invalid verification code");
-        toast.error(data.message || "Invalid verification code");
+        setError(data.message ?? "Invalid verification code");
+        toast.error(data.message ?? "Invalid verification code");
       }
     } catch (err) {
       console.error("Error in verification process:", err);
@@ -237,12 +183,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
   };
 
   const handleSubmit = () => {
-    // Validate Instagram username before submission
-    if (!validateInstagramUsername(formData.instagramUser)) {
-      toast.error("Please fix the Instagram username format");
-      return;
-    }
-
     onSubmit(formData);
   };
 
@@ -250,79 +190,6 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
     <>
       <CardContent className="space-y-6">
         <div className="space-y-6">
-          {/* Campo requerido: Instagram */}
-          <div className="space-y-2">
-            <Label htmlFor="instagramUser" className="flex items-center gap-2">
-              Instagram <span className="text-red-500">*</span>
-            </Label>
-
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                <span className="text-slate-500 text-sm">@</span>
-              </div>
-              <Input
-                id="instagramUser"
-                name="instagramUser"
-                value={formData.instagramUser}
-                onChange={(e) => {
-                  const sanitizedValue = sanitizeInputBeforeUpdate(
-                    e.target.value
-                  );
-                  setFormData((prev) => ({
-                    ...prev,
-                    instagramUser: sanitizedValue,
-                  }));
-                }}
-                placeholder="username"
-                className="pl-8"
-              />
-            </div>
-
-            {instagramError && (
-              <>
-                <p className="text-sm text-red-500 mt-1">{instagramError}</p>
-                {needsInstagramRevalidation && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => {
-                      validateInstagramUsername(formData.instagramUser);
-                    }}
-                  >
-                    Validate Instagram again
-                  </Button>
-                )}
-              </>
-            )}
-
-            <p className="text-xs text-gray-500">
-              Must be 5–30 characters long. Only letters, numbers, periods, and
-              underscores are allowed. Do not include @ or links.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="isIGProfessional"
-              checked={formData.isIGProfessional}
-              onCheckedChange={(checked) =>
-                handleCheckboxChange("isIGProfessional", checked as boolean)
-              }
-            />
-            <Label htmlFor="isIGProfessional" className="text-sm">
-              My account is a{" "}
-              <a
-                href="https://help.instagram.com/502981923235522"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                professional instagram account
-              </a>
-            </Label>
-          </div>
-
           {/* Campo requerido: Teléfono */}
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
@@ -345,7 +212,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     name="phoneCountryCode"
                     value={formData.phoneCountryCode}
                     onChange={handleInputChange}
-                    className="w-20"
+                    className="w-20 bg-gray-50 border-0"
                     readOnly={true}
                     aria-readonly={formData.phoneVerified}
                   />
@@ -355,7 +222,7 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                     placeholder="Phone number"
-                    className="flex-1"
+                    className="flex-1 bg-gray-50 border-0"
                     type="tel"
                     readOnly={formData.phoneVerified}
                     disabled={formData.phoneVerified}
@@ -460,10 +327,10 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
           {/* Campo opcional: YouTube */}
           <div className="space-y-2">
             <Label htmlFor="youtubeChannel">YouTube Channel (Optional)</Label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                <span className="text-slate-500 text-sm">@</span>
-              </div>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-0 rounded-l-md">
+                @
+              </span>
               <Input
                 id="youtubeChannel"
                 name="youtubeChannel"
@@ -478,23 +345,24 @@ export const CompleteProfileForm: React.FC<CompleteProfileFormProps> = ({
                   }));
                 }}
                 placeholder="channelname"
-                className="pl-8"
+                className="rounded-l-none bg-gray-50 border-0"
               />
             </div>
+            <p className="text-xs text-gray-500">
+              Link your YouTube channel to unlock cross-platform opportunities
+            </p>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-center">
         <Button
           onClick={handleSubmit}
+          className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           disabled={
             isSubmitting ||
             !formData.phoneVerified ||
-            !formData.phoneNumber ||
-            !formData.isIGProfessional ||
-            !formData.instagramUser ||
-            !!instagramError
+            !formData.phoneNumber
           }
         >
           {isSubmitting ? "Saving..." : "Continue to final step"}

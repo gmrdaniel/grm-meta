@@ -15,9 +15,7 @@ import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 
 // 🛠️ Services
 import { supabase } from "@/integrations/supabase/client";
-import {
-  updateFacebookPage,
-} from "@/services/invitation";
+import { updateFacebookPage } from "@/services/invitation";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
@@ -26,12 +24,13 @@ import { validateFacebookPageUrl } from "@/utils/validateFacebookPageUrl";
 // 🗃️ Types
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectStage } from "@/types/project";
-import { Check } from "lucide-react";
+import { Check, Clock, DollarSign, Shield, Zap } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
 import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
 import { ProfileFormData } from "@/types/forms-type";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
+import BonusCard from "@/components/ui/bonus-card";
 
 // 🧭 Steps
 const stepList = [
@@ -48,6 +47,7 @@ const defaultFormData = {
   email: "",
   socialMediaHandle: "",
   termsAccepted: false,
+  instagramUser: "",
 };
 
 const defaultFacebookData = {
@@ -66,9 +66,6 @@ const defaultPasswordData = {
 export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
-
-
-  
 
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
@@ -98,46 +95,43 @@ export default function InvitationStepperPage() {
     youtubeChannel: string;
     instagramUser: string;
     isIGProfessional: boolean;
-    phoneCountryCode: string; 
+    phoneCountryCode: string;
     phoneNumber: string;
     phoneVerified: boolean;
     socialMediaHandle: string; // Para el "TikTok Channel" que se guarda aquí
   }
 
-  
+  const handleCompleteProfileYtbSubmit = async (
+    formData: YouTubeProfileFormData
+  ) => {
+    if (!invitation) return;
+    setSaving(true);
 
-const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) => {
-  if (!invitation) return;
-  setSaving(true);
+    const updateData = {
+      youtube_channel: formData.youtubeChannel ?? null,
+      instagram_user: formData.instagramUser,
+      is_professional_account: formData.isIGProfessional,
+      phone_country_code: formData.phoneCountryCode ?? null,
+      phone_number: formData.phoneNumber ?? null,
+      phone_verified: formData.phoneVerified ?? false,
+      social_media_handle: formData.socialMediaHandle ?? null, // Para TikTok
+    };
+    console.log("updateData being sent to Supabase:", updateData);
 
-  const updateData = {
-    youtube_channel: formData.youtubeChannel ?? null,
-    instagram_user: formData.instagramUser,
-    is_professional_account: formData.isIGProfessional,
-    phone_country_code: formData.phoneCountryCode ?? null,
-    phone_number: formData.phoneNumber ?? null,
-    phone_verified: formData.phoneVerified ?? false,
-    social_media_handle: formData.socialMediaHandle ?? null, // Para TikTok
+    const { error } = await supabase
+      .from("creator_invitations")
+      .update(updateData)
+      .eq("id", invitation.id);
+
+    if (error) {
+      toast.error("Failed to save YouTube profile");
+    } else {
+      toast.success("YouTube profile saved successfully");
+      goToNextStep();
+    }
+
+    setSaving(false);
   };
-  console.log("updateData being sent to Supabase:", updateData);
-
-  const { error } = await supabase
-    .from("creator_invitations")
-    .update(updateData)
-    .eq("id", invitation.id);
-
-  if (error) {
-    toast.error("Failed to save YouTube profile");
-  } else {
-    toast.success("YouTube profile saved successfully");
-    goToNextStep();
-  }
-
-  setSaving(false);
-};
-
-
-
 
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,84 +193,99 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
     if (!invitation) return;
     setIsSubmitting(true);
 
-    const hasExistingTask = await checkExistingTask(null, invitation.id);
-    if (hasExistingTask) {
-      toast.error("This invitation has already been processed");
+    try {
+      const hasExistingTask = await checkExistingTask(null, invitation.id);
+      if (hasExistingTask) {
+        toast.error("This invitation has already been processed");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.firstName.trim() || !formData.lastName.trim()) {
+        toast.error("First name and last name are required");
+        setIsSubmitting(false);
+        return;
+      }
+      const instagramUsername = formData.instagramUser?.trim();
+
+      // Validación 1: campo obligatorio
+      if (!instagramUsername) {
+        toast.error("Instagram username is required.");
+        setIsSubmitting(false);
+        setSaving(false);
+        return;
+      }
+
+      // Validación 2: formato correcto (sin arrobas, links, espacios, etc.)
+      if (!isValidInstagramUsernameFormat(instagramUsername)) {
+        toast.error(
+          "Please enter only the Instagram username without @ or links."
+        );
+        setIsSubmitting(false);
+        setSaving(false);
+        return;
+      }
+
+      let isBusinessAccount: boolean | null = null;
+      let isProfessionalAccount: boolean | null = null;
+
+      // Validación 3: existencia del usuario
+      try {
+        const result = await fetchInstagramUser(instagramUsername);
+
+        const user = result.result[0]?.user;
+
+        if (
+          !user?.username ||
+          user.username.toLowerCase() !== instagramUsername.toLowerCase()
+        ) {
+          toast.error("Instagram user does not exist or is inaccessible.");
+          setSaving(false);
+          return;
+        }
+
+        isBusinessAccount = user.is_business;
+        isProfessionalAccount = false;
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to verify Instagram user.");
+        setSaving(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from("creator_invitations")
+        .update({
+          status: "in process",
+          updated_at: new Date().toISOString(),
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          instagram_user: instagramUsername,
+          is_business_account: isBusinessAccount,
+          is_professional_account: isProfessionalAccount,
+        })
+        .eq("id", invitation.id);
+
+      if (error) {
+        toast.error("Failed to accept invitation");
+      } else {
+        toast.success("Invitation accepted successfully");
+        goToNextStep();
+      }
+    } catch (error) {
+      console.error("Error in handleContinueWelcome:", error);
+      toast.error("An error occurred while processing your request");
+      setIsSubmitting(false);
       return;
     }
-
-    const { error } = await supabase
-      .from("creator_invitations")
-      .update({ status: "in process", updated_at: new Date().toISOString() })
-      .eq("id", invitation.id);
-
-    if (error) {
-      toast.error("Failed to accept invitation");
-    } else {
-      toast.success("Invitation accepted successfully");
-      goToNextStep();
-    }
-
-    setIsSubmitting(false);
   };
 
   const handleCompleteProfileSubmit = async (formData: ProfileFormData) => {
     if (!invitation) return;
     setSaving(true);
 
-    const instagramUsername = formData.instagramUser?.trim();
-
-    // Validación 1: campo obligatorio
-    if (!instagramUsername) {
-      toast.error("Instagram username is required.");
-      setSaving(false);
-      return;
-    }
-
-    // Validación 2: formato correcto (sin arrobas, links, espacios, etc.)
-    if (!isValidInstagramUsernameFormat(instagramUsername)) {
-      toast.error(
-        "Please enter only the Instagram username without @ or links."
-      );
-      setSaving(false);
-      return;
-    }
-
-    let isBusinessAccount: boolean | null = null;
-    let isProfessionalAccount: boolean | null = null;
-
-    // Validación 3: existencia del usuario
-    try {
-      const result = await fetchInstagramUser(instagramUsername);
-      
-      
-      const user = result.result[0]?.user;
-
-
-      if (
-        !user?.username ||
-        user.username.toLowerCase() !== instagramUsername.toLowerCase()
-      ) {
-        toast.error("Instagram user does not exist or is inaccessible.");
-        setSaving(false);
-        return;
-      }
-
-      isBusinessAccount = user.is_business;
-      isProfessionalAccount = false;
-    } catch (error) {
-      console.log(error)
-      toast.error("Failed to verify Instagram user.");
-      setSaving(false);
-      return;
-    }
-
     const updateData = {
       youtube_channel: formData.youtubeChannel || null,
-      instagram_user: instagramUsername,
-      is_business_account: isBusinessAccount,
-      is_professional_account: isProfessionalAccount,
-      
       status: "in process" as const,
     };
 
@@ -322,9 +331,11 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       return;
     }
 
-    if(facebookFormData.facebookPageUrl === facebookFormData.facebookProfileUrl) {
+    if (
+      facebookFormData.facebookPageUrl === facebookFormData.facebookProfileUrl
+    ) {
       toast.error("Facebook Page and Profile URLs cannot be the same.");
-      return
+      return;
     }
 
     if (!invitation_code || !invitation) {
@@ -407,7 +418,7 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
       toast.success("Account created! You can log in now.");
       setTimeout(() => navigate("/auth"), 2000);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       toast.error("Error creating account");
     } finally {
       setSubmitting(false);
@@ -436,119 +447,162 @@ const handleCompleteProfileYtbSubmit = async (formData: YouTubeProfileFormData) 
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Contenido principal con flex-grow */}
-      <div className="flex flex-col md:flex-row items-center justify-evenly flex-grow p-4 gap-2">
-        <div className="text-center max-w-md space-y-1 mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mt-4">
-            {currentStep.id === "completeProfile"
-              ? "Complete Your Profile"
-              : "Join Meta Creator Breakthrough Bonus Program"}
-          </h1>
-          <p className="text-sm text-gray-500">Join. Monetize. Grow.</p>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="max-w-7xl mx-auto my-8 md:my-12 ">
+        <div className="lg:grid lg:grid-cols-[1fr_1.25fr]">
+          {/* Left Side - Purple Section */}
+          <div className="bg-gradient-to-br from-blue-500/80 to-purple-600/80 opacity-90 p-12 text-white relative overflow-hidden flex flex-col rounded-t-2xl md:rounded-tr-none md:rounded-s-2xl">
+            <div className="relative z-10">
+              {/* Official Badge */}
+              <a
+                href="https://www.facebook.com/FacebookforCreators/posts/pfbid02cZ1b5PweXBEdJhXz7XDBXSGVt1ELbkZNkSCR7vUAKeNmebbyQvk6in7AjJnboskNl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="badge inline-flex items-center bg-white bg-opacity-30 rounded-full px-4 py-2 mb-6 no-underline hover:bg-opacity-40 transition"
+              >
+                <Check className="h-4 w-4 mr-2 text-white" />
+                <span className="text-white font-medium text-sm">
+                  Official Announcement
+                </span>
+              </a>
 
-          {/* Benefits Section */}
-          {currentStep.id === "welcome" && (
-            <div className="p-4">
-              <h3 className="font-medium mb-3">Benefits:</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <div className="rounded-full bg-green-100 p-1">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span className="whitespace-nowrap">
-                    Gain Immediate Facebook monetization
-                  </span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="rounded-full bg-green-100 p-1">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span>Up to $5,000 in extra bonuses (90 days)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="rounded-full bg-green-100 p-1">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span>Free trial of Meta Verified</span>
-                </li>
-                <li className="items-center gap-2 hidden lg:flex">
-                  <div className="rounded-full bg-green-100 p-1">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span>Increased discoverability</span>
-                </li>
-                <li className=" items-center gap-2 hidden lg:flex">
-                  <div className="rounded-full bg-green-100 p-1">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span>Meta Support</span>
-                </li>
-              </ul>
+              {/* Main Title */}
+              <h1 className="relative z-10 text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-8">
+                Join Meta
+                <br className="lg:block" />
+                Creator Breakthrough Bonus Program
+              </h1>
+
+              {/* Subtitle */}
+              <p className="relative z-10 text-xl text-white mb-8">
+                Get access to:
+              </p>
+
+              {/* Benefits Cards */}
+              <div className="space-y-4">
+                <BonusCard
+                  icon={<DollarSign className="h-5 w-5" />}
+                  title="$5,000 in bonuses"
+                  subtitle="Earn while creating content you love"
+                />
+
+                <BonusCard
+                  icon={<Clock className="h-5 w-5" />}
+                  title="Monetize on Facebook Instantly"
+                  subtitle="No waiting period for eligibility"
+                />
+                <BonusCard
+                  icon={<Shield className="h-5 w-5" />}
+                  title="Free Meta Verified"
+                  subtitle="Get the blue checkmark & exclusive features"
+                />
+                <BonusCard
+                  icon={<Zap className="h-5 w-5" />}
+                  title="Fast-track application"
+                  subtitle="Skip the line with our partner program"
+                />
+              </div>
+
+              <div className="mt-8">
+                <p className="text-white/80 font-medium">
+                  Limited spots available. Apply now!
+                </p>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Right Side - Form Section */}
+          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-e-2xl">
+            <div className=" w-full">
+              <div className="text-left mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+                  Join Meta Creator Program
+                </h2>
+                <p className="text-purple-600 font-medium mb-4">
+                  We're La Neta, an official partner of Meta
+                </p>
+
+                {currentStep.id === "welcome" && (
+                  <div className="space-y-3 text-gray-600">
+                    <p>
+                      Welcome to the Meta Creator Breakthrough Bonus Program
+                    </p>
+                    <p>
+                      Earn up to{" "}
+                      <span className="font-semibold">$5,000 in bonuses</span>{" "}
+                      just by posting Reels on Facebook
+                    </p>
+                    <p>
+                      Start monetizing right away + get a free trial of Meta
+                      Verified
+                    </p>
+                    <p>
+                      Limited spots available for high-potential creators like
+                      you
+                    </p>
+                    <p className="mt-4 text-gray-700">
+                      Fill out the form below to get started.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {invitation?.social_media_type === "tiktok" && (
+                <TikTokForm
+                  currentStep={currentStep}
+                  invitation={invitation}
+                  formData={formData}
+                  saving={saving}
+                  isSubmitting={isSubmitting}
+                  submissionComplete={submissionComplete}
+                  facebookFormData={facebookFormData}
+                  submitting={submitting}
+                  error={error}
+                  showPasswordForm={showPasswordForm}
+                  passwordData={passwordData}
+                  handleInputChange={handleInputChange}
+                  handleCheckboxChange={handleCheckboxChange}
+                  handleContinueWelcome={handleContinueWelcome}
+                  handleCompleteProfileSubmit={handleCompleteProfileSubmit}
+                  handleFacebookInputChange={handleFacebookInputChange}
+                  handleCheckboxFacebookChange={handleCheckboxFacebookChange}
+                  handleFacebookSubmit={handleFacebookSubmit}
+                  handlePasswordChange={handlePasswordChange}
+                  handleSetPassword={handleSetPassword}
+                  setShowPasswordForm={setShowPasswordForm}
+                />
+              )}
+              {invitation?.social_media_type === "youtube" && (
+                <YouTubeForm
+                  currentStep={currentStep}
+                  invitation={invitation}
+                  formData={formData}
+                  saving={saving}
+                  isSubmitting={isSubmitting}
+                  submissionComplete={submissionComplete}
+                  facebookFormData={facebookFormData}
+                  submitting={submitting}
+                  error={error}
+                  showPasswordForm={showPasswordForm}
+                  passwordData={passwordData}
+                  handleInputChange={handleInputChange}
+                  handleCheckboxChange={handleCheckboxChange}
+                  handleContinueWelcome={handleContinueWelcome}
+                  handleCompleteProfileYtbSubmit={
+                    handleCompleteProfileYtbSubmit
+                  }
+                  handleFacebookInputChange={handleFacebookInputChange}
+                  handleCheckboxFacebookChange={handleCheckboxFacebookChange}
+                  handleFacebookSubmit={handleFacebookSubmit}
+                  handlePasswordChange={handlePasswordChange}
+                  handleSetPassword={handleSetPassword}
+                  setShowPasswordForm={setShowPasswordForm}
+                />
+              )}
+            </div>
+          </div>
         </div>
-
-        <div className="h-[400px] hidden lg:block bg-blue-300 p-[1px]"></div>
-
-        <Card className="w-full max-w-lg min-h-lg">
-          <CardContent className="pt-6">
-            <Stepper steps={stepList} currentStep={currentStep.id} />
-            {invitation?.social_media_type === "tiktok" && (
-              <TikTokForm
-                currentStep={currentStep}
-                invitation={invitation}
-                formData={formData}
-                saving={saving}
-                isSubmitting={isSubmitting}
-                submissionComplete={submissionComplete}
-                facebookFormData={facebookFormData}
-                submitting={submitting}
-                error={error}
-                showPasswordForm={showPasswordForm}
-                passwordData={passwordData}
-                handleInputChange={handleInputChange}
-                handleCheckboxChange={handleCheckboxChange}
-                handleContinueWelcome={handleContinueWelcome}
-                handleCompleteProfileSubmit={handleCompleteProfileSubmit}
-                handleFacebookInputChange={handleFacebookInputChange}
-                handleCheckboxFacebookChange={handleCheckboxFacebookChange}
-                handleFacebookSubmit={handleFacebookSubmit}
-                handlePasswordChange={handlePasswordChange}
-                handleSetPassword={handleSetPassword}
-                setShowPasswordForm={setShowPasswordForm}
-              />
-            )}
-            {invitation?.social_media_type === "youtube" && (
-              <YouTubeForm
-                currentStep={currentStep}
-                invitation={invitation}
-                formData={formData}
-                saving={saving}
-                isSubmitting={isSubmitting}
-                submissionComplete={submissionComplete}
-                facebookFormData={facebookFormData}
-                submitting={submitting}
-                error={error}
-                showPasswordForm={showPasswordForm}
-                passwordData={passwordData}
-                handleInputChange={handleInputChange}
-                handleCheckboxChange={handleCheckboxChange}
-                handleContinueWelcome={handleContinueWelcome}
-                handleCompleteProfileYtbSubmit={handleCompleteProfileYtbSubmit}
-                handleFacebookInputChange={handleFacebookInputChange}
-                handleCheckboxFacebookChange={handleCheckboxFacebookChange}
-                handleFacebookSubmit={handleFacebookSubmit}
-                handlePasswordChange={handlePasswordChange}
-                handleSetPassword={handleSetPassword}
-                setShowPasswordForm={setShowPasswordForm}
-              />
-            )}
-          </CardContent>
-        </Card>
       </div>
-
-      <Footer />
     </div>
   );
 }
