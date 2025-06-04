@@ -523,7 +523,10 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
               if (creatorInvitationEventsError) {
                 console.error("Error al crear creator_invitation_events:", creatorInvitationEventsError);
-                throw creatorInvitationEventsError;
+                if (creatorInvitationEventsError?.code != '23505') {//Si el error es diferente a duplicados en bd
+                  throw creatorInvitationEventsError;
+                }
+
               }
             }
           }
