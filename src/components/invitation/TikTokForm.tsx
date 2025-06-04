@@ -32,10 +32,8 @@ export const TikTokForm = ({
     <>
       {currentStep.id === "welcome" && (
         <WelcomeForm
-          invitation={invitation}
           formData={formData}
           onInputChange={handleInputChange}
-          onCheckboxChange={handleCheckboxChange}
           onContinue={handleContinueWelcome}
           isSubmitting={isSubmitting}
         />
@@ -56,6 +54,7 @@ export const TikTokForm = ({
             onPasswordChange={handlePasswordChange}
             onSetPassword={handleSetPassword}
             onShowPasswordForm={() => setShowPasswordForm(true)}
+            invitation={invitation}
           />
         )}
       {currentStep.id === "fbcreation" &&
