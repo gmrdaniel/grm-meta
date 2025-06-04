@@ -142,7 +142,7 @@ async function sendNotification(
     const body = {
       Messages: [
         {
-          From: { Email: senderEmail },
+          From: { Email: senderEmail, Name: "Nicole Kressler" },
           To: [{ Email: invitation.email, Name: invitation.first_name || "Usuario" }],
           Subject: subject,
           HTMLPart: html,
