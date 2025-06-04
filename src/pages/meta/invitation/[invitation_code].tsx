@@ -1,6 +1,6 @@
 // 🧩 Libs
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Footer from "../../../components/Footer";
 
@@ -76,6 +76,8 @@ const defaultPasswordData = {
 export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const notif = searchParams.get("notif");
 
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
@@ -273,6 +275,7 @@ export default function InvitationStepperPage() {
           instagram_user: instagramUsername,
           is_business_account: isBusinessAccount,
           is_professional_account: isProfessionalAccount,
+          registration_notification_id: notif
         })
         .eq("id", invitation.id);
 
