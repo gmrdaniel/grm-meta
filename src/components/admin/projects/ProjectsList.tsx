@@ -1,39 +1,49 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit } from "lucide-react";
+import { Eye, Edit, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
-import { Project } from "@/types/project";
 import { fetchProjects } from "@/services/project/projectService";
 import { useQuery } from "@tanstack/react-query";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 
 export function ProjectsList() {
   const navigate = useNavigate();
-  
-  const { data: projects, isLoading, error } = useQuery({
-    queryKey: ['projects'],
-    queryFn: fetchProjects
+
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["projects"],
+    queryFn: fetchProjects,
   });
-  
+
   useEffect(() => {
     if (error) {
       toast.error(`Error al cargar proyectos: ${(error as Error).message}`);
     }
   }, [error]);
-  
+
   const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'draft':
+    switch (status) {
+      case "draft":
         return <Badge variant="outline">Borrador</Badge>;
-      case 'active':
+      case "active":
         return <Badge className="bg-green-500">Activo</Badge>;
-      case 'pending':
+      case "pending":
         return <Badge className="bg-yellow-500">Pendiente</Badge>;
-      case 'archived':
+      case "archived":
         return <Badge variant="secondary">Archivado</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -75,25 +85,47 @@ export function ProjectsList() {
                   <TableCell className="font-medium">{project.name}</TableCell>
                   <TableCell>{getStatusBadge(project.status)}</TableCell>
                   <TableCell>{project.stage_count || 0}</TableCell>
-                  <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(project.updated_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {new Date(project.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(project.updated_at).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={() => navigate(`/admin/projects/${project.id}`)}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        side="bottom"
+                        sideOffset={8}
+                        collisionPadding={16}
+                        className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
                       >
-                        <Eye size={16} />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={() => navigate(`/admin/projects/${project.id}?edit=true`)}
-                      >
-                        <Edit size={16} />
-                      </Button>
-                    </div>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/admin/projects/${project.id}`)
+                          }
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer"
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          See project
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/admin/projects/${project.id}?edit=true`)
+                          }
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit project
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))

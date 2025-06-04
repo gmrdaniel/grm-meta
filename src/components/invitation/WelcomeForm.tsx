@@ -1,237 +1,156 @@
-import { CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { CreatorInvitation } from "@/types/invitation";
-import { TermsCheckbox } from "../terms-and-conditions/TermsAndConditions";
-import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface WelcomeFormProps {
-  invitation: CreatorInvitation;
-  formData: {
+  readonly formData: {
     firstName: string;
     lastName: string;
     email: string;
-    socialMediaHandle: string;
-    termsAccepted: boolean;
+    instagramUser: string;
+    isUsResident: boolean;
+    isOver18: boolean;
+    isNewToMeta: boolean;
   };
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onCheckboxChange: (checked: boolean) => void;
-  onContinue: () => void;
-  isSubmitting?: boolean;
+  readonly onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  readonly onContinue: () => void;
+  readonly isSubmitting: boolean;
 }
 
-export const WelcomeForm: React.FC<WelcomeFormProps> = ({
-  invitation,
+export function WelcomeForm({
   formData,
   onInputChange,
-  onCheckboxChange,
   onContinue,
-  isSubmitting = false,
-}) => {
-  // Estado para cada checkbox
-  const [isUSBased, setIsUSBased] = useState(false);
-  const [hasNotMonetized, setHasNotMonetized] = useState(false);
-  const [notInOtherProgram, setNotInOtherProgram] = useState(false);
-  const [formErrors, setFormErrors] = useState<{
-    firstName?: string;
-    lastName?: string;
-  }>({});
-
-  // Función para verificar si todos los checkboxes están marcados
-  const allChecked =
-    isUSBased && hasNotMonetized && notInOtherProgram && formData.termsAccepted;
-
-  const handleContinue = () => {
-    if (!isValidName(formData.firstName) || !isValidName(formData.lastName)) {
-      toast.error(
-        "Please enter a valid first and last name (at least 2 letters, no symbols)."
-      );
-      return;
-    }
-
-    if (!allChecked) {
-      toast.error("You must accept all conditions to continue");
-      return;
-    }
-    onContinue();
-  };
-
-  const handleAcceptTerms = () => {
-    onCheckboxChange(true); // Marca el checkbox de términos y condiciones
-  };
-
-  const isValidName = (name: string) => {
-    const nameRegex = /^[a-zA-ZÀ-ÿ'-]{2,}$/; // permite letras, espacios, apóstrofes y guiones
-    return nameRegex.test(name.trim());
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    onInputChange(e); // actualiza estado padre
-
-    // Validar solo firstName y lastName
-    if (name === "firstName" || name === "lastName") {
-      const isValid = isValidName(value);
-
-      setFormErrors((prev) => ({
-        ...prev,
-        [name]: isValid
-          ? undefined
-          : "Must be at least 2 letters. No spaces or special characters.",
-      }));
-    }
-  };
+  isSubmitting,
+}: WelcomeFormProps) {
+  const [isUsResident, setIsUsResident] = React.useState(false);
+  const [isOver18, setIsOver18] = React.useState(false);
+  const [isNewToMeta, setIsNewToMeta] = React.useState(false);
 
   return (
-    <>
-      <CardContent className="space-y-6">
-        {/* Join Meta Creator Program Section (Moved from CardHeader) */}
-        <div className="mt-4 border-gray-200 pt-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-2 whitespace-normal lg:whitespace-nowrap">
-            Join Meta Breakthrough Bonus Program
-          </h2>
-          <p className="text-gray-600 text-sm">
-            You've been invited to join this exclusive program. Apply through us
-            and get direct Meta support, tips for content optimization, to earn
-            faster, and more!
-          </p>
-        </div>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={onInputChange}
-              placeholder="Your first name"
-              className={formErrors.firstName ? "border-red-500" : ""}
-            />
-            {formErrors.firstName && (
-              <p className="text-xs text-red-500">{formErrors.firstName}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              placeholder="Your last name"
-              className={formErrors.lastName ? "border-red-500" : ""}
-            />
-            {formErrors.lastName && (
-              <p className="text-xs text-red-500">{formErrors.lastName}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              readOnly
-              className="bg-gray-50"
-              placeholder="your@email.com"
-            />
-          </div>
-
-          {invitation.social_media_type && (
-            <div className="space-y-2">
-              <Label htmlFor="socialMediaHandle">
-                {invitation.social_media_type === "tiktok"
-                  ? "TikTok Username"
-                  : "Pinterest Username"}
-              </Label>
-              <Input
-                id="socialMediaHandle"
-                name="socialMediaHandle"
-                value={formData.socialMediaHandle}
-                readOnly
-                className="bg-gray-50"
-                placeholder={
-                  invitation.social_media_type === "tiktok"
-                    ? "@username"
-                    : "username"
-                }
-              />
-            </div>
-          )}
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="us-based-checkbox"
-              checked={isUSBased}
-              onCheckedChange={(checked) => setIsUSBased(checked === true)}
-            />
-            <label
-              htmlFor="us-based-checkbox"
-              className="text-sm font-medium text-gray-700"
-            >
-              I’m based in the US and 18 years of age or older
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="not-monetized-checkbox"
-              checked={hasNotMonetized}
-              onCheckedChange={(checked) =>
-                setHasNotMonetized(checked === true)
-              }
-            />
-            <label
-              htmlFor="not-monetized-checkbox"
-              className="text-sm font-medium text-gray-700"
-            >
-              I’ve never monetize on Facebook before
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="not-other-program-checkbox"
-              checked={notInOtherProgram}
-              onCheckedChange={(checked) =>
-                setNotInOtherProgram(checked === true)
-              }
-            />
-            <label
-              htmlFor="not-other-program-checkbox"
-              className="text-sm font-medium text-gray-700 break-words sm:whitespace-nowrap"
-            >
-              I’m not participating in any other Facebook monetization program
-            </label>
-          </div>
-
-          <TermsCheckbox
-            formData={formData}
-            onCheckboxChange={onCheckboxChange}
-            onAcceptTerms={handleAcceptTerms}
-            formType="meta"
+    <div className="space-y-6">
+      {/* Form Fields */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={onInputChange}
+            placeholder="Your first name"
+            className="bg-gray-50 border-0"
           />
         </div>
-      </CardContent>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={onInputChange}
+            placeholder="Your last name"
+            className="bg-gray-50 border-0"
+          />
+        </div>
+      </div>
 
-      <CardFooter className="flex justify-end">
+      <div className="space-y-2">
+        <Label htmlFor="instagram">Instagram username</Label>
+        <div className="flex">
+          <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-0 rounded-l-md">
+            @
+          </span>
+          <Input
+            id="instagram"
+            name="instagramUser"
+            value={formData.instagramUser}
+            onChange={onInputChange}
+            placeholder="yourusername"
+            className="rounded-l-none bg-gray-50 border-0"
+          />
+        </div>
+        <p className="text-xs text-gray-500">
+          Must be 5–30 characters long. Only letters, numbers, periods, and
+          underscores are allowed. Do not include @ or links.
+        </p>
+      </div>
+
+      {/* Eligibility Requirements - Purple Background */}
+      <div className="bg-purple-50 p-6 rounded-lg space-y-4">
+        <h3 className="font-semibold text-purple-800 mb-4">
+          Eligibility Requirements
+        </h3>
+
+        <div className="space-y-3">
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="us-resident"
+              checked={isUsResident}
+              onCheckedChange={(checked) => setIsUsResident(!!checked)}
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
+            />
+            <label
+              htmlFor="us-resident"
+              className="text-gray-700 leading-relaxed"
+            >
+              I confirm that I am a resident of the United States
+            </label>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="age-18"
+              checked={isOver18}
+              onCheckedChange={(checked) => setIsOver18(!!checked)}
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
+            />
+            <label htmlFor="age-18" className="text-gray-700 leading-relaxed">
+              I confirm that I am 18 years of age or older
+            </label>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="no-previous-meta"
+              checked={isNewToMeta}
+              onCheckedChange={(checked) => setIsNewToMeta(!!checked)}
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
+            />
+            <label
+              htmlFor="no-previous-meta"
+              className="text-gray-700 leading-relaxed"
+            >
+              I confirm that I have not previously participated in a Meta
+              program or monetized with Facebook
+            </label>
+          </div>
+        </div>
+      </div>
+      <div className="text-center">
+        {/* Updated Button with Gradient and Rounded Style */}
         <Button
-          onClick={handleContinue}
-          disabled={
-            !allChecked ||
-            !formData.firstName ||
-            !formData.lastName ||
-            isSubmitting
-          }
+          onClick={onContinue}
+          disabled={!isUsResident || !isOver18 || !isNewToMeta || isSubmitting}
+          className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {isSubmitting ? "Processing..." : "Continue"}
+          {isSubmitting ? "Processing..." : "Next: Facebook Setup →"}
         </Button>
-      </CardFooter>
-    </>
+      </div>
+
+      {/* Terms */}
+      <div className="text-center text-sm text-gray-500">
+        By applying, you agree to our{" "}
+        <a href="#" className="text-purple-600 hover:underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="#" className="text-purple-600 hover:underline">
+          Privacy Policy
+        </a>
+      </div>
+    </div>
   );
-};
+}

@@ -1,9 +1,11 @@
 export interface InstagramUserResponse {
-    data: {
+    result: {
+      result : {
       user: InstagramUser;
-    };
+    }[]
     status: string;
   }
+}
   
   export interface InstagramUser {
     ai_agent_type: string | null;
