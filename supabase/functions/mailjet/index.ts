@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     const body = {
       Messages: [
         {
-          From: { Email: senderEmail },   
+          From: { Email: senderEmail, Name: "Nicole Kressler" },   
           To: [{ Email: email, Name: "Usuario" }],
           Subject: subject,
           HTMLPart: html,
