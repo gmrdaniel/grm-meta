@@ -8,11 +8,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FacebookPageFormProps {
   formData: {
-    facebookProfileUrl: string
-    facebookPageUrl: string
-    verifyPageOwnership: boolean
-    verifyProfileOwnership: boolean
-    linkInstagram: boolean
+    facebookProfileUrl: string;
+    facebookPageUrl: string;
+    verifyPageOwnership: boolean;
+    verifyProfileOwnership: boolean;
+    linkInstagram: boolean;
   };
   submitting: boolean;
   error: string | null;
@@ -41,17 +41,8 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800">
-          Complete your Application
+          Connect Your Facebook Accounts
         </h1>
-        <div className="flex items-center text-red-500 mt-2">
-          <p className="text-gray-500 font-medium mt-4">
-            <p className="text-gray-600 text-xs ">
-              Important: On this step, please share/create a Facebook Page and
-              make sure to connect it with your Instagram account to complete
-              your application and send it for validation to Meta!{" "}
-            </p>
-          </p>
-        </div>
       </div>
 
       {error && (
@@ -61,32 +52,39 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
       )}
 
       <div className="space-y-6">
-        <div className="space-y-4">
+        <div className="flex flex-col space-y-4 gap-4">
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">
               1. Share your Facebook Page
             </h2>
-            <aside className="text-xs text-yellow-700 bg-amber-50 border border-yellow-300 p-2">
+            <aside className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
               <strong>Attention:</strong> Page name must be 5–30 characters
               long. Only letters, numbers, periods, and underscores are allowed.
             </aside>
-            <a
-              href="https://www.facebook.com/business/help/104002523024878"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-500 hover:underline text-sm"
-            >
-              <span className="inline-flex items-center text-xs">
-                Need to create a Facebook page? See here how.
-              </span>
-              <ExternalLink className="h-4 w-4 text-xs ml-[0.5px]" />
-            </a>
+            <aside className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm">
+              <strong>Need to create a Facebook page?</strong>
+              <a
+                href="https://www.facebook.com/business/help/104002523024878"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-500 hover:underline text-sm"
+              >
+                <span className="inline-flex items-center text-sm">
+                  See here how.
+                </span>
+                <ExternalLink className="h-4 w-4 text-xs ml-[0.5px]" />
+              </a>
+            </aside>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="facebookPageUrl" className="font-semibold">Facebook Business Page URL</Label>
+            <Label htmlFor="facebookPageUrl" className="font-semibold">
+              Facebook Business Page URL
+            </Label>
             <p className="text-xs text-gray-600 font-semibold">
-              <span className="text-gray-600 font-semibold">This is the new page you created</span>
+              <span className="text-gray-600 font-semibold">
+                Share your existing FB page or create one and share.
+              </span>
             </p>
             <div className="flex items-center">
               <Input
@@ -94,27 +92,28 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 name="facebookPageUrl"
                 value={formData.facebookPageUrl}
                 onChange={onInputChange}
-                className="rounded-l-none"
+                className="rounded-l-none bg-gray-50 border-0"
                 type="url"
                 pattern="https://www\.facebook\.com/.*"
                 required
                 placeholder="https://www.facebook.com/yourpage"
               />
             </div>
-            <p className="text-xs text-gray-600 font-semibold">
-              Example: <span className="text-gray-500 font-normal">https://www.facebook.com/yourpage</span>
-            </p>
           </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="verifyPageOwnership"
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
               checked={formData.verifyPageOwnership}
               onCheckedChange={(checked) =>
                 onCheckboxChange("verifyPageOwnership", checked as boolean)
               }
             />
-            <Label htmlFor="verifyPageOwnership" className="text-sm font-semibold">
+            <Label
+              htmlFor="verifyPageOwnership"
+              className="text-sm font-semibold"
+            >
               I verify that I own this page.
             </Label>
           </div>
@@ -126,10 +125,15 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               Facebook Personal Profile URL
             </Label>
             <p className="text-xs text-gray-600 font-semibold">
-              <span className="text-gray-500 font-normal">This is your personal and unique profile and is NOT the same as your page.</span>
+              <span className="text-gray-500 font-normal">
+                This is your personal and unique profile and is NOT the same as
+                your page.
+              </span>
             </p>
             <p className="text-xs text-gray-600 font-semibold">
-              <span className="text-gray-500 font-normal">If you need to understand the difference </span>
+              <span className="text-gray-500 font-normal">
+                If you need to understand the difference{" "}
+              </span>
               <a
                 href="https://www.facebook.com/help/337881706729661/"
                 target="_blank"
@@ -148,27 +152,25 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 name="facebookProfileUrl"
                 value={formData.facebookProfileUrl}
                 onChange={onInputChange}
-                className="rounded-l-none"
+                className="rounded-l-none bg-gray-50 border-0"
                 type="url"
                 pattern="https://www\.facebook\.com/.*"
                 required
                 placeholder="https://facebook.com/profile.php?id=..."
               />
             </div>
-            <p className="text-xs text-gray-600 font-semibold">
-              Example: <span className="text-gray-500 font-normal">https://facebook.com/profile.php?id=...</span>
-            </p>
           </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="verifyProfileOwnership"
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
               checked={formData.verifyProfileOwnership}
               onCheckedChange={(checked) =>
                 onCheckboxChange("verifyProfileOwnership", checked as boolean)
               }
             />
-            <Label htmlFor="verifyProfileOwnership" className="text-sm">
+            <Label htmlFor="verifyProfileOwnership" className="text-sm font-semibold">
               This is my own profile
             </Label>
           </div>
@@ -184,41 +186,35 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             rel="noopener noreferrer"
             className="flex items-center text-blue-500 hover:underline text-sm"
           >
-            <span className="text-xs">Instructions here</span>
+            <span className="text-xs">Learn how to link your Instagram account to your Facebook Page</span>
             <ExternalLink className="h-4 w-4 ml-1 text-xs ml-[0.5px]" />
           </a>
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="linkInstagram"
+              className="mt-1 border-2 h-[1.25rem] min-w-[20px] border-purple-300 data-[state=checked]:bg-purple-600"
               checked={formData.linkInstagram}
               onCheckedChange={(checked) =>
                 onCheckboxChange("linkInstagram", checked as boolean)
               }
             />
-            <Label htmlFor="linkInstagram" className="text-sm">
+            <Label htmlFor="linkInstagram" className="text-sm font-semibold">
               I’ve linked my Instagram professional account and my Facebook Page
             </Label>
           </div>
         </div>
 
-        <div className="text-xs bg-blue-50 p-2 border border-blue-100 flex items-center">
-          <div className="rounded-full bg-green-100 p-1 mr-2">
-            <Check className="h-4 w-4 text-green-600" />
-          </div>
-          <span className="text-blue-700">
-            Submit for validation (3-7 business days).
-          </span>
-        </div>
+        
       </div>
 
-      <div className="flex justify-end pt-4">
+      <div className="flex justify-center pt-4">
         <Button
           onClick={onSubmit}
           disabled={isSubmitDisabled}
-          className="min-w-[200px]"
+          className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {submitting ? "Submitting..." : "Submit for Validation"}
+          {submitting ? "Submitting..." : "Submit my application"}
         </Button>
       </div>
     </div>

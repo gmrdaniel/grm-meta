@@ -21,6 +21,7 @@ import InvitationStepperPagePinterest from "./pages/pinterest/invitation/[invita
 import NotificationLogs from "./pages/admin/notification-logs";
 import NotificationSettings from "./pages/admin/notification-settings";
 import EditInvitation from "./pages/admin/invitations/edit/[id]";
+import AdminCampaign from "./pages/admin/campaign";
 
 
 const queryClient = new QueryClient();
@@ -131,7 +132,15 @@ function App() {
                       <NotificationSettings />
                     </ProtectedRoute>
                   }
-                  
+                />
+                
+                <Route
+                  path="/admin/campaign"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminCampaign />
+                    </ProtectedRoute>
+                  }
                 />
 
                 {/* Creator routes */}
