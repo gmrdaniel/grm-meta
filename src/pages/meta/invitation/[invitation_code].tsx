@@ -32,6 +32,7 @@ import {
   LockKeyhole,
   Shield,
   ShieldCheck,
+  Ticket,
   Waypoints,
   Zap,
 } from "lucide-react";
@@ -477,7 +478,7 @@ export default function InvitationStepperPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center flex-col p-4">
       <div className="max-w-7xl mx-auto my-8 md:my-12 ">
         <div
           className={`lg:grid ${
@@ -603,7 +604,7 @@ export default function InvitationStepperPage() {
           )}
           {/* Right Side - Form Section */}
 
-          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-e-2xl">
+          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-bl-none md:rounded-e-2xl">
             <div className=" w-full">
               {!submissionComplete && !invitation.fb_step_completed && (
                 <Stepper steps={stepList} currentStep={currentStep.id} />
@@ -664,7 +665,40 @@ export default function InvitationStepperPage() {
           </div>
         </div>
       </div>
-      <>hola</>
+      {eventData && (
+        <div className="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-500 p-6 text-white">
+          {eventData.event_name && (
+            <h2 className="flex items-center gap-1 text-xl font-bold mb-2">
+              <Ticket className="text-red-300"></Ticket> {eventData.event_name}
+            </h2>
+          )}
+
+          {eventData.description && (
+            <p className="mb-4">{eventData.description}</p>
+          )}
+
+          {eventData.link_terms && (
+            <p className="text-sm ">
+              By participating, you agree to our{" "}
+              <a
+                href={eventData.link_terms}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Terms and Conditions
+              </a>
+              .
+            </p>
+          )}
+
+          {eventData.deadline && (
+            <p className="text-sm font-medium">
+              Deadline: {eventData.deadline} EST
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

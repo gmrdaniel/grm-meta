@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 /**
  * Busca un evento de invitación a partir de un ID de notificación.
  * @param notifId ID de la notificación (notification_settings.id)
