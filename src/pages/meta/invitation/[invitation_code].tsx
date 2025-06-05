@@ -41,6 +41,7 @@ import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsername
 import { ProfileFormData } from "@/types/forms-type";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 import BonusCard from "@/components/ui/bonus-card";
+import { fetchInvitationEventByNotification } from "@/services/notification-settings/fetchInvitationEventByNotification";
 
 // 🧭 Steps
 const stepList = [
@@ -77,7 +78,7 @@ export default function InvitationStepperPage() {
   const { invitation_code } = useParams<{ invitation_code: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const notif = searchParams.get("notif");
+  const notif: string | null = searchParams.get("notif");
 
   // 📦 State
   const [invitation, setInvitation] = useState<CreatorInvitation | null>(null);
@@ -92,6 +93,22 @@ export default function InvitationStepperPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [eventData, setEventData] = useState<any>();
+
+  useEffect(() => {
+    if (!notif) return;
+
+    const fetchEventData = async () => {
+      try {
+        const data = await fetchInvitationEventByNotification(notif);
+        setEventData(data);
+      } catch (err) {
+        console.error("Error fetching event:", err);
+      }
+    };
+
+    fetchEventData();
+  }, [notif]);
 
   // 🔃 Fetch invitation and stages
   const { loading, error } = useInvitationLoader({
@@ -275,7 +292,7 @@ export default function InvitationStepperPage() {
           instagram_user: instagramUsername,
           is_business_account: isBusinessAccount,
           is_professional_account: isProfessionalAccount,
-          registration_notification_id: notif
+          registration_notification_id: notif,
         })
         .eq("id", invitation.id);
 
@@ -647,6 +664,7 @@ export default function InvitationStepperPage() {
           </div>
         </div>
       </div>
+      <>hola</>
     </div>
   );
 }
