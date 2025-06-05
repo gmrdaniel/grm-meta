@@ -604,7 +604,7 @@ export default function InvitationStepperPage() {
           )}
           {/* Right Side - Form Section */}
 
-          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-bl-none md:rounded-e-2xl">
+          <div className={`bg-white p-8 flex flex-col justify-center rounded-b-2xl ${!submissionComplete && !invitation.fb_step_completed ? 'md:rounded-bl-none md:rounded-e-2xl' : 'rounded-2xl'}`}>
             <div className=" w-full">
               {!submissionComplete && !invitation.fb_step_completed && (
                 <Stepper steps={stepList} currentStep={currentStep.id} />
@@ -663,10 +663,9 @@ export default function InvitationStepperPage() {
               )}
             </div>
           </div>
-        </div>
-      </div>
-      {eventData && (
-        <div className="w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-500 p-6 text-white">
+          
+        </div>{eventData && (
+        <div className="w-full mt-8 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-500 p-6 text-white">
           {eventData.event_name && (
             <h2 className="flex items-center gap-1 text-xl font-bold mb-2">
               <Ticket className="text-red-300"></Ticket> {eventData.event_name}
@@ -699,6 +698,8 @@ export default function InvitationStepperPage() {
           )}
         </div>
       )}
+      </div>
+      
     </div>
   );
 }
