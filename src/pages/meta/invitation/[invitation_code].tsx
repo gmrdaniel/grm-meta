@@ -604,7 +604,7 @@ export default function InvitationStepperPage() {
           )}
           {/* Right Side - Form Section */}
 
-          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-e-2xl">
+          <div className="bg-white p-8 flex flex-col justify-center rounded-b-2xl md:rounded-bl-none md:rounded-e-2xl">
             <div className=" w-full">
               {!submissionComplete && !invitation.fb_step_completed && (
                 <Stepper steps={stepList} currentStep={currentStep.id} />
@@ -694,7 +694,7 @@ export default function InvitationStepperPage() {
 
           {eventData.deadline && (
             <p className="text-sm font-medium">
-              Deadline: {eventData.deadline}
+              Deadline: {eventData.deadline} EST
             </p>
           )}
         </div>
