@@ -324,9 +324,9 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
           if (!email) {
             rowErrorFieldsEmpty.push("Email");
-          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          } /* else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             rowErrors.push("Formato de email inválido");
-          }
+          } */
 
           if (!socialHandle) rowErrorFieldsEmpty.push("Social Handle")
           if (!socialPlatform) rowErrorFieldsEmpty.push("Social Platform")
