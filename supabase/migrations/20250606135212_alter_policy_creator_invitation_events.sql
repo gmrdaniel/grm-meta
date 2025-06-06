@@ -1,6 +1,6 @@
 ALTER TABLE public.creator_invitations_events ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow admin SELECT/UPDATE/DELETE on creator_invitations_events"
+CREATE POLICY "Allow admin SELECT UPDATE DELETE on creator_invitations_events"
 ON public.creator_invitations_events
 FOR SELECT, UPDATE, DELETE
 TO authenticated
