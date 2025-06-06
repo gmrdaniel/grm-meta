@@ -244,6 +244,15 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
     return { created: false, status, invitation: null };
   };
 
+
+  const chunkArray = (array: any[], chunkSize: number) => {
+    const result: any[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      result.push(array.slice(i, i + chunkSize));
+    }
+    return result;
+  };
+
   // Función principal para manejar la importación
   const handleImport = async (values: FormValues) => {
     if (!file) {
@@ -487,19 +496,29 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
             return;
           }
 
-          const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
-            body: {
-              htmlContent: htmlContent,
-              recipients: recipients,
-              subject: selectedNotification.subject || "Invitación a Evento",
-              customCampaign: selectedNotification.campaign_name
-            }
-          });
+          const recipientChunks = chunkArray(recipients, 50);
 
-          if (error) throw error;
+          let campaignId = null;
+          for (const chunk of recipientChunks) {
 
-          // Extraer campaign_id de la respuesta de Mailjet
-          const campaignId = response?.campaignId || null;
+            console.log("batch: ")
+            console.log(chunk)
+
+            const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
+              body: {
+                htmlContent: htmlContent,
+                recipients: chunk,
+                subject: selectedNotification.subject || "Invitación a Evento",
+                customCampaign: selectedNotification.campaign_name
+              }
+            });
+
+            if (error) throw error;
+
+            // Extraer campaign_id de la respuesta de Mailjet
+            campaignId = response?.campaignId || null;
+
+          }
           if (campaignId) {
             // Actualizar campaign_id en notification_settings
             const { error: updateError } = await supabase
