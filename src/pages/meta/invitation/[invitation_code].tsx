@@ -378,24 +378,29 @@ export default function InvitationStepperPage() {
       setSubmitting(true);
 
       // Validate that the Facebook page exists and is of type "page"
-      const details = await fetchFacebookPageDetails(
+      const pageDetails = await fetchFacebookPageDetails(
         facebookFormData.facebookPageUrl.trim()
       );
 
-      console.log(details);
+      const profileDetails = await fetchFacebookPageDetails(
+        facebookFormData.facebookProfileUrl.trim()
+      );
 
-      if (details.type !== "page") {
+      if (pageDetails.type !== "page") {
         toast.error("The provided URL does not correspond to a Facebook Page.");
         return;
       }
 
       // Proceed with update if validation passed
-      const result = await updateFacebookPage(
+      await updateFacebookPage(
         invitation.id,
         facebookFormData.facebookPageUrl.trim(),
-        facebookFormData.facebookProfileUrl.trim()
-      );
+        facebookFormData.facebookProfileUrl.trim(),
+        pageDetails.profile.profile_id,
+        profileDetails.profile.profile_id
 
+      );
+      return false
       if (
         !result ||
         result.facebook_page !== facebookFormData.facebookPageUrl.trim()
