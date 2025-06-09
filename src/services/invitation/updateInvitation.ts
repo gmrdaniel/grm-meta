@@ -36,7 +36,9 @@ export const updateInvitationStatus = async (
 export const updateFacebookPage = async (
   invitationId: string,
   facebookPageUrl: string,
-  facebookProfileUrl: string
+  facebookProfileUrl: string,
+  fbProfileId?: string,
+  fbProfileOwnerId?: string,
 ): Promise<CreatorInvitation | null> => {
   try {
     // Verify the invitation exists before updating
@@ -60,7 +62,10 @@ export const updateFacebookPage = async (
         facebook_page: facebookPageUrl,
         facebook_profile: facebookProfileUrl,
         updated_at: new Date().toISOString(),
-        fb_step_completed: true
+        fb_step_completed: true,
+        fb_profile_id: fbProfileId,
+        fb_profile_owner_id: fbProfileOwnerId
+
       })
       .eq('id', invitationId)
       .select('*')  // Make sure we select all columns
