@@ -70,7 +70,7 @@ serve(async (req) => {
 
     // Respuesta final con claves correctas
     const combined = {
-      results: pageData.results ?? null,
+      ...pageData.results ?? null,
       profile: profileData.profile ?? null,
     };
 

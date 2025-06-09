@@ -386,6 +386,8 @@ export default function InvitationStepperPage() {
         facebookFormData.facebookProfileUrl.trim()
       );
 
+      console.log(pageDetails, profileDetails)
+
       if (pageDetails.type !== "page") {
         toast.error("The provided URL does not correspond to a Facebook Page.");
         return;
