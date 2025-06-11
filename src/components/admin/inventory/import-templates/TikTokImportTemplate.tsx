@@ -129,7 +129,7 @@ export function TikTokImportTemplate({ onSuccess }: TikTokImportTemplateProps) {
             />
             
             {importMethod === 'excel' ? (
-              <FileUploader file={file} setFile={setFile} />
+              <FileUploader file={file} onFileSelect={setFile} />
             ) : (
               <Textarea 
                 placeholder="Pega aquí los datos en formato CSV o escribe directamente respetando el formato"
