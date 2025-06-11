@@ -133,7 +133,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
         const lastName = row[lastNameIndex]?.toString().trim();
         const email = row[emailIndex]?.toString().trim();
         const socialMediaHandle = row[handleIndex]?.toString().trim();
-        const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() || "tiktok";
+        const socialMediaType = row[platformIndex]?.toString().trim().toLowerCase() ?? "tiktok";
 
         // Validate row data
         const rowErrorFieldsEmpty = []
@@ -157,7 +157,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
         const invitationData: CreateInvitationData = {
           first_name: firstName,
           last_name: lastName,
-          email: email.toLowerCase(),
+          email: email,
           project_id: values.projectId,
           invitation_type: values.invitationType,
           social_media_type: socialMediaType
@@ -345,7 +345,7 @@ const ImportInvitations: React.FC<ImportInvitationsProps> = ({ onSuccess }) => {
                 Platform
               </code>
             </p>
-            <FileUploader file={file} setFile={setFile} />
+            <FileUploader file={file} onFileSelect={setFile} />
           </div>
 
           <Button
