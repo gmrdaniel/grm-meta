@@ -201,7 +201,7 @@ const ImportProcessedCreators: React.FC = () => {
         </Select>
       </div>
 
-      <FileUploader file={file} setFile={setFile} />
+      <FileUploader file={file} onFileSelect={setFile} />
 
       <Button
         onClick={handleImport}
