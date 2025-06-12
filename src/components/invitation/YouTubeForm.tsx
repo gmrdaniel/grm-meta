@@ -14,8 +14,6 @@ export const YouTubeForm = ({
   facebookFormData,
   submitting,
   error,
-  showPasswordForm,
-  passwordData,
   handleInputChange,
   handleCheckboxChange,
   handleContinueWelcome,
@@ -23,11 +21,8 @@ export const YouTubeForm = ({
   handleFacebookInputChange,
   handleCheckboxFacebookChange,
   handleFacebookSubmit,
-  handlePasswordChange,
-  handleSetPassword,
-  setShowPasswordForm,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) => {
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => {
   return (
     <>
       {currentStep.id === "welcome" && (
@@ -49,14 +44,7 @@ export const YouTubeForm = ({
       )}
       {currentStep.id === "fbcreation" &&
         (submissionComplete || invitation.fb_step_completed) && (
-          <SubmissionCompleteScreen
-            showPasswordForm={showPasswordForm}
-            passwordData={passwordData}
-            submitting={submitting}
-            onPasswordChange={handlePasswordChange}
-            onSetPassword={handleSetPassword}
-            onShowPasswordForm={() => setShowPasswordForm(true)}
-          />
+          <SubmissionCompleteScreen invitation={invitation} />
         )}
       {currentStep.id === "fbcreation" &&
         !submissionComplete &&

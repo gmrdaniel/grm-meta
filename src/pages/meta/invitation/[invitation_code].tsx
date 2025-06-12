@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import Footer from "../../../components/Footer";
 
 // 🧱 UI Components
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +42,7 @@ import { ProfileFormData } from "@/types/forms-type";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 import BonusCard from "@/components/ui/bonus-card";
 import { fetchInvitationEventByNotification } from "@/services/notification-settings/fetchInvitationEventByNotification";
+import { sendMagicLink } from "@/utils/sendMagicLink";
 
 // 🧭 Steps
 const stepList = [
@@ -336,72 +336,35 @@ export default function InvitationStepperPage() {
   };
 
   const handleFacebookSubmit = async () => {
-    if (!facebookFormData.verifyPageOwnership) {
-      toast.error("Please verify that you own this Facebook page");
-      return;
-    }
-
-    if (!facebookFormData.verifyProfileOwnership) {
-      toast.error("Please verify that you own this Facebook ");
-      return;
-    }
-    const { isValid: isPageUrlValid, errorMessage: pageUrlError } =
-      validateFacebookPageUrl(facebookFormData.facebookPageUrl);
-
-    const { isValid: isProfileUrlValid, errorMessage: profileUrlError } =
-      validateFacebookPageUrl(facebookFormData.facebookProfileUrl);
-
-    // Validación secuencial
-    if (!isPageUrlValid) {
-      toast.error(pageUrlError || "Invalid Facebook Business Page URL");
-      return;
-    }
-
-    if (!isProfileUrlValid) {
-      toast.error(profileUrlError || "Invalid Facebook Personal Profile URL");
-      return;
-    }
-
-    if (
-      facebookFormData.facebookPageUrl === facebookFormData.facebookProfileUrl
-    ) {
-      toast.error("Facebook Page and Profile URLs cannot be the same.");
-      return;
-    }
-
-    if (!invitation_code || !invitation) {
-      toast.error("Missing invitation data");
-      return;
-    }
-
     try {
       setSubmitting(true);
 
-      // Validate that the Facebook page exists and is of type "page"
-      const pageDetails = await fetchFacebookPageDetails(
-        facebookFormData.facebookPageUrl.trim()
+      // Step 1: Validate form fields
+      const isValid = validateFacebookForm();
+      if (!isValid) return;
+
+      // Step 2: Validate Facebook page via API
+      const isValidPage = await validateFacebookPageType(
+        facebookFormData.facebookPageUrl
       );
+      if (!isValidPage) return;
 
-      const profileDetails = await fetchFacebookPageDetails(
-        facebookFormData.facebookProfileUrl.trim()
+      // Step 3: Update backend with Facebook data
+      const updated = await updateFacebookInfo(invitation.id);
+      if (!updated) return;
+
+      // Step 4: Register or enrich user in Supabase Auth
+      const registered = await registerOrUpdateUser(invitation);
+      if (!registered) return;
+
+      // Step 5: Send magic link to login
+      const magicLinkSent = await sendMagicLink(invitation.email);
+      if (!magicLinkSent) return;
+
+      // Final feedback
+      toast.success(
+        "Your submission has been received. Check your email to sign in."
       );
-      
-      if (pageDetails.type !== "page") {
-        toast.error("The provided URL does not correspond to a Facebook Page.");
-        return;
-      }
-
-      // Proceed with update if validation passed
-      await updateFacebookPage(
-        invitation.id,
-        facebookFormData.facebookPageUrl.trim(),
-        facebookFormData.facebookProfileUrl.trim(),
-        pageDetails.profile.profile_id,
-        profileDetails.profile.profile_id
-      );
-
-
-      toast.success("Your submission has been received");
       setSubmissionComplete(true);
     } catch (err) {
       toast.error("Error submitting your info");
@@ -411,46 +374,107 @@ export default function InvitationStepperPage() {
     }
   };
 
-  const handleSetPassword = async () => {
-    if (!invitation) return;
-
-    if (passwordData.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
+  const validateFacebookForm = (): boolean => {
+    if (!facebookFormData.verifyPageOwnership) {
+      toast.error("Please verify that you own this Facebook page");
+      return false;
     }
 
-    if (passwordData.password !== passwordData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+    if (!facebookFormData.verifyProfileOwnership) {
+      toast.error("Please verify that you own this Facebook profile");
+      return false;
     }
 
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: invitation.email,
-        password: passwordData.password,
-        options: {
-          data: {
-            first_name: invitation.first_name,
-            last_name: invitation.last_name,
-            phone_country_code: invitation.phone_country_code || null,
-            phone_number: invitation.phone_number || null,
-            social_media_handle: invitation.instagram_user || null,
-            country_of_residence_id: null,
-          },
+    const { isValid: isPageUrlValid, errorMessage: pageUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookPageUrl);
+    const { isValid: isProfileUrlValid, errorMessage: profileUrlError } =
+      validateFacebookPageUrl(facebookFormData.facebookProfileUrl);
+
+    if (!isPageUrlValid) {
+      toast.error(pageUrlError || "Invalid Facebook Business Page URL");
+      return false;
+    }
+
+    if (!isProfileUrlValid) {
+      toast.error(profileUrlError || "Invalid Facebook Personal Profile URL");
+      return false;
+    }
+
+    if (
+      facebookFormData.facebookPageUrl === facebookFormData.facebookProfileUrl
+    ) {
+      toast.error("Facebook Page and Profile URLs cannot be the same.");
+      return false;
+    }
+
+    if (!invitation_code || !invitation) {
+      toast.error("Missing invitation data");
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateFacebookPageType = async (
+    pageUrl: string
+  ): Promise<boolean> => {
+    const details = await fetchFacebookPageDetails(pageUrl.trim());
+    console.log(details);
+
+    if (details.type !== "page") {
+      toast.error("The provided URL does not correspond to a Facebook Page.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateFacebookInfo = async (invitationId: string): Promise<boolean> => {
+    const result = await updateFacebookPage(
+      invitationId,
+      facebookFormData.facebookPageUrl.trim(),
+      facebookFormData.facebookProfileUrl.trim()
+    );
+
+    if (
+      !result ||
+      result.facebook_page !== facebookFormData.facebookPageUrl.trim()
+    ) {
+      toast.error("Error saving your Facebook page");
+      return false;
+    }
+
+    return true;
+  };
+
+  const registerOrUpdateUser = async (invitation: any): Promise<boolean> => {
+    const randomPassword =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2);
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: invitation.email,
+      password: randomPassword,
+      options: {
+        data: {
+          first_name: invitation.first_name,
+          last_name: invitation.last_name,
+          phone_country_code: invitation.phone_country_code || null,
+          phone_number: invitation.phone_number || null,
+          social_media_handle: invitation.instagram_user || null,
+          country_of_residence_id: null,
         },
-      });
+      },
+    });
 
-      if (error) throw error;
-
-      toast.success("Account created! You can log in now.");
-      setTimeout(() => navigate("/auth"), 2000);
-    } catch (err) {
-      console.log(err);
-      toast.error("Error creating account");
-    } finally {
-      setSubmitting(false);
+    if (signUpError && signUpError.message !== "User already registered") {
+      toast.error("Error registering user");
+      console.error(signUpError);
+      return false;
     }
+
+    return true;
   };
 
   // 🖼️ Render
@@ -468,10 +492,6 @@ export default function InvitationStepperPage() {
 
   if (error || !invitation) {
     return <InvitationError message={error || "Invitation not found"} />;
-  }
-
-  if (invitation.status === "completed") {
-    return <InvitationError message={error || "Invitation was completed"} />;
   }
 
   return (
@@ -601,7 +621,13 @@ export default function InvitationStepperPage() {
           )}
           {/* Right Side - Form Section */}
 
-          <div className={`bg-white p-8 flex flex-col justify-center rounded-b-2xl ${!submissionComplete && !invitation.fb_step_completed ? 'md:rounded-bl-none md:rounded-e-2xl' : 'rounded-2xl'}`}>
+          <div
+            className={`bg-white p-8 flex flex-col justify-center rounded-b-2xl ${
+              !submissionComplete && !invitation.fb_step_completed
+                ? "md:rounded-bl-none md:rounded-e-2xl"
+                : "rounded-2xl"
+            }`}
+          >
             <div className=" w-full">
               {!submissionComplete && !invitation.fb_step_completed && (
                 <Stepper steps={stepList} currentStep={currentStep.id} />
@@ -627,7 +653,6 @@ export default function InvitationStepperPage() {
                   handleCheckboxFacebookChange={handleCheckboxFacebookChange}
                   handleFacebookSubmit={handleFacebookSubmit}
                   handlePasswordChange={handlePasswordChange}
-                  handleSetPassword={handleSetPassword}
                   setShowPasswordForm={setShowPasswordForm}
                 />
               )}
@@ -654,49 +679,48 @@ export default function InvitationStepperPage() {
                   handleCheckboxFacebookChange={handleCheckboxFacebookChange}
                   handleFacebookSubmit={handleFacebookSubmit}
                   handlePasswordChange={handlePasswordChange}
-                  handleSetPassword={handleSetPassword}
                   setShowPasswordForm={setShowPasswordForm}
                 />
               )}
             </div>
           </div>
-          
-        </div>{eventData && (
-        <div className="w-full mt-8 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-500 p-6 text-white">
-          {eventData.event_name && (
-            <h2 className="flex items-center gap-1 text-xl font-bold mb-2">
-              <Ticket className="text-red-300"></Ticket> {eventData.event_name}
-            </h2>
-          )}
-
-          {eventData.description && (
-            <p className="mb-4">{eventData.description}</p>
-          )}
-
-          {eventData.link_terms && (
-            <p className="text-sm ">
-              By participating, you agree to our{" "}
-              <a
-                href={eventData.link_terms}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                Terms and Conditions
-              </a>
-              .
-            </p>
-          )}
-
-          {eventData.deadline && (
-            <p className="text-sm font-medium">
-              Deadline: {eventData.deadline} EST
-            </p>
-          )}
         </div>
-      )}
+        {eventData && (
+          <div className="w-full mt-8 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-500 p-6 text-white">
+            {eventData.event_name && (
+              <h2 className="flex items-center gap-1 text-xl font-bold mb-2">
+                <Ticket className="text-red-300"></Ticket>{" "}
+                {eventData.event_name}
+              </h2>
+            )}
+
+            {eventData.description && (
+              <p className="mb-4">{eventData.description}</p>
+            )}
+
+            {eventData.link_terms && (
+              <p className="text-sm ">
+                By participating, you agree to our{" "}
+                <a
+                  href={eventData.link_terms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Terms and Conditions
+                </a>
+                .
+              </p>
+            )}
+
+            {eventData.deadline && (
+              <p className="text-sm font-medium">
+                Deadline: {eventData.deadline} EST
+              </p>
+            )}
+          </div>
+        )}
       </div>
-      
     </div>
   );
 }
