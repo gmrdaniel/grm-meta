@@ -23,6 +23,7 @@ import NotificationSettings from "./pages/admin/notification-settings";
 import EditInvitation from "./pages/admin/invitations/edit/[id]";
 import AdminCampaign from "./pages/admin/campaign";
 import { AuthGate } from "./components/auth/AuthGate";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/auth" replace />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+
 
                 {/* Public routes */}
                 <Route

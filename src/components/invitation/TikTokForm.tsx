@@ -17,14 +17,12 @@ export const TikTokForm = ({
   showPasswordForm,
   passwordData,
   handleInputChange,
-  handleCheckboxChange,
   handleContinueWelcome,
   handleCompleteProfileSubmit,
   handleFacebookInputChange,
   handleCheckboxFacebookChange,
   handleFacebookSubmit,
   handlePasswordChange,
-  handleSetPassword,
   setShowPasswordForm,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 any) => {
@@ -90,12 +88,6 @@ any) => {
       {currentStep.id === "fbcreation" &&
         (submissionComplete || invitation.fb_step_completed) && (
           <SubmissionCompleteScreen
-            showPasswordForm={showPasswordForm}
-            passwordData={passwordData}
-            submitting={submitting}
-            onPasswordChange={handlePasswordChange}
-            onSetPassword={handleSetPassword}
-            onShowPasswordForm={() => setShowPasswordForm(true)}
             invitation={invitation}
           />
         )}
