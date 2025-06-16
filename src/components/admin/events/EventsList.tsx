@@ -57,7 +57,11 @@ import EventsPagination from "./EventsPagination";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from "@/hooks/use-debounce";
 
-const EventsList = () => {
+interface EventsListProps {
+  onManageNotifications?: (eventId: string) => void;
+}
+
+const EventsList = ({ onManageNotifications }: EventsListProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -223,7 +227,7 @@ const EventsList = () => {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
-                      onClick={() => navigate(`/admin/events/notifications/${event.id}`)}
+                      onClick={() => onManageNotifications ? onManageNotifications(event.id) : null}
                       className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                     >
                       <Bell className="mr-2 h-4 w-4" />
