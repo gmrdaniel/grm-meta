@@ -8,16 +8,26 @@ import { CampaignStats } from "@/components/admin/campaigns/CampaignStats";
 import EventInvitation from "@/components/admin/campaigns/EventInvitation";
 import CreateEvent from "@/components/admin/campaigns/CreateEvent";
 import EventsList from "@/components/admin/events/EventsList";
+import {NewNotificationSettingsEvents} from "@/components/admin/notification-settings/NewNotificationSettingsEvents";
 import { Plus } from "lucide-react";
-
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const handleCreateEventClick = () => {
     setActiveTab("createevent");
   };
 
   const handleEventCreated = () => {
+    setActiveTab("events");
+  };
+
+  const handleCreateNotificationClick = (eventId: string | null) => {
+    setSelectedEventId(eventId);
+    setActiveTab("createnotification");
+  };
+
+  const handleNotificationCreated = () => {
     setActiveTab("events");
   };
 
@@ -41,6 +51,7 @@ export default function CampaignPage() {
             <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
             {/* <TabsTrigger value="createevent">Crear Evento</TabsTrigger> */}
             <TabsTrigger value="events">Gestionar Eventos</TabsTrigger>
+            {/* <TabsTrigger value="createnotification">Crear Notificación</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="statistics">
@@ -79,7 +90,7 @@ export default function CampaignPage() {
           <TabsContent value="createevent">
             <Card>
               <CardHeader>
-                <CardTitle>Crear Evento</CardTitle>
+          
               </CardHeader>
               <CardContent>
                 <CreateEvent onSuccess={handleEventCreated} />
@@ -93,7 +104,21 @@ export default function CampaignPage() {
                 <CardTitle>Gestionar Eventos</CardTitle>
               </CardHeader>
               <CardContent>
-                <EventsList />
+                <EventsList onManageNotifications={handleCreateNotificationClick} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="createnotification">
+            <Card>
+              <CardHeader>
+                <CardTitle>Crear Notificación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NewNotificationSettingsEvents 
+                  eventId={selectedEventId || ""} 
+                  onSuccess={handleNotificationCreated} 
+                />
               </CardContent>
             </Card>
           </TabsContent>
