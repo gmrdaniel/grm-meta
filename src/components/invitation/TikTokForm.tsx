@@ -14,6 +14,8 @@ export const TikTokForm = ({
   facebookFormData,
   submitting,
   error,
+  loadingMessage,
+  getLoadingMessage,
   showPasswordForm,
   passwordData,
   handleInputChange,
@@ -101,6 +103,8 @@ any) => {
             onInputChange={handleFacebookInputChange}
             onCheckboxChange={handleCheckboxFacebookChange}
             onSubmit={handleFacebookSubmit}
+            loadingMessage={getLoadingMessage()}
+            
           />
         )}
     </>
