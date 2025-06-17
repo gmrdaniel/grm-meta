@@ -14,7 +14,7 @@ import { YouTubeForm } from "@/components/invitation/YouTubeForm";
 
 // 🛠️ Services
 import { supabase } from "@/integrations/supabase/client";
-import { updateFacebookPage } from "@/services/invitation";
+import { updateFacebookPage, updateInvitation } from "@/services/invitation";
 import { checkExistingTask } from "@/services/tasksService";
 
 // 🧠 Utils
@@ -163,18 +163,18 @@ export default function InvitationStepperPage() {
     setSaving(false);
   };
 
-const getLoadingMessage = () => {
-  if (isSubmitting) return "Verifying Instagram user...";
-  if (saving) return "Saving profile information...";
-  if (submittingStep === "validatingPage") return "Validating Facebook page...";
-  if (submittingStep === "validatingProfile") return "Validating Facebook profile...";
-  if (submittingStep === "creatingAccount") return "Creating account...";
-  if (submittingStep === "sendingMagicLink") return "Sending magic link...";
-  if (submitting) return "Submitting Facebook data...";
-  return "Loading information...";
-};
-
-
+  const getLoadingMessage = () => {
+    if (isSubmitting) return "Verifying Instagram user...";
+    if (saving) return "Saving profile information...";
+    if (submittingStep === "validatingPage")
+      return "Validating Facebook page...";
+    if (submittingStep === "validatingProfile")
+      return "Validating Facebook profile...";
+    if (submittingStep === "creatingAccount") return "Creating account...";
+    if (submittingStep === "sendingMagicLink") return "Sending magic link...";
+    if (submitting) return "Submitting Facebook data...";
+    return "Loading information...";
+  };
 
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -448,16 +448,15 @@ const getLoadingMessage = () => {
   };
 
   const updateFacebookInfo = async (invitationId: string): Promise<boolean> => {
-    const result = await updateFacebookPage(
-      invitationId,
-      facebookFormData.facebookPageUrl.trim(),
-      facebookFormData.facebookProfileUrl.trim()
-    );
+    
+    const result = await updateInvitation(invitationId, {
+      facebook_page: facebookFormData.facebookPageUrl.trim(),
+      facebook_profile: facebookFormData.facebookProfileUrl.trim(),
+      fb_step_completed: true,
+      status: "completed",
+    });
 
-    if (
-      !result ||
-      result.facebook_page !== facebookFormData.facebookPageUrl.trim()
-    ) {
+    if (!result) {
       toast.error("Error saving your Facebook page");
       return false;
     }
