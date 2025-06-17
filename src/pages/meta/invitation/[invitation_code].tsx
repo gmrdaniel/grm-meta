@@ -170,6 +170,8 @@ export default function InvitationStepperPage() {
       return "Validating Facebook page...";
     if (submittingStep === "validatingProfile")
       return "Validating Facebook profile...";
+    if (submittingStep === "updatingInvitation")
+      return "Updating invitation...";
     if (submittingStep === "creatingAccount") return "Creating account...";
     if (submittingStep === "sendingMagicLink") return "Sending magic link...";
     if (submitting) return "Submitting Facebook data...";
@@ -357,15 +359,40 @@ export default function InvitationStepperPage() {
       const isValid = validateFacebookForm();
       if (!isValid) return;
 
-      // Step 2: Validate Facebook page via API
-      const isValidPage = await validateFacebookPageType(
-        facebookFormData.facebookPageUrl
+      // Step 2: Get Facebook page details
+      const fbPageData = await fetchFacebookPageDetails(
+        facebookFormData.facebookPageUrl.trim()
       );
-      if (!isValidPage) return;
 
-      // Step 3: Update backend with Facebook data
+      // Check if the page is valid
+      if (fbPageData.type !== "page") {
+        toast.error("The provided URL does not correspond to a Facebook Page.");
+        return false;
+      }
+
       setSubmittingStep("validatingProfile");
-      const updated = await updateFacebookInfo(invitation.id);
+      // Step 3: Get Facebook profile details
+      const fbOwnerProfileData = await fetchFacebookPageDetails(
+        facebookFormData.facebookProfileUrl.trim()
+      );
+
+      if (
+        fbOwnerProfileData.type !== "not_page" &&
+        fbOwnerProfileData.type !== "private_page"
+      ) {
+        toast.error(
+          "The provided URL does not correspond to a Facebook Profile."
+        );
+        return false;
+      }
+
+      setSubmittingStep("updatingInvitation");
+      // Step 3: Update backend with Facebook data
+      const updated = await updateFacebookInfo(
+        invitation.id,
+        fbPageData.profile?.profile_id, // Page ID
+        fbOwnerProfileData?.profile?.profile_id, // Profile ID
+      );
       if (!updated) return;
 
       // Step 4: Register or enrich user in Supabase Auth
@@ -433,26 +460,17 @@ export default function InvitationStepperPage() {
     return true;
   };
 
-  const validateFacebookPageType = async (
-    pageUrl: string
+  const updateFacebookInfo = async (
+    invitationId: string,
+    fb_profile_id?: string,
+    fb_profile_owner_id?: string
   ): Promise<boolean> => {
-    const details = await fetchFacebookPageDetails(pageUrl.trim());
-    console.log(details);
-
-    if (details.type !== "page") {
-      toast.error("The provided URL does not correspond to a Facebook Page.");
-      return false;
-    }
-
-    return true;
-  };
-
-  const updateFacebookInfo = async (invitationId: string): Promise<boolean> => {
-    
     const result = await updateInvitation(invitationId, {
       facebook_page: facebookFormData.facebookPageUrl.trim(),
       facebook_profile: facebookFormData.facebookProfileUrl.trim(),
       fb_step_completed: true,
+      fb_profile_id: fb_profile_id, //Page ID
+      fb_profile_owner_id: fb_profile_owner_id, //Profile ID
       status: "completed",
     });
 
