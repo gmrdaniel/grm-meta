@@ -10,7 +10,7 @@ export const sendMagicLink = async (email: string): Promise<boolean> => {
   });
 
   if (signInError) {
-    toast.error("Error sending magic link");
+    toast.error(`Error sending magic link: ${signInError.message}`);
     console.error(signInError);
     return false;
   }
