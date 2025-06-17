@@ -11,7 +11,6 @@ import EventsList from "@/components/admin/events/EventsList";
 import { NewNotificationSettingsEvents } from "@/components/admin/notification-settings/NewNotificationSettingsEvents";
 import { NotificationSettingsListEvents } from "@/components/admin/notification-settings/NotificationSettingsListEvents";
 import { Plus } from "lucide-react";
-
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
