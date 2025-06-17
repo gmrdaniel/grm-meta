@@ -95,7 +95,7 @@ export default function InvitationStepperPage() {
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [eventData, setEventData] = useState<any>();
-
+  const [submittingStep, setSubmittingStep] = useState<string>("");
   useEffect(() => {
     if (!notif) return;
 
@@ -162,6 +162,19 @@ export default function InvitationStepperPage() {
 
     setSaving(false);
   };
+
+const getLoadingMessage = () => {
+  if (isSubmitting) return "Verifying Instagram user...";
+  if (saving) return "Saving profile information...";
+  if (submittingStep === "validatingPage") return "Validating Facebook page...";
+  if (submittingStep === "validatingProfile") return "Validating Facebook profile...";
+  if (submittingStep === "creatingAccount") return "Creating account...";
+  if (submittingStep === "sendingMagicLink") return "Sending magic link...";
+  if (submitting) return "Submitting Facebook data...";
+  return "Loading information...";
+};
+
+
 
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,6 +353,7 @@ export default function InvitationStepperPage() {
       setSubmitting(true);
 
       // Step 1: Validate form fields
+      setSubmittingStep("validatingPage");
       const isValid = validateFacebookForm();
       if (!isValid) return;
 
@@ -350,14 +364,17 @@ export default function InvitationStepperPage() {
       if (!isValidPage) return;
 
       // Step 3: Update backend with Facebook data
+      setSubmittingStep("validatingProfile");
       const updated = await updateFacebookInfo(invitation.id);
       if (!updated) return;
 
       // Step 4: Register or enrich user in Supabase Auth
+      setSubmittingStep("creatingAccount");
       const registered = await registerOrUpdateUser(invitation);
       if (!registered) return;
 
       // Step 5: Send magic link to login
+      setSubmittingStep("sendingMagicLink");
       const magicLinkSent = await sendMagicLink(invitation.email);
       if (!magicLinkSent) return;
 
@@ -371,6 +388,7 @@ export default function InvitationStepperPage() {
       console.error(err);
     } finally {
       setSubmitting(false);
+      setSubmittingStep(null);
     }
   };
 
@@ -638,6 +656,7 @@ export default function InvitationStepperPage() {
                   invitation={invitation}
                   formData={formData}
                   saving={saving}
+                  getLoadingMessage={getLoadingMessage}
                   isSubmitting={isSubmitting}
                   submissionComplete={submissionComplete}
                   facebookFormData={facebookFormData}
