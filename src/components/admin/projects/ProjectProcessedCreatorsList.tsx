@@ -24,7 +24,6 @@ interface ProcessedCreator {
   fbProfileOwnerId: string;
 }
 
-
 interface ImportError {
   row: number;
   data: {
@@ -130,15 +129,27 @@ const ImportProcessedCreators: React.FC = () => {
         processedData.push({ email, status, approvalDate, fbProfileId, fbProfileOwnerId });
       } catch (err: any) {
         console.error(err);
+        
+     
+        let errorMessage = err.message ?? "Unknown error";
+        
+        
+        if (err.code === '42501' || err.code === 42501) {
+          errorMessage = `Error: The user ${email} was already processed`;
+        }
+    
+        
         errors.push({
           row: rowNumber,
           data: { email, status, approvalDate },
-          error: err.message ?? "Unknown error",
+          error: errorMessage,
         });
       }
     }
 
     setImportedData(processedData);
+    
+    
     setImportErrors(errors);
 
     if (errors.length === 0 && processedData.length > 0) {
