@@ -130,10 +130,10 @@ const ImportProcessedCreators: React.FC = () => {
       } catch (err: any) {
         console.error(err);
         
-        // Manejo específico para el error 42501
+     
         let errorMessage = err.message ?? "Unknown error";
         
-        // Verificar si la respuesta tiene el código 42501
+        
         if (err.code === '42501' || err.code === 42501) {
           errorMessage = `Error: The user ${email} was already processed`;
         }
