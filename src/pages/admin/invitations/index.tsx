@@ -41,7 +41,7 @@ const InvitationsPage = () => {
             <TabsTrigger value="list">Invitations List</TabsTrigger>
             <TabsTrigger value="create">Create Invitation</TabsTrigger>
             <TabsTrigger value="import">Import Invitations</TabsTrigger>
-            <TabsTrigger value="import_meta">Import Meta Processed Invitations</TabsTrigger>
+            <TabsTrigger value="import_meta">Import Project Processed Invitations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="list">
