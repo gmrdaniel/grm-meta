@@ -94,7 +94,7 @@ export const updateFacebookPage = async (
 
 export const updateInvitation = async (
   id: string,
-  data: CreatorInvitation | CreateInvitationData
+  data: Partial<CreatorInvitation> | Partial<CreateInvitationData>
 ): Promise<CreatorInvitation> => {
   // 🔒 Bloquear modificación del email
   const { email, project_id, ...safeData } = data;
