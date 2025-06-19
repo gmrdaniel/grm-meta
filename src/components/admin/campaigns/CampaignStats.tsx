@@ -323,7 +323,7 @@ export function CampaignStats() {
                 <tbody className="divide-y divide-gray-200">
                   {campaignsToUse?.map((campaign) => (
                     <tr key={campaign.CampaignID}>
-                      {/*<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button 
                           onClick={() => openDetailModal(campaign.CampaignID)}
                           className="text-blue-600 hover:text-blue-800 flex items-center"
@@ -331,7 +331,7 @@ export function CampaignStats() {
                           <PieChart size={16} className="mr-1" />
                           <span>Ver detalles</span>
                         </button>
-                      </td>*/}
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{campaign.CampaignID}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{campaign.CampaignName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{campaign.MessageSentCount}</td>

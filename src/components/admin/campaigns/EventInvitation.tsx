@@ -500,6 +500,11 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
           // Extraer campaign_id de la respuesta de Mailjet
           const campaignId = response?.campaignId || null;
+          if (!campaignId){
+            console.log(campaignId)
+            console.log("No hay nada")
+          }
+
           if (campaignId) {
             // Actualizar campaign_id en notification_settings
             const { error: updateError } = await supabase
