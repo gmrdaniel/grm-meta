@@ -304,18 +304,9 @@ export const NotificationSettingsCards = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ninguno</SelectItem>
-                    <SelectItem value="unknown">unknown</SelectItem>
-                    <SelectItem value="queued">queued</SelectItem>
                     <SelectItem value="sent">sent</SelectItem>
                     <SelectItem value="opened">opened</SelectItem>
                     <SelectItem value="clicked">clicked</SelectItem>
-                    <SelectItem value="bounce">bounce</SelectItem>
-                    <SelectItem value="spam">spam</SelectItem>
-                    <SelectItem value="unsub">unsub</SelectItem>
-                    <SelectItem value="blocked">blocked</SelectItem>
-                    <SelectItem value="hardbounced">hardbounced</SelectItem>
-                    <SelectItem value="softbounced">softbounced</SelectItem>
-                    <SelectItem value="deferred">deferred</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
