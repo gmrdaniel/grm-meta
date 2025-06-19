@@ -38,6 +38,7 @@ const HtmlPreview = ({ html }: { html: string }) => {
     />
   );
 };
+import { toggleNotificationStatus, deleteNotificationSetting, updateNotificationConfig } from "../services/notificationSettingsService";
 
 export const NotificationSettingsCards = ({
   settings,
@@ -83,6 +84,44 @@ export const NotificationSettingsCards = ({
       </div>
     );
   }
+  const handleSaveConfig = async () => {
+            if (!selectedSetting) return;
+            
+            // Convertir daysAfter a número o null
+            let daysAfterValue: number | null = null;
+            if (isPreviousEmailSelected && daysAfter) {
+              daysAfterValue = parseInt(daysAfter, 10);
+            }
+            
+            // Convertir timeHour a string o null
+            let timeHourValue: string | null = null;
+            if (isPreviousEmailSelected && timeHour) {
+              timeHourValue = timeHour;
+            }
+            
+            // Determinar el sequence_order basado en el previousEmail
+            let sequenceOrder: number | null = null;
+            if (previousEmail && previousEmail !== "none") {
+              // Si previousEmail es "null", dejamos sequenceOrder como null
+              if (previousEmail !== "null") {
+                sequenceOrder = parseInt(previousEmail, 10) + 1;
+              }
+            }
+            
+            const success = await updateNotificationConfig(selectedSetting.id, {
+              target_status: targetStatus,
+              sequence_order: sequenceOrder,
+              email_status: statusEmail,
+              days_after: daysAfterValue,
+              time_hour: timeHourValue
+            });
+            
+            if (success) {
+              setIsConfigModalOpen(false);
+              // Si existe una función para refrescar los datos, la llamamos aquí
+              // Por ejemplo: onRefresh && onRefresh();
+            }
+          };
 
   return (
     <>
@@ -282,11 +321,13 @@ export const NotificationSettingsCards = ({
               </div>
             </div>
           </div>
+          
+          
           <DialogFooter>
             <Button type="button" onClick={() => setIsConfigModalOpen(false)}>
               Cancelar
             </Button>
-            <Button type="button" variant="default">
+            <Button type="button" variant="default" onClick={handleSaveConfig}>
               Guardar
             </Button>
           </DialogFooter>
