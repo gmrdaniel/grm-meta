@@ -1,0 +1,1 @@
+ALTER TABLE notification_settings ADD COLUMN sequence_order INTEGER;
