@@ -514,9 +514,9 @@ export default function InvitationStepperPage() {
         data: {
           first_name: invitation.first_name,
           last_name: invitation.last_name,
-          phone_country_code: invitation.phone_country_code || null,
-          phone_number: invitation.phone_number || null,
-          social_media_handle: invitation.instagram_user || null,
+          phone_country_code: invitation.phone_country_code ?? null,
+          phone_number: invitation.phone_number ?? null,
+          social_media_handle: invitation.instagram_user ?? null,
           country_of_residence_id: null,
         },
       },
