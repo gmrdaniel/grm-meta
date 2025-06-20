@@ -88,7 +88,7 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "in process", "accepted", "completed","approved"]),
+    status: z.enum(["pending", "in process", "accepted", "completed","rejected","approved"]),
     instagram_user: z.string().optional().default(""),
     
   })
@@ -625,6 +625,7 @@ const InvitationForm = ({
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="in process">In Process</SelectItem>
                         <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>                        
                         <SelectItem value="approved">Approved</SelectItem>
 
