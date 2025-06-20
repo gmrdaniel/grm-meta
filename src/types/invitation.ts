@@ -19,7 +19,7 @@ export interface CreatorInvitation {
   facebook_profile?: string | null;
   invitation_code: string;
   invitation_url: string;
-  status: "pending" | "accepted" | "rejected" | "completed";
+  status: "pending" | "accepted" | "rejected" | "completed"| "approved";
   invitation_type: string;
   created_at: string;
   updated_at: string;
@@ -66,7 +66,7 @@ export type UpdateFacebookPageData = {
 export interface TaskWithInvitation {
   taskId: string;
   creatorInvitationId: string | null;
-  status: "pending" | "in_progress" | "completed" | "review";
+  status: "pending" | "in_progress" | "completed" | "review"| "approved" | "rejected";
   title: string;
   created_at: string;
 }

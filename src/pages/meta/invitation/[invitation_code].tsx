@@ -43,6 +43,7 @@ import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 import BonusCard from "@/components/ui/bonus-card";
 import { fetchInvitationEventByNotification } from "@/services/notification-settings/fetchInvitationEventByNotification";
 import { sendMagicLink } from "@/utils/sendMagicLink";
+import { Button } from "@/components/ui/button";
 
 // 🧭 Steps
 const stepList = [
@@ -270,6 +271,24 @@ export default function InvitationStepperPage() {
         setSaving(false);
         return;
       }
+
+    if (/\s+$|\/$/.test(formData.instagramUser)) {
+      toast.error("Username must not end with spaces or a slash (/)");
+      setIsSubmitting(false);
+      return;
+    }
+   
+    
+  if (/\s/.test(formData.instagramUser)) {
+    toast.error("Username cannot contain spaces");
+    setIsSubmitting(false);
+    return;
+  }
+    if (!isValidInstagramUsernameFormat(instagramUsername)) {
+      toast.error("Only letters, numbers, periods, and underscores allowed.");
+      setIsSubmitting(false);
+      return;
+    }
 
       let isBusinessAccount: boolean | null = null;
       let isProfessionalAccount: boolean | null = null;

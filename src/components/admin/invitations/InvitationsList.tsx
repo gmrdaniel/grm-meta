@@ -70,7 +70,7 @@ const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
-
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isExporting, setIsExporting] = useState(false);
@@ -88,7 +88,8 @@ const InvitationsList = () => {
           | "rejected"
           | "completed"
           | "in process"
-          | "sended");
+          | "sended"
+          | "approved");
 
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -114,15 +115,19 @@ const InvitationsList = () => {
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
-
+    const isFbStepDisabled = (status: string) => {
+    return status === "pending" || status === "in process";
+  };
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
       status,
+      resetFbStep = false
     }: {
       id: string;
-      status: "pending" | "rejected" | "completed" | "sended" | "in process";
-    }) => updateInvitationStatus(id, status),
+      status: "pending" | "rejected" | "completed" | "sended" | "in process" | "approved";
+      resetFbStep?: boolean;
+    }) => updateInvitationStatus(id, status,false),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       toast.success("Invitation status updated");
@@ -161,13 +166,19 @@ const InvitationsList = () => {
     },
   });
 
-  const handleStatusChange = (
-    id: string,
-    newStatus: "pending" | "rejected" | "completed" | "sended" | "in process"
-  ) => {
-    updateStatusMutation.mutate({ id, status: newStatus });
-  };
-
+const handleStatusChange = (
+  id: string,
+  newStatus: "pending" | "rejected" | "completed" | "sended" | "in process"| "approved"
+) => {
+  // Determine if fb_step_completed should be false based on the new status
+  const shouldResetFbStep = newStatus === "pending" || newStatus === "in process";
+  
+  updateStatusMutation.mutate({ 
+    id, 
+    status: newStatus,
+    resetFbStep: shouldResetFbStep 
+  });
+};
   const confirmDelete = () => {
     if (selectedInvitation) {
       deleteMutation.mutate(selectedInvitation);
@@ -207,10 +218,22 @@ const InvitationsList = () => {
             Pending
           </Badge>
         );
+        case "completed":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            Completed
+          </Badge>
+        );
       case "accepted":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             Accepted
+          </Badge>
+        );
+        case "approved":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            Approved
           </Badge>
         );
       case "rejected":
@@ -444,6 +467,7 @@ const InvitationsList = () => {
                         Reset to pending
                       </DropdownMenuItem>
                     )}
+                    
 
                     <DropdownMenuSeparator />
 
