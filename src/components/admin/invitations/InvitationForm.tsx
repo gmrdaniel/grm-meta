@@ -88,7 +88,7 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "in process", "accepted", "completed","rejected","approved"]),
+    status: z.enum(["pending", "in process", "completed","rejected","approved"]),
     instagram_user: z.string().optional().default(""),
     
   })
@@ -200,6 +200,12 @@ const InvitationForm = ({
           shouldValidate: true
         });
       }
+
+       if (name === "status" && (value.status === "completed" || value.status === "approved")) {
+        form.setValue("fb_step_completed", true, {
+          shouldValidate: true
+        });
+      }
     });
     
     return () => subscription.unsubscribe();
@@ -207,8 +213,9 @@ const InvitationForm = ({
 
    const isFbStepDisabled = () => {
     const status = form.watch("status");
-    return status === "pending" || status === "in process";
+    return status === "pending" || status === "in process" || status === "completed" || status === "approved";
   };
+  
   useEffect(() => {
     if (
       initialData &&
@@ -624,9 +631,8 @@ const InvitationForm = ({
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="in process">In Process</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>                        
+                        <SelectItem value="rejected">Rejected</SelectItem>
                         <SelectItem value="approved">Approved</SelectItem>
 
                       </SelectContent>
@@ -725,26 +731,7 @@ const InvitationForm = ({
             {buttonText}
           </Button>
 
-          {/* 
-          
-          I will comment this code temporarily because
-          the form redirect to the list. 
-
-          So the user wont see this button ever.
-            
-          {createdInvitation && (
-            <div className="flex justify-end pt-4">
-              <Button
-                variant="outline"
-                onClick={handleSendEmail}
-                disabled={sendEmail.isPending}
-              >
-                {sendEmail.isPending
-                  ? "Sending Email..."
-                  : "Send Invitation Email"}
-              </Button>
-            </div>
-          )} */}
+        
         </div>
       </form>
     </Form>

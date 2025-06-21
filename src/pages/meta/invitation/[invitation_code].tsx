@@ -182,7 +182,19 @@ export default function InvitationStepperPage() {
   // ✏️ Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    let finalValue = value;
+
+    if (name === "instagramUser") {
+      finalValue = value
+        .replace(/[^a-zA-Z0-9._]/g, "") // permite letras, números, punto y guion bajo
+        .slice(0, 30); // máximo 30 caracteres
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: finalValue,
+    }));
   };
 
   const handleFacebookInputChange = (
@@ -272,23 +284,22 @@ export default function InvitationStepperPage() {
         return;
       }
 
-    if (/\s+$|\/$/.test(formData.instagramUser)) {
-      toast.error("Username must not end with spaces or a slash (/)");
-      setIsSubmitting(false);
-      return;
-    }
-   
-    
-  if (/\s/.test(formData.instagramUser)) {
-    toast.error("Username cannot contain spaces");
-    setIsSubmitting(false);
-    return;
-  }
-    if (!isValidInstagramUsernameFormat(instagramUsername)) {
-      toast.error("Only letters, numbers, periods, and underscores allowed.");
-      setIsSubmitting(false);
-      return;
-    }
+      if (/\s+$|\/$/.test(formData.instagramUser)) {
+        toast.error("Username must not end with spaces or a slash (/)");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (/\s/.test(formData.instagramUser)) {
+        toast.error("Username cannot contain spaces");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!isValidInstagramUsernameFormat(instagramUsername)) {
+        toast.error("Only letters, numbers, periods, and underscores allowed.");
+        setIsSubmitting(false);
+        return;
+      }
 
       let isBusinessAccount: boolean | null = null;
       let isProfessionalAccount: boolean | null = null;
@@ -410,7 +421,7 @@ export default function InvitationStepperPage() {
       const updated = await updateFacebookInfo(
         invitation.id,
         fbPageData.profile?.profile_id, // Page ID
-        fbOwnerProfileData?.profile?.profile_id, // Profile ID
+        fbOwnerProfileData?.profile?.profile_id // Profile ID
       );
       if (!updated) return;
 
