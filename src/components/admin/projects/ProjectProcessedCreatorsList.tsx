@@ -228,7 +228,7 @@ const ImportProcessedCreators: React.FC = () => {
           <ul className="text-sm list-disc ml-6">
             {importedData.map((creator, idx) => (
               <li key={idx}>
-                {creator.email} - {creator.status} - {creator.approvalDate}
+                {creator.email} - {creator.status} 
               </li>
             ))}
           </ul>
