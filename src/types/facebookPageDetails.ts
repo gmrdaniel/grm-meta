@@ -21,8 +21,5 @@ export interface FacebookPageDetails {
     };
     cover_image: string;
     verified: boolean;
-    profile: {
-      profile_id?: string
-    }
   }
   

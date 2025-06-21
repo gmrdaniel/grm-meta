@@ -64,7 +64,7 @@ const formSchema = z
       .refine((val) => !val || val.replace(/\D/g, "").length >= 9, {
         message: "Phone number must have at least 9 digits",
       }),
-        
+
     phone_country_code: z
       .string()
       .nullable()
@@ -88,9 +88,8 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "in process", "accepted", "completed","rejected","approved"]),
+    status: z.enum(["pending", "in process", "accepted", "completed"]),
     instagram_user: z.string().optional().default(""),
-    
   })
   .superRefine((data, ctx) => {
     // 🔒 Requiere teléfono completo para marcar como verificado
@@ -193,22 +192,7 @@ const InvitationForm = ({
       instagram_user: "",
     },
   });
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === "status" && (value.status === "pending" || value.status === "in process")) {
-        form.setValue("fb_step_completed", false, {
-          shouldValidate: true
-        });
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [form]);
 
-   const isFbStepDisabled = () => {
-    const status = form.watch("status");
-    return status === "pending" || status === "in process";
-  };
   useEffect(() => {
     if (
       initialData &&
@@ -625,10 +609,7 @@ const InvitationForm = ({
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="in process">In Process</SelectItem>
                         <SelectItem value="accepted">Accepted</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>                        
-                        <SelectItem value="approved">Approved</SelectItem>
-
+                        <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
@@ -681,13 +662,7 @@ const InvitationForm = ({
                     <FormControl>
                       <Switch
                         checked={field.value}
-                        onCheckedChange={(checked) => {
-                          if (!isFbStepDisabled()) {
-                            field.onChange(checked);
-                          }
-                        }}
-                        disabled={isFbStepDisabled()}
-                        className={isFbStepDisabled() ? "opacity-50 cursor-not-allowed" : ""}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
                   </FormItem>

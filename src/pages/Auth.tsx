@@ -26,6 +26,12 @@ export default function Auth() {
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
+        
+        console.log("Auth check - hash parameters:", { 
+          hasAccessToken: !!accessToken, 
+          hasRefreshToken: !!refreshToken, 
+          type 
+        });
 
         if (accessToken && type === 'recovery') {
           // Handle password recovery redirect
