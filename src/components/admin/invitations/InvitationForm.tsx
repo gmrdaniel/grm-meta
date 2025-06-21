@@ -88,7 +88,7 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "in process", "accepted", "completed"]),
+    status: z.enum(["pending", "in process", "approved", "rejected", "completed"]),
     instagram_user: z.string().optional().default(""),
   })
   .superRefine((data, ctx) => {
@@ -608,7 +608,6 @@ const InvitationForm = ({
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="in process">In Process</SelectItem>
-                        <SelectItem value="accepted">Accepted</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
