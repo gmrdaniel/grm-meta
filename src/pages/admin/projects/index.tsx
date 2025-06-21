@@ -28,10 +28,8 @@ return (
           >
             <TabsList className="mb-6">
               <TabsTrigger value="list">Projects List</TabsTrigger>
-              <TabsTrigger value="profile_projects">
-                Creators by Project
-              </TabsTrigger>
               <TabsTrigger value="create">Create Project</TabsTrigger>
+              <TabsTrigger value="profile_projects">Creators by Project</TabsTrigger>
               <TabsTrigger value="import_meta">Import processed creators</TabsTrigger>
             </TabsList>
 
