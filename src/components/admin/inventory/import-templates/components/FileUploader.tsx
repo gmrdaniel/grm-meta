@@ -10,7 +10,7 @@ interface FileUploaderProps {
   label?: string;
 }
 
-export function FileUploader({ file, onFileSelect, accept = ".xls,.xlsx", label = "Click to select or drag an Excel file" }: FileUploaderProps) {
+export function FileUploader({ file, onFileSelect, accept = ".xls,.xlsx", label = "Haz clic para seleccionar o arrastra un archivo Excel" }: FileUploaderProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       onFileSelect(e.target.files[0]);

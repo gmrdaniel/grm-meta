@@ -21,7 +21,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import InvitationsPagination from "../invitations/InvitationsPagination";
 import { fetchProfileProjectsWithPagination } from "@/services/profile-project/fetchProfileProjectsWithPagination";
 import { fetchProjects } from "@/services/project/projectService";
-import { Button } from "@/components/ui/button";
 
 const ProjectCreatorsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,8 +104,6 @@ const ProjectCreatorsList = () => {
 
   return (
     <div>
-          
-
       <div className="flex flex-col gap-4 mb-4 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:justify-between lg:items-center">
         <input
           type="text"

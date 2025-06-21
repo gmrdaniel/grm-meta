@@ -12,11 +12,9 @@ interface FacebookPageFormProps {
     facebookPageUrl: string;
     verifyPageOwnership: boolean;
     verifyProfileOwnership: boolean;
-    loadingMessage: string;
     linkInstagram: boolean;
   };
   submitting: boolean;
-  loadingMessage: string;
   error: string | null;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (name: string, checked: boolean) => void;
@@ -26,7 +24,6 @@ interface FacebookPageFormProps {
 export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   formData,
   submitting,
-  loadingMessage,
   error,
   onInputChange,
   onCheckboxChange,
@@ -217,10 +214,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           disabled={isSubmitDisabled}
           className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {submitting && (
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        )}
-        {submitting ? loadingMessage : "Submit"}
+          {submitting ? "Submitting..." : "Submit my application"}
         </Button>
       </div>
     </div>
