@@ -516,10 +516,11 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
               console.error("Error al actualizar campaign_id en notification_settings:", updateError);
               throw updateError;
             }
+            
             if (processedInvitations.length > 0) {
               const creatorInvitationEvents = processedInvitations.map(invitation => ({
                 creator_invitation_id: invitation.id,
-                invitation_event_id: selectedEvent.id  // Usar selectedEvent.id en lugar de selectedEvent
+                invitation_event_id: selectedEvent.id
               }));
 
               const { error: creatorInvitationEventsError } = await supabase
@@ -531,8 +532,42 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
                 if (creatorInvitationEventsError?.code != '23505') {//Si el error es diferente a duplicados en bd
                   throw creatorInvitationEventsError;
                 }
-
               }
+              
+              console.log(`Registrando ${processedInvitations.length} logs de notificación...`);
+              
+              const logPromises = processedInvitations.map(invitation => {
+                return supabase
+                  .from("notification_logs")
+                  .insert({
+                    channel: "email",
+                    status: "sent",
+                    invitation_id: invitation.id,
+                    notification_setting_id: selectedNotification.id,
+                    campaign_id: campaignId,
+                    campaign_name: selectedNotification.campaign_name
+                  });
+              });
+              
+              const logResults = await Promise.allSettled(logPromises);
+              
+              // Procesar resultados de los inserts
+              const logsSuccessCount = logResults.filter(result => 
+                result.status === 'fulfilled' && !(result.value as any).error
+              ).length;
+              
+              console.log(`✅ ${logsSuccessCount} de ${processedInvitations.length} logs registrados correctamente`);
+              
+              // Registrar errores si los hay
+              logResults.forEach((result, index) => {
+                if (result.status === 'rejected' || (result.status === 'fulfilled' && (result.value as any).error)) {
+                  const error = result.status === 'rejected' 
+                    ? (result as PromiseRejectedResult).reason 
+                    : (result as PromiseFulfilledResult<any>).value.error;
+                  
+                  console.error(`Error al registrar log para la invitación ${processedInvitations[index].id}:`, error);
+                }
+              });
             }
           }
 
