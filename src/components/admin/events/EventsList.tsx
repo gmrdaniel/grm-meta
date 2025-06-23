@@ -218,13 +218,13 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
                     collisionPadding={16}
                     className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
                   >
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => navigate(`/admin/events/edit/${event.id}`)}
                       className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                     >
                       <Edit className="mr-2 h-4 w-4" />
                       Editar evento
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
 
                     <DropdownMenuItem
                       onClick={() => onManageNotifications ? onManageNotifications(event.id) : null}
@@ -240,7 +240,7 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
                         className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                       >
                         <Link className="mr-2 h-4 w-4" />
-                        Ver términos y condiciones
+                        Ver Enlace
                       </DropdownMenuItem>
                     )}
 

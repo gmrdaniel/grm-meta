@@ -8,7 +8,8 @@ import { CampaignStats } from "@/components/admin/campaigns/CampaignStats";
 import EventInvitation from "@/components/admin/campaigns/EventInvitation";
 import CreateEvent from "@/components/admin/campaigns/CreateEvent";
 import EventsList from "@/components/admin/events/EventsList";
-import {NewNotificationSettingsEvents} from "@/components/admin/notification-settings/NewNotificationSettingsEvents";
+import { NewNotificationSettingsEvents } from "@/components/admin/notification-settings/NewNotificationSettingsEvents";
+import { NotificationSettingsListEvents } from "@/components/admin/notification-settings/NotificationSettingsListEvents";
 import { Plus } from "lucide-react";
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
@@ -27,13 +28,18 @@ export default function CampaignPage() {
     setActiveTab("createnotification");
   };
 
+  const handleManageNotificationsClick = (eventId: string | null) => {
+    setSelectedEventId(eventId);
+    setActiveTab("managenotifications");
+  };
+
   const handleNotificationCreated = () => {
-    setActiveTab("events");
+    setActiveTab("managenotifications");
   };
 
   return (
     <Layout>
-      <div className="container max-w-full py-6">
+      <div className="container min-w-full py-6 px-2">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Campañas</h1>
           {activeTab === "events" && (
@@ -51,7 +57,7 @@ export default function CampaignPage() {
             <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
             {/* <TabsTrigger value="createevent">Crear Evento</TabsTrigger> */}
             <TabsTrigger value="events">Gestionar Eventos</TabsTrigger>
-            {/* <TabsTrigger value="createnotification">Crear Notificación</TabsTrigger> */}
+            <TabsTrigger value="managenotifications">Gestionar Notificaciones</TabsTrigger>
           </TabsList>
 
           <TabsContent value="statistics">
@@ -104,7 +110,7 @@ export default function CampaignPage() {
                 <CardTitle>Gestionar Eventos</CardTitle>
               </CardHeader>
               <CardContent>
-                <EventsList onManageNotifications={handleCreateNotificationClick} />
+                <EventsList onManageNotifications={handleManageNotificationsClick} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -118,7 +124,19 @@ export default function CampaignPage() {
                 <NewNotificationSettingsEvents 
                   eventId={selectedEventId || ""} 
                   onSuccess={handleNotificationCreated} 
+                  onCancel={() => setActiveTab("managenotifications")}
                 />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="managenotifications">
+            <Card className="min-w-fit max-w-full">
+              <CardHeader>
+                <CardTitle>Gestionar Notificaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NotificationSettingsListEvents initialEventId={selectedEventId} />
               </CardContent>
             </Card>
           </TabsContent>

@@ -128,7 +128,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-full ">
       <div className="transition-all duration-300 ease-in-out">
         <h2 className="text-xl font-bold mb-4">Crear Nuevo Evento</h2>
         <Form {...form}>
@@ -203,6 +203,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
                     {...field}
                     type="date"
                     disabled={isSubmitting}
+                    min={new Date().toISOString().split('T')[0]}
                   />
                   <FormMessage />
                 </FormItem>
