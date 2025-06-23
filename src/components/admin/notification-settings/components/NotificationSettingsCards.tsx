@@ -192,7 +192,7 @@ export const NotificationSettingsCards = ({
                   <Pencil className="h-4 w-4 mr-1" />
                   Editar
                 </Button>
-                <Button 
+                {/*<Button 
                   variant="ghost" 
                   size="sm" 
                   className="text-red-500 hover:text-red-700"
@@ -200,7 +200,7 @@ export const NotificationSettingsCards = ({
                 >
                   <Trash className="h-4 w-4 mr-1" />
                   Eliminar
-                </Button>
+                </Button>*/}
               </div>
             </CardFooter>
           </Card>

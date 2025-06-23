@@ -215,7 +215,7 @@ serve(async (req) => {
               if (nextSequential?.length) {
                 // Verificar si han pasado suficientes días desde la última notificación
                 const daysAfter = nextSequential[0].days_after || 0;
-                const lastNotificationDate = new Date(lastNotification.sent_at);
+                const lastNotificationDate = new Date(lastNotification.created_at);
                 const daysSinceLastNotification = Math.floor(
                   (Date.now() - lastNotificationDate.getTime()) / (1000 * 60 * 60 * 24)
                 );
