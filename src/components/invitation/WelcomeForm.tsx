@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MetaTermsAndConditions } from "../terms-and-conditions/MetaTermsAndconditions";
 
 interface WelcomeFormProps {
   readonly formData: {
@@ -133,7 +134,7 @@ export function WelcomeForm({
         {/* Updated Button with Gradient and Rounded Style */}
         <Button
           onClick={onContinue}
-          disabled={!isUsResident || !isOver18 || !isNewToMeta || isSubmitting}
+          disabled={!formData.instagramUser.trim() || !isUsResident || !isOver18 || !isNewToMeta || isSubmitting}
           className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isSubmitting ? "Processing..." : "Next: Facebook Setup →"}
@@ -141,15 +142,18 @@ export function WelcomeForm({
       </div>
 
       {/* Terms */}
-      <div className="text-center text-sm text-gray-500">
-        By applying, you agree to our{" "}
-        <a href="#" className="text-purple-600 hover:underline">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="#" className="text-purple-600 hover:underline">
+      <div className="flex items-center text-center text-sm text-gray-500 flex-wrap">
+        By applying, you agree to our&nbsp;
+        <MetaTermsAndConditions />
+        &nbsp;and&nbsp;
+        <a
+          href="https://www.laneta.com/policess"
+          target="_blanck"
+          className="text-purple-600 hover:underline"
+        >
           Privacy Policy
         </a>
+        .
       </div>
     </div>
   );

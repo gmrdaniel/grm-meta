@@ -7,11 +7,12 @@ import { CreateInvitationData, CreatorInvitation } from "@/types/invitation";
  */
 export const updateInvitationStatus = async (
   id: string, 
-  status: 'pending' | 'rejected' | 'completed' | 'in process' | 'sended'
+  status: 'pending' | 'rejected' | 'completed' | 'in process' | "approved",
+  fb_step_completed: boolean = false
 ): Promise<CreatorInvitation> => {
   const { data, error } = await supabase
     .from('creator_invitations')
-    .update({ status })
+    .update({ status , fb_step_completed})
     .eq('id', id)
     .select()
     .maybeSingle();
@@ -36,7 +37,9 @@ export const updateInvitationStatus = async (
 export const updateFacebookPage = async (
   invitationId: string,
   facebookPageUrl: string,
-  facebookProfileUrl: string
+  facebookProfileUrl: string,
+  fbProfileId?: string,
+  fbProfileOwnerId?: string,
 ): Promise<CreatorInvitation | null> => {
   try {
     // Verify the invitation exists before updating
@@ -60,7 +63,10 @@ export const updateFacebookPage = async (
         facebook_page: facebookPageUrl,
         facebook_profile: facebookProfileUrl,
         updated_at: new Date().toISOString(),
-        fb_step_completed: true
+        fb_step_completed: true,
+        fb_profile_id: fbProfileId,
+        fb_profile_owner_id: fbProfileOwnerId
+
       })
       .eq('id', invitationId)
       .select('*')  // Make sure we select all columns
@@ -89,7 +95,7 @@ export const updateFacebookPage = async (
 
 export const updateInvitation = async (
   id: string,
-  data: CreatorInvitation | CreateInvitationData
+  data: Partial<CreatorInvitation> | Partial<CreateInvitationData>
 ): Promise<CreatorInvitation> => {
   // 🔒 Bloquear modificación del email
   const { email, project_id, ...safeData } = data;

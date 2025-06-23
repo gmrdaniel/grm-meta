@@ -12,9 +12,11 @@ interface FacebookPageFormProps {
     facebookPageUrl: string;
     verifyPageOwnership: boolean;
     verifyProfileOwnership: boolean;
+    loadingMessage: string;
     linkInstagram: boolean;
   };
   submitting: boolean;
+  loadingMessage: string;
   error: string | null;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (name: string, checked: boolean) => void;
@@ -24,6 +26,7 @@ interface FacebookPageFormProps {
 export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   formData,
   submitting,
+  loadingMessage,
   error,
   onInputChange,
   onCheckboxChange,
@@ -99,12 +102,6 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 placeholder="https://www.facebook.com/yourpage"
               />
             </div>
-            <p className="text-xs text-gray-600 font-semibold">
-              Example:{" "}
-              <span className="text-gray-500 font-normal">
-                https://www.facebook.com/yourpage
-              </span>
-            </p>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -165,12 +162,6 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 placeholder="https://facebook.com/profile.php?id=..."
               />
             </div>
-            <p className="text-xs text-gray-600 font-semibold">
-              Example:{" "}
-              <span className="text-gray-500 font-normal">
-                https://facebook.com/profile.php?id=...
-              </span>
-            </p>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -198,7 +189,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             rel="noopener noreferrer"
             className="flex items-center text-blue-500 hover:underline text-sm"
           >
-            <span className="text-xs">Instructions here</span>
+            <span className="text-xs">Learn how to link your Instagram account to your Facebook Page</span>
             <ExternalLink className="h-4 w-4 ml-1 text-xs ml-[0.5px]" />
           </a>
 
@@ -217,14 +208,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           </div>
         </div>
 
-        <div className="text-xs bg-blue-50 p-2 border border-blue-100 flex items-center">
-          <div className="rounded-full bg-green-100 p-1 mr-2">
-            <Check className="h-4 w-4 text-green-600" />
-          </div>
-          <span className="text-blue-700">
-            Submit for validation (3-7 business days).
-          </span>
-        </div>
+        
       </div>
 
       <div className="flex justify-center pt-4">
@@ -233,7 +217,10 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           disabled={isSubmitDisabled}
           className="w-fit h-12 bg-[linear-gradient(to_right,_#4776E6_0%,_#8E54E9_100%)] hover:opacity-90 text-white font-medium rounded-full shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {submitting ? "Submitting..." : "Submit for Validation"}
+          {submitting && (
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        )}
+        {submitting ? loadingMessage : "Submit"}
         </Button>
       </div>
     </div>
