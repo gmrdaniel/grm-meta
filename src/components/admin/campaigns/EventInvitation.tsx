@@ -244,7 +244,16 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
     return { created: false, status, invitation: null };
   };
 
-  // Función principal para manejar la importación
+
+  const chunkArray = (array: any[], chunkSize: number) => {
+    const result: any[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      result.push(array.slice(i, i + chunkSize));
+    }
+    return result;
+  };
+
+// Función principal para manejar la importación
   const handleImport = async (values: FormValues) => {
     if (!file) {
       toast.error("Por favor selecciona un archivo para importar");
