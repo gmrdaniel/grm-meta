@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { NotificationSettingsCards } from "./components/NotificationSettingsCards";
-import { NewNotificationSettingsEvents } from "./NewNotificationSettingsEvents";
+import { UnifiedNotificationSettings } from "./UnifiedNotificationSettings";
 
 interface Event {
   id: string;
@@ -180,18 +180,19 @@ export function NotificationSettingsListEvents({ initialEventId }: NotificationS
       </div>
 
       {editingSetting ? (
-        <EditNotificationSettings 
-          notificationSetting={editingSetting}
-          onSuccess={handleEditSuccess}
-          onCancel={handleEditCancel}
-        />
+        <UnifiedNotificationSettings 
+  isEditing={true}
+  notificationSetting={editingSetting}
+  onSuccess={handleEditSuccess}
+  onCancel={handleEditCancel}
+/>
       ) : isCreatingNotification ? (
-        <NewNotificationSettingsEvents 
-          eventId={selectedEventId || ""}
-          eventName={events.find(e => e.id === selectedEventId)?.event_name}
-          onSuccess={handleCreateSuccess}
-          onCancel={handleCreateCancel}
-        />
+          <UnifiedNotificationSettings 
+  eventId={selectedEventId || ""}
+  eventName={events.find(e => e.id === selectedEventId)?.event_name}
+  onSuccess={handleCreateSuccess}
+  onCancel={handleCreateCancel}
+/>
       ) : (
         <>
           {selectedEventId ? (

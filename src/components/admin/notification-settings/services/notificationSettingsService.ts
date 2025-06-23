@@ -29,8 +29,7 @@ export const deleteNotificationSetting = async (id: string) => {
   
   try {
     const { error } = await supabase
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from('notification_settings' as any)
+      .from('notification_settings')
       .delete()
       .eq('id', id);
     
@@ -38,8 +37,7 @@ export const deleteNotificationSetting = async (id: string) => {
     
     toast.success("Notification setting deleted");
     return true;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
+  } catch (err) {
     toast.error(`Failed to delete setting: ${err.message}`);
     return false;
   }
