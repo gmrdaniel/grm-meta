@@ -56,6 +56,7 @@ import {
 import EventsPagination from "./EventsPagination";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from "@/hooks/use-debounce";
+import EditEvent from "./EditEvent";
 
 interface EventsListProps {
   onManageNotifications?: (eventId: string) => void;
@@ -66,6 +67,7 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -146,6 +148,15 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
     setCurrentPage(1); // Reset to first page when changing page size
   };
 
+  const handleEditEvent = (event: Event) => {
+    setEditingEvent(event);
+  };
+
+  const handleEditSuccess = () => {
+    setEditingEvent(null);
+    queryClient.invalidateQueries({ queryKey: ["events"] });
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-4">Cargando eventos...</div>;
   }
@@ -160,144 +171,154 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <Button
-          onClick={handleExportEvents}
-          disabled={isExporting}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <Download size={16} />
-          {isExporting ? "Exportando..." : "Exportar Todos los Eventos"}
-        </Button>
-      </div>
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre de evento"
-          className="border rounded px-3 py-2 w-full md:w-80"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setCurrentPage(1); // resetear página al filtrar
-          }}
+      {editingEvent ? (
+        <EditEvent 
+          event={editingEvent} 
+          onSuccess={handleEditSuccess} 
+          onCancel={() => setEditingEvent(null)} 
         />
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre del Evento</TableHead>
-            <TableHead>Proyecto</TableHead>
-            <TableHead>Fecha Límite</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {events.map((event: Event) => (
-            <TableRow key={event.id}>
-              <TableCell className="font-medium">
-                {event.event_name}
-              </TableCell>
-              <TableCell>{event.projects?.name || "N/A"}</TableCell>
-              <TableCell>
-                {event.deadline
-                  ? new Date(event.deadline).toLocaleDateString()
-                  : "N/A"}
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical size={16} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    side="bottom"
-                    sideOffset={8}
-                    collisionPadding={16}
-                    className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
-                  >
-                    {/* <DropdownMenuItem
-                      onClick={() => navigate(`/admin/events/edit/${event.id}`)}
-                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    >
-                      <Edit className="mr-2 h-4 w-4" />
-                      Editar evento
-                    </DropdownMenuItem> */}
-
-                    <DropdownMenuItem
-                      onClick={() => onManageNotifications ? onManageNotifications(event.id) : null}
-                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    >
-                      <Bell className="mr-2 h-4 w-4" />
-                      Gestionar Notificaciones
-                    </DropdownMenuItem>
-
-                    {event.link_terms && (
-                      <DropdownMenuItem
-                        onClick={() => window.open(event.link_terms, "_blank")}
-                        className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+      ) : (
+        <>
+          <div className="flex justify-end mb-4">
+            <Button
+              onClick={handleExportEvents}
+              disabled={isExporting}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Download size={16} />
+              {isExporting ? "Exportando..." : "Exportar Todos los Eventos"}
+            </Button>
+          </div>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Buscar por nombre de evento"
+              className="border rounded px-3 py-2 w-full md:w-80"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // resetear página al filtrar
+              }}
+            />
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre del Evento</TableHead>
+                <TableHead>Proyecto</TableHead>
+                <TableHead>Fecha Límite</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {events.map((event: Event) => (
+                <TableRow key={event.id}>
+                  <TableCell className="font-medium">
+                    {event.event_name}
+                  </TableCell>
+                  <TableCell>{event.projects?.name || "N/A"}</TableCell>
+                  <TableCell>
+                    {event.deadline
+                      ? new Date(event.deadline).toLocaleDateString()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        side="bottom"
+                        sideOffset={8}
+                        collisionPadding={16}
+                        className="z-50 bg-white border shadow-md rounded-md w-auto max-w-xs p-2"
                       >
-                        <Link className="mr-2 h-4 w-4" />
-                        Ver Enlace
-                      </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuSeparator />
-
-                    <AlertDialog
-                      open={selectedEvent === event.id}
-                      onOpenChange={(open) =>
-                        !open && setSelectedEvent(null)
-                      }
-                    >
-                      <AlertDialogTrigger asChild>
                         <DropdownMenuItem
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            setSelectedEvent(event.id);
-                          }}
-                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
+                          onClick={() => handleEditEvent(event)}
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar evento
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar evento
                         </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Eliminar Evento</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            ¿Estás seguro de que deseas eliminar este evento?
-                            Esta acción no se puede deshacer.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={confirmDelete}
-                            className="bg-red-600 hover:bg-red-700"
+
+                        <DropdownMenuItem
+                          onClick={() => onManageNotifications ? onManageNotifications(event.id, event) : null}
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
+                        >
+                          <Bell className="mr-2 h-4 w-4" />
+                          Gestionar Notificaciones
+                        </DropdownMenuItem>
+
+                        {event.link_terms && (
+                          <DropdownMenuItem
+                            onClick={() => window.open(event.link_terms, "_blank")}
+                            className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                           >
-                            Eliminar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {totalCount > 0 && (
-        <EventsPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
+                            <Link className="mr-2 h-4 w-4" />
+                            Ver Enlace
+                          </DropdownMenuItem>
+                        )}
+
+                        <DropdownMenuSeparator />
+
+                        <AlertDialog
+                          open={selectedEvent === event.id}
+                          onOpenChange={(open) =>
+                            !open && setSelectedEvent(null)
+                          }
+                        >
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setSelectedEvent(event.id);
+                              }}
+                              className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar evento
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Eliminar Evento</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                ¿Estás seguro de que deseas eliminar este evento?
+                                Esta acción no se puede deshacer.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={confirmDelete}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {totalCount > 0 && (
+            <EventsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          )}
+        </>
       )}
     </div>
   );

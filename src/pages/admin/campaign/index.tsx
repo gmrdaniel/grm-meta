@@ -8,12 +8,13 @@ import { CampaignStats } from "@/components/admin/campaigns/CampaignStats";
 import EventInvitation from "@/components/admin/campaigns/EventInvitation";
 import CreateEvent from "@/components/admin/campaigns/CreateEvent";
 import EventsList from "@/components/admin/events/EventsList";
-import { NewNotificationSettingsEvents } from "@/components/admin/notification-settings/NewNotificationSettingsEvents";
 import { NotificationSettingsListEvents } from "@/components/admin/notification-settings/NotificationSettingsListEvents";
 import { Plus } from "lucide-react";
+import { UnifiedNotificationSettings } from "@/components/admin/notification-settings/UnifiedNotificationSettings";
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null); // Añadir estado para el evento seleccionado
 
   const handleCreateEventClick = () => {
     setActiveTab("createevent");
@@ -28,8 +29,11 @@ export default function CampaignPage() {
     setActiveTab("createnotification");
   };
 
-  const handleManageNotificationsClick = (eventId: string | null) => {
+  const handleManageNotificationsClick = (eventId: string | null, eventData?: any) => {
     setSelectedEventId(eventId);
+    if (eventData) {
+      setSelectedEvent(eventData);
+    }
     setActiveTab("managenotifications");
   };
 
@@ -121,8 +125,9 @@ export default function CampaignPage() {
                 <CardTitle>Crear Notificación</CardTitle>
               </CardHeader>
               <CardContent>
-                <NewNotificationSettingsEvents 
+                <UnifiedNotificationSettings 
                   eventId={selectedEventId || ""} 
+                  eventName={selectedEvent?.event_name} // Usar el evento seleccionado
                   onSuccess={handleNotificationCreated} 
                   onCancel={() => setActiveTab("managenotifications")}
                 />

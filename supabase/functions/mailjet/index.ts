@@ -21,7 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, subject, html } = await req.json();
+    const { email, subject, html, variables } = await req.json();
 
     if (!email || !subject || !html) {
       return new Response(
@@ -43,6 +43,8 @@ const handler = async (req: Request): Promise<Response> => {
           Subject: subject,
           HTMLPart: html,
           TextPart: html.replace(/<[^>]*>/g, ""),
+          TemplateLanguage: true,
+          Variables: variables || {}
         },
       ],
     };

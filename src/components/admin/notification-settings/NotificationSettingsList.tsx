@@ -11,7 +11,7 @@ import { EditNotificationSettings } from "./components/EditNotificationSettings"
 import { useNotificationSettings } from "./hooks/useNotificationSettings";
 import { toggleNotificationStatus, deleteNotificationSetting } from "./services/notificationSettingsService";
 import { NotificationSetting } from "./types";
-
+import { UnifiedNotificationSettings } from "./UnifiedNotificationSettings";
 export function NotificationSettingsList() {
   const [editingSetting, setEditingSetting] = useState<NotificationSetting | null>(null);
   
@@ -73,11 +73,12 @@ export function NotificationSettingsList() {
   return (
     <div className="space-y-4">
       {editingSetting ? (
-        <EditNotificationSettings 
-          notificationSetting={editingSetting}
-          onSuccess={handleEditSuccess}
-          onCancel={handleEditCancel}
-        />
+        <UnifiedNotificationSettings 
+  isEditing={true}
+  notificationSetting={editingSetting}
+  onSuccess={handleEditSuccess}
+  onCancel={handleEditCancel}
+/>
       ) : (
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <NotificationSettingsHeader 
