@@ -183,6 +183,15 @@ export default function CreatorDashboard() {
                           invitation.status === "pending" ||
                           invitation.status === "completed"
                       )
+                      .sort((a, b) => {
+                        const order = {
+                          pending: 1,
+                          "in process": 2,
+                          completed: 3,
+                        };
+
+                        return order[a.status] - order[b.status];
+                      })
                       .map((invitation) => {
                         // Color para el fondo general de la tarjeta
                         const bgColorClass = () => {
@@ -236,16 +245,15 @@ export default function CreatorDashboard() {
                           >
                             <div className="mb-4">
                               <h3 className="font-semibold text-lg mb-4">
-                                {invitation.name} 
+                                {invitation.name}
                               </h3>
 
-                            <p className="text-xs">
-                              Created at: {" "}
-                                 {new Date(
-                                invitation.created_at
-                              ).toLocaleDateString()}
-                              
-                            </p>
+                              <p className="text-xs">
+                                Created at:{" "}
+                                {new Date(
+                                  invitation.created_at
+                                ).toLocaleDateString()}
+                              </p>
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex -space-x-2">
@@ -268,17 +276,22 @@ export default function CreatorDashboard() {
                             <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/10 rounded-full"></div>
 
                             <div className="flex justify-center mt-5">
-                              <a
-                                href={invitation.invitation_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`inline-flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-full transition ${getButtonStyleByStatus(
-                                  invitation.status
-                                )}`}
-                              >
-                                Complete invitation
-                                <ExternalLink className="w-4 h-4" />
-                              </a>
+                              {/* Mostrar botón solo si no está completed ni rejected */}
+                              {invitation.status === "pending" && (
+                                <a
+                                  href={invitation.invitation_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`inline-flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-full transition ${getButtonStyleByStatus(
+                                    invitation.status
+                                  )}`}
+                                >
+                                  Complete invitation
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              )}
+                              {/* Si es completed, no mostramos nada */}
+                              {/* Si es rejected, no mostramos nada */}
                             </div>
                           </div>
                         );
@@ -296,76 +309,6 @@ export default function CreatorDashboard() {
                       </div>
                     )}
                   </div>
-
-                  {/* Recent Tasks Section */}
-                  {/* <div className="bg-white rounded-2xl shadow-sm border">
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Recent Tasks</h2>
-                  <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                    {getFilteredTasks().length} Tasks
-                  </span>
-                </div>
-                
-                <div className="flex space-x-6 mt-4 overflow-x-auto">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`whitespace-nowrap pb-2 border-b-2 transition-colors ${
-                        activeTab === tab
-                          ? "text-blue-600 font-medium border-blue-600"
-                          : "text-gray-400 hover:text-gray-600 border-transparent"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              </div>
-                  
-              <div className="p-6">
-                <div className="space-y-4">
-                  {getFilteredTasks().length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No {activeTab.toLowerCase()} found
-                    </div>
-                  ) : (
-                    getFilteredTasks().map((task, index) => (
-                      <div key={task.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors group">
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-10 h-10 ${getPriorityColor(task.priority)} rounded-lg flex items-center justify-center text-white font-semibold`}>
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900">{task.title}</h3>
-                            <p className="text-sm text-gray-500">{task.description}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="flex -space-x-1">
-                            {[...Array(Math.min(task.assignees, 3))].map((_, i) => (
-                              <div key={i} className="w-6 h-6 bg-gray-300 rounded-full border-2 border-white"></div>
-                            ))}
-                            {task.assignees > 3 && (
-                              <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center">
-                                <span className="text-xs text-white font-medium">+{task.assignees - 3}</span>
-                              </div>
-                            )}
-                          </div>
-                          <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-                  
-
-            </div> */}
 
                   {/* Pending Invitations Section */}
                   <div className="bg-white rounded-2xl shadow-sm border p-6">
@@ -451,110 +394,7 @@ export default function CreatorDashboard() {
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                  {/* Upcoming Schedule */}
-                  {/* <div className="bg-white rounded-2xl shadow-sm border p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Upcoming Schedule</h2>
-                <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                  <Calendar className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl p-4 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">Create Infographic</h3>
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded">15:30</span>
-                  </div>
-                  <p className="text-sm text-pink-100 mb-3">Design For Education</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex -space-x-1">
-                        <div className="w-5 h-5 bg-white/30 rounded-full"></div>
-                        <div className="w-5 h-5 bg-white/30 rounded-full"></div>
-                        <div className="w-5 h-5 bg-white/30 rounded-full"></div>
-                      </div>
-                      <span className="text-xs ml-2">+3</span>
-                    </div>
-                    <Users className="w-4 h-4" />
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 text-white cursor-pointer hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium">Financial Planner</h3>
-                    <span className="text-xs bg-white/20 px-2 py-1 rounded">24:57</span>
-                  </div>
-                  <p className="text-sm text-emerald-100 mb-3">Dashboard Application</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex -space-x-1">
-                        <div className="w-5 h-5 bg-white/30 rounded-full"></div>
-                        <div className="w-5 h-5 bg-white/30 rounded-full"></div>
-                      </div>
-                      <span className="text-xs ml-2">+2</span>
-                    </div>
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            </div> */}
-
-                  {/* New Task */}
-                  {/* <div className="bg-white rounded-2xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">New Task</h2>
-              
-              <div className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder="Task Title Here" 
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-                />
-                
-                <div className="grid grid-cols-2 gap-2">
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedCategory === category
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500 mb-2">Add Members</p>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex -space-x-2">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-medium">AX</span>
-                      </div>
-                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-gray-600 text-xs font-medium">CX</span>
-                      </div>
-                      <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <button 
-                  onClick={createNewTask}
-                  disabled={!newTaskTitle.trim()}
-                  className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors"
-                >
-                  Create Task
-                </button>
-              </div>
-            </div> */}
+                  {/* Aquí podrías agregar otras secciones de la columna derecha */}
                 </div>
               </div>
             </div>
