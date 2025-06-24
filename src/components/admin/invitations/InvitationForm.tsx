@@ -88,7 +88,7 @@ const formSchema = z
     phone_verified: z.boolean().optional().default(false),
     fb_step_completed: z.boolean().optional().default(false),
     is_professional_account: z.boolean().optional().default(false),
-    status: z.enum(["pending", "in process", "completed","rejected","approved"]),
+    status: z.enum(["pending", "in process", "completed", "rejected", "approved"]),
     instagram_user: z.string().optional().default(""),
     
   })

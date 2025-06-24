@@ -43,7 +43,6 @@ import { useInvitationLoader } from "@/hooks/use-invitationLoader";
 import BonusCard from "@/components/ui/bonus-card";
 import { fetchInvitationEventByNotification } from "@/services/notification-settings/fetchInvitationEventByNotification";
 import { sendMagicLink } from "@/utils/sendMagicLink";
-import { Button } from "@/components/ui/button";
 
 // 🧭 Steps
 const stepList = [
