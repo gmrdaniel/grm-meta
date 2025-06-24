@@ -236,7 +236,7 @@ export default function CreatorDashboard() {
                           >
                             <div className="mb-4">
                               <h3 className="font-semibold text-lg mb-4">
-                                {invitation.name} holis
+                                {invitation.name} 
                               </h3>
 
                             <p className="text-xs">
