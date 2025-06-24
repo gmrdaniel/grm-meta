@@ -9,6 +9,4 @@ DROP INDEX IF EXISTS creator_invitations_email_project_id_idx;
 
 -- Crea nuevo índice único que asegura que un mismo email (sin importar mayúsculas)
 -- no se repita dentro del mismo proyecto
-CREATE UNIQUE INDEX unique_email_project_ci
-ON public.creator_invitations
-USING btree (lower(email), project_id);
+CREATE UNIQUE INDEX unique_email_project_ci ON public.creator_invitations USING btree (lower(email), project_id)
