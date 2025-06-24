@@ -300,11 +300,11 @@ export default function InvitationStepperPage() {
         return;
       }
 
-      let isBusinessAccount: boolean | null = null;
-      let isProfessionalAccount: boolean | null = null;
+      /* let isBusinessAccount: boolean | null = null;
+      let isProfessionalAccount: boolean | null = null; */
 
       // Validación 3: existencia del usuario
-      try {
+      /* try {
         const result = await fetchInstagramUser(instagramUsername);
 
         const user = result.result[0]?.user;
@@ -325,7 +325,7 @@ export default function InvitationStepperPage() {
         toast.error("Failed to verify Instagram user.");
         setSaving(false);
         return;
-      }
+      } */
 
       const { error } = await supabase
         .from("creator_invitations")
@@ -335,8 +335,8 @@ export default function InvitationStepperPage() {
           first_name: formData.firstName,
           last_name: formData.lastName,
           instagram_user: instagramUsername,
-          is_business_account: isBusinessAccount,
-          is_professional_account: isProfessionalAccount,
+          /* is_business_account: isBusinessAccount,
+          is_professional_account: isProfessionalAccount, */
           registration_notification_id: notif,
         })
         .eq("id", invitation.id);
