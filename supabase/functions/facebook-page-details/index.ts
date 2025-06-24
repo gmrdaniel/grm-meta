@@ -11,6 +11,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Manejo de preflight CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -21,17 +22,18 @@ serve(async (req) => {
     if (!pageUrl || typeof pageUrl !== "string") {
       return new Response(
         JSON.stringify({ error: "Missing or invalid pageUrl" }),
-        { status: 400, headers: corsHeaders }
+        {
+          status: 400,
+          headers: corsHeaders,
+        }
       );
     }
-
+    console.log("pageUrl", pageUrl);
+    const encodedUrl = encodeURIComponent(pageUrl);
+    const url = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedUrl}`;
     const rapidApiKey = Deno.env.get("RAPIDAPI_KEY");
 
-    // 1. Llamada a page/details
-    const encodedPageUrl = encodeURIComponent(pageUrl);
-    const pageDetailsUrl = `https://facebook-scraper3.p.rapidapi.com/page/details?url=${encodedPageUrl}`;
-
-    const pageRes = await fetch(pageDetailsUrl, {
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "x-rapidapi-key": rapidApiKey!,
@@ -39,55 +41,27 @@ serve(async (req) => {
       },
     });
 
-    const pageData = await pageRes.json();
+    const data = await response.json();
 
-    if (!pageRes.ok) {
-      return new Response(JSON.stringify({ error: pageData }), {
-        status: pageRes.status,
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: data }), {
+        status: response.status,
         headers: corsHeaders,
       });
     }
 
-    // 2. Llamada a profile/details_url
-    const profileDetailsUrl = `https://facebook-scraper3.p.rapidapi.com/profile/details_url?url=${encodedPageUrl}`;
-
-    const profileRes = await fetch(profileDetailsUrl, {
-      method: "GET",
-      headers: {
-        "x-rapidapi-key": rapidApiKey!,
-        "x-rapidapi-host": "facebook-scraper3.p.rapidapi.com",
-      },
-    });
-
-    const profileData = await profileRes.json();
-
-    if (!profileRes.ok) {
-      return new Response(JSON.stringify({ error: profileData }), {
-        status: profileRes.status,
-        headers: corsHeaders,
-      });
-    }
-
-    // Respuesta final con claves correctas
-    const combined = {
-      ...pageData.results ?? null,
-      profile: profileData.profile ?? null,
-    };
-
-    return new Response(JSON.stringify(combined), {
+    return new Response(JSON.stringify({ data: data.results }), {
       status: 200,
       headers: {
         ...corsHeaders,
         "Content-Type": "application/json",
       },
     });
-
   } catch (error) {
-    console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ error: "Unexpected error occurred" }),
+      JSON.stringify({ error: "Missing or invalid pageUrl" }),
       {
-        status: 500,
+        status: 400,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",

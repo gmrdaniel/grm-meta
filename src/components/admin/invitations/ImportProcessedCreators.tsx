@@ -154,7 +154,7 @@ const ImportProcessedCreators: React.FC = () => {
 
   const generateExcelTemplate = () => {
     const templateData = [
-      ["Email", "Status", "Approval Date", "FB Profile ID", "FB Profile Owner ID"],
+      ["Email", "Status", "Approval Date", "FB Page ID", "FB Page Owner ID"],
       [
         "user@example.com",
         "approved",
