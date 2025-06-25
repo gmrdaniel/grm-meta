@@ -36,7 +36,7 @@ import {
   Zap,
 } from "lucide-react";
 import { fetchFacebookPageDetails } from "@/services/facebook/fetchFacebookPageDetails";
-import { fetchInstagramUser } from "@/services/instagram/fetchInstagramUser";
+
 import { isValidInstagramUsernameFormat } from "@/utils/isValidInstagramUsernameFormat";
 import { ProfileFormData } from "@/types/forms-type";
 import { useInvitationLoader } from "@/hooks/use-invitationLoader";
@@ -321,7 +321,6 @@ export default function InvitationStepperPage() {
         isBusinessAccount = user.is_business;
         isProfessionalAccount = false;
       } catch (error) {
-        console.log(error);
         toast.error("Failed to verify Instagram user.");
         setSaving(false);
         return;
