@@ -335,7 +335,7 @@ const handleStatusChange = (
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="sended">Sended</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="in process">In Process</SelectItem>
           </SelectContent>
         </Select>
