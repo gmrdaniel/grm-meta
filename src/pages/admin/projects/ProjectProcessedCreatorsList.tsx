@@ -119,7 +119,11 @@ const ImportProcessedCreators: React.FC = () => {
         });
         continue;
       }
+      console.log('ANTES',approvalDate);
+      
       approvalDate = excelDateToJSDate(approvalDate);
+      console.log('DESPUES',approvalDate);
+      
 
       try {
         await linkProfileToProjectById({
