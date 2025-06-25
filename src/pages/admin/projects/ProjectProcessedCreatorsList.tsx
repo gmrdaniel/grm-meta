@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { FileUploader } from "@/components/admin/inventory/import-templates/components/FileUploader";
 import { Card } from "@/components/ui/card";
+
 import {
   Select,
   SelectTrigger,
@@ -15,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchProjects } from "@/services/project/projectService";
 import { linkProfileToProjectById } from "@/services/profile-project/linkUserToMetaProject";
 import { useAuth } from "@/hooks/useAuth";
+import excelDateToJSDate from "@/utils/excelDateToJSDate";
 
 interface ProcessedCreator {
   email: string;
@@ -23,7 +25,6 @@ interface ProcessedCreator {
   fbProfileId: string;
   fbProfileOwnerId: string;
 }
-
 
 interface ImportError {
   row: number;
@@ -98,10 +99,12 @@ const ImportProcessedCreators: React.FC = () => {
       const rowNumber = i + 1;
       const email = row[emailIndex]?.toString().trim();
       const status = row[statusIndex]?.toString().trim();
-      const approvalDate = row[dateIndex]?.toString().trim();
+      
+      let approvalDate = row[dateIndex]?.toString().trim();
+
       const fbProfileId = row[fbPageIdIndex]?.toString().trim();
       const fbProfileOwnerId = row[fbPageOwnerIdIndex]?.toString().trim();
-
+      
       if (
         !email ||
         !status ||
@@ -116,6 +119,7 @@ const ImportProcessedCreators: React.FC = () => {
         });
         continue;
       }
+      approvalDate = excelDateToJSDate(approvalDate);
 
       try {
         await linkProfileToProjectById({
@@ -125,20 +129,36 @@ const ImportProcessedCreators: React.FC = () => {
           status,
           fbProfileId,
           fbProfileOwnerId,
+          approvalDate
         });
 
-        processedData.push({ email, status, approvalDate, fbProfileId, fbProfileOwnerId });
+        processedData.push({
+          email,
+          status,
+          approvalDate,
+          fbProfileId,
+          fbProfileOwnerId,
+        });
       } catch (err: any) {
         console.error(err);
+
+        let errorMessage = err.message ?? "Unknown error";
+
+        if (err.code === "42501" || err.code === 42501) {
+          errorMessage = `Error: The user ${email} was already processed`;
+        }
+
         errors.push({
           row: rowNumber,
           data: { email, status, approvalDate },
-          error: err.message ?? "Unknown error",
+          error: errorMessage,
         });
       }
     }
-
+    console.log(processedData);
+    
     setImportedData(processedData);
+
     setImportErrors(errors);
 
     if (errors.length === 0 && processedData.length > 0) {
@@ -154,14 +174,14 @@ const ImportProcessedCreators: React.FC = () => {
 
   const generateExcelTemplate = () => {
     const templateData = [
-      ["Email", "Status", "Approval Date", "FB Profile ID", "FB Profile Owner ID"],
       [
-        "user@example.com",
-        "approved",
-        "2025-05-20",
-        "123456789",
-        "987654321",
+        "Email",
+        "Status",
+        "Approval Date",
+        "FB Profile ID",
+        "FB Profile Owner ID",
       ],
+      ["user@example.com", "approved", "2025-05-20", "123456789", "987654321"],
     ];
 
     const wb = XLSX.utils.book_new();
@@ -217,7 +237,7 @@ const ImportProcessedCreators: React.FC = () => {
           <ul className="text-sm list-disc ml-6">
             {importedData.map((creator, idx) => (
               <li key={idx}>
-                {creator.email} - {creator.status} - {creator.approvalDate}
+                {creator.email} - {creator.status}
               </li>
             ))}
           </ul>

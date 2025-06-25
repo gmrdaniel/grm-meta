@@ -20,7 +20,7 @@ export const fetchProfileProjectsWithPagination = async (
   pageSize: number = 10,
   sortBy: string = "joined_at",
   sortOrder: "asc" | "desc" = "desc",
-  statusFilter?: string,
+  statusFilter?: "rejected" | "approved",
   projectFilter?: string,
   searchQuery?: string
 ): Promise<{ data: ProfileProjectsWithProfile[]; count: number }> => {
@@ -28,9 +28,21 @@ export const fetchProfileProjectsWithPagination = async (
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const likeFilter = searchQuery?.trim()
-      ? `profile.first_name.ilike.%${searchQuery.trim()}%,profile.last_name.ilike.%${searchQuery.trim()}%,profile.email.ilike.%${searchQuery.trim()}%`
-      : undefined;
+    // Primero buscamos los IDs de perfil que coincidan con la búsqueda
+    let profileIds: string[] | undefined;
+    if (searchQuery?.trim()) {
+      const searchTerm = `%${searchQuery.trim()}%`;
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id")
+        .or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},email.ilike.${searchTerm}`);
+
+      if (profilesError) {
+        console.error("Error searching profiles:", profilesError);
+        return { data: [], count: 0 };
+      }
+      profileIds = profiles?.map(p => p.id);
+    }
 
     // Count query
     let countQuery = supabase
@@ -39,7 +51,7 @@ export const fetchProfileProjectsWithPagination = async (
 
     if (statusFilter) countQuery = countQuery.eq("status", statusFilter);
     if (projectFilter) countQuery = countQuery.eq("project_id", projectFilter);
-    if (likeFilter) countQuery = countQuery.or(likeFilter);
+    if (profileIds) countQuery = countQuery.in("profile_id", profileIds);
 
     const { count, error: countError } = await countQuery;
     if (countError) {
@@ -60,10 +72,10 @@ export const fetchProfileProjectsWithPagination = async (
         status,
         joined_at,
         profile:profiles!profile_projects_profile_id_fkey (
-      first_name,
-      last_name,
-      email
-    )
+          first_name,
+          last_name,
+          email
+        )
       `
       )
       .order(sortBy, { ascending: sortOrder === "asc" })
@@ -71,7 +83,7 @@ export const fetchProfileProjectsWithPagination = async (
 
     if (statusFilter) dataQuery = dataQuery.eq("status", statusFilter);
     if (projectFilter) dataQuery = dataQuery.eq("project_id", projectFilter);
-    if (likeFilter) dataQuery = dataQuery.or(likeFilter);
+    if (profileIds) dataQuery = dataQuery.in("profile_id", profileIds);
 
     const { data, error } = await dataQuery;
 
@@ -85,10 +97,7 @@ export const fetchProfileProjectsWithPagination = async (
       count: count || 0,
     };
   } catch (err) {
-    console.error(
-      "Unexpected error in fetchProfileProjectsWithPagination:",
-      err
-    );
+    console.error("Unexpected error in fetchProfileProjectsWithPagination:", err);
     return { data: [], count: 0 };
   }
 };

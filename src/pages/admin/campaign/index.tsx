@@ -1,19 +1,57 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Layout } from "@/components/Layout";
 import ImportCampaign from "@/components/admin/campaigns/SendCampaign";
 import { CampaignStats } from "@/components/admin/campaigns/CampaignStats";
 import EventInvitation from "@/components/admin/campaigns/EventInvitation";
-
+import CreateEvent from "@/components/admin/campaigns/CreateEvent";
+import EventsList from "@/components/admin/events/EventsList";
+import { NotificationSettingsListEvents } from "@/components/admin/notification-settings/NotificationSettingsListEvents";
+import { Plus } from "lucide-react";
+import { UnifiedNotificationSettings } from "@/components/admin/notification-settings/UnifiedNotificationSettings";
 export default function CampaignPage() {
   const [activeTab, setActiveTab] = useState("statistics");
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null); // Añadir estado para el evento seleccionado
+
+  const handleCreateEventClick = () => {
+    setActiveTab("createevent");
+  };
+
+  const handleEventCreated = () => {
+    setActiveTab("events");
+  };
+
+  const handleCreateNotificationClick = (eventId: string | null) => {
+    setSelectedEventId(eventId);
+    setActiveTab("createnotification");
+  };
+
+  const handleManageNotificationsClick = (eventId: string | null, eventData?: any) => {
+    setSelectedEventId(eventId);
+    if (eventData) {
+      setSelectedEvent(eventData);
+    }
+    setActiveTab("managenotifications");
+  };
+
+  const handleNotificationCreated = () => {
+    setActiveTab("managenotifications");
+  };
 
   return (
     <Layout>
-      <div className="container max-w-full py-6">
+      <div className="container min-w-full py-6 px-2">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Campañas</h1>
+          {activeTab === "events" && (
+            <Button onClick={handleCreateEventClick}>
+              <Plus size={18} className="mr-2" />
+              Crear evento
+            </Button>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -21,6 +59,9 @@ export default function CampaignPage() {
             <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
             {/* <TabsTrigger value="send">Enviar Campaña</TabsTrigger> */}
             <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
+            {/* <TabsTrigger value="createevent">Crear Evento</TabsTrigger> */}
+            <TabsTrigger value="events">Gestionar Eventos</TabsTrigger>
+            <TabsTrigger value="managenotifications">Gestionar Notificaciones</TabsTrigger>
           </TabsList>
 
           <TabsContent value="statistics">
@@ -52,6 +93,55 @@ export default function CampaignPage() {
               </CardHeader>
               <CardContent>
                 <EventInvitation />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="createevent">
+            <Card>
+              <CardHeader>
+          
+              </CardHeader>
+              <CardContent>
+                <CreateEvent onSuccess={handleEventCreated} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="events">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestionar Eventos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EventsList onManageNotifications={handleManageNotificationsClick} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="createnotification">
+            <Card>
+              <CardHeader>
+                <CardTitle>Crear Notificación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UnifiedNotificationSettings 
+                  eventId={selectedEventId || ""} 
+                  eventName={selectedEvent?.event_name} // Usar el evento seleccionado
+                  onSuccess={handleNotificationCreated} 
+                  onCancel={() => setActiveTab("managenotifications")}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="managenotifications">
+            <Card className="min-w-fit max-w-full">
+              <CardHeader>
+                <CardTitle>Gestionar Notificaciones</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NotificationSettingsListEvents initialEventId={selectedEventId} />
               </CardContent>
             </Card>
           </TabsContent>

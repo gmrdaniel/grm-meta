@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
 const apiKey = Deno.env.get("MAILJET_API_KEY");
 const apiSecret = Deno.env.get("MAILJET_API_SECRET");
@@ -93,14 +94,37 @@ serve(async (req) => {
       });
     }
 
-    // Obtener el CampaignID
-    const campaignResponse = await fetch(`https://api.mailjet.com/v3/REST/campaign?CustomCampaign=${customCampaign}`, {
-      headers: {
-        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`)
+    // Implementar mecanismo de reintento para obtener el campaignId
+    let campaignId = null;
+    let retryCount = 0;
+    const maxRetries = 5;
+    const baseDelay = 1000; // 1 segundo
+
+    while (!campaignId && retryCount < maxRetries) {
+      // Esperar con un retraso exponencial (1s, 2s, 4s, 8s, 16s)
+      if (retryCount > 0) {
+        const delay = baseDelay * Math.pow(2, retryCount - 1);
+        console.log(`Intento ${retryCount + 1}: Esperando ${delay}ms antes de reintentar obtener campaignId`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-    });
-    const campaignData = await campaignResponse.json();
-    const campaignId = campaignData.Data[0]?.ID || null;
+
+      // Obtener el CampaignID
+      const campaignResponse = await fetch(`https://api.mailjet.com/v3/REST/campaign?CustomCampaign=${customCampaign}`, {
+        headers: {
+          Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`)
+        }
+      });
+      const campaignData = await campaignResponse.json();
+      campaignId = campaignData.Data[0]?.ID || null;
+      
+      if (campaignId) {
+        console.log(`Éxito: campaignId ${campaignId} obtenido en el intento ${retryCount + 1}`);
+        break;
+      }
+      
+      retryCount++;
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       data,

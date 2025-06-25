@@ -57,7 +57,7 @@ export const fetchInvitationsWithPagination = async (
   pageSize: number = 10,
   sortBy: string = 'created_at',
   sortOrder: 'asc' | 'desc' = 'desc',
-  statusFilter?: "pending" | "accepted" | "rejected" | "completed" | "in process" | "sended",
+  statusFilter?: "pending" | "approved" | "rejected" | "completed" | "in process",
   searchQuery?: string,
 ): Promise<{ data: CreatorInvitation[], count: number }> => {
   try {

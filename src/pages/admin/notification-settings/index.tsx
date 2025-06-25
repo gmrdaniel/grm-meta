@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificationSettingsList } from "@/components/admin/notification-settings/NotificationSettingsList";
-import { NewNotificationSettings } from "@/components/admin/notification-settings/NewNotificationSettings";
+import { UnifiedNotificationSettings } from "@/components/admin/notification-settings/UnifiedNotificationSettings";
 
 export default function NotificationSettingsPage() {
   const [activeTab, setActiveTab] = useState("list");
@@ -27,7 +27,9 @@ export default function NotificationSettingsPage() {
           </TabsContent>
           
           <TabsContent value="new" className="space-y-4">
-            <NewNotificationSettings onSuccess={() => setActiveTab("list")} />
+            <UnifiedNotificationSettings 
+              onSuccess={() => setActiveTab("list")} 
+            />
           </TabsContent>
         </Tabs>
       </div>

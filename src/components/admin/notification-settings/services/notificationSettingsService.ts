@@ -29,8 +29,7 @@ export const deleteNotificationSetting = async (id: string) => {
   
   try {
     const { error } = await supabase
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from('notification_settings' as any)
+      .from('notification_settings')
       .delete()
       .eq('id', id);
     
@@ -38,9 +37,43 @@ export const deleteNotificationSetting = async (id: string) => {
     
     toast.success("Notification setting deleted");
     return true;
+  } catch (err) {
+    toast.error(`Failed to delete setting: ${err.message}`);
+    return false;
+  }
+};
+
+export const updateNotificationConfig = async (
+  id: string,
+  data: {
+    target_status: string;
+    sequence_order: number | null;
+    email_status: string;
+    days_after: number | null;
+    time_hour: string | null;
+  }
+) => {
+  try {
+    const { error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('notification_settings' as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update({
+        target_status: data.target_status,
+        sequence_order: data.sequence_order,
+        email_status: data.email_status === 'none' ? null : data.email_status,
+        days_after: data.days_after,
+        time_hour: data.time_hour
+      } as any)
+      .eq('id', id);
+    
+    if (error) throw error;
+    
+    toast.success("Configuración actualizada correctamente");
+    return true;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
-    toast.error(`Failed to delete setting: ${err.message}`);
+    toast.error(`Error al actualizar la configuración: ${err.message}`);
     return false;
   }
 };
