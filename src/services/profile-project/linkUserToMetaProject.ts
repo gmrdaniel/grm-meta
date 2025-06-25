@@ -6,6 +6,7 @@ interface LinkProfileParams {
   status?: "approved" | "rejected";
   fbProfileId: string;
   fbProfileOwnerId: string;
+  approvalDate?: string;
 }
 
 export async function linkProfileToProjectById({
@@ -15,8 +16,11 @@ export async function linkProfileToProjectById({
   status = "approved",
   fbProfileId,
   fbProfileOwnerId,
+  approvalDate
 }: LinkProfileParams) {
   // 1. Buscar perfil con rol 'creator'
+  console.log('DataTransfer',email, projectId, adminId, status, fbProfileId, fbProfileOwnerId, approvalDate);
+  
   const { data: profileData, error: profileErr } = await supabase
     .from("profiles")
     .select("id")
@@ -40,7 +44,7 @@ export async function linkProfileToProjectById({
       status,
       fb_profile_id: fbProfileId,
       fb_profile_owner_id: fbProfileOwnerId,
-      joined_at: currentTimestamp,
+      joined_at: approvalDate || currentTimestamp, // Usar approvalDate si se proporciona, o el timestamp actual
       updated_at: currentTimestamp,
     },
     {
