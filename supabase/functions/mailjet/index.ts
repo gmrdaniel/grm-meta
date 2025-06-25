@@ -43,8 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
           Subject: subject,
           HTMLPart: html,
           TextPart: html.replace(/<[^>]*>/g, ""),
-          TemplateLanguage: true,
-          Variables: variables || {}
+          TemplateLanguage: false
         },
       ],
     };
