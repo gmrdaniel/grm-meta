@@ -22,7 +22,8 @@ import NotificationLogs from "./pages/admin/notification-logs";
 import NotificationSettings from "./pages/admin/notification-settings";
 import EditInvitation from "./pages/admin/invitations/edit/[id]";
 import AdminCampaign from "./pages/admin/campaign";
-
+import { AuthGate } from "./components/auth/AuthGate";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -34,21 +35,22 @@ function App() {
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-
+            <AuthGate>
               <Routes>
-               <Route path="/" element={<Navigate to="/auth" replace />} />
+                <Route path="/" element={<Navigate to="/auth" replace />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+
 
                 {/* Public routes */}
                 <Route
                   path="/meta/invitation/:invitation_code?"
                   element={<InvitationStepperPage />}
                 />
-                 <Route
+                <Route
                   path="/pinterest/invitation/:invitation_code?"
                   element={<InvitationStepperPagePinterest />}
                 />
-                
 
                 {/* Admin routes */}
                 <Route
@@ -114,7 +116,6 @@ function App() {
                       <AdminTest />
                     </ProtectedRoute>
                   }
-                  
                 />
                 <Route
                   path="/admin/notification-logs"
@@ -123,7 +124,6 @@ function App() {
                       <NotificationLogs />
                     </ProtectedRoute>
                   }
-                  
                 />
                 <Route
                   path="/admin/notification-settings"
@@ -133,7 +133,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
+
                 <Route
                   path="/admin/campaign"
                   element={
@@ -163,6 +163,7 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+            </AuthGate>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
