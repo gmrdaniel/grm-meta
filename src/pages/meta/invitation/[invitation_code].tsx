@@ -414,13 +414,12 @@ export default function InvitationStepperPage() {
         );
         return false;
       }
-
       setSubmittingStep("updatingInvitation");
       // Step 3: Update backend with Facebook data
       const updated = await updateFacebookInfo(
         invitation.id,
-        fbPageData.profile?.profile_id, // Page ID
-        fbOwnerProfileData?.profile?.profile_id // Profile ID
+        fbPageData.page_id, // Page ID
+        fbOwnerProfileData?.page_id // Profile ID
       );
       if (!updated) return;
 

@@ -19,7 +19,7 @@ export interface CreatorInvitation {
   facebook_profile?: string | null;
   invitation_code: string;
   invitation_url: string;
-  status: "pending" | "accepted" | "rejected" | "completed";
+  status: "pending" | "accepted" | "rejected" | "completed"| "approved";
   invitation_type: string;
   created_at: string;
   updated_at: string;
@@ -29,6 +29,8 @@ export interface CreatorInvitation {
   current_stage_id: string | null;
   fb_step_completed: boolean;
   is_professional_account?: boolean;
+  fb_profile_id?: string | null;
+  fb_profile_owner_id?: string | null;
 }
 
 export type CreateInvitationData = {
@@ -49,6 +51,8 @@ export type CreateInvitationData = {
   phone_verified?: boolean | null;
   fb_step_completed?: boolean | null;
   is_professional_account?: boolean | null;
+  fb_profile_id?: string | null;
+  fb_profile_owner_id?: string | null;
   status?: string
 };
 
