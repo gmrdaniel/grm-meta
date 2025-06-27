@@ -1,16 +1,11 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import {
-  MoreHorizontal,
-  Mail,
-  ExternalLink,
-} from "lucide-react";
+import { MoreHorizontal, Mail, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { createClient } from "@supabase/supabase-js";
-import { fetchProjectNameByInvitationEmail } from "@/services/project/getProjectByUser";
 import { fetchProjectsByEmail } from "@/services/project/getProjectsByUser";
 
 const supabase = createClient(
@@ -21,18 +16,7 @@ const supabase = createClient(
 export default function CreatorDashboard() {
   const isMobile = useIsMobile();
   const { user } = useAuth();
-  const [projectName, setProjectName] = useState<string>();
   const [invitations, setInvitations] = useState([]);
-
-  const getProject = async () => {
-    if (!user) return;
-    console.log(user);
-
-    if (!user.email) return;
-    if (projectName != null) return;
-    const name = await fetchProjectNameByInvitationEmail(user.email);
-    setProjectName(name);
-  };
 
   const fetchInvitationStatus = async () => {
     if (!user?.email) return;
@@ -64,10 +48,6 @@ export default function CreatorDashboard() {
     };
     return colors[status] ?? "bg-gray-100 text-gray-800";
   };
-
-  useEffect(() => {
-    getProject();
-  }, [user]);
 
   useEffect(() => {
     const fetchVerificationStatus = async () => {
@@ -110,10 +90,6 @@ export default function CreatorDashboard() {
                   <p className="text-gray-600">
                     Here's what's happening with your projects today
                   </p>
-
-                  <h3 className="text-2xl font-bold text-gray-900 mt-5">
-                    Active invitations
-                  </h3>
                 </div>
                 {/* <div className="flex items-center space-x-4">
             <div className="bg-white rounded-lg shadow-sm border px-4 py-2">
@@ -135,146 +111,151 @@ export default function CreatorDashboard() {
           </div> */}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="flex flex-col">
                 {/* Left Column - Projects and Tasks */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Active Projects */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {invitations
-                      .filter(
+                  <div className="bg-white shadow-sm border  rounded-2xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Active invitations
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {invitations
+                        .filter(
+                          (invitation) =>
+                            invitation.status === "in process" ||
+                            invitation.status === "pending" ||
+                            invitation.status === "completed"
+                        )
+                        .sort((a, b) => {
+                          const order = {
+                            pending: 1,
+                            "in process": 2,
+                            completed: 3,
+                          };
+
+                          return order[a.status] - order[b.status];
+                        })
+                        .map((invitation) => {
+                          // Color para el fondo general de la tarjeta
+                          const bgColorClass = () => {
+                            switch (invitation.status) {
+                              case "in process":
+                                return "bg-gradient-to-br from-[#e1efff] to-[#90c4ff] text-[#2563eb] border border-[#90c4ff]";
+                              case "pending":
+                                return "bg-gradient-to-br from-[#fff4dc] to-[#ffd17c] text-[#5b3b00] border border-[#ffa800]";
+                              case "completed":
+                                return "bg-gradient-to-br from-green-500 to-green-600 text-white border border-green-700";
+                              default:
+                                return "bg-gradient-to-br from-blue-500 to-blue-600 text-white border border-blue-700";
+                            }
+                          };
+
+                          const getButtonStyleByStatus = (status: string) => {
+                            switch (status) {
+                              case "in process":
+                                return "bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-300";
+                              case "pending":
+                                return "bg-[#ffe4af] text-[#5b3b00] border border-[#ffd88b] hover:bg-[#fdaa05] hover:text-yellow-900";
+                              case "completed":
+                                return "bg-green-400 text-white-300  hover:bg-green-700";
+                              case "approved":
+                                return "bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200";
+                              case "rejected":
+                                return "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200";
+                              default:
+                                return "bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200";
+                            }
+                          };
+
+                          // Color solo para el estado (texto o fondo)
+                          const statusColorClass = () => {
+                            switch (invitation.status) {
+                              case "in process":
+                                return "bg-blue-700 text-blue-100"; // azul fuerte
+                              case "pending":
+                                return "bg-[#fdaa05] text-yellow-900";
+                              case "completed":
+                                return "bg-green-700 text-green-100";
+                              default:
+                                return "bg-blue-700 text-blue-100";
+                            }
+                          };
+
+                          return (
+                            <div
+                              key={invitation.id}
+                              className={`${bgColorClass()} rounded-2xl p-6 relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer`}
+                            >
+                              <div className="mb-4">
+                                <h3 className="font-semibold text-lg mb-4">
+                                  {invitation.projectName}
+                                </h3>
+
+                                <p className="text-xs">
+                                  Created at:{" "}
+                                  {new Date(
+                                    invitation.created_at
+                                  ).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex -space-x-2">
+                                  <div
+                                    className={`w-6 h-6  rounded-full border-2 ${bgColorClass()}`}
+                                  ></div>
+                                  <div
+                                    className={`w-6 h-6 rounded-full border-2 ${bgColorClass()}`}
+                                  ></div>
+                                  <div
+                                    className={`w-6 h-6 bg-white/30 rounded-full border-2 ${bgColorClass()}`}
+                                  ></div>
+                                </div>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-full font-semibold ${statusColorClass()}`}
+                                >
+                                  {invitation.status}
+                                </span>
+                              </div>
+                              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/10 rounded-full"></div>
+
+                              <div className="flex justify-center mt-5">
+                                {/* Mostrar botón solo si no está completed ni rejected */}
+                                {(invitation.status == "pending" ||
+                                  invitation.status == "in process") && (
+                                  <a
+                                    href={invitation.invitation_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`inline-flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-full transition ${getButtonStyleByStatus(
+                                      invitation.status
+                                    )}`}
+                                  >
+                                    Complete invitation
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                     {invitations.filter(
                         (invitation) =>
                           invitation.status === "in process" ||
                           invitation.status === "pending" ||
                           invitation.status === "completed"
-                      )
-                      .sort((a, b) => {
-                        const order = {
-                          pending: 1,
-                          "in process": 2,
-                          completed: 3,
-                        };
-
-                        return order[a.status] - order[b.status];
-                      })
-                      .map((invitation) => {
-                        // Color para el fondo general de la tarjeta
-                        const bgColorClass = () => {
-                          switch (invitation.status) {
-                            case "in process":
-                              return "bg-gradient-to-br from-[#e1efff] to-[#90c4ff] text-[#2563eb] border border-[#90c4ff]";
-                            case "pending":
-                              return "bg-gradient-to-br from-[#fff4dc] to-[#ffd17c] text-[#5b3b00] border border-[#ffa800]";
-                            case "completed":
-                              return "bg-gradient-to-br from-green-500 to-green-600 text-white border border-green-700";
-                            default:
-                              return "bg-gradient-to-br from-blue-500 to-blue-600 text-white border border-blue-700";
-                          }
-                        };
-
-                        const getButtonStyleByStatus = (status: string) => {
-                          switch (status) {
-                            case "in process":
-                              return "bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-300";
-                            case "pending":
-                              return "bg-[#ffe4af] text-[#5b3b00] border border-[#ffd88b] hover:bg-[#fdaa05] hover:text-yellow-900";
-                            case "completed":
-                              return "bg-green-400 text-white-300  hover:bg-green-700";
-                            case "approved":
-                              return "bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200";
-                            case "rejected":
-                              return "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200";
-                            default:
-                              return "bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200";
-                          }
-                        };
-
-                        // Color solo para el estado (texto o fondo)
-                        const statusColorClass = () => {
-                          switch (invitation.status) {
-                            case "in process":
-                              return "bg-blue-700 text-blue-100"; // azul fuerte
-                            case "pending":
-                              return "bg-[#fdaa05] text-yellow-900";
-                            case "completed":
-                              return "bg-green-700 text-green-100";
-                            default:
-                              return "bg-blue-700 text-blue-100";
-                          }
-                        };
-
-                        return (
-                          <div
-                            key={invitation.id}
-                            className={`${bgColorClass()} rounded-2xl p-6 relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer`}
-                          >
-                            <div className="mb-4">
-                              <h3 className="font-semibold text-lg mb-4">
-                                {invitation.name}
-                              </h3>
-
-                              <p className="text-xs">
-                                Created at:{" "}
-                                {new Date(
-                                  invitation.created_at
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex -space-x-2">
-                                <div
-                                  className={`w-6 h-6  rounded-full border-2 ${bgColorClass()}`}
-                                ></div>
-                                <div
-                                  className={`w-6 h-6 rounded-full border-2 ${bgColorClass()}`}
-                                ></div>
-                                <div
-                                  className={`w-6 h-6 bg-white/30 rounded-full border-2 ${bgColorClass()}`}
-                                ></div>
-                              </div>
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full font-semibold ${statusColorClass()}`}
-                              >
-                                {invitation.status}
-                              </span>
-                            </div>
-                            <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/10 rounded-full"></div>
-
-                            <div className="flex justify-center mt-5">
-                              {/* Mostrar botón solo si no está completed ni rejected */}
-                              {invitation.status === "pending" || invitation.status === "in process" && (
-                                <a
-                                  href={invitation.invitation_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`inline-flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-full transition ${getButtonStyleByStatus(
-                                    invitation.status
-                                  )}`}
-                                >
-                                  Complete invitation
-                                  <ExternalLink className="w-4 h-4" />
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                    {invitations.filter(
-                      (invitation) =>
-                        invitation.status === "in process" ||
-                        invitation.status === "pending" ||
-                        invitation.status === "completed"
-                    ).length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <Mail className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p>No invitations at the moment</p>
-                      </div>
-                    )}
+                      ).length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          <Mail className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>No invitations at the moment</p>
+                        </div>
+                      )}
                   </div>
 
                   {/* Pending Invitations Section */}
                   <div className="bg-white rounded-2xl shadow-sm border p-6">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-gray-900">
                         Processed invitations
                       </h2>
@@ -309,7 +290,7 @@ export default function CreatorDashboard() {
                                   <span className="font-semibold text-gray-900">
                                     Project:{" "}
                                   </span>
-                                  {invitation.name}
+                                  {invitation.projectName}
                                 </p>
 
                                 {/* Estado del proyecto */}
@@ -328,12 +309,10 @@ export default function CreatorDashboard() {
 
                                 <div className="flex items-center space-x-2">
                                   <span className="text-xs text-gray-500">
-                                    {invitation.create_at}
+                                    {new Date(
+                                      invitation.created_at
+                                    ).toLocaleDateString()}
                                   </span>
-
-                                  <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                                  </button>
                                 </div>
                               </div>
                             </div>
