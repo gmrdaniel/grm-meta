@@ -2,8 +2,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 type ProjectInvitation = {
   id: string;
-  name: string;
+  projectName: string;
   invitation_link: string;
+  status: string
+  created_at: string
 };
 
 export const fetchProjectsByEmail = async (
@@ -24,15 +26,15 @@ export const fetchProjectsByEmail = async (
     throw new Error(error?.message ?? "No invitations found");
   }
 
-  const proyectos = data
+  const projects = data
     .filter((item) => item.projects)
     .map((item) => ({
       id: item.projects.id,
-      name: item.projects.name,
+      projectName: item.projects.name,
       status:item.status,
       invitation_link: item.invitation_url,
       created_at: item.created_at, 
     }));
 
-  return proyectos;
+  return projects;
 };
