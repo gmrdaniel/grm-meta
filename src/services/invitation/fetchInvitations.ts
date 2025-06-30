@@ -59,6 +59,7 @@ export const fetchInvitationsWithPagination = async (
   sortOrder: 'asc' | 'desc' = 'desc',
   statusFilter?: "pending" | "approved" | "rejected" | "completed" | "in process",
   searchQuery?: string,
+  projectFilter?: string, // Nuevo parámetro para filtrar por proyecto
 ): Promise<{ data: CreatorInvitation[], count: number }> => {
   try {
     const from = (page - 1) * pageSize;
@@ -77,6 +78,10 @@ export const fetchInvitationsWithPagination = async (
       countQuery = countQuery.eq('status', statusFilter);
     }
 
+    if (projectFilter && projectFilter !== 'all') {
+      countQuery = countQuery.eq('project_id', projectFilter);
+    }
+
     if (likeFilter) {
       countQuery = countQuery.or(likeFilter);
     }
@@ -91,12 +96,19 @@ export const fetchInvitationsWithPagination = async (
     // --- Paso 2: Obtener los datos paginados
     let dataQuery = supabase
       .from('creator_invitations')
-      .select('*')
+      .select(`
+        *,
+        projects(id, name)
+      `)
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(from, to);
 
     if (statusFilter) {
       dataQuery = dataQuery.eq('status', statusFilter);
+    }
+
+    if (projectFilter && projectFilter !== 'all') {
+      dataQuery = dataQuery.eq('project_id', projectFilter);
     }
 
     if (likeFilter) {
