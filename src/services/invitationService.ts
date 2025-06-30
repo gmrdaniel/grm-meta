@@ -3,7 +3,7 @@ import { fetchProjects } from './project/projectService';
 
 // Añadir esta función para exponer fetchProjects desde invitationService
 export const getProjects = async () => {
-  return fetchProjects();
+  return await fetchProjects();
 };
 
 // This file is kept for backwards compatibility
