@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchInvitations,
@@ -8,6 +8,7 @@ import {
   fetchInvitationsWithPagination,
   fetchAllInvitations,
   exportInvitationsToExcel,
+  getProjects, 
 } from "@/services/invitationService";
 import {
   Check,
@@ -74,7 +75,31 @@ const InvitationsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isExporting, setIsExporting] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  
+  // Inicializar los estados con valores de localStorage si existen
+  const [filterStatus, setFilterStatus] = useState<string>(
+    localStorage.getItem("invitationsFilterStatus") || "all"
+  );
+  const [filterProject, setFilterProject] = useState<string>(
+    localStorage.getItem("invitationsFilterProject") || "all"
+  );
+
+  // Consulta para obtener los proyectos
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: getProjects,
+  });
+
+  const projects = projectsData || [];
+
+  // Guardar los valores de los filtros en localStorage cuando cambien
+  useEffect(() => {
+    localStorage.setItem("invitationsFilterStatus", filterStatus);
+  }, [filterStatus]);
+
+  useEffect(() => {
+    localStorage.setItem("invitationsFilterProject", filterProject);
+  }, [filterProject]);
 
   const queryClient = useQueryClient();
 
@@ -89,6 +114,9 @@ const InvitationsList = () => {
           | "in process"
           | "approved");
 
+  const normalizedProjectFilter =
+    filterProject === "all" ? undefined : filterProject;
+
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "invitations",
@@ -96,7 +124,8 @@ const InvitationsList = () => {
         page: currentPage,
         pageSize,
         statusFilter: normalizedStatusFilter,
-        searchQuery: debouncedSearchQuery, 
+        searchQuery: debouncedSearchQuery,
+        projectFilter: normalizedProjectFilter, // Añadir filtro de proyecto
       },
     ],
     queryFn: () =>
@@ -106,7 +135,8 @@ const InvitationsList = () => {
         "created_at",
         "desc",
         normalizedStatusFilter,
-        debouncedSearchQuery 
+        debouncedSearchQuery,
+        normalizedProjectFilter // Añadir filtro de proyecto
       ),
   });
 
@@ -321,24 +351,47 @@ const handleStatusChange = (
             setCurrentPage(1); // resetear página al filtrar
           }}
         />
-        <Select
-          onValueChange={(value) => {
-            setFilterStatus(value);
-            setCurrentPage(1);
-          }}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="in process">In Process</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select
+            value={filterStatus}
+            onValueChange={(value) => {
+              setFilterStatus(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="in process">In Process</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select
+            value={filterProject}
+            onValueChange={(value) => {
+              setFilterProject(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="All Projects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Projects</SelectItem>
+              {projects.map((project) => (
+                <SelectItem key={project.id} value={project.id}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <Table>
         <TableHeader>
@@ -346,6 +399,7 @@ const handleStatusChange = (
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Invitation Code</TableHead>
+            <TableHead>Project</TableHead> 
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
@@ -377,6 +431,10 @@ const handleStatusChange = (
                     </Button>
                   )}
                 </div>
+              </TableCell>
+              
+              <TableCell>
+                {invitation.projects?.name || "N/A"}
               </TableCell>
               <TableCell>
                 {invitation.invitation_type === "new_user"

@@ -442,6 +442,49 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
                 // Usar la invitación existente
                 invitation = existingInvitation;
+                
+                // Actualizar campos de redes sociales si están vacíos en la invitación existente
+                let needsUpdate = false;
+                const updateData: Partial<CreateInvitationData> = {};
+                
+                // Verificar y actualizar campos de redes sociales según la plataforma
+                if (socialPlatform && socialHandle) {
+                  switch (socialPlatform.toUpperCase()) {
+                    case "TIKTOK":
+                      if (!invitation.social_media_handle && socialHandle) {
+                        updateData.social_media_handle = socialHandle;
+                        needsUpdate = true;
+                      }
+                      break;
+                    case "YOUTUBE":
+                      if (!invitation.youtube_channel && socialHandle) {
+                        updateData.youtube_channel = socialHandle;
+                        needsUpdate = true;
+                      }
+                      break;
+                    case "INSTAGRAM":
+                      if (!invitation.instagram_user && socialHandle) {
+                        updateData.instagram_user = socialHandle;
+                        needsUpdate = true;
+                      }
+                      break;
+                  }
+                }
+                
+                // Si hay campos para actualizar, hacemos la actualización
+                if (needsUpdate) {
+                  const { error: updateError } = await supabase
+                    .from('creator_invitations')
+                    .update(updateData)
+                    .eq('id', invitation.id);
+                  
+                  if (updateError) {
+                    console.warn(`No se pudieron actualizar los datos de redes sociales: ${updateError.message}`);
+                  } else {
+                    console.log(`Datos de redes sociales actualizados para ${email}:`, updateData);
+                  }
+                }
+                
                 processedInvitations.push(invitation);
 
                 // Añadir a la lista de destinatarios para enviar correo
