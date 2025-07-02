@@ -1,17 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
-
-export type ProjectSummary = {
-      projectId: string;  // <--- Agrega esto
-  projectName: string;
-  approvedInvitations: number;
-rejectedInvitations: number;
-  completedInvitations: number;
-  totalInvitations: number;
-  pendingInvitations: number;
-  acceptedInvitations: number;
-  inProcessInvitations: number;
-};
+import { ProjectSummary } from "@/types/project";
 
 export const fetchProjectsWithInvitationsSummary = async (): Promise<ProjectSummary[]> => {
   try {

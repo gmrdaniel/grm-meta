@@ -1,23 +1,12 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { InvitationsCard } from "@/components/InvitationsCard";
+import { InvitationsCard } from "@/components/ProjectCard";
 import { fetchProjectsWithInvitationsSummary } from "@/services/invitation/fetchProjectsInvitations";
 import { fetchInProcessInvitationsByProjects } from "@/services/invitation/fetchInProcessInvitationsByProject";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { CreatorInvitation } from "@/types/invitation";
-
-type ProjectSummary = {
-  projectName: string;
-  approvedInvitations: number;
-  completedInvitations: number;
-  acceptedInvitations: number;
-  projectId: string;
-  rejectedInvitations: number;
-  pendingInvitations: number;
-  totalInvitations: number;
-  inProcessInvitations: number;
-};
+import {ProjectSummary} from "@/types/project"
 
 export default function AdminDashboard() {
   const [projectsSummary, setProjectsSummary] = useState<ProjectSummary[]>([]);

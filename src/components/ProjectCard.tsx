@@ -1,4 +1,4 @@
-import { ProjectSummary } from "@/services/invitation/fetchProjectsInvitations";
+import { ProjectSummary } from "@/types/project";
 import { Users } from "lucide-react";
 
 interface InvitationsCardProps {
