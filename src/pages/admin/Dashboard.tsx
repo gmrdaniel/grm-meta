@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { InvitationsCard } from "@/components/ProjectCard";
+import { ProjectCard } from "@/components/ProjectCard";
 import { fetchProjectsWithInvitationsSummary } from "@/services/invitation/fetchProjectsInvitations";
 import { fetchInProcessInvitationsByProjects } from "@/services/invitation/fetchInProcessInvitationsByProject";
 import { useEffect, useState } from "react";
@@ -117,7 +117,7 @@ const exportToExcel = (projectId: string) => {
                 );
 
                 return (
-                  <InvitationsCard
+                  <ProjectCard
                     key={projectSummary.projectId}
                     projectSummary={projectSummary}
                     hasInProcess={!!inProcess?.invitations?.length}

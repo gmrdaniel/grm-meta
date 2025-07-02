@@ -1,17 +1,17 @@
 import { ProjectSummary } from "@/types/project";
 import { Users } from "lucide-react";
 
-interface InvitationsCardProps {
+interface ProjectCardProps {
   projectSummary: ProjectSummary;
   onDownloadExcel: () => void;
   hasInProcess: boolean;
 }
 
-export function InvitationsCard({
+export function ProjectCard({
   projectSummary,
   onDownloadExcel,
   hasInProcess,
-}: InvitationsCardProps) {
+}: ProjectCardProps) {
   const {
     totalInvitations,
     pendingInvitations,
