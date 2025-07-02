@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectSummary } from "@/types/project";
 
-export const fetchProjectsInvitations = async (): Promise<ProjectSummary[]> => {
+export const fetchProjectInvitationSummaries = async (): Promise<ProjectSummary[]> => {
   try {
     // 1. Traer todos los proyectos
     const { data: projects, error: projectsError } = await supabase
