@@ -104,7 +104,7 @@ export default function AdminDashboard() {
 
             {loading ? (
               <div className="flex flex-col justify-center items-center h-48 space-y-2 ">
-                <div className="animate-spin h-8 w-8 border-b-2 border-gray-900 rounded-full" />
+                <div className="animate-spin h-8 w-8 border-b-2 border-gray-900 rounded-full m-5" />
                 Loading projects...
               </div>
             ) : projectsSummary.length === 0 ? (
