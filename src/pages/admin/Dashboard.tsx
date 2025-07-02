@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { ProjectCard } from "@/components/ProjectCard";
-import { fetchProjectsWithInvitationsSummary } from "@/services/invitation/fetchProjectsInvitations";
+import { fetchProjectsInvitations } from "@/services/invitation/fetchProjectsInvitations";
 import { fetchInProcessInvitationsByProjects } from "@/services/invitation/fetchInProcessInvitationsByProject";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const summary = await fetchProjectsWithInvitationsSummary();
+      const summary = await fetchProjectsInvitations();
       setProjectsSummary(summary);
 
       const projectIds = summary.map(p => p.projectId);
@@ -120,11 +120,7 @@ const exportToExcel = (projectId: string) => {
                   <ProjectCard
                     key={projectSummary.projectId}
                     projectSummary={projectSummary}
-                    hasInProcess={!!inProcess?.invitations?.length}
-                    onDownloadExcel={() =>
-                      exportToExcel(projectSummary.projectId)
-                    }
-                  />
+                    onDownloadExcel={async () => exportToExcel(projectSummary.projectId)}             />
                 );
               })}
             </div>
