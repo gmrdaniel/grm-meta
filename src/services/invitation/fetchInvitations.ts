@@ -150,24 +150,41 @@ export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
   return data as CreatorInvitation[];
 };
 
-export const fetchInvitationsByRange = async (projectId: string, fechaDesde: Date): Promise<CreatorInvitation[]> => {
-  const { data, error } = await supabase
+export const fetchInvitationsByDateAndStatus = async (
+  projectId: string,
+  fechaDesde: Date,
+  fechaHasta?: Date,
+  statuses: readonly string[] = []
+): Promise<CreatorInvitation[]> => {
+  let query = supabase
     .from('creator_invitations')
     .select(`
-    *,
-    projects(*)
-  `)
+      *,
+      projects(*)
+    `)
     .eq('project_id', projectId)
     .gte('created_at', fechaDesde.toISOString())
     .order('created_at', { ascending: false });
 
+  if (fechaHasta) {
+    query = query.lte('created_at', fechaHasta.toISOString());
+  }
+
+  if (statuses.length > 0) {
+    query = query.in('status', statuses);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
-    console.error('Error fetching all invitations:', error);
+    console.error('Error fetching invitations by range:', error);
     throw new Error(error.message);
   }
 
   return data as CreatorInvitation[];
 };
+
+
 
 
 export const fetchInvitationsWithProfile = async (projectId: string): Promise<CreatorInvitation[]> => {
@@ -190,7 +207,7 @@ export const fetchInvitationsWithProfile = async (projectId: string): Promise<Cr
     console.error('Error fetching all invitations:', error);
     throw new Error(error.message);
   }
-
+  
   return data as CreatorInvitation[];
 };
 

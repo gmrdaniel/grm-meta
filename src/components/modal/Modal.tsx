@@ -33,7 +33,7 @@ export const Modal = ({ children, options }: ModalProps) => {
                     <div className="flex justify-end">
                         {ButtonComponent}
                         <Dialog.Close asChild>
-                            <Button onClick={() => setOpen(false)}>Cerrar</Button>
+                            <Button onClick={() => setOpen(false)}>Close</Button>
                         </Dialog.Close>
                     </div>
                 </Dialog.Content>

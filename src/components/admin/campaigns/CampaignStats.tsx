@@ -419,7 +419,7 @@ export function CampaignStats() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>
-              Cerrar
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
