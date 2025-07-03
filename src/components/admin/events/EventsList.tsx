@@ -5,7 +5,7 @@ import {
   fetchAllEvents,
   deleteEvent,
   exportEventsToExcel,
-  Event
+  Event,
 } from "@/services/events/eventService";
 import {
   Calendar,
@@ -15,7 +15,7 @@ import {
   Trash2,
   Edit,
   Link,
-  Bell
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -158,24 +158,24 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-4">Cargando eventos...</div>;
+    return <div className="flex justify-center p-4">Loading events...</div>;
   }
 
   if (error) {
-    return <div className="text-red-500 p-4">Error al cargar los eventos</div>;
+    return <div className="text-red-500 p-4">Error loading events</div>;
   }
 
   if (!events || events.length === 0) {
-    return <div className="text-center p-4">No se encontraron eventos</div>;
+    return <div className="text-center p-4">No events found</div>;
   }
 
   return (
     <div>
       {editingEvent ? (
-        <EditEvent 
-          event={editingEvent} 
-          onSuccess={handleEditSuccess} 
-          onCancel={() => setEditingEvent(null)} 
+        <EditEvent
+          event={editingEvent}
+          onSuccess={handleEditSuccess}
+          onCancel={() => setEditingEvent(null)}
         />
       ) : (
         <>
@@ -187,13 +187,13 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
               className="flex items-center gap-2"
             >
               <Download size={16} />
-              {isExporting ? "Exportando..." : "Exportar Todos los Eventos"}
+              {isExporting ? "Exporting..." : "Export All Events"}
             </Button>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
             <input
               type="text"
-              placeholder="Buscar por nombre de evento"
+              placeholder="Search by event name"
               className="border rounded px-3 py-2 w-full md:w-80"
               value={searchQuery}
               onChange={(e) => {
@@ -205,10 +205,10 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre del Evento</TableHead>
-                <TableHead>Proyecto</TableHead>
-                <TableHead>Fecha Límite</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead>Event Name</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Deadline Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -242,24 +242,30 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
                           className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                         >
                           <Edit className="mr-2 h-4 w-4" />
-                          Editar evento
+                          Edit event
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                          onClick={() => onManageNotifications ? onManageNotifications(event.id, event) : null}
+                          onClick={() =>
+                            onManageNotifications
+                              ? onManageNotifications(event.id, event)
+                              : null
+                          }
                           className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                         >
                           <Bell className="mr-2 h-4 w-4" />
-                          Gestionar Notificaciones
+                          Manage Notifications
                         </DropdownMenuItem>
 
                         {event.link_terms && (
                           <DropdownMenuItem
-                            onClick={() => window.open(event.link_terms, "_blank")}
+                            onClick={() =>
+                              window.open(event.link_terms, "_blank")
+                            }
                             className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
                           >
                             <Link className="mr-2 h-4 w-4" />
-                            Ver Enlace
+                            See Link
                           </DropdownMenuItem>
                         )}
 
@@ -280,24 +286,24 @@ const EventsList = ({ onManageNotifications }: EventsListProps) => {
                               className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar evento
+                              Delete Event
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Eliminar Evento</AlertDialogTitle>
+                              <AlertDialogTitle>Delete Event</AlertDialogTitle>
                               <AlertDialogDescription>
-                                ¿Estás seguro de que deseas eliminar este evento?
-                                Esta acción no se puede deshacer.
+                                Are you sure you want to delete this event? This
+                                action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={confirmDelete}
                                 className="bg-red-600 hover:bg-red-700"
                               >
-                                Eliminar
+                                Eliminate
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

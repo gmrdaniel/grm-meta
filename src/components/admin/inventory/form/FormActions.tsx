@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 
@@ -8,26 +7,26 @@ interface FormActionsProps {
   onCancel?: () => void;
 }
 
-export function FormActions({ isSubmitting, isEditing, onCancel }: FormActionsProps) {
+export function FormActions({
+  isSubmitting,
+  isEditing,
+  onCancel,
+}: FormActionsProps) {
   return (
     <div className="flex justify-end gap-2">
       {onCancel && (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-        >
-          Cancelar
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
         </Button>
       )}
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
             <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-opacity-50 border-t-transparent rounded-full" />
-            {isEditing ? "Actualizando..." : "Guardando..."}
+            {isEditing ? "Updating..." : "Saving..."}
           </>
         ) : (
-          <>{isEditing ? "Actualizar Creador" : "Guardar Creador"}</>
+          <>{isEditing ? "Update Creator" : "Save Creator"}</>
         )}
       </Button>
     </div>

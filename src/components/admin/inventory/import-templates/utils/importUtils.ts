@@ -67,20 +67,20 @@ export const createBulkInvitationDetail = async (data: {
 
 export const generateExcelTemplate = () => {
   const templateData = [
-    ["nombre", "apellido", "correo", "usuario_tiktok"],
-    ["Juan", "Pérez", "juan@example.com", "juantiktok"],
-    ["María", "González", "maria@example.com", "mariatiktok"]
+    ["full_name", "email", "tiktok_username"],
+    ["Juan Perez", "juan@example.com", "juantiktok"],
+    ["María Gonzales", "maria@example.com", "mariatiktok"]
   ];
   
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(templateData);
-  XLSX.utils.book_append_sheet(wb, ws, "Plantilla TikTok");
-  XLSX.writeFile(wb, "plantilla_tiktok.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Tiktok Template");
+  XLSX.writeFile(wb, "tiktok_template.xlsx");
 };
 
 export const processExcelFile = async (file: File): Promise<string> => {
   if (!file) {
-    toast.error("Selecciona un archivo Excel para importar");
+    toast.error("Select an Excel file to import");
     throw new Error("No file selected");
   }
   
@@ -91,6 +91,7 @@ export const processExcelFile = async (file: File): Promise<string> => {
     const jsonData = XLSX.utils.sheet_to_json<any>(worksheet, { header: 1 });
     
     let csvData = "";
+    ;
     
     jsonData.forEach((row: any[], index: number) => {
       csvData += row.join(",") + "\n";
@@ -99,20 +100,22 @@ export const processExcelFile = async (file: File): Promise<string> => {
     return csvData;
   } catch (error) {
     console.error("Error reading Excel file:", error);
-    toast.error("Error al leer el archivo Excel");
+    toast.error("Error reading Excel file");
     throw error;
   }
 };
 
 export const validateCreatorData = (rowData: any): string[] => {
   const rowErrors = [];
-  if (!rowData.nombre) rowErrors.push("Nombre es requerido");
-  if (!rowData.apellido) rowErrors.push("Apellido es requerido");
+  if (!rowData.nombre) rowErrors.push("Full Name is required");
+  if (!rowData.apellido) rowErrors.push("Last name is required");
   if (!rowData.correo) {
-    rowErrors.push("Correo es requerido");
+    rowErrors.push("Email is required");
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rowData.correo)) {
-    rowErrors.push("Correo no tiene formato válido");
+    rowErrors.push("Email does not have a valid format");
   }
+  console.log('error');
+  
   return rowErrors;
 };
 
@@ -126,18 +129,18 @@ export const processImportData = async (
   errors: ImportError[]
 }> => {
   if (!csvData.trim()) {
-    toast.error("Ingresa los datos para importar");
+    toast.error("Enter the data to import");
     throw new Error("No data to import");
   }
   
   const lines = csvData.trim().split('\n');
   const headers = lines[0].split(',');
   
-  const requiredHeaders = ["nombre", "apellido", "correo", "usuario_tiktok"];
+  const requiredHeaders = ["full_name", "email", "tiktok_username"];
   const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
   
   if (missingHeaders.length > 0) {
-    toast.error(`Faltan encabezados requeridos: ${missingHeaders.join(', ')}`);
+    toast.error(`Required headers are missing: ${missingHeaders.join(', ')}`);
     throw new Error(`Missing required headers: ${missingHeaders.join(', ')}`);
   }
 
@@ -175,7 +178,7 @@ export const processImportData = async (
       await createBulkInvitationDetail({
         bulkInvitationId: bulkInvitation.id,
         fullName: `${rowData.nombre || ''} ${rowData.apellido || ''}`.trim() || 'Sin nombre',
-        email: rowData.correo || 'Sin correo',
+        email: rowData.correo || 'No mail',
         status: 'failed',
         errorMessage: errorMsg
       });
@@ -201,7 +204,7 @@ export const processImportData = async (
       
       successCount++;
     } catch (error: any) {
-      const errorMsg = error.message || "Error al crear creador";
+      const errorMsg = error.message || "Error creating creator";
       errors.push({
         row: i,
         error: errorMsg,
@@ -229,11 +232,11 @@ export const processImportData = async (
   onError(errors);
   
   if (errors.length === 0 && successCount > 0) {
-    toast.success(`${successCount} creadores importados correctamente`);
+    toast.success(`${successCount} creators imported successfully`);
   } else if (errors.length > 0 && successCount > 0) {
-    toast.info(`Importación parcial: ${successCount} creadores importados, ${errors.length} errores`);
-  } else if (errors.length > 0 && successCount === 0) {
-    toast.error(`La importación falló con ${errors.length} errores`);
+
+    toast.info(`Partial import: ${successCount} imported creators, ${errors.length} errors`);  } else if (errors.length > 0 && successCount === 0) {
+    toast.error(`The import failed with ${errors.length} errors`);
   }
 
   return {

@@ -71,7 +71,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
   ) => {
     setProfileData((prev) => ({ ...prev, [key]: checked }));
   };
-  
+
   const isValidPinterestUsername = (username: string) => {
     const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
     return usernameRegex.test(username.trim());
@@ -87,21 +87,19 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
     }
 
     if (!isConnected) {
-      toast.error(
-        "Debes confirmar que conectaste tu cuenta de Instagram a Pinterest."
-      );
+toast.error(
+"You need to confirm that you've connected your Instagram account to Pinterest."
+);
       return;
     }
 
     if (!isAutoPublishEnabled) {
-      toast.error(
-        "Debes activar la autopublicación desde Instagram a Pinterest."
-      );
+      toast.error("You must enable auto-posting from Instagram to Pinterest.");
       return;
     }
 
     if (!contentTypes || contentTypes.length === 0) {
-      toast.error("Selecciona al menos un tipo de contenido que publicas.");
+      toast.error("Please select at least one type of content you publish.");
       return;
     }
 
@@ -113,15 +111,15 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
       <div className="space-y-4">
         <div>
           <h2 className="text-2xl font-bold text-center mb-4">
-            ¡Excelente! Ahora completa tu perfil de Pinterest
+            Great! Now complete your Pinterest profile.
           </h2>
           <p className="text-xs text-gray-700 mb-6">
-            Crea tu perfil de Pinterest y compártelo con nosotros...
+            Create your Pinterest profile and share it with us...
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pinterestUrl">Nuevo perfil de Pinterest</Label>
+          <Label htmlFor="pinterestUrl">New Pinterest profile</Label>
           <div className="relative w-full max-w-md">
             {/* Prefix */}
             <div className="absolute inset-y-0 left-0 flex items-center">
@@ -145,13 +143,15 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Aprende cómo hacerlo paso a paso aquí
+              Learn how to do it step by step here
             </a>
           </div>
         </div>
 
         <div className="space-y-2 pt-4">
-          <Label className="block mb-2">¿Qué tipo de contenido publicas?</Label>
+          <Label className="block mb-2">
+            What type of content do you publish?
+          </Label>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {contentCategories.map((category) => (
               <div key={category.id} className="flex items-center space-x-2">
@@ -174,8 +174,8 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
           <div className="flex items-center space-x-2">
             <div className="space-y-1">
               <span className="text-sm font-medium">
-                Ahora conecta tu nueva cuenta de Pinterest con tu cuenta de
-                Instagram
+                Now connect your new Pinterest account to your Instagram
+                account.
               </span>
               <div className="text-xs text-blue-600 hover:underline">
                 <a
@@ -183,7 +183,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Aprende Cómo Aquí
+                  Learn How Here
                 </a>
               </div>
             </div>
@@ -199,8 +199,8 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
               className="border-blue-300 text-blue-600"
             />
             <label htmlFor="isConnected" className="text-sm font-medium">
-              Confirmo que he conectado mi cuenta de Pinterest con mi cuenta de
-              Instagram
+              I confirm that I have connected my Pinterest account to my
+              Instagram account.
             </label>
           </div>
 
@@ -218,7 +218,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                 htmlFor="isAutoPublishEnabled"
                 className="text-sm font-medium"
               >
-                He activado la autopublicación de Instagram en Pinterest
+                I have activated Instagram auto-posting on Pinterest
               </label>
               <div className="text-xs text-blue-600 hover:underline">
                 <a
@@ -226,7 +226,7 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Aprende cómo aquí
+                  Learn how here
                 </a>
               </div>
             </div>
@@ -235,11 +235,8 @@ export const PinterestProfileForm: React.FC<PinterestProfileFormProps> = ({
       </div>
 
       <CardFooter className="flex justify-end px-0">
-        <Button
-          onClick={handleClick}
-          className="text-white w-full"
-        >
-          {isSubmitting ? "Guardando..." : "GUARDAR Y CONTINUAR"}
+        <Button onClick={handleClick} className="text-white w-full">
+          {isSubmitting ? "Saving..." : "SAVE AND CONTINUE"}
         </Button>
       </CardFooter>
     </CardContent>

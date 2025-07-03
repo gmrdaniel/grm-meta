@@ -40,9 +40,8 @@ export default function AdminDashboard() {
 
   const STEP_NAMES: { [key: string]: string } = {
     "12592545-e1dd-4fa9-95b9-34a4ca9accd6": "Create Pinterest Account",
-    "17d6d8d0-3a9f-4bdc-a1d9-39cd4c0f0fe0": "Crear cuenta",
-    "462b4ad5-9fd5-4404-a700-f46f440ef75e":
-      "Facebook Page Creation & Instagram Link",
+    "17d6d8d0-3a9f-4bdc-a1d9-39cd4c0f0fe0": "Create account",
+    "462b4ad5-9fd5-4404-a700-f46f440ef75e":"Facebook Page Creation & Instagram Link",
     "c6cb53f9-f285-475a-ae36-0b474254e2ca": "pinterest/sendedApplication",
     "d4372ddc-b14c-48d0-bd4e-928d08fd4c91": "Complete Your Profile",
     "db68c27d-f0cf-49f4-8cf0-954220e9f14e": "Welcome & Identification",

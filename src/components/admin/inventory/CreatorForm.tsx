@@ -64,10 +64,10 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
 
       if (isEditing && initialData) {
         await updateCreator(initialData.id, formData as Partial<Creator>);
-        toast.success("Creador actualizado correctamente");
+        toast.success("Creator updated successfully");
       } else {
         await createCreator(formData as Omit<Creator, "id" | "fecha_creacion">);
-        toast.success("Creador agregado correctamente");
+        toast.success("Creator added successfully");
         form.reset({
           nombre: "",
           apellido: "",
@@ -91,7 +91,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
       }
       onSuccess();
     } catch (error: any) {
-      toast.error(error.message || "Error al guardar el creador");
+      toast.error(error.message || "Error saving the creator");
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +103,7 @@ export function CreatorForm({ initialData, onSuccess, onCancel }: CreatorFormPro
         <PersonalInfoFields form={form} />
 
         <div className="space-y-4">
-          <FormHeader title="Redes Sociales" />
+          <FormHeader title="Social Media" />
           
           <FormSection title="TikTok">
             <TikTokFields form={form} />
