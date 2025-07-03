@@ -1,12 +1,25 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCreators, updateCreator } from "@/services/creatorService";
-import { fetchTikTokUserInfo, updateCreatorTikTokInfo, fetchTikTokUserVideos } from "@/services/tiktokVideoService";
+import {
+  fetchTikTokUserInfo,
+  updateCreatorTikTokInfo,
+  fetchTikTokUserVideos,
+} from "@/services/tiktokVideoService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Pencil, Phone, ExternalLink, Mail, MoreHorizontal, 
-  Users, Loader2, Filter, X, Check, Download
+import {
+  Pencil,
+  Phone,
+  ExternalLink,
+  Mail,
+  MoreHorizontal,
+  Users,
+  Loader2,
+  Filter,
+  X,
+  Check,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -56,24 +69,28 @@ interface CreatorsListProps {
   onFilterChange?: (filters: CreatorFilter) => void;
 }
 
-export function CreatorsList({ 
-  onCreatorSelect, 
-  filters = {}, 
-  onFilterChange 
+export function CreatorsList({
+  onCreatorSelect,
+  filters = {},
+  onFilterChange,
 }: CreatorsListProps) {
   const [editCreator, setEditCreator] = useState<Creator | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(null);
-  const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(null);
+  const [loadingTikTokInfo, setLoadingTikTokInfo] = useState<string | null>(
+    null
+  );
+  const [loadingTikTokVideos, setLoadingTikTokVideos] = useState<string | null>(
+    null
+  );
   const [pageSize, setPageSize] = useState(10);
   const [activeFilters, setActiveFilters] = useState<CreatorFilter>(filters);
 
-  const { 
-    data: creatorsData, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: creatorsData,
+    isLoading,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ["creators", currentPage, pageSize, activeFilters],
     queryFn: () => fetchCreators(currentPage, pageSize, activeFilters),
@@ -90,54 +107,72 @@ export function CreatorsList({
   const totalCount = creatorsData?.count || 0;
 
   const updateTikTokInfoMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+    mutationFn: async ({
+      creatorId,
+      username,
+    }: {
+      creatorId: string;
+      username: string;
+    }) => {
       const userInfo = await fetchTikTokUserInfo(username);
-      
-      console.log('Processing TikTok user info result:', userInfo);
-      
+
+      console.log("Processing TikTok user info result:", userInfo);
+
       const followerCount = userInfo?.userInfo?.stats?.followerCount;
       const secUid = userInfo?.userInfo?.user?.secUid;
-      
-      console.log('Extracted follower count:', followerCount);
-      console.log('Extracted secUid:', secUid);
-      
+
+      console.log("Extracted follower count:", followerCount);
+      console.log("Extracted secUid:", secUid);
+
       if (followerCount !== undefined) {
         await updateCreatorTikTokInfo(creatorId, followerCount, secUid);
-        
+
         const isEligible = followerCount >= 100000;
         return { followerCount, isEligible, secUid };
       }
-      
-      throw new Error('No se pudo obtener el número de seguidores');
+
+      throw new Error("Could not get the number of followers");
     },
     onSuccess: (data, variables) => {
-      const eligibilityStatus = data.isEligible ? 'elegible' : 'no elegible';
-      toast.success(`Información de TikTok actualizada. Seguidores: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`);
+      const eligibilityStatus = data.isEligible ? "eligible" : "not eligible";
+      toast.success(
+        `Updated TikTok information. Followers: ${data.followerCount.toLocaleString()} (${eligibilityStatus})`
+      );
       refetch();
     },
     onError: (error) => {
-      toast.error(`Error al obtener información de TikTok: ${(error as Error).message}`);
+      toast.error(
+        `Error getting information from TikTok: ${(error as Error).message}`
+      );
     },
     onSettled: () => {
       setLoadingTikTokInfo(null);
-    }
+    },
   });
 
   const fetchTikTokVideosMutation = useMutation({
-    mutationFn: async ({ creatorId, username }: { creatorId: string; username: string }) => {
+    mutationFn: async ({
+      creatorId,
+      username,
+    }: {
+      creatorId: string;
+      username: string;
+    }) => {
       const result = await fetchTikTokUserVideos(username, creatorId);
       return result;
     },
     onSuccess: (data, variables) => {
-      toast.success(`Se guardaron ${data.savedCount} videos de TikTok de @${variables.username} (${data.savedCount}/${data.totalCount})`);
+      toast.success(
+        `They were saved ${data.savedCount} TikTok videos of @${variables.username} (${data.savedCount}/${data.totalCount})`
+      );
       refetch();
     },
     onError: (error) => {
-      toast.error(`Error al obtener videos de TikTok: ${(error as Error).message}`);
+      toast.error(`Error getting TikTok videos: ${(error as Error).message}`);
     },
     onSettled: () => {
       setLoadingTikTokVideos(null);
-    }
+    },
   });
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -187,33 +222,33 @@ export function CreatorsList({
 
   const handleFetchTikTokInfo = (creatorId: string, username: string) => {
     if (!username) {
-      toast.error("Este creador no tiene un nombre de usuario de TikTok");
+      toast.error("This creator does not have a TikTok username");
       return;
     }
-    
+
     setLoadingTikTokInfo(creatorId);
     updateTikTokInfoMutation.mutate({ creatorId, username });
   };
 
   const handleFetchTikTokVideos = (creatorId: string, username: string) => {
     if (!username) {
-      toast.error("Este creador no tiene un nombre de usuario de TikTok");
+      toast.error("This creator does not have a TikTok username");
       return;
     }
-    
+
     setLoadingTikTokVideos(creatorId);
     fetchTikTokVideosMutation.mutate({ creatorId, username });
   };
 
   const toggleFilter = (filterName: keyof CreatorFilter) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       const newFilters = { ...prev };
       newFilters[filterName] = !prev[filterName];
-      
+
       if (!newFilters[filterName]) {
         delete newFilters[filterName];
       }
-      
+
       return newFilters;
     });
   };
@@ -229,7 +264,7 @@ export function CreatorsList({
   if (error) {
     return (
       <div className="p-4 bg-red-50 text-red-500 rounded-md">
-        Error al cargar los creadores: {error.message}
+        Error loading creators: {error.message}
       </div>
     );
   }
@@ -238,48 +273,57 @@ export function CreatorsList({
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold">Lista de Creadores</h2>
-          <p className="text-gray-500">Total: {totalCount} creadores</p>
+          <h2 className="text-2xl font-bold">List of Creators</h2>
+          <p className="text-gray-500">Total: {totalCount} creators</p>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button 
-            variant={activeFilters.tiktokEligible ? "default" : "outline"} 
+          <Button
+            variant={activeFilters.tiktokEligible ? "default" : "outline"}
             size="sm"
-            onClick={() => toggleFilter('tiktokEligible')}
+            onClick={() => toggleFilter("tiktokEligible")}
             className="flex items-center gap-1"
           >
-            {activeFilters.tiktokEligible ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            TikTok Elegible
+            {activeFilters.tiktokEligible ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
+            TikTok Eligible
           </Button>
-          
-          <Button 
-            variant={activeFilters.hasTiktokUsername ? "default" : "outline"} 
+
+          <Button
+            variant={activeFilters.hasTiktokUsername ? "default" : "outline"}
             size="sm"
-            onClick={() => toggleFilter('hasTiktokUsername')}
+            onClick={() => toggleFilter("hasTiktokUsername")}
             className="flex items-center gap-1"
           >
-            {activeFilters.hasTiktokUsername ? <Check className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-            Usuario TikTok
+            {activeFilters.hasTiktokUsername ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
+            TikTok user{" "}
           </Button>
-          
-          {(activeFilters.tiktokEligible || activeFilters.hasTiktokUsername) && (
-            <Button 
-              variant="ghost" 
+
+          {(activeFilters.tiktokEligible ||
+            activeFilters.hasTiktokUsername) && (
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setActiveFilters({})}
               className="flex items-center gap-1"
             >
               <X className="h-4 w-4" />
-              Limpiar filtros
+              Clean filters
             </Button>
           )}
         </div>
       </div>
-      
+
       {creators.length === 0 ? (
         <div className="p-8 text-center text-gray-500 border rounded-md">
-          No hay creadores que coincidan con los criterios seleccionados
+          There are no creators that match the selected criteria
         </div>
       ) : (
         <>
@@ -287,20 +331,30 @@ export function CreatorsList({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">Creador</TableHead>
-                  <TableHead className="w-[300px]">Redes Sociales</TableHead>
-                  <TableHead className="w-[180px]">Teléfono</TableHead>
-                  <TableHead className="w-[150px]">Fecha</TableHead>
-                  <TableHead className="w-[120px]">Estatus</TableHead>
-                  <TableHead className="w-[120px] text-right">Acciones</TableHead>
+                  <TableHead className="w-[250px]">Creator</TableHead>
+                  <TableHead className="w-[300px]">Social Networks</TableHead>
+                  <TableHead className="w-[180px]">Phone</TableHead>
+                  <TableHead className="w-[150px]">Date</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
+                  <TableHead className="w-[120px] text-right">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {creators.map((creator) => (
-                  <TableRow 
+                  <TableRow
                     key={creator.id}
-                    className={onCreatorSelect ? "cursor-pointer hover:bg-gray-100" : undefined}
-                    onClick={onCreatorSelect ? () => onCreatorSelect(creator) : undefined}
+                    className={
+                      onCreatorSelect
+                        ? "cursor-pointer hover:bg-gray-100"
+                        : undefined
+                    }
+                    onClick={
+                      onCreatorSelect
+                        ? () => onCreatorSelect(creator)
+                        : undefined
+                    }
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -308,7 +362,9 @@ export function CreatorsList({
                           {getInitials(creator.nombre, creator.apellido)}
                         </div>
                         <div>
-                          <div className="font-medium">{creator.nombre} {creator.apellido}</div>
+                          <div className="font-medium">
+                            {creator.nombre} {creator.apellido}
+                          </div>
                           <div className="text-sm text-muted-foreground flex items-center gap-1">
                             <Mail className="h-3 w-3" /> {creator.correo}
                           </div>
@@ -320,34 +376,43 @@ export function CreatorsList({
                         {creator.usuario_tiktok && (
                           <div className="text-sm">
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">TikTok:</span> 
-                              <a href={`https://tiktok.com/@${creator.usuario_tiktok}`} 
-                                target="_blank" 
+                              <span className="font-medium">TikTok:</span>
+                              <a
+                                href={`https://tiktok.com/@${creator.usuario_tiktok}`}
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                className="flex items-center gap-1 text-blue-600 hover:underline"
+                              >
                                 @{creator.usuario_tiktok}
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                               {creator.seguidores_tiktok && (
                                 <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_tiktok)}
+                                  <Users className="h-3 w-3 mr-1" />{" "}
+                                  {formatFollowers(creator.seguidores_tiktok)}
                                 </span>
                               )}
                               <div className="flex gap-1 ml-1">
-                                <Button 
-                                  size="sm" 
-                                  variant="secondary" 
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
                                   className="h-6 rounded-md"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleFetchTikTokInfo(creator.id, creator.usuario_tiktok || '');
+                                    handleFetchTikTokInfo(
+                                      creator.id,
+                                      creator.usuario_tiktok || ""
+                                    );
                                   }}
-                                  disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
+                                  disabled={
+                                    loadingTikTokInfo === creator.id ||
+                                    loadingTikTokVideos === creator.id
+                                  }
                                 >
                                   {loadingTikTokInfo === creator.id ? (
                                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                   ) : (
-                                    <svg 
+                                    <svg
                                       viewBox="0 0 24 24"
                                       className="h-3 w-3 mr-1"
                                       fill="currentColor"
@@ -357,15 +422,21 @@ export function CreatorsList({
                                   )}
                                   Info
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="secondary" 
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
                                   className="h-6 rounded-md"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleFetchTikTokVideos(creator.id, creator.usuario_tiktok || '');
+                                    handleFetchTikTokVideos(
+                                      creator.id,
+                                      creator.usuario_tiktok || ""
+                                    );
                                   }}
-                                  disabled={loadingTikTokInfo === creator.id || loadingTikTokVideos === creator.id}
+                                  disabled={
+                                    loadingTikTokInfo === creator.id ||
+                                    loadingTikTokVideos === creator.id
+                                  }
                                 >
                                   {loadingTikTokVideos === creator.id ? (
                                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -377,12 +448,21 @@ export function CreatorsList({
                               </div>
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
-                              <span className={`flex items-center ${creator.elegible_tiktok ? 'text-green-500' : 'text-gray-400'}`}>
-                                {creator.elegible_tiktok ? 'Elegible' : 'No elegible'}
+                              <span
+                                className={`flex items-center ${
+                                  creator.elegible_tiktok
+                                    ? "text-green-500"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {creator.elegible_tiktok
+                                  ? "Elegible"
+                                  : "No elegible"}
                               </span>
                               {creator.engagement_tiktok && (
                                 <span className="flex items-center text-gray-500">
-                                  Engagement: {formatEngagement(creator.engagement_tiktok)}
+                                  Engagement:{" "}
+                                  {formatEngagement(creator.engagement_tiktok)}
                                 </span>
                               )}
                             </div>
@@ -391,27 +471,39 @@ export function CreatorsList({
                         {creator.usuario_youtube && (
                           <div className="text-sm">
                             <div className="flex items-center gap-1">
-                              <span className="font-medium">YouTube:</span> 
-                              <a href={`https://youtube.com/@${creator.usuario_youtube}`} 
-                                target="_blank" 
+                              <span className="font-medium">YouTube:</span>
+                              <a
+                                href={`https://youtube.com/@${creator.usuario_youtube}`}
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-blue-600 hover:underline">
+                                className="flex items-center gap-1 text-blue-600 hover:underline"
+                              >
                                 @{creator.usuario_youtube}
                                 <ExternalLink className="h-3 w-3" />
                               </a>
                               {creator.seguidores_youtube && (
                                 <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                  <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_youtube)}
+                                  <Users className="h-3 w-3 mr-1" />{" "}
+                                  {formatFollowers(creator.seguidores_youtube)}
                                 </span>
                               )}
                             </div>
                             <div className="flex gap-3 mt-1 text-xs">
-                              <span className={`flex items-center ${creator.elegible_youtube ? 'text-green-500' : 'text-gray-400'}`}>
-                                {creator.elegible_youtube ? 'Elegible' : 'No elegible'}
+                              <span
+                                className={`flex items-center ${
+                                  creator.elegible_youtube
+                                    ? "text-green-500"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {creator.elegible_youtube
+                                  ? "Elegible"
+                                  : "No elegible"}
                               </span>
                               {creator.engagement_youtube && (
                                 <span className="flex items-center text-gray-500">
-                                  Engagement: {formatEngagement(creator.engagement_youtube)}
+                                  Engagement:{" "}
+                                  {formatEngagement(creator.engagement_youtube)}
                                 </span>
                               )}
                             </div>
@@ -419,47 +511,58 @@ export function CreatorsList({
                         )}
                         {creator.usuario_pinterest && (
                           <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">Pinterest:</span> 
-                            <a href={`https://pinterest.com/${creator.usuario_pinterest}`} 
-                              target="_blank" 
+                            <span className="font-medium">Pinterest:</span>
+                            <a
+                              href={`https://pinterest.com/${creator.usuario_pinterest}`}
+                              target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline">
+                              className="flex items-center gap-1 text-blue-600 hover:underline"
+                            >
                               @{creator.usuario_pinterest}
                               <ExternalLink className="h-3 w-3" />
                             </a>
                             {creator.seguidores_pinterest && (
                               <span className="ml-2 flex items-center text-gray-500 text-xs">
-                                <Users className="h-3 w-3 mr-1" /> {formatFollowers(creator.seguidores_pinterest)}
+                                <Users className="h-3 w-3 mr-1" />{" "}
+                                {formatFollowers(creator.seguidores_pinterest)}
                               </span>
                             )}
                           </div>
                         )}
                         {creator.page_facebook && (
                           <div className="text-sm flex items-center gap-1">
-                            <span className="font-medium">Facebook:</span> 
-                            <a href={creator.page_facebook} 
-                              target="_blank" 
+                            <span className="font-medium">Facebook:</span>
+                            <a
+                              href={creator.page_facebook}
+                              target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline">
-                              Página
+                              className="flex items-center gap-1 text-blue-600 hover:underline"
+                            >
+                              Page
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           </div>
                         )}
-                        {!creator.usuario_tiktok && !creator.usuario_pinterest && !creator.usuario_youtube && !creator.page_facebook && (
-                          <span className="text-sm text-gray-500">Sin redes sociales</span>
-                        )}
+                        {!creator.usuario_tiktok &&
+                          !creator.usuario_pinterest &&
+                          !creator.usuario_youtube &&
+                          !creator.page_facebook && (
+                            <span className="text-sm text-gray-500">
+                              No social media
+                            </span>
+                          )}
                       </div>
                     </TableCell>
                     <TableCell>
                       {creator.telefono ? (
                         <div className="flex items-center gap-1">
-                          <Phone className="h-4 w-4 text-gray-500" /> 
-                          {creator.lada_telefono && `+${creator.lada_telefono} `}
+                          <Phone className="h-4 w-4 text-gray-500" />
+                          {creator.lada_telefono &&
+                            `+${creator.lada_telefono} `}
                           {creator.telefono}
                         </div>
                       ) : (
-                        <span className="text-gray-500">No disponible</span>
+                        <span className="text-gray-500">Not available</span>
                       )}
                     </TableCell>
                     <TableCell>{formatDate(creator.fecha_creacion)}</TableCell>
@@ -480,8 +583,8 @@ export function CreatorsList({
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={(e) => {
                               if (onCreatorSelect) {
@@ -490,11 +593,11 @@ export function CreatorsList({
                             }}
                           >
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Abrir menú</span>
+                            <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={(e) => {
                               if (onCreatorSelect) {
                                 e.stopPropagation();
@@ -503,7 +606,7 @@ export function CreatorsList({
                             }}
                           >
                             <Pencil className="mr-2 h-4 w-4" />
-                            Editar
+                            Edit
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -516,7 +619,7 @@ export function CreatorsList({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Resultados por página:</span>
+              <span className="text-sm text-gray-500">Results per page:</span>
               <Select
                 value={pageSize.toString()}
                 onValueChange={handlePageSizeChange}
@@ -537,23 +640,27 @@ export function CreatorsList({
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       onClick={() => handlePageChange(currentPage - 1)}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
                     />
                   </PaginationItem>
-                  
+
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
                     if (
-                      page === 1 || 
-                      page === totalPages || 
-                      page === currentPage || 
+                      page === 1 ||
+                      page === totalPages ||
+                      page === currentPage ||
                       (page >= currentPage - 1 && page <= currentPage + 1)
                     ) {
                       return (
                         <PaginationItem key={page}>
-                          <PaginationLink 
+                          <PaginationLink
                             isActive={page === currentPage}
                             onClick={() => handlePageChange(page)}
                           >
@@ -562,25 +669,31 @@ export function CreatorsList({
                         </PaginationItem>
                       );
                     }
-                    
+
                     if (
-                      (page === 2 && currentPage > 3) || 
+                      (page === 2 && currentPage > 3) ||
                       (page === totalPages - 1 && currentPage < totalPages - 2)
                     ) {
                       return (
                         <PaginationItem key={page}>
-                          <span className="flex h-9 w-9 items-center justify-center">...</span>
+                          <span className="flex h-9 w-9 items-center justify-center">
+                            ...
+                          </span>
                         </PaginationItem>
                       );
                     }
-                    
+
                     return null;
                   })}
-                  
+
                   <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => handlePageChange(currentPage + 1)} 
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    <PaginationNext
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -594,20 +707,20 @@ export function CreatorsList({
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Editar Creador</DialogTitle>
+              <DialogTitle>Edit Creator</DialogTitle>
               <DialogDescription>
-                Actualiza los datos del creador seleccionado.
+                Updates the data for the selected creator.
               </DialogDescription>
             </DialogHeader>
             {editCreator && (
-              <CreatorForm 
-                initialData={editCreator} 
+              <CreatorForm
+                initialData={editCreator}
                 onSuccess={() => {
                   setIsEditDialogOpen(false);
                   refetch();
-                  toast.success("Creador actualizado correctamente");
-                }} 
-                onCancel={() => setIsEditDialogOpen(false)} 
+                  toast.success("Creator updated successfully");
+                }}
+                onCancel={() => setIsEditDialogOpen(false)}
               />
             )}
           </DialogContent>

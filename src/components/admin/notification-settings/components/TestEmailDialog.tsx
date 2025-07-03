@@ -25,7 +25,7 @@ export function TestEmailDialog({ subject, message, isOpen, onOpenChange }: Test
 
   const handleSendTestEmail = async () => {
     if (!email) {
-      toast.error("Por favor, ingresa un correo electrónico");
+      toast.error("Please enter an email address");
       return;
     }
 
@@ -42,11 +42,11 @@ export function TestEmailDialog({ subject, message, isOpen, onOpenChange }: Test
 
       if (error) throw error;
 
-      toast.success("Correo de prueba enviado correctamente");
+      toast.success("Test email sent successfully");
       onOpenChange(false);
     } catch (error) {
-      console.error("Error al enviar correo de prueba:", error);
-      toast.error(`Error al enviar correo de prueba: ${error.message || "Error desconocido"}`);
+console.error("Error sending test email:", error);
+toast.error(`Error sending test email: ${error.message || "Unknown error"}`);
     } finally {
       setIsSending(false);
     }
@@ -56,12 +56,12 @@ export function TestEmailDialog({ subject, message, isOpen, onOpenChange }: Test
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Enviar correo de prueba</DialogTitle>
+          <DialogTitle>Send test email</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="test-email" className="text-right font-medium col-span-1">
-              Correo
+              Email
             </label>
             <div className="col-span-3">
               <Input
@@ -69,21 +69,21 @@ export function TestEmailDialog({ subject, message, isOpen, onOpenChange }: Test
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Ingresa un correo electrónico"
+                placeholder="Enter an email"
               />
             </div>
           </div>
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
+            Cancel
           </Button>
           <Button 
             type="button" 
             onClick={handleSendTestEmail} 
             disabled={isSending}
           >
-            {isSending ? "Enviando..." : "Enviar"}
+            {isSending ? "Sending..." : "Send"}
           </Button>
         </DialogFooter>
       </DialogContent>

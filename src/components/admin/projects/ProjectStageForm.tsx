@@ -1,31 +1,51 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { fetchProjectStages, createProjectStage, updateProjectStage } from "@/services/project/projectService";
+import {
+  fetchProjectStages,
+  createProjectStage,
+  updateProjectStage,
+} from "@/services/project/projectService";
 import { ProjectStage } from "@/types/project";
 
-const formSchema = z.object({
-  name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
-  slug: z.string().min(3, { message: "El slug debe tener al menos 3 caracteres" }),
-  url: z.string().min(1, { message: "La URL es obligatoria" }),
-  view: z.string().min(1, { message: "La vista es obligatoria" }),
-  responsible: z.enum(["system", "creator", "admin"], {
-    required_error: "Debe seleccionar un responsable",
-  }),
-  privacy: z.enum(["public", "private"], {
-    required_error: "Debe seleccionar la privacidad",
-  }),
-  response_positive: z.string().optional(),
-  response_negative: z.string().optional()
+const formSchema = z. object({
+name: z
+. string()
+. min(3, { message: "Name must be at least 3 characters" }),
+slug: z
+. string()
+. min(3, { message: "Slug must be at least 3 characters" }),
+url: z. string(). min(1, { message: "URL is required" }),
+view: z. string(). min(1, { message: "View is required" }),
+responsible: z. enum(["system", "creator", "admin"], {
+required_error: "You must select a responsible",
+}),
+privacy: z. enum(["public", "private"], {
+required_error: "You must select privacy",
+}),
+response_positive: z. string(). optional(),
+response_negative: z.string().optional(),
 });
 
 interface ProjectStageFormProps {
@@ -35,10 +55,15 @@ interface ProjectStageFormProps {
   stageId?: string;
 }
 
-export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId }: ProjectStageFormProps) {
+export function ProjectStageForm({
+  projectId,
+  onSuccess,
+  defaultValues,
+  stageId,
+}: ProjectStageFormProps) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!stageId;
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues || {
@@ -49,28 +74,31 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
       responsible: "system",
       privacy: "private",
       response_positive: "",
-      response_negative: ""
-    }
+      response_negative: "",
+    },
   });
-  
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
-      
+
       // Get next order index if creating new stage
       let orderIndex = defaultValues?.order_index || 1;
-      
+
       if (!isEditing) {
         const stages = await fetchProjectStages(projectId);
-        orderIndex = stages.length > 0 ? Math.max(...stages.map(s => s.order_index)) + 1 : 1;
+        orderIndex =
+          stages.length > 0
+            ? Math.max(...stages.map((s) => s.order_index)) + 1
+            : 1;
       }
-      
+
       if (isEditing && stageId) {
         await updateProjectStage(stageId, {
           ...values,
-          project_id: projectId
+          project_id: projectId,
         });
-        toast.success("Etapa actualizada correctamente");
+        toast.success("Successfully updated stage");
       } else {
         await createProjectStage({
           name: values.name,
@@ -82,24 +110,28 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
           response_positive: values.response_positive,
           response_negative: values.response_negative,
           project_id: projectId,
-          order_index: orderIndex
+          order_index: orderIndex,
         });
-        toast.success("Etapa creada correctamente");
+        toast.success("Successfully created stage");
       }
-      
+
       form.reset();
       onSuccess();
     } catch (error: any) {
-      toast.error(`Error al ${isEditing ? "actualizar" : "crear"} etapa: ${error.message}`);
+      toast.error(
+        `Failed to ${isEditing ? "update" : "create"} stage: ${error.message}`
+      );
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? "Editar Etapa" : "Crear Nueva Etapa"}</CardTitle>
+        <CardTitle>
+          {isEditing ? "Edit Stage" : "Create New Stage"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -109,15 +141,15 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre de la Etapa</FormLabel>
+                  <FormLabel>Stage Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Revisión de Solicitud" {...field} />
+                    <Input placeholder="Ej: Application Review" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="slug"
@@ -125,13 +157,13 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                 <FormItem>
                   <FormLabel>Slug</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: revision-solicitud" {...field} />
+                    <Input placeholder="Ej: review-request" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -146,13 +178,13 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="view"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vista</FormLabel>
+                    <FormLabel>View</FormLabel>
                     <FormControl>
                       <Input placeholder="ReviewView" {...field} />
                     </FormControl>
@@ -161,52 +193,52 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="responsible"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsable</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <FormLabel>Responsible</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar responsable" />
+                          <SelectValue placeholder="Select responsible" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="system">Sistema</SelectItem>
-                        <SelectItem value="creator">Creador</SelectItem>
-                        <SelectItem value="admin">Administrador</SelectItem>
+                        <SelectItem value="system">System</SelectItem>
+                        <SelectItem value="creator">Creator</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="privacy"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Privacidad</FormLabel>
-                    <Select 
+                    <FormLabel>Privacy</FormLabel>
+                    <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar privacidad" />
+                          <SelectValue placeholder="Select privacy" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="public">Público</SelectItem>
-                        <SelectItem value="private">Privado</SelectItem>
+                        <SelectItem value="public">Públic</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -214,42 +246,51 @@ export function ProjectStageForm({ projectId, onSuccess, defaultValues, stageId 
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="response_positive"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vista Siguiente (Positivo)</FormLabel>
+                    <FormLabel>Next View (Positive)</FormLabel>
                     <FormControl>
-                      <Input placeholder="ApprovalView" {...field} value={field.value || ""} onChange={field.onChange} />
+                      <Input
+                        placeholder="ApprovalView"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="response_negative"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vista Siguiente (Negativo)</FormLabel>
+                    <FormLabel>Next View (Negative)</FormLabel>
                     <FormControl>
-                      <Input placeholder="RejectionView" value={field.value || ""} onChange={field.onChange} />
+                      <Input
+                        placeholder="RejectionView"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <Button type="submit" disabled={loading}>
               {loading && (
                 <div className="mr-2 animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
               )}
-              {isEditing ? "Actualizar Etapa" : "Crear Etapa"}
+              {isEditing ? "Update Stage" : "Create Stage"}
             </Button>
           </form>
         </Form>

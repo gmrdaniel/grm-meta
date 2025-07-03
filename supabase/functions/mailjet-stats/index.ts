@@ -22,7 +22,7 @@ serve(async (req)=>{
     });
   }
   try {
-    // Crear un cliente de Supabase para acceder a la base de datos
+    // un cliente de Supabase para acceder a la base de datos
     const supabaseClient = Deno.env.get("SUPABASE_URL") && Deno.env.get("SUPABASE_ANON_KEY") 
       ? createClient(
           Deno.env.get("SUPABASE_URL") as string,

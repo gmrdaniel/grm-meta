@@ -16,20 +16,20 @@ export function StatusField({ form }: StatusFieldProps) {
       name="estatus"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Estatus</FormLabel>
+          <FormLabel>Status</FormLabel>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar estatus" />
+                <SelectValue placeholder="Select status" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="activo">Activo</SelectItem>
-              <SelectItem value="inactivo">Inactivo</SelectItem>
-              <SelectItem value="pendiente">Pendiente</SelectItem>
+              <SelectItem value="activo">Active</SelectItem>
+              <SelectItem value="inactivo">Inactive</SelectItem>
+              <SelectItem value="pendiente">Pending</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />
