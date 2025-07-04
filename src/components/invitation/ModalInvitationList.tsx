@@ -23,34 +23,26 @@ interface ButtonDownloadInvitationsProps {
 const ButtonDownloadInvitations = ({
   onClick,
   exporting,
-}: ButtonDownloadInvitationsProps) => {
-  return (
-    <Button
-      onClick={onClick}
-      disabled={exporting}
-      variant="outline"
-      className="flex items-center gap-2 mr-4"
-    >
-      <Download size={16} />
-      {exporting ? "Exporting..." : "Export Invitations"}
-    </Button>
-  );
-};
+}: ButtonDownloadInvitationsProps) => (
+  <Button
+    onClick={onClick}
+    disabled={exporting}
+    variant="outline"
+    className="flex items-center gap-2 mr-4"
+  >
+    <Download size={16} />
+    {exporting ? "Exporting..." : "Export Invitations"}
+  </Button>
+);
 
 interface ModalInvitationListProps {
-  // Proyecto preseleccionado (opcional)
   preselectedProject?: Project;
-  // Nombre del proyecto preseleccionado (alternativa cuando solo tienes el nombre)
   preselectedProjectName?: string;
-  // ID del proyecto preseleccionado (alternativa cuando solo tienes el ID)
   preselectedProjectId?: string;
-  // Si debe mostrar el selector de proyecto
   showProjectSelector?: boolean;
-  // Si el selector debe estar deshabilitado
   disableProjectSelector?: boolean;
-  // Callback cuando se selecciona un proyecto (opcional)
-  isOpen; // <-- Esto es para detectar si esta abierto el modal
   onProjectSelect?: (project: Project) => void;
+  resetProjectOnClose?: boolean;
 }
 
 export const ModalInvitationList = ({
@@ -59,8 +51,8 @@ export const ModalInvitationList = ({
   preselectedProjectId,
   showProjectSelector = true,
   disableProjectSelector = false,
-  isOpen, // <-- Nueva prop para detectar cierre
   onProjectSelect,
+  resetProjectOnClose = false,
 }: ModalInvitationListProps) => {
   const [currentProject, setCurrentProject] = useState<Project | undefined>(
     preselectedProject
@@ -79,12 +71,17 @@ export const ModalInvitationList = ({
     "approved",
     "rejected",
   ];
-const resetForm = () => {
-  setStartDate("");
-  setEndDate("");
-  setSelectedStatuses([]);
-  setCurrentProject(preselectedProject);
-};
+
+  const resetForm = () => {
+    setStartDate("");
+    setEndDate("");
+    setSelectedStatuses([]);
+    if (resetProjectOnClose) {
+      setCurrentProject(undefined);
+    } else {
+      setCurrentProject(preselectedProject); // conserva la selección original
+    }
+  };
 
   const handleCheckboxChange = (status: string) => {
     setSelectedStatuses((prev) =>
@@ -111,11 +108,8 @@ const resetForm = () => {
     try {
       setExporting(true);
 
-      // Solo crear las fechas si startDate y endDate tienen valores
       const from = startDate ? new Date(startDate) : undefined;
-      const to = endDate ? new Date(endDate) : new Date(); // Si endDate está vacío, usar fecha de hoy
-
-      console.log(currentProject);
+      const to = endDate ? new Date(endDate) : new Date();
 
       const data = await fetchInvitationsByDateAndStatus(
         currentProject.id,
@@ -137,38 +131,30 @@ const resetForm = () => {
     const res = await fetchProjects();
     setProjectsList(res);
 
-    // Si se pasó un nombre o ID de proyecto, buscar el proyecto completo
     if (preselectedProjectName && !preselectedProject) {
       const project = res.find((p) => p.name === preselectedProjectName);
-      if (project) {
-        setCurrentProject(project);
-      }
+      if (project) setCurrentProject(project);
     } else if (preselectedProjectId && !preselectedProject) {
       const project = res.find((p) => p.id === preselectedProjectId);
-      if (project) {
-        setCurrentProject(project);
-      }
+      if (project) setCurrentProject(project);
     }
   };
-  
 
   useEffect(() => {
     initialFetch();
   }, []);
 
-  // Actualizar currentProject cuando cambie preselectedProject
   useEffect(() => {
     if (preselectedProject) {
       setCurrentProject(preselectedProject);
-      console.log(preselectedProject);
     }
   }, [preselectedProject]);
 
   return (
     <Modal
-     onOpenChange={(open) => {
-    if (!open) resetForm(); // ✅ Aquí limpias tu formulario
-  }}
+      onOpenChange={(open) => {
+        if (!open) resetForm(); // limpia al cerrar
+      }}
       options={{
         title: "Export Invitations",
         ButtonComponent: (
@@ -185,9 +171,7 @@ const resetForm = () => {
             <label className="mb-2 mt-2 text-sm font-medium">
               Project: {!currentProject && "(*)"}
             </label>
-
             {disableProjectSelector && currentProject ? (
-              // Mostrar input de solo lectura cuando está deshabilitado
               <input
                 type="text"
                 value={currentProject.name}
@@ -195,7 +179,6 @@ const resetForm = () => {
                 className="border px-3 py-2 rounded-md w-full max-w-sm bg-gray-50 text-gray-700 cursor-not-allowed"
               />
             ) : (
-              // Mostrar selector cuando está habilitado
               <Select
                 onValueChange={handleProjectChange}
                 disabled={disableProjectSelector}
@@ -217,9 +200,7 @@ const resetForm = () => {
         )}
 
         <div className="w-full">
-          <label className="mb-1 mt-3 block text-sm font-medium">
-            From date:
-          </label>
+          <label className="mb-1 mt-3 block text-sm font-medium">From date:</label>
           <div className="relative w-full max-w-sm">
             <input
               max={today}
@@ -240,9 +221,7 @@ const resetForm = () => {
             )}
           </div>
 
-          <label className="mb-1 mt-3 block text-sm font-medium">
-            To date:
-          </label>
+          <label className="mb-1 mt-3 block text-sm font-medium">To date:</label>
           <div className="relative w-full max-w-sm">
             <input
               max={today}
@@ -278,7 +257,7 @@ const resetForm = () => {
                     value={status}
                     checked={selectedStatuses.includes(status)}
                     onChange={() => handleCheckboxChange(status)}
-                    className="peer hidden "
+                    className="peer hidden"
                   />
                   <div className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center peer-checked:bg-blue-600 transition">
                     <div className="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition"></div>
