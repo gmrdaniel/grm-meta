@@ -12,17 +12,20 @@ export const exportToExcel = (
   try {
     //  Eliminar el filtrado
     const exportData = data.map((invitation) => ({
-      "First Name": invitation.first_name,
       "Email": invitation.email,
-      "Social Media Handle": invitation.social_media_handle || "",
-      "Social Media Platform": invitation.social_media_type || "",
-      "Facebook profile":invitation.facebook_profile,
+      "First Name": invitation.first_name,
+      "Last Name": invitation.last_name,
       "Facebook page":invitation.facebook_page,
-      "Phone number":invitation.phone_number,
-      "Invitation Code": invitation.invitation_code,
-      "Status": invitation.status,
+      "Facebook profile":invitation.facebook_profile,
       "Invitation Type": invitation.invitation_type === "new_user" ? "New User" : "Existing User",
+      "Instagram": invitation.instagram_user,
+      "TikTok": invitation.social_media_handle || "",
+      "Youtube Channel": invitation.youtube_channel,
+      "Phone number":invitation.phone_number,
+      "Status": invitation.status,
       "Created At": new Date(invitation.created_at).toLocaleString(),
+      "Updated At": new Date(invitation.updated_at).toLocaleString(),
+
     }));
 
     // Crear hoja y libro de Excel
