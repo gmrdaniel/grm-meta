@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
+import { fetchInvitationById } from "@/services/invitation/fetchInvitations";
 
 type NotificationSetting = {
   id: string;
@@ -54,6 +55,7 @@ export function RequestUpdateDialog({
   const [isSending, setIsSending] = useState<boolean>(false);
   const [isTestMode, setIsTestMode] = useState<boolean>(false);
   const [testEmail, setTestEmail] = useState<string>("");
+  const [invitationUrl, setInvitationUrl] = useState<string>("");
 
   // Obtener las notificaciones de tipo "notice"
   const { data: noticeTemplates, isLoading } = useQuery({
@@ -70,6 +72,26 @@ export function RequestUpdateDialog({
       return data as NotificationSetting[];
     },
   });
+
+  // Obtener los detalles de la invitación si se proporciona un ID
+  useEffect(() => {
+    const getInvitationDetails = async () => {
+      if (invitation_id) {
+        try {
+          const invitation = await fetchInvitationById(invitation_id);
+          if (invitation && invitation.invitation_url) {
+            const baseUrl = window.location.origin;
+            const fullUrl = `${baseUrl}${invitation.invitation_url}`;
+            setInvitationUrl(fullUrl);
+          }
+        } catch (error) {
+          console.error("Error fetching invitation details:", error);
+        }
+      }
+    };
+
+    getInvitationDetails();
+  }, [invitation_id]);
 
   useEffect(() => {
     if (selectedTemplate && noticeTemplates) {
@@ -98,6 +120,43 @@ export function RequestUpdateDialog({
     return templateHtml.replace("{{content}}", content);
   };
 
+  // Función para añadir el botón de invitación al mensaje
+  const addInvitationButton = (message: string) => {
+    if (!invitationUrl) return message;
+
+    const buttonHtml = `
+      <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{invitationUrl}}" style="height:45px;v-text-anchor:middle;width:300px;" arcsize="60%" strokecolor="#0000CD" fillcolor="#0000CD">
+        <w:anchorlock/>
+        <center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">
+        Click to update
+        </center>
+        <![endif]-->
+        <a href="${invitationUrl}" 
+          style="color:#FFFFFF !important; background: #0000CD; border: 2px solid #0000CD; border-radius: 
+          20px; display: inline-block; font-family: Arial, sans-serif;  font-weight: bold; font-size: 16px; 
+          line-height: 45px; text-align: center; text-decoration: none; width: 300px; -webkit-text-size-adjust: none; mso-hide: all;"> 
+          Update Invitation
+        </a> 
+        <!--[if mso]> 
+        </center> 
+        </v:roundrect> 
+        <![endif]--> 
+        <p style="text-align: center; margin-top: 15px; font-family: 'Poppins', Arial, sans-serif; font-size: 12px;"> 
+          <span style=""><i> If you can't see the button, click the following link:</i></span> 
+          <br> 
+          <a href="${invitationUrl}" style="color: #0000CD; text-decoration: underline; 
+          font-size: 12px;"> 
+          ${invitationUrl} 
+          </a>
+        </p>
+      </div>
+    `;
+
+    return `${message}\n\n${buttonHtml}`;
+  };
+
   // Function to send the test email
   const handleSendTestEmail = async () => {
     if (!testEmail) {
@@ -119,12 +178,15 @@ export function RequestUpdateDialog({
         throw new Error("Selected template not found");
       }
       
-      let finalHtml = templateMessage;
+      // Añadir el botón de invitación al mensaje
+      let messageWithButton = addInvitationButton(templateMessage);
+      
+      let finalHtml = messageWithButton;
       
       // If there's an associated template_id, get the HTML template and combine it with the message
       if (template.template_id) {
         const templateHtml = await fetchEmailTemplateHtml(template.template_id);
-        finalHtml = combineTemplateWithContent(templateHtml, templateMessage);
+        finalHtml = combineTemplateWithContent(templateHtml, messageWithButton);
       }
   
       // Direct call to Supabase mailjet function
@@ -169,12 +231,15 @@ export function RequestUpdateDialog({
         throw new Error("Selected template not found");
       }
       
-      let finalHtml = templateMessage;
+      // Añadir el botón de invitación al mensaje
+      let messageWithButton = addInvitationButton(templateMessage);
+      
+      let finalHtml = messageWithButton;
       
       // Si hay un template_id asociado, obtener la plantilla HTML y combinarla con el mensaje
       if (template.template_id) {
         const templateHtml = await fetchEmailTemplateHtml(template.template_id);
-        finalHtml = combineTemplateWithContent(templateHtml, templateMessage);
+        finalHtml = combineTemplateWithContent(templateHtml, messageWithButton);
       }
   
       // Llamada directa a la función de Supabase mailjet
