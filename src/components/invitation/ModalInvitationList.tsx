@@ -37,9 +37,31 @@ const ButtonDownloadInvitations = ({
   );
 };
 
-export const ModalInvitationList = () => {
+interface ModalInvitationListProps {
+  // Proyecto preseleccionado (opcional)
+  preselectedProject?: Project;
+  // Nombre del proyecto preseleccionado (alternativa cuando solo tienes el nombre)
+  preselectedProjectName?: string;
+  // ID del proyecto preseleccionado (alternativa cuando solo tienes el ID)
+  preselectedProjectId?: string;
+  // Si debe mostrar el selector de proyecto
+  showProjectSelector?: boolean;
+  // Si el selector debe estar deshabilitado
+  disableProjectSelector?: boolean;
+  // Callback cuando se selecciona un proyecto (opcional)
+  onProjectSelect?: (project: Project) => void;
+}
+
+export const ModalInvitationList = ({
+  preselectedProject,
+  preselectedProjectName,
+  preselectedProjectId,
+  showProjectSelector = true,
+  disableProjectSelector = false,
+  onProjectSelect,
+}: ModalInvitationListProps) => {
   const [currentProject, setCurrentProject] = useState<Project | undefined>(
-    undefined
+    preselectedProject
   );
   const [projectsList, setProjectsList] = useState<Project[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -48,7 +70,7 @@ export const ModalInvitationList = () => {
   const [exporting, setExporting] = useState<boolean>(false);
   const today = new Date().toISOString().split("T")[0];
 
-  const STATUSES = [
+  const StatusList = [
     "pending",
     "in process",
     "completed",
@@ -64,49 +86,80 @@ export const ModalInvitationList = () => {
     );
   };
 
-const generateXlsx = async () => {
-  if (!currentProject) {
-    toast.error("Please select a project.");
-    return;
-  }
-     
-  try {
-    setExporting(true);
+  const handleProjectChange = (value: string) => {
+    const project = projectsList.find((project) => project.id === value);
+    if (project) {
+      setCurrentProject(project);
+      onProjectSelect?.(project);
+    }
+  };
 
-    // Solo crear las fechas si startDate y endDate tienen valores
-    const from = startDate ? new Date(startDate) : undefined;
-    const to = endDate ? new Date(endDate) : new Date(); // Si endDate está vacío, usar fecha de hoy
+  const generateXlsx = async () => {
+    if (!currentProject) {
+      toast.error("Please select a project.");
+      return;
+    }
+       
+    try {
+      setExporting(true);
 
-    console.log(currentProject);
+      // Solo crear las fechas si startDate y endDate tienen valores
+      const from = startDate ? new Date(startDate) : undefined;
+      const to = endDate ? new Date(endDate) : new Date(); // Si endDate está vacío, usar fecha de hoy
 
-    const data = await fetchInvitationsByDateAndStatus(
-      currentProject.id,
-      from,
-      to,
-      selectedStatuses
-    );
+      console.log(currentProject);
 
-    exportToExcel(data, "invitations", from, to, selectedStatuses);
-  } catch (e) {
-    console.error("Error :", e);
-    toast.error("An error has occurred");
-  } finally {
-    setExporting(false);
-  }
-};
+      const data = await fetchInvitationsByDateAndStatus(
+        currentProject.id,
+        from,
+        to,
+        selectedStatuses
+      );
+
+      exportToExcel(data, "invitations", from, to, selectedStatuses);
+    } catch (e) {
+      console.error("Error :", e);
+      toast.error("An error has occurred");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const initialFetch = async () => {
     const res = await fetchProjects();
     setProjectsList(res);
+    
+    // Si se pasó un nombre o ID de proyecto, buscar el proyecto completo
+    if (preselectedProjectName && !preselectedProject) {
+      const project = res.find((p) => p.name === preselectedProjectName);
+      if (project) {
+        setCurrentProject(project);
+      }
+    } else if (preselectedProjectId && !preselectedProject) {
+      const project = res.find((p) => p.id === preselectedProjectId);
+      if (project) {
+        setCurrentProject(project);
+      }
+    }
   };
 
   useEffect(() => {
     initialFetch();
   }, []);
 
+  // Actualizar currentProject cuando cambie preselectedProject
+  useEffect(() => {
+    if (preselectedProject) {
+      setCurrentProject(preselectedProject);
+      console.log(preselectedProject);
+      
+    }
+  }, [preselectedProject]);
+
   return (
     <Modal
       options={{
-        title: "Export By Date",
+        title: "Export Invitations",
         ButtonComponent: (
           <ButtonDownloadInvitations
             onClick={generateXlsx}
@@ -116,33 +169,46 @@ const generateXlsx = async () => {
       }}
     >
       <div className="mt-4 md:mt-0 flex flex-col">
-        <div className="flex flex-col w-full">
-          <label className="mb-2 mt-2 text-sm font-medium">See from: (*)</label>
-          <Select
-            onValueChange={(value) => {
-              const project = projectsList.find(
-                (project) => project.id === value
-              );
-              setCurrentProject(project);
-            }}
-          >
-            <SelectTrigger className="w-full max-w-sm">
-              <SelectValue placeholder="Select Project" />
-            </SelectTrigger>
-            <SelectContent side="bottom" avoidCollisions={false}>
-              {projectsList.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {showProjectSelector && (
+          <div className="flex flex-col w-full">
+            <label className="mb-2 mt-2 text-sm font-medium">
+              Project: {!currentProject && "(*)"}
+            </label>
+            
+            {disableProjectSelector && currentProject ? (
+              // Mostrar input de solo lectura cuando está deshabilitado
+              <input
+                type="text"
+                value={currentProject.name}
+                readOnly
+                className="border px-3 py-2 rounded-md w-full max-w-sm bg-gray-50 text-gray-700 cursor-not-allowed"
+              />
+            ) : (
+              // Mostrar selector cuando está habilitado
+              <Select
+                onValueChange={handleProjectChange}
+                disabled={disableProjectSelector}
+                value={currentProject?.id || ""}
+              >
+                <SelectTrigger className="w-full max-w-sm">
+                  <SelectValue placeholder="Select Project" />
+                </SelectTrigger>
+                <SelectContent side="bottom" avoidCollisions={false}>
+                  {projectsList.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
 
         <div className="w-full">
           <label className="mb-1 mt-3 block text-sm font-medium">
             From date:
-          </label>{" "}
+          </label>
           <input
             max={today}
             type="date"
@@ -152,7 +218,7 @@ const generateXlsx = async () => {
           />
           <label className="mb-1 mt-3 block text-sm font-medium">
             To date:
-          </label>{" "}
+          </label>
           <input
             max={today}
             type="date"
@@ -165,7 +231,7 @@ const generateXlsx = async () => {
               Filter by state
             </label>
             <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 gap-3">
-              {STATUSES.map((status) => (
+              {StatusList.map((status) => (
                 <label
                   key={status}
                   className="flex items-center gap-2 px-2 py-2 border border-gray-300 rounded-full cursor-pointer transition hover:bg-gray-100"

@@ -151,41 +151,59 @@ export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
 };
 export const fetchInvitationsByDateAndStatus = async (
   projectId: string,
-  fechaDesde?: Date,
-  fechaHasta?: Date,
-  statuses: readonly string[] = []
+  dateFrom?: Date,
+  dateTo?: Date,
+  statusList: readonly string[] = [],
+  pageSize = 1000 // Supabase limit per request
 ): Promise<CreatorInvitation[]> => {
-  let query = supabase
-    .from('creator_invitations')
-    .select(`
-      *,
-      projects(*)
-    `)
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: false });
+  let allResults: CreatorInvitation[] = [];
+  let from = 0;
+  let to = pageSize - 1;
+  let hasMore = true;
 
-  // Solo aplicar filtros de fecha si se proporcionan
-  if (fechaDesde) {
-    query = query.gte('created_at', fechaDesde.toISOString());
+  while (hasMore) {
+    let query = supabase
+      .from('creator_invitations')
+      .select(`
+        *,
+        projects(*)
+      `)
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom.toISOString());
+    }
+
+    if (dateTo) {
+      query = query.lte('created_at', dateTo.toISOString());
+    }
+
+    if (statusList.length > 0) {
+      query = query.in('status', statusList);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching invitations by page:', error);
+      throw new Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      break;
+    }
+
+    allResults = allResults.concat(data);
+    hasMore = data.length === pageSize;
+    from += pageSize;
+    to += pageSize;
   }
 
-  if (fechaHasta) {
-    query = query.lte('created_at', fechaHasta.toISOString());
-  }
-
-  if (statuses.length > 0) {
-    query = query.in('status', statuses);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Error fetching invitations by range:', error);
-    throw new Error(error.message);
-  }
-
-  return data as CreatorInvitation[];
+  return allResults;
 };
+
 
 
 
