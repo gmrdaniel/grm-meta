@@ -64,40 +64,36 @@ export const ModalInvitationList = () => {
     );
   };
 
-  const generateXlsx = async () => {
-    if (!currentProject) {
-      toast.error("Please select a project.");
-      return;
-    }
-    if (!startDate || !endDate) {
-      toast.error("Please select both start and end dates.");
-      return;
-    }
+const generateXlsx = async () => {
+  if (!currentProject) {
+    toast.error("Please select a project.");
+    return;
+  }
+     
+  try {
+    setExporting(true);
 
-    try {
-      setExporting(true);
+    // Solo crear las fechas si startDate y endDate tienen valores
+    const from = startDate ? new Date(startDate) : undefined;
+    const to = endDate ? new Date(endDate) : new Date(); // Si endDate está vacío, usar fecha de hoy
 
-      const from = new Date(startDate);
-      const to = new Date(endDate);
+    console.log(currentProject);
 
-      console.log(currentProject);
+    const data = await fetchInvitationsByDateAndStatus(
+      currentProject.id,
+      from,
+      to,
+      selectedStatuses
+    );
 
-      const data = await fetchInvitationsByDateAndStatus(
-        currentProject.id,
-        from,
-        to,
-        selectedStatuses
-      );
-
-      exportToExcel(data, "invitations", from, to, selectedStatuses);
-    } catch (e) {
-      console.error("Error :", e);
-      toast.error("An error has occurred");
-    } finally {
-      setExporting(false);
-    }
-  };
-
+    exportToExcel(data, "invitations", from, to, selectedStatuses);
+  } catch (e) {
+    console.error("Error :", e);
+    toast.error("An error has occurred");
+  } finally {
+    setExporting(false);
+  }
+};
   const initialFetch = async () => {
     const res = await fetchProjects();
     setProjectsList(res);
@@ -145,7 +141,7 @@ export const ModalInvitationList = () => {
 
         <div className="w-full">
           <label className="mb-1 mt-3 block text-sm font-medium">
-            From date: (*)
+            From date:
           </label>{" "}
           <input
             max={today}
@@ -155,7 +151,7 @@ export const ModalInvitationList = () => {
             className="border px-2 py-2 rounded-md w-full max-w-sm"
           />
           <label className="mb-1 mt-3 block text-sm font-medium">
-            To date: (*)
+            To date:
           </label>{" "}
           <input
             max={today}

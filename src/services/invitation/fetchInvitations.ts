@@ -149,10 +149,9 @@ export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
 
   return data as CreatorInvitation[];
 };
-
 export const fetchInvitationsByDateAndStatus = async (
   projectId: string,
-  fechaDesde: Date,
+  fechaDesde?: Date,
   fechaHasta?: Date,
   statuses: readonly string[] = []
 ): Promise<CreatorInvitation[]> => {
@@ -163,8 +162,12 @@ export const fetchInvitationsByDateAndStatus = async (
       projects(*)
     `)
     .eq('project_id', projectId)
-    .gte('created_at', fechaDesde.toISOString())
     .order('created_at', { ascending: false });
+
+  // Solo aplicar filtros de fecha si se proporcionan
+  if (fechaDesde) {
+    query = query.gte('created_at', fechaDesde.toISOString());
+  }
 
   if (fechaHasta) {
     query = query.lte('created_at', fechaHasta.toISOString());
