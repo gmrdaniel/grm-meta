@@ -19,9 +19,9 @@ import { getProfileIdByInvitationId } from "@/services/creatorService";
 import { PinterestVerificationSuccess } from "@/components/pinterest/PinterestVerificationSuccess";
 
 const stepList = [
-  { id: "createAccount", label: "Crear cuenta" },
-  { id: "createPinterest", label: "Perfil" },
-  { id: "sendedApplication", label: "Iniciar sesión" },
+{ id: "createAccount", label: "Create Account" },
+{ id: "createPinterest", label: "Profile" },
+{ id: "sendedApplication", label: "Sign In" },
 ] as const;
 
 type Step = (typeof stepList)[number];
@@ -98,21 +98,20 @@ export default function InvitationStepperPage() {
       }
 
       // Paso 2: Crear el usuario en Supabase Auth
-      const { error: signupError } =
-        await supabase.auth.signUp({
-          email: allFormData.email,
-          password: crypto.randomUUID(),
-          options: {
-            data: {
-              first_name: allFormData.firstName,
-              last_name: allFormData.lastName,
-              phone_country_code: allFormData.phoneCountryCode,
-              phone_number: allFormData.phoneNumber,
-              social_media_handle: allFormData.instagramUser,
-              country_of_residence_id: allFormData.countryOfResidenceId,
-            },
+      const { error: signupError } = await supabase.auth.signUp({
+        email: allFormData.email,
+        password: crypto.randomUUID(),
+        options: {
+          data: {
+            first_name: allFormData.firstName,
+            last_name: allFormData.lastName,
+            phone_country_code: allFormData.phoneCountryCode,
+            phone_number: allFormData.phoneNumber,
+            social_media_handle: allFormData.instagramUser,
+            country_of_residence_id: allFormData.countryOfResidenceId,
           },
-        });
+        },
+      });
 
       if (signupError) {
         toast.error("Error creating your account");
@@ -162,26 +161,26 @@ export default function InvitationStepperPage() {
       const { pinterestUrl, contentTypes } = profileData;
 
       if (!invitation.id || !pinterestUrl || !contentTypes?.length) {
-        toast.error("Por favor completa todos los campos.");
+        toast.error("Please complete all fields.");
         return;
       }
 
       // 1. Buscar el ID del perfil por email
       const profileId = await getProfileIdByInvitationId(invitation.id);
       if (!profileId) {
-        toast.error("No se encontró un perfil con este correo.");
+        toast.error("No profile found with this email.");
         return;
       }
 
       // 2. Actualizar la URL de Pinterest
       const { error: urlError } = await updatePinterestUrl(
         profileId,
-        'https://pinterest.com/' + pinterestUrl
+        "https://pinterest.com/" + pinterestUrl
       );
 
       if (urlError) {
         console.error("Error actualizando URL:", urlError);
-        toast.error("No se pudo guardar la URL de Pinterest.");
+        toast.error("Could not save Pinterest URL.");
         return;
       }
 
@@ -192,22 +191,21 @@ export default function InvitationStepperPage() {
       );
       if (categoryError) {
         console.error("Error actualizando categorías:", categoryError);
-        toast.error("No se pudieron actualizar las categorías.");
+        toast.error("Categories could not be updated.");
         return;
       }
 
-      toast.success("¡Perfil guardado exitosamente!");
-
+      toast.success("Profile saved successfully!");
 
       if (error) {
         toast.error("Failed to save progress");
         return;
       }
-      console.log(error)
+      console.log(error);
       goToNextStep();
     } catch (error) {
       console.error("Error inesperado al guardar el perfil:", error);
-      toast.error("Hubo un error inesperado al guardar el perfil.");
+      toast.error("There was an unexpected error while saving the profile.");
     }
   };
 
@@ -232,25 +230,32 @@ export default function InvitationStepperPage() {
           {/* Left column - Text */}
           <div className="w-full text-center space-y-4 sm:space-y-8">
             <h1 className="sm:text-lg font-bold bg-clip-text text-sm">
-              📌 ¡Únete al programa de creadores en Pinterest!
+              📌 Join the Pinterest Creator Program!
             </h1>
             <div className="prose prose-blue max-w-none">
               <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Somos La Neta, socios estratégicos de Pinterest en LATAM, y estamos invitando a creadores como tú a formar parte de esta gran red social.
+                We are La Neta, Pinterest's strategic partners in Latin America,
+                and we're inviting creators like you to be part of this great
+                social network.
               </p>
             </div>
             <div className="prose prose-blue max-w-none">
               <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Regístrate y obtén acceso a webinars exclusivos de Pinterest donde aprenderás a llevar tu creatividad al siguiente nivel.
+                Sign up and get access to exclusive Pinterest webinars where
+                you'll learn how to take your creativity to the next level.
               </p>
             </div>
             <div className="prose prose-blue max-w-none">
               <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                Amplía tu alcance como creador, gana visibilidad frente a marcas líderes en la región y accede a oportunidades comerciales reales y exclusivas.              </p>
+                Expand your reach as a creator, gain visibility in front of
+                leading brands in the region, and access real and exclusive
+                business opportunities.{" "}
+              </p>
             </div>
             <div className="prose prose-blue max-w-none">
               <p className="sm:text-lg text-gray-700 leading-relaxed sm:text-justify text-sm">
-                🎯 Completa tu registro y da el siguiente paso con Pinterest.
+                🎯 Complete your registration and take the next step with
+                Pinterest.
               </p>
             </div>
           </div>

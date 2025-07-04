@@ -148,14 +148,14 @@ export function NotificationSettingsListEvents({ initialEventId }: NotificationS
       <div className="bg-white shadow rounded-lg max-w-full p-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="w-full s">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Evento</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Select Event</label>
             <Select
               value={selectedEventId || ""}
               onValueChange={handleEventChange}
               disabled={isLoadingEvents}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un evento" />
+                <SelectValue placeholder="Select Event" />
               </SelectTrigger>
               <SelectContent>
                 {events.map((event) => (
@@ -173,8 +173,7 @@ export function NotificationSettingsListEvents({ initialEventId }: NotificationS
               className="w-full md:w-auto"
             >
               <Plus size={16} className="mr-2" />
-              Crear Notificación
-            </Button>
+Create Notification            </Button>
           )}
         </div>
       </div>
@@ -204,7 +203,7 @@ export function NotificationSettingsListEvents({ initialEventId }: NotificationS
 
               {!settings || settings.length === 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-gray-500">No hay configuraciones de notificación para este evento.</p>
+                  <p className="text-gray-500">There are no notification settings for this event.</p>
                 </div>
               ) : (
                 <NotificationSettingsCards 
@@ -217,8 +216,7 @@ export function NotificationSettingsListEvents({ initialEventId }: NotificationS
             </div>
           ) : (
             <div className="bg-white shadow rounded-lg p-8 text-center">
-              <p className="text-gray-500">Selecciona un evento para ver sus configuraciones de notificación.</p>
-            </div>
+<p className="text-gray-500">Select an event to view its notification settings.</p>            </div>
           )}
         </>
       )}

@@ -682,11 +682,12 @@ export type Database = {
     Enums: {
       invitation_status:
         | "pending"
-        | "accepted"
         | "rejected"
         | "completed"
         | "in process"
-        | "sended";
+        | "accepted"
+        | "approved";
+        
       task_status: "pending" | "in_progress" | "completed" | "review";
       user_role: "admin" | "creator";
     };

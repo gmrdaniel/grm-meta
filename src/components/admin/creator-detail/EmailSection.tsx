@@ -8,7 +8,7 @@ interface EmailSectionProps {
 export const EmailSection = ({ email }: EmailSectionProps) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
-      <h3 className="text-lg font-medium mb-4">Correo Electrónico</h3>
+      <h3 className="text-lg font-medium mb-4">Email</h3>
       <input
         type="email"
         value={email || ''}

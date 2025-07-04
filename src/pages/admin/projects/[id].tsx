@@ -44,7 +44,7 @@ export default function AdminProjectDetail() {
               onClick={() => navigate("/admin/projects")}
               className="mb-4"
             >
-              <ChevronLeft size={16} className="mr-1" /> Volver
+              <ChevronLeft size={16} className="mr-1" /> Back
             </Button>
             
             {isLoading ? (

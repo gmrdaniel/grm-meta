@@ -29,7 +29,10 @@ export default function CampaignPage() {
     setActiveTab("createnotification");
   };
 
-  const handleManageNotificationsClick = (eventId: string | null, eventData?: any) => {
+  const handleManageNotificationsClick = (
+    eventId: string | null,
+    eventData?: any
+  ) => {
     setSelectedEventId(eventId);
     if (eventData) {
       setSelectedEvent(eventData);
@@ -56,18 +59,20 @@ export default function CampaignPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
-            {/* <TabsTrigger value="send">Enviar Campaña</TabsTrigger> */}
-            <TabsTrigger value="event">Enviar Invitación a Evento</TabsTrigger>
-            {/* <TabsTrigger value="createevent">Crear Evento</TabsTrigger> */}
-            <TabsTrigger value="events">Gestionar Eventos</TabsTrigger>
-            <TabsTrigger value="managenotifications">Gestionar Notificaciones</TabsTrigger>
+            <TabsTrigger value="statistics">Statistics</TabsTrigger>
+            {/* <TabsTrigger value="send">Send Campaign</TabsTrigger> */}
+            <TabsTrigger value="event">Send Event Invitation</TabsTrigger>
+            {/* <TabsTrigger value="createevent">Create Event</TabsTrigger> */}
+            <TabsTrigger value="events">Manage Events</TabsTrigger>
+            <TabsTrigger value="managenotifications">
+              Manage Notifications
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="statistics">
             <Card>
               <CardHeader>
-                <CardTitle>Estadísticas de Campañas</CardTitle>
+                <CardTitle>Campaign Statistics</CardTitle>{" "}
               </CardHeader>
               <CardContent>
                 <CampaignStats />
@@ -89,7 +94,7 @@ export default function CampaignPage() {
           <TabsContent value="event">
             <Card>
               <CardHeader>
-                <CardTitle>Enviar Invitación a Evento</CardTitle>
+                <CardTitle>Send Event Invitation</CardTitle>{" "}
               </CardHeader>
               <CardContent>
                 <EventInvitation />
@@ -99,22 +104,21 @@ export default function CampaignPage() {
 
           <TabsContent value="createevent">
             <Card>
-              <CardHeader>
-          
-              </CardHeader>
+              <CardHeader></CardHeader>
               <CardContent>
                 <CreateEvent onSuccess={handleEventCreated} />
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="events">
             <Card>
               <CardHeader>
-                <CardTitle>Gestionar Eventos</CardTitle>
-              </CardHeader>
+<CardTitle>Manage Events</CardTitle>              </CardHeader>
               <CardContent>
-                <EventsList onManageNotifications={handleManageNotificationsClick} />
+                <EventsList
+                  onManageNotifications={handleManageNotificationsClick}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -122,13 +126,13 @@ export default function CampaignPage() {
           <TabsContent value="createnotification">
             <Card>
               <CardHeader>
-                <CardTitle>Crear Notificación</CardTitle>
+                <CardTitle>Create Notification</CardTitle>{" "}
               </CardHeader>
               <CardContent>
-                <UnifiedNotificationSettings 
-                  eventId={selectedEventId || ""} 
+                <UnifiedNotificationSettings
+                  eventId={selectedEventId || ""}
                   eventName={selectedEvent?.event_name} // Usar el evento seleccionado
-                  onSuccess={handleNotificationCreated} 
+                  onSuccess={handleNotificationCreated}
                   onCancel={() => setActiveTab("managenotifications")}
                 />
               </CardContent>
@@ -138,10 +142,11 @@ export default function CampaignPage() {
           <TabsContent value="managenotifications">
             <Card className="min-w-fit max-w-full">
               <CardHeader>
-                <CardTitle>Gestionar Notificaciones</CardTitle>
-              </CardHeader>
+<CardTitle>Manage Notifications</CardTitle>              </CardHeader>
               <CardContent>
-                <NotificationSettingsListEvents initialEventId={selectedEventId} />
+                <NotificationSettingsListEvents
+                  initialEventId={selectedEventId}
+                />
               </CardContent>
             </Card>
           </TabsContent>

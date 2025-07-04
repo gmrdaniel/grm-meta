@@ -71,7 +71,9 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [phoneVerified, setPhoneVerified] = useState(invitation.phone_verified || false);
+  const [phoneVerified, setPhoneVerified] = useState(
+    invitation.phone_verified || false
+  );
   const [localPhoneNumber, setLocalPhoneNumber] = useState(
     formData.phoneNumber
   );
@@ -115,16 +117,15 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
     // Call handleInputChange manually
     handleInputChange({
-      target: { name: 'countryOfResidenceId', value: countryId },
+      target: { name: "countryOfResidenceId", value: countryId },
     } as React.ChangeEvent<HTMLInputElement>);
-
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     const isValidName = (name: string) => {
-      const normalized = name.trim().replace(/\s+/g, ' ');
+      const normalized = name.trim().replace(/\s+/g, " ");
       const nameRegex = /^[a-zA-ZÀ-ÿ' -]{2,}$/;
       return nameRegex.test(normalized);
     };
@@ -145,7 +146,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     onInputChange(e); // Call the parent function to update the form data
   };
 
-
   const handleAcceptTerms = () => {
     onCheckboxChange(true);
   };
@@ -164,7 +164,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
         body: {
           action: "send",
           phoneNumber: localPhoneNumber,
-          countryCode: localPhoneCountryCode
+          countryCode: localPhoneCountryCode,
         },
       });
 
@@ -190,7 +190,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
     } finally {
       setIsVerifying(false);
     }
-  }
+  };
 
   const handleVerifyCode = async () => {
     if (verificationCode.length !== 4) {
@@ -246,13 +246,13 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
       <CardContent className="space-y-6 pt-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Nombre</Label>
+            <Label htmlFor="firstName">Name</Label>
             <Input
               id="firstName"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
-              placeholder="Nombre"
+              placeholder="Name"
               className={formErrors.firstName ? "border-red-500" : ""}
             />
             {formErrors.firstName && (
@@ -260,13 +260,13 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Apellido</Label>
+            <Label htmlFor="lastName">Last name</Label>
             <Input
               id="lastName"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
-              placeholder="Apellido"
+              placeholder="Last name"
               className={formErrors.lastName ? "border-red-500" : ""}
             />
             {formErrors.lastName && (
@@ -275,7 +275,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               name="email"
@@ -283,16 +283,13 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
               value={formData.email}
               readOnly
               className="bg-gray-50 border-blue-100"
-              placeholder="tu@correo.com"
+              placeholder="you@email.com"
             />
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="instagramUser"
-              className="flex items-center gap-2"
-            >
-              <Instagram className="h-4 w-4" /> Usuario de Instagram
+            <Label htmlFor="instagramUser" className="flex items-center gap-2">
+              <Instagram className="h-4 w-4" /> instagram User
             </Label>
             <div className="relative">
               <Input
@@ -300,7 +297,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                 name="instagramUser"
                 value={formData.instagramUser}
                 onChange={onInputChange}
-                placeholder="usuario"
+                placeholder="instagram User"
                 className="pl-8 border-blue-100 focus-visible:ring-blue-200"
                 disabled
               />
@@ -308,10 +305,10 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="residenceCountry">País de residencia</Label>
+            <Label htmlFor="residenceCountry">Country of residence</Label>
             <CountrySelect
               onSelect={handleResidenceCountryChange}
-              placeholder="País de residencia"
+              placeholder="Country of residence"
               value={residenceCountryId}
               countries={countries.map((c) => ({
                 id: c.country_id,
@@ -325,7 +322,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
             <Label htmlFor="phoneNumber" className="flex items-center gap-2">
               {phoneVerified && (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                  <Shield className="mr-1 h-3 w-3" /> Verificado
+                  <Shield className="mr-1 h-3 w-3" /> Verified
                 </span>
               )}
             </Label>
@@ -357,9 +354,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                     }
                     className="mt-2"
                   >
-                    {isVerifying
-                      ? "Enviando..."
-                      : "Verificar número de teléfono"}
+                    {isVerifying ? "Sending..." : "Verify phone number"}
                   </Button>
                 )}
               </div>
@@ -374,7 +369,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="verification-code">
-                    Introduce el código de verificación de 4 dígitos.
+                    Enter the 4-digit verification code.
                   </Label>
                   <div className="flex justify-center py-4">
                     <InputOTP
@@ -392,12 +387,12 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                   </div>
                   <div className="text-sm text-center space-y-2">
                     <p className="text-muted-foreground">
-                      Enviamos un código a {localPhoneCountryCode}-
+                      We send a code to {localPhoneCountryCode}-
                       {localPhoneNumber}
                     </p>
                     {countdown > 0 && (
                       <p className="text-muted-foreground">
-                        El código expira en:{" "}
+                        The code expires in:{" "}
                         <span className="font-medium">
                           {formatTime(countdown)}
                         </span>
@@ -425,7 +420,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                       onClick={handleResendCode}
                       disabled={isVerifying || countdown > 540}
                     >
-                      Reenviar código
+                      Resend code
                     </Button>
                     <Button
                       size="sm"
@@ -433,7 +428,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
                       disabled={verificationCode.length !== 4 || isVerifying}
                       className="bg-blue-100 hover:bg-blue-300 text-black"
                     >
-                      {isVerifying ? "Verificando..." : "Verificar"}
+                      {isVerifying ? "Verifying..." : "Verifying"}
                     </Button>
                   </div>
                 </div>
@@ -443,7 +438,6 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
 
           <div className="flex items-center space-x-2 pt-4">
             <TermsCheckbox
-
               formData={formData}
               onCheckboxChange={onCheckboxChange}
               onAcceptTerms={handleAcceptTerms}
@@ -466,7 +460,7 @@ export const PinterestWelcomeForm: React.FC<PinterestWelcomeFormProps> = ({
           disabled={!formData.termsAccepted || isSubmitting || !phoneVerified}
           className="text-white"
         >
-          {isSubmitting ? "Procesando..." : "Siguiente"}
+          {isSubmitting ? "Processing..." : "Next"}
         </Button>
       </CardFooter>
     </>

@@ -38,13 +38,13 @@ export function ProjectsList() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "draft":
-        return <Badge variant="outline">Borrador</Badge>;
+        return <Badge variant="outline">Draft</Badge>;
       case "active":
-        return <Badge className="bg-green-500">Activo</Badge>;
+        return <Badge className="bg-green-500">Active</Badge>;
       case "pending":
-        return <Badge className="bg-yellow-500">Pendiente</Badge>;
+        return <Badge className="bg-yellow-500">Pending</Badge>;
       case "archived":
-        return <Badge variant="secondary">Archivado</Badge>;
+        return <Badge variant="secondary">Archived</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -56,12 +56,12 @@ export function ProjectsList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Etapas</TableHead>
-              <TableHead>Creado</TableHead>
-              <TableHead>Actualizado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Stages</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -76,7 +76,7 @@ export function ProjectsList() {
             ) : projects?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  No hay proyectos creados aún
+                  There are no projects created yet
                 </TableCell>
               </TableRow>
             ) : (

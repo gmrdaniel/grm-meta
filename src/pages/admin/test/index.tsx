@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchInvitationByCode } from "@/services/invitationService";
@@ -20,12 +27,12 @@ export default function AdminTestPage() {
   const [directLoading, setDirectLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [directError, setDirectError] = useState<string | null>(null);
-  
+
   const [tiktokUsername, setTiktokUsername] = useState<string>("");
   const [tiktokResult, setTiktokResult] = useState<any>(null);
   const [tiktokLoading, setTiktokLoading] = useState<boolean>(false);
   const [tiktokError, setTiktokError] = useState<string | null>(null);
-  
+
   const [tiktokVideoUsername, setTiktokVideoUsername] = useState<string>("");
   const [tiktokVideoResult, setTiktokVideoResult] = useState<any>(null);
   const [tiktokVideoLoading, setTiktokVideoLoading] = useState<boolean>(false);
@@ -33,7 +40,7 @@ export default function AdminTestPage() {
 
   const handleTestService = async () => {
     if (!invitationCode.trim()) {
-      setError("Por favor ingrese un código de invitación");
+      setError("Please enter an invitation code");
       return;
     }
 
@@ -44,15 +51,18 @@ export default function AdminTestPage() {
       setResult({
         invitation,
         success: true,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } catch (err) {
       console.error("Error testing invitation service:", err);
-      setError("Error al consultar el servicio: " + (err instanceof Error ? err.message : String(err)));
+      setError(
+        "Error querying service: " +
+          (err instanceof Error ? err.message : String(err))
+      );
       setResult({
         success: false,
         error: err,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } finally {
       setLoading(false);
@@ -61,31 +71,34 @@ export default function AdminTestPage() {
 
   const handleDirectTest = async () => {
     if (!invitationCode.trim()) {
-      setDirectError("Por favor ingrese un código de invitación");
+      setDirectError("Please enter an invitation code");
       return;
     }
 
     setDirectLoading(true);
     setDirectError(null);
     try {
-      const { data, error } = await supabase.rpc('find_invitation_by_code', { 
-        code_param: invitationCode 
+      const { data, error } = await supabase.rpc("find_invitation_by_code", {
+        code_param: invitationCode,
       });
-      
+
       if (error) throw error;
-      
+
       setDirectResult({
         data,
         success: true,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } catch (err) {
       console.error("Error testing direct RPC call:", err);
-      setDirectError("Error al consultar RPC: " + (err instanceof Error ? err.message : String(err)));
+      setDirectError(
+        "Error al consultar RPC: " +
+          (err instanceof Error ? err.message : String(err))
+      );
       setDirectResult({
         success: false,
         error: err,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } finally {
       setDirectLoading(false);
@@ -94,28 +107,31 @@ export default function AdminTestPage() {
 
   const handleTiktokTest = async () => {
     if (!tiktokUsername.trim()) {
-      setTiktokError("Por favor ingrese un nombre de usuario");
+      setTiktokError("Please enter a username");
       return;
     }
 
     setTiktokLoading(true);
     setTiktokError(null);
-    
+
     try {
       const data = await fetchTikTokUserInfo(tiktokUsername);
-      
+
       setTiktokResult({
         data,
         success: true,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } catch (err) {
       console.error("Error testing TikTok API:", err);
-      setTiktokError("Error al consultar la API de TikTok: " + (err instanceof Error ? err.message : String(err)));
+      setTiktokError(
+        "Error querying TikTok API: " +
+          (err instanceof Error ? err.message : String(err))
+      );
       setTiktokResult({
         success: false,
         error: err,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } finally {
       setTiktokLoading(false);
@@ -124,43 +140,49 @@ export default function AdminTestPage() {
 
   const handleTiktokVideoTest = async () => {
     if (!tiktokVideoUsername.trim()) {
-      setTiktokVideoError("Por favor ingrese un nombre de usuario");
+      setTiktokVideoError("Please enter a username");
       return;
     }
 
     setTiktokVideoLoading(true);
     setTiktokVideoError(null);
-    
+
     try {
-      const url = `https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(tiktokVideoUsername)}`;
+      const url = `https://tiktok-api6.p.rapidapi.com/user/videos?username=${encodeURIComponent(
+        tiktokVideoUsername
+      )}`;
       const options = {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'x-rapidapi-key': '9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5',
-          'x-rapidapi-host': 'tiktok-api6.p.rapidapi.com'
-        }
+          "x-rapidapi-key":
+            "9e40c7bc0dmshe6e2e43f9b23e23p1c66dbjsn39d61b2261d5",
+          "x-rapidapi-host": "tiktok-api6.p.rapidapi.com",
+        },
       };
 
       const response = await fetch(url, options);
-      
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       setTiktokVideoResult({
         data,
         success: true,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } catch (err) {
       console.error("Error testing TikTok Video API:", err);
-      setTiktokVideoError("Error al consultar la API de TikTok Video: " + (err instanceof Error ? err.message : String(err)));
+      setTiktokVideoError(
+        "Error querying TikTok Video API: " +
+          (err instanceof Error ? err.message : String(err))
+      );
       setTiktokVideoResult({
         success: false,
         error: err,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString(),
       });
     } finally {
       setTiktokVideoLoading(false);
@@ -170,54 +192,57 @@ export default function AdminTestPage() {
   return (
     <Layout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">Panel de Pruebas (Admin)</h1>
-        
+        <h1 className="text-2xl font-bold mb-6">Test Panel (Admin)</h1>
+
         <Alert className="mb-6 border-green-500 bg-green-50">
           <CheckCircle2 className="h-4 w-4 text-green-500" />
-          <AlertTitle>Servicio Público Configurado</AlertTitle>
+          <AlertTitle>Public Service Configured</AlertTitle>
           <AlertDescription>
-            El servicio de consulta de invitaciones está configurado para acceso público sin autenticación.
-            Las pruebas a continuación pueden ejecutarse sin necesidad de iniciar sesión.
+            The invitation query service is configured for public access without
+            authentication. The tests below can be run without logging in.
           </AlertDescription>
         </Alert>
-        
+
         <Tabs defaultValue="service" className="mb-6">
           <TabsList className="mb-4">
-            <TabsTrigger value="service">Usando Servicio</TabsTrigger>
-            <TabsTrigger value="direct">Llamada Directa RPC</TabsTrigger>
+            <TabsTrigger value="service">Using Service</TabsTrigger>
+            <TabsTrigger value="direct">Direct RPC Call</TabsTrigger>
             <TabsTrigger value="tiktok">TikTok API</TabsTrigger>
             <TabsTrigger value="tiktok-video">TikTok Video</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="service">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  Prueba del Servicio de Invitaciones
-                  <Badge variant="outline" className="ml-2">fetchInvitationByCode</Badge>
+                  Invitation Service Test
+                  <Badge variant="outline" className="ml-2">
+                    fetchInvitationByCode
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Esta prueba utiliza la función del servicio que internamente usa el RPC
+                  This test uses the service function that internally uses the
+                  RPC
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="invitationCode" className="block text-sm font-medium mb-1">
-                      Código de Invitación
+                    <label
+                      htmlFor="invitationCode"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Invitation Code{" "}
                     </label>
                     <div className="flex gap-2">
                       <Input
                         id="invitationCode"
-                        placeholder="Ingrese el código"
+                        placeholder="Enter the code"
                         value={invitationCode}
                         onChange={(e) => setInvitationCode(e.target.value)}
                       />
-                      <Button 
-                        onClick={handleTestService} 
-                        disabled={loading}
-                      >
-                        {loading ? "Procesando..." : "Probar Servicio"}
+                      <Button onClick={handleTestService} disabled={loading}>
+                        {loading ? "Processing..." : "Test Service"}
                       </Button>
                     </div>
                     {error && (
@@ -231,7 +256,9 @@ export default function AdminTestPage() {
 
                   {result && (
                     <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado ({result.timestamp}):</h3>
+                      <h3 className="font-medium mb-2">
+                        Result ({result.timestamp}):
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(result, null, 2)}
@@ -242,40 +269,46 @@ export default function AdminTestPage() {
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
-                Este panel permite probar el servicio fetchInvitationByCode sin autenticación
+                This panel allows you to test the fetchInvitationByCode service
+                without authentication.
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="direct">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  Llamada Directa a RPC
-                  <Badge variant="outline" className="ml-2">find_invitation_by_code</Badge>
+                  Direct Call to RPC
+                  <Badge variant="outline" className="ml-2">
+                    find_invitation_by_code
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Esta prueba llama directamente a la función RPC de Supabase
+                  This test directly calls the Supabase RPC function
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="directInvitationCode" className="block text-sm font-medium mb-1">
-                      Código de Invitación
+                    <label
+                      htmlFor="directInvitationCode"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Invitation Code
                     </label>
                     <div className="flex gap-2">
                       <Input
                         id="directInvitationCode"
-                        placeholder="Ingrese el código"
+                        placeholder="Enter the code"
                         value={invitationCode}
                         onChange={(e) => setInvitationCode(e.target.value)}
                       />
-                      <Button 
-                        onClick={handleDirectTest} 
+                      <Button
+                        onClick={handleDirectTest}
                         disabled={directLoading}
                       >
-                        {directLoading ? "Procesando..." : "Llamar RPC"}
+                        {directLoading ? "Processing..." : "Call RPC"}
                       </Button>
                     </div>
                     {directError && (
@@ -289,7 +322,9 @@ export default function AdminTestPage() {
 
                   {directResult && (
                     <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado RPC ({directResult.timestamp}):</h3>
+                      <h3 className="font-medium mb-2">
+                        RPC Result ({directResult.timestamp}):
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(directResult, null, 2)}
@@ -300,40 +335,46 @@ export default function AdminTestPage() {
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
-                Este panel permite probar directamente la función RPC find_invitation_by_code sin autenticación
+                This panel allows you to directly test the RPC function
+                find_invitation_by_code without authentication.
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="tiktok">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Test API TikTok
-                  <Badge variant="outline" className="ml-2">TikTok API</Badge>
+                  <Badge variant="outline" className="ml-2">
+                    TikTok API
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Esta prueba consulta información de usuarios de TikTok utilizando RapidAPI
+                  This test queries TikTok user information using RapidAPI
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="tiktokUsername" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="tiktokUsername"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Username
                     </label>
                     <div className="flex gap-2">
                       <Input
                         id="tiktokUsername"
-                        placeholder="Ingrese el nombre de usuario"
+                        placeholder="Enter username"
                         value={tiktokUsername}
                         onChange={(e) => setTiktokUsername(e.target.value)}
                       />
-                      <Button 
-                        onClick={handleTiktokTest} 
+                      <Button
+                        onClick={handleTiktokTest}
                         disabled={tiktokLoading}
                       >
-                        {tiktokLoading ? "Procesando..." : "Probar Servicio"}
+                        {tiktokLoading ? "Processing..." : "Test Service"}
                       </Button>
                     </div>
                     {tiktokError && (
@@ -347,7 +388,9 @@ export default function AdminTestPage() {
 
                   {tiktokResult && (
                     <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado ({tiktokResult.timestamp}):</h3>
+                      <h3 className="font-medium mb-2">
+                        Result ({tiktokResult.timestamp}):
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(tiktokResult, null, 2)}
@@ -358,40 +401,46 @@ export default function AdminTestPage() {
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
-                Este panel permite probar la API de TikTok para obtener información de usuarios
+                This panel allows you to test the TikTok API to obtain user
+                information.
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="tiktok-video">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   Test API TikTok Video
-                  <Badge variant="outline" className="ml-2">TikTok Video API</Badge>
+                  <Badge variant="outline" className="ml-2">
+                    TikTok Video API
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Esta prueba consulta videos de usuarios de TikTok utilizando RapidAPI
+                  This test queries TikTok user videos using RapidAPI
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="tiktokVideoUsername" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="tiktokVideoUsername"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Username
                     </label>
                     <div className="flex gap-2">
                       <Input
                         id="tiktokVideoUsername"
-                        placeholder="Ingrese el nombre de usuario"
+                        placeholder="Enter your username"
                         value={tiktokVideoUsername}
                         onChange={(e) => setTiktokVideoUsername(e.target.value)}
                       />
-                      <Button 
-                        onClick={handleTiktokVideoTest} 
+                      <Button
+                        onClick={handleTiktokVideoTest}
                         disabled={tiktokVideoLoading}
                       >
-                        {tiktokVideoLoading ? "Procesando..." : "Probar Servicio"}
+                        {tiktokVideoLoading ? "Processing..." : "Test Service"}
                       </Button>
                     </div>
                     {tiktokVideoError && (
@@ -405,7 +454,9 @@ export default function AdminTestPage() {
 
                   {tiktokVideoResult && (
                     <div className="mt-4">
-                      <h3 className="font-medium mb-2">Resultado ({tiktokVideoResult.timestamp}):</h3>
+                      <h3 className="font-medium mb-2">
+                        Result ({tiktokVideoResult.timestamp}):
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md border">
                         <pre className="whitespace-pre-wrap overflow-auto max-h-80 text-sm">
                           {JSON.stringify(tiktokVideoResult, null, 2)}
@@ -416,7 +467,8 @@ export default function AdminTestPage() {
                 </div>
               </CardContent>
               <CardFooter className="text-sm text-gray-500">
-                Este panel permite probar la API de TikTok para obtener videos de usuarios
+                This panel allows you to test the TikTok API to retrieve user
+                videos.
               </CardFooter>
             </Card>
           </TabsContent>

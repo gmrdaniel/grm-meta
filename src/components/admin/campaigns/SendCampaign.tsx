@@ -15,12 +15,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download } from "lucide-react";
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 // Importar la función createInvitation
-import { createInvitation } from '@/services/invitation/createInvitation';
+import { createInvitation } from "@/services/invitation/createInvitation";
 
 interface ImportCampaignProps {
   onSuccess?: () => void;
@@ -42,27 +42,29 @@ const formSchema = z.object({
   templateId: z.string().optional(),
   plainText: z.string().optional(),
   htmlContent: z.string().optional(),
-  customCampaign: z.string().min(1, "Debes ingresar un nombre para la campaña"),
+  customCampaign: z.string().min(1, "You must enter a campaign name"),
   deduplicateCampaign: z.boolean().optional(),
-  subject: z.string().min(1, "Debes ingresar un asunto para el correo"),
+  subject: z.string().min(1, "You must enter a subject for the email"),
   generateInvitations: z.boolean().default(false),
-  projectId: z.string().min(1, "Debes seleccionar un proyecto")
+  projectId: z.string().min(1, "You must select a project"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
-  const [projects, setProjects] = useState<Array<{ id: string, name: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
+    []
+  );
 
   useEffect(() => {
     const fetchProjects = async () => {
       const { data, error } = await supabase
-        .from('projects')
-        .select('id, name')
-        .order('name');
+        .from("projects")
+        .select("id, name")
+        .order("name");
 
       if (error) {
-        toast.error('Error al cargar los proyectos');
+        toast.error("Error loading projects");
         return;
       }
 
@@ -86,7 +88,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       htmlContent: "",
       subject: "",
       generateInvitations: false,
-      projectId: null
+      projectId: null,
     },
   });
 
@@ -96,7 +98,11 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
   const handleDownloadTemplate = () => {
     const template = [
       ["Email", "Name", "Paragraph"],
-      ["ejemplo@email.com", "Nombre Ejemplo", "Contenido del párrafo para el email"]
+      [
+        "ejemplo@email.com",
+        "Nombre Ejemplo",
+        "Paragraph content for the email",
+      ],
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(template);
@@ -107,7 +113,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
 
   const handleImport = async (values: FormValues) => {
     if (!file) {
-      toast.error("Por favor selecciona un archivo para importar");
+      toast.error("Please select a file to import");
       return;
     }
 
@@ -129,7 +135,9 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
         (header) => !headers.includes(header)
       );
       if (missingHeaders.length > 0) {
-        toast.error(`Faltan encabezados requeridos: ${missingHeaders.join(", ")}`);
+        toast.error(
+          `Required headers are missing: ${missingHeaders.join(", ")}`
+        );
         setIsImporting(false);
         return;
       }
@@ -143,73 +151,85 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
       const rows = jsonData.slice(1).map((row: any) => ({
         email: row[emailIndex],
         name: row[nameIndex],
-        paragraph: row[paragraphIndex]
+        paragraph: row[paragraphIndex],
       }));
 
       if (channel === "email") {
         // Procesar las filas y generar invitaciones si es necesario
-        const processedRows = await Promise.all(rows.map(async (row) => {
-          let invitationData = {};
-          if (values.projectId && values.projectId !="Ninguno") {
-            try {
-              const invitation = await createInvitation({
-                project_id: values.projectId,
-                email: row.email,
-                first_name: row.name.split(' ')[0] || row.email.split('@')[0],
-                last_name:row.name.split(' ').slice(1).join(' ') || '',
-                invitation_type:"new_user",
-                social_media_type: "pinterest"
-              });
-              
-              invitationData = {
-                invitation_code: invitation.invitation_code,
-                invitation_url: invitation.invitation_url
-              };
-            } catch (error) {
-              console.error('Error generating invitation:', error);
-            }
-          }
+        const processedRows = await Promise.all(
+          rows.map(async (row) => {
+            let invitationData = {};
+            if (values.projectId && values.projectId != "None") {
+              try {
+                const invitation = await createInvitation({
+                  project_id: values.projectId,
+                  email: row.email,
+                  first_name: row.name.split(" ")[0] || row.email.split("@")[0],
+                  last_name: row.name.split(" ").slice(1).join(" ") || "",
+                  invitation_type: "new_user",
+                  social_media_type: "pinterest",
+                });
 
-          return {
-            email: row.email,
-            name: row.name,
-            variables: {
-              paragraph: row.paragraph,
-              invitationCode: invitationData.invitation_code || "NO CODE", 
-              invitationUrl: invitationData.invitation_url || "NO URL"
+                invitationData = {
+                  invitation_code: invitation.invitation_code,
+                  invitation_url: invitation.invitation_url,
+                };
+              } catch (error) {
+                console.error("Error generating invitation:", error);
+              }
             }
-          };
-        }));
 
-        const { data: response, error } = await supabase.functions.invoke('mailjet-campaign', {
-          body: {
-            templateId: values.messageType === 'template' ? values.templateId : undefined,
-            textContent: values.messageType === 'plaintext' ? values.plainText : undefined,
-            htmlContent: values.htmlContent,
-            recipients: processedRows,
-            subject: values.subject,
-            customCampaign: values.customCampaign,
-            //deduplicateCampaign: values.deduplicateCampaign
+            return {
+              email: row.email,
+              name: row.name,
+              variables: {
+                paragraph: row.paragraph,
+                invitationCode: invitationData.invitation_code || "NO CODE",
+                invitationUrl: invitationData.invitation_url || "NO URL",
+              },
+            };
+          })
+        );
+
+        const { data: response, error } = await supabase.functions.invoke(
+          "mailjet-campaign",
+          {
+            body: {
+              templateId:
+                values.messageType === "template"
+                  ? values.templateId
+                  : undefined,
+              textContent:
+                values.messageType === "plaintext"
+                  ? values.plainText
+                  : undefined,
+              htmlContent: values.htmlContent,
+              recipients: processedRows,
+              subject: values.subject,
+              customCampaign: values.customCampaign,
+              //deduplicateCampaign: values.deduplicateCampaign
+            },
           }
-        });
-        console.log(processedRows)
+        );
+        console.log(processedRows);
         if (error) throw error;
       } else {
-        throw new Error(`El canal ${channel} aún no está implementado`);
+        throw new Error(`The channel ${channel} is not yet implemented`);
       }
 
       setImportSuccess(rows.length);
-      toast.success(`Campaña enviada exitosamente a ${rows.length} destinatarios`);
+      toast.success(`Campaign successfully sent to ${rows.length} recipients`);
       onSuccess?.();
-
     } catch (error) {
-      console.error('Error al enviar la campaña:', error);
-      toast.error(`Error al enviar la campaña: ${error.message}`);
-      setImportErrors([{
-        row: 0,
-        data: { email: '', name: '', paragraph: '' },
-        error: error.message
-      }]);
+      console.error("Error al enviar la campaña:", error);
+      toast.error(`Error sending campaign: ${error.message}`);
+      setImportErrors([
+        {
+          row: 0,
+          data: { email: "", name: "", paragraph: "" },
+          error: error.message,
+        },
+      ]);
     } finally {
       setIsImporting(false);
     }
@@ -217,7 +237,6 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
 
   return (
     <>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleImport)} className="space-y-6">
           <FormField
@@ -225,18 +244,15 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
             name="projectId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Proyecto de invitación</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <FormLabel>Invitation Project</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un proyecto de invitación" />
+                    <SelectValue placeholder="Select an invitation project" />
                   </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem key="none" value="Ninguno">
-                        Ninguno
-                      </SelectItem>
+                  <SelectContent>
+                    <SelectItem key="none" value="None">
+                      None
+                    </SelectItem>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
@@ -252,13 +268,10 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
             name="channel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Canal de comunicación</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <FormLabel>Communication channel</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un canal" />
+                    <SelectValue placeholder="Select a channel" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="email">Email</SelectItem>
@@ -271,30 +284,30 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
             )}
           />
           <FormField
-          control={form.control}
-          name="customCampaign"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de la Campaña</FormLabel>
-              <input
-                {...field}
-                type="text"
-                placeholder="Ej: Promocion_Mayo_2025"
-                className="w-full border rounded-md px-3 py-2"
-              />
-            </FormItem>
-          )}
-        />
+            control={form.control}
+            name="customCampaign"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Campaign Name</FormLabel>
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="Ej: Promocion_May_2025"
+                  className="w-full border rounded-md px-3 py-2"
+                />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="subject"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Asunto del Correo</FormLabel>
+                <FormLabel>Mail Subject</FormLabel>
                 <input
                   {...field}
                   type="text"
-                  placeholder="Ej: Invitación especial para ti"
+                  placeholder="Ej: Special invitation for you"
                   className="w-full border rounded-md px-3 py-2"
                 />
               </FormItem>
@@ -305,14 +318,14 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
             name="messageType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Mensaje</FormLabel>
+                <FormLabel>Message Type</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el tipo de mensaje" />
+                    <SelectValue placeholder="Select the message type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="template">Plantilla</SelectItem>
-                    <SelectItem value="plaintext">Texto Plano</SelectItem>
+                    <SelectItem value="template">Template</SelectItem>
+                    <SelectItem value="plaintext">Plain Text</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -325,13 +338,13 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
               name="templateId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ID de Plantilla</FormLabel>
+                  <FormLabel>Template ID</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una plantilla" />
+                      <SelectValue placeholder="Select a template" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="4812772">Plantilla Principal</SelectItem>
+                      <SelectItem value="4812772">Main Template</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -346,10 +359,10 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
                 name="plainText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contenido de Texto Plano</FormLabel>
+                    <FormLabel>Plain Text Content</FormLabel>
                     <Textarea
                       {...field}
-                      placeholder="Escribe el contenido del email aquí..."
+                      placeholder="Write the content of the email here..."
                       className="min-h-[100px]"
                     />
                   </FormItem>
@@ -361,10 +374,10 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
                 name="htmlContent"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contenido HTML (opcional)</FormLabel>
+                    <FormLabel>HTML Content (optional)</FormLabel>
                     <Textarea
                       {...field}
-                      placeholder="<html><body>Contenido HTML aquí...</body></html>"
+                      placeholder="<html><body>HTML content here...</body></html>"
                       className="min-h-[100px]"
                     />
                   </FormItem>
@@ -374,15 +387,17 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
           )}
 
           <div className="space-y-4">
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <AlertDescription>
-                Estructura del archivo Excel para importación masiva:<br />
-                <strong>Email</strong> | <strong>Name</strong> | <strong>Paragraph</strong><br />
-                ejemplo@email.com | Nombre Ejemplo | Contenido del párrafo para el email
-              </AlertDescription>
-            </CardContent>
-          </Card>
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <AlertDescription>
+                  Excel file structure for bulk import: <br />
+                  <strong>Email</strong> | <strong>Name</strong> |{" "}
+                  <strong>Paragraph</strong>
+                  <br />
+                  example@email.com | Name Example | Paragraph content for email
+                </AlertDescription>
+              </CardContent>
+            </Card>
             <div className="flex items-center gap-4">
               <Button
                 type="button"
@@ -391,7 +406,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
                 className="w-full sm:w-auto"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Descargar Template
+                Download Template
               </Button>
             </div>
 
@@ -399,7 +414,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
               file={file}
               onFileSelect={setFile}
               accept=".xlsx,.xls"
-              label="Arrastra y suelta tu archivo Excel aquí"
+              label="Drag and drop your Excel file here"
             />
 
             <Button
@@ -407,7 +422,7 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
               className="w-full"
               disabled={isImporting || !file}
             >
-              {isImporting ? "Enviando..." : "Enviar Campaña"}
+              {isImporting ? "Sending..." : "Send Campaign"}
             </Button>
           </div>
         </form>

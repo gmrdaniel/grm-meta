@@ -14,6 +14,18 @@ export interface SocialMediaPlatform {
   name: string;
 }
 
+export interface ProjectSummary  {
+  projectName: string;
+  approvedInvitations: number;
+  completedInvitations: number;
+  acceptedInvitations: number;
+  projectId: string;
+  rejectedInvitations: number;
+  pendingInvitations: number;
+  totalInvitations: number;
+  inProcessInvitations: number;
+}
+
 export interface ProjectStage {
   id: string;
   project_id: string;
