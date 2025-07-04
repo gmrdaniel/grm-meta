@@ -541,10 +541,7 @@ export function CampaignStats() {
           </ScrollArea>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDetailModalOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>
               Close
             </Button>
           </DialogFooter>
