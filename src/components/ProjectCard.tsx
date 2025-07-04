@@ -5,12 +5,10 @@ import { ModalInvitationList } from "./invitation/ModalInvitationList";
 
 interface ProjectCardProps {
   projectSummary: ProjectSummary;
-  
 }
 
 export function ProjectCard({
   projectSummary,
-  
 }: ProjectCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,6 +29,7 @@ export function ProjectCard({
       : "(0%)";
 
   const statItemClass = "m-2 text-gray-700 font-semibold";
+
 
   return (
     <div className="flex justify-between flex-col bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-200/50 hover:shadow-lg transition-all duration-300">
@@ -112,10 +111,16 @@ export function ProjectCard({
       </div>
 
       {inProcessInvitations > 0 && (
-        <ModalInvitationList 
-          preselectedProjectName={projectName}   
-          disableProjectSelector={true}
-        />
+<ModalInvitationList
+  preselectedProject={{
+    id: projectSummary.projectId,
+    name: projectSummary.projectName,
+  }}
+  resetProjectOnClose={false}
+  disableProjectSelector={true}
+/>
+
+
       )}
     </div>
   );
