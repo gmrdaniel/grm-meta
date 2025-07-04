@@ -40,6 +40,7 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
   const ITEMS_PER_PAGE = 10;
   
   const { data, isLoading, error } = useQuery({
+    
     queryKey: ['tasks', page, statusFilter],
     queryFn: () => fetchTasks({ 
       page, 
@@ -47,6 +48,7 @@ export function TasksList({ page, onPageChange, statusFilter, onStatusFilterChan
       status: statusFilter !== 'all' && isValidStatus(statusFilter) ? statusFilter : undefined 
     }),
   });
+  console.log('Tasks data:', data);
 
   const getStatusBadge = (status: string) => {
     switch(status) {

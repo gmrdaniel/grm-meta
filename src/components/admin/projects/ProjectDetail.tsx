@@ -34,13 +34,13 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
         status: projectStatus
       });
       
-      toast.success("Proyecto actualizado correctamente");
+      toast.success("Project updated successfully");
       setIsEditing(false);
       if (onProjectUpdated) {
         onProjectUpdated();
       }
     } catch (error: any) {
-      toast.error(`Error al actualizar proyecto: ${error.message}`);
+      toast.error(`Error updating project: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -54,13 +54,13 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'draft':
-        return <Badge variant="outline">Borrador</Badge>;
+        return <Badge variant="outline">Draft</Badge>;
       case 'active':
-        return <Badge className="bg-green-500">Activo</Badge>;
+        return <Badge className="bg-green-500">Active</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-500">Pendiente</Badge>;
+        return <Badge className="bg-yellow-500">Pending</Badge>;
       case 'archived':
-        return <Badge variant="secondary">Archivado</Badge>;
+        return <Badge variant="secondary">Archived</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -84,10 +84,10 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
                   onChange={(e) => setProjectStatus(e.target.value as Project["status"])}
                   className="border rounded p-1 text-sm"
                 >
-                  <option value="draft">Borrador</option>
-                  <option value="active">Activo</option>
-                  <option value="pending">Pendiente</option>
-                  <option value="archived">Archivado</option>
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="archived">Archived</option>
                 </select>
               </div>
             ) : (
@@ -127,24 +127,24 @@ export function ProjectDetail({ project, onProjectUpdated }: ProjectDetailProps)
                 variant="outline" 
                 onClick={() => setIsEditing(true)}
               >
-                <Edit size={16} className="mr-1" /> Editar
+                <Edit size={16} className="mr-1" /> Edit
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between text-sm text-gray-500">
-            <span>Creado: {new Date(project.created_at).toLocaleString()}</span>
-            <span>Actualizado: {new Date(project.updated_at).toLocaleString()}</span>
+            <span>Created: {new Date(project.created_at).toLocaleString()}</span>
+            <span>Updated: {new Date(project.updated_at).toLocaleString()}</span>
           </div>
         </CardContent>
       </Card>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
-          <TabsTrigger value="stages">Etapas del Proyecto</TabsTrigger>
-          <TabsTrigger value="add-stage">Añadir Etapa</TabsTrigger>
-          {editingStage && <TabsTrigger value="edit-stage">Editar Etapa</TabsTrigger>}
+          <TabsTrigger value="stages">Project Stages</TabsTrigger>
+          <TabsTrigger value="add-stage">Add Stage</TabsTrigger>
+          {editingStage && <TabsTrigger value="edit-stage">Edit Stage</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="stages">

@@ -18,9 +18,9 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre *</FormLabel>
+              <FormLabel>Name *</FormLabel>
               <FormControl>
-                <Input placeholder="Nombre" {...field} />
+                <Input placeholder="Name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -31,9 +31,9 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="apellido"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Apellido *</FormLabel>
+              <FormLabel>Last name *</FormLabel>
               <FormControl>
-                <Input placeholder="Apellido" {...field} />
+                <Input placeholder="Last name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -46,11 +46,11 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
         name="correo"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Correo Electrónico *</FormLabel>
+            <FormLabel>Email *</FormLabel>
             <FormControl>
               <Input
                 type="email"
-                placeholder="correo@ejemplo.com"
+                placeholder="you@example.com"
                 {...field}
               />
             </FormControl>
@@ -65,7 +65,7 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="lada_telefono"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Lada Telefónica</FormLabel>
+              <FormLabel>Country Code</FormLabel>
               <FormControl>
                 <Input placeholder="52" {...field} />
               </FormControl>
@@ -78,7 +78,7 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="telefono"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Teléfono</FormLabel>
+              <FormLabel>Phone</FormLabel>
               <FormControl>
                 <Input placeholder="1234567890" {...field} />
               </FormControl>

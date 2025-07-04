@@ -18,9 +18,9 @@ export function OtherSocialFields({ form }: OtherSocialFieldsProps) {
           name="usuario_pinterest"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Usuario Pinterest</FormLabel>
+              <FormLabel>Pinterest User</FormLabel>
               <FormControl>
-                <Input placeholder="@usuario" {...field} />
+                <Input placeholder="@user" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -31,7 +31,7 @@ export function OtherSocialFields({ form }: OtherSocialFieldsProps) {
           name="seguidores_pinterest"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Seguidores Pinterest</FormLabel>
+              <FormLabel>Pinterest Followers</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
@@ -55,10 +55,10 @@ export function OtherSocialFields({ form }: OtherSocialFieldsProps) {
         name="page_facebook"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Página de Facebook</FormLabel>
+            <FormLabel>Facebook page</FormLabel>
             <FormControl>
               <Input
-                placeholder="https://facebook.com/pagina"
+                placeholder="https://facebook.com/page"
                 {...field}
               />
             </FormControl>
