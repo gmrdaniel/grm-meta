@@ -49,6 +49,7 @@ interface ModalInvitationListProps {
   // Si el selector debe estar deshabilitado
   disableProjectSelector?: boolean;
   // Callback cuando se selecciona un proyecto (opcional)
+  isOpen; // <-- Esto es para detectar si esta abierto el modal
   onProjectSelect?: (project: Project) => void;
 }
 
@@ -58,6 +59,7 @@ export const ModalInvitationList = ({
   preselectedProjectId,
   showProjectSelector = true,
   disableProjectSelector = false,
+  isOpen, // <-- Nueva prop para detectar cierre
   onProjectSelect,
 }: ModalInvitationListProps) => {
   const [currentProject, setCurrentProject] = useState<Project | undefined>(
@@ -77,6 +79,12 @@ export const ModalInvitationList = ({
     "approved",
     "rejected",
   ];
+const resetForm = () => {
+  setStartDate("");
+  setEndDate("");
+  setSelectedStatuses([]);
+  setCurrentProject(preselectedProject);
+};
 
   const handleCheckboxChange = (status: string) => {
     setSelectedStatuses((prev) =>
@@ -99,7 +107,7 @@ export const ModalInvitationList = ({
       toast.error("Please select a project.");
       return;
     }
-       
+
     try {
       setExporting(true);
 
@@ -128,7 +136,7 @@ export const ModalInvitationList = ({
   const initialFetch = async () => {
     const res = await fetchProjects();
     setProjectsList(res);
-    
+
     // Si se pasó un nombre o ID de proyecto, buscar el proyecto completo
     if (preselectedProjectName && !preselectedProject) {
       const project = res.find((p) => p.name === preselectedProjectName);
@@ -142,6 +150,7 @@ export const ModalInvitationList = ({
       }
     }
   };
+  
 
   useEffect(() => {
     initialFetch();
@@ -152,12 +161,14 @@ export const ModalInvitationList = ({
     if (preselectedProject) {
       setCurrentProject(preselectedProject);
       console.log(preselectedProject);
-      
     }
   }, [preselectedProject]);
 
   return (
     <Modal
+     onOpenChange={(open) => {
+    if (!open) resetForm(); // ✅ Aquí limpias tu formulario
+  }}
       options={{
         title: "Export Invitations",
         ButtonComponent: (
@@ -174,7 +185,7 @@ export const ModalInvitationList = ({
             <label className="mb-2 mt-2 text-sm font-medium">
               Project: {!currentProject && "(*)"}
             </label>
-            
+
             {disableProjectSelector && currentProject ? (
               // Mostrar input de solo lectura cuando está deshabilitado
               <input
@@ -209,23 +220,49 @@ export const ModalInvitationList = ({
           <label className="mb-1 mt-3 block text-sm font-medium">
             From date:
           </label>
-          <input
-            max={today}
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="border px-2 py-2 rounded-md w-full max-w-sm"
-          />
+          <div className="relative w-full max-w-sm">
+            <input
+              max={today}
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border px-2 py-2 rounded-md w-full pr-10"
+            />
+            {startDate && (
+              <button
+                type="button"
+                onClick={() => setStartDate("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label="Clear start date"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           <label className="mb-1 mt-3 block text-sm font-medium">
             To date:
           </label>
-          <input
-            max={today}
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="border px-2 py-2 rounded-md w-full max-w-sm"
-          />
+          <div className="relative w-full max-w-sm">
+            <input
+              max={today}
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border px-2 py-2 rounded-md w-full pr-10"
+            />
+            {endDate && (
+              <button
+                type="button"
+                onClick={() => setEndDate("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label="Clear end date"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
           <div className="w-full my-4">
             <label className="mb-2 mt-3 block text-sm font-medium">
               Filter by state
