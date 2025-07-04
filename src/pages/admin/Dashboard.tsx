@@ -21,6 +21,8 @@ export default function AdminDashboard() {
       setLoading(true);
       try {
         const summary = await fetchProjectInvitationSummaries();
+        console.log('data',summary);
+        
         setProjectsSummary(summary);
 
         const projectIds = summary.map((p) => p.projectId);

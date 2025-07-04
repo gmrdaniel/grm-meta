@@ -2,62 +2,56 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreatorInvitation } from "@/types/invitation";
 import { ProjectSummary } from "@/types/project";
 
-export const fetchProjectInvitationSummaries = async (): Promise<ProjectSummary[]> => {
-  try {
-    // 1. Traer todos los proyectos
-    const { data: projects, error: projectsError } = await supabase
-      .from("projects")
-      .select("id, name");
+export const fetchProjectInvitationSummaries = async (
+  projectId: string,
+  dateFrom?: Date,
+  dateTo?: Date,
+  statusList: readonly string[] = []
+): Promise<CreatorInvitation[]> => {
+  let allInvitations: CreatorInvitation[] = [];
+  let from = 0;
+  const limit = 1000;
+  let hasMore = true;
 
-    if (projectsError) {
-      console.error("Error fetching projects:", projectsError);
-      return [];
-    }
-    if (!projects || projects.length === 0) {
-      return [];
-    }
+  while (hasMore) {
+    let query = supabase
+      .from('creator_invitations')
+      .select(`
+        *,
+        projects(*)
+      `)
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+      .range(from, from + limit - 1);
 
-    // 2. Por cada proyecto, consultar invitaciones y agrupar por estado
-    const projectSummaries: ProjectSummary[] = [];
-
-    for (const project of projects) {
-      const { data: invitations, error: invitationsError } = await supabase
-        .from("creator_invitations")
-        .select("status")
-        .eq("project_id", project.id);
-
-      if (invitationsError) {
-        console.error(`Error fetching invitations for project ${project.id}:`, invitationsError);
-        continue; // continuar con el siguiente proyecto
-      }
-
-      // Contar según estado
-      const approvedInvitations = invitations?.filter(inv => inv.status === "approved").length || 0;
-      const completedInvitations = invitations?.filter(inv => inv.status === "completed").length || 0;
-      const inProcessInvitations = invitations?.filter(inv => inv.status === "in process").length || 0;
-      const rejectedInvitations = invitations?.filter(inv => inv.status === "rejected").length || 0;
-      const acceptedInvitations = invitations?.filter(inv => inv.status === "accepted").length || 0;
-      const pendingInvitations = invitations?.filter(inv => inv.status === "pending").length || 0;
-
-      projectSummaries.push({
-        projectId: project.id,  // <--- Agrega esto
-        totalInvitations: invitations?.length || 0,
-        projectName: project.name,
-        approvedInvitations,
-        acceptedInvitations,
-        rejectedInvitations,
-        pendingInvitations,
-        completedInvitations,
-        inProcessInvitations,
-      });
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom.toISOString());
     }
 
-    return projectSummaries;
-    console.log("Project summaries fetched successfully:", projectSummaries);
-    
+    if (dateTo) {
+      query = query.lte('created_at', dateTo.toISOString());
+    }
 
-  } catch (err) {
-    console.error("Unexpected error fetching projects summary:", err);
-    return [];
+    if (statusList.length > 0) {
+      query = query.in('status', statusList);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching invitations by range:', error);
+      throw new Error(error.message);
+    }
+
+    if (data && data.length > 0) {
+      allInvitations = [...allInvitations, ...data as CreatorInvitation[]];
+      from += limit;
+      hasMore = data.length === limit; // If it brings less than 1000, there are no more
+    } else {
+      hasMore = false;
+    }
   }
+
+  return allInvitations;
 };
+
