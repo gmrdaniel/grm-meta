@@ -34,8 +34,8 @@ export function CreatorDetail({ creator, onBack, onUpdate }: CreatorDetailProps)
       
       <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="profile">Perfil</TabsTrigger>
-          <TabsTrigger value="tiktok-videos">Videos TikTok</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="tiktok-videos">TikTok Videos</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-6">

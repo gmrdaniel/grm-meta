@@ -91,7 +91,7 @@ export function Sidebar() {
             <LogOut size={24} />
             {expanded && (
               <span className="ml-3 font-medium animate-fadeIn">
-                Cerrar Sesión
+                Logout
               </span>
             )}
           </button>

@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { ProjectSummary } from "@/types/project";
 import { Users, Loader2 } from "lucide-react";
+import { ModalInvitationList } from "./invitation/ModalInvitationList";
 
 interface ProjectCardProps {
   projectSummary: ProjectSummary;
-  onDownloadExcel: () => Promise<void>;
 }
 
 export function ProjectCard({
   projectSummary,
-  onDownloadExcel,
 }: ProjectCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,16 +30,6 @@ export function ProjectCard({
 
   const statItemClass = "m-2 text-gray-700 font-semibold";
 
-  const handleDownload = async () => {
-    setIsLoading(true);
-    try {
-      await onDownloadExcel();
-    } catch (err) {
-      console.error("Error downloading Excel:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="flex justify-between flex-col bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-200/50 hover:shadow-lg transition-all duration-300">
@@ -122,39 +111,16 @@ export function ProjectCard({
       </div>
 
       {inProcessInvitations > 0 && (
-        <button
-          onClick={handleDownload}
-          className="mt-8 w-full bg-slate-50 border border-slate-200 text-slate-700 py-3 px-6 rounded-lg font-medium hover:bg-slate-100 hover:border-slate-300 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md group disabled:opacity-60 disabled:cursor-not-allowed"
-          title={`Download in process invitations for ${projectName}`}
-          disabled={isLoading}
-        >
-          <span className="flex items-center justify-center gap-2">
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin w-5 h-5" />
-                Downloading...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-full h-auto max-w-[24px] max-h-[24px] group-hover:scale-110 transition-transform duration-200"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                Download In Process Invitations
-              </>
-            )}
-          </span>
-        </button>
+<ModalInvitationList
+  preselectedProject={{
+    id: projectSummary.projectId,
+    name: projectSummary.projectName,
+  }}
+  resetProjectOnClose={false}
+  disableProjectSelector={true}
+/>
+
+
       )}
     </div>
   );

@@ -58,7 +58,7 @@ export const CountrySelect = ({
   const loadingMessage = null;
   const errorMessage = null;
   const emptyMessage = !loadingMessage && !errorMessage && filteredCountries.length === 0
-    ? "No se encontraron países"
+    ? "No countries found"
     : null;
 
     if (isMobile) {
@@ -73,7 +73,7 @@ export const CountrySelect = ({
                 className
               )}
             >
-              {currentCountry ? `${currentCountry.name_es}` : placeholder || "Seleccionar país"}
+              {currentCountry ? `${currentCountry.name_es}` : placeholder || "Select country"}
               <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </button>
           </PopoverTrigger>
@@ -130,7 +130,7 @@ export const CountrySelect = ({
       }}
     >
       <SelectTrigger className={className} disabled={false}> 
-        <SelectValue placeholder={placeholder || "Seleccionar país"} />
+        <SelectValue placeholder={placeholder || "Select country"} />
       </SelectTrigger>
       <SelectContent>
         <Command>

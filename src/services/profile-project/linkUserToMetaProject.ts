@@ -29,7 +29,7 @@ export async function linkProfileToProjectById({
     .single();
 
   if (profileErr || !profileData) {
-    throw new Error(`No se encontró perfil para: ${email}`);
+    throw new Error(`No profile found for: ${email}`);
   }
 
   // 2. Crear o actualizar relación en profile_projects

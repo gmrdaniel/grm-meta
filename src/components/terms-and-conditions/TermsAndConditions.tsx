@@ -26,115 +26,122 @@ export function TermsCheckbox({
       return (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Términos y Condiciones del Sorteo</DialogTitle>
+            <DialogTitle>Contest Terms and Conditions</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto max-h-96 text-sm space-y-4 pt-2 pr-2">
             <p>
-              <strong>1. Organizador</strong>
+              <strong>1. Organizer</strong>
               <br />
-              Este sorteo es organizado por La Neta, en colaboración con
-              Pinterest, con el objetivo de atraer nuevos creadores de contenido
-              en Hispanic LATAM (México, Colombia, Argentina, Chile y Perú).
+              This contest is organized by La Neta, in collaboration with
+              Pinterest, aiming to attract new content creators in Hispanic
+              LATAM (Mexico, Colombia, Argentina, Chile, and Peru).
             </p>
             <p>
-              <strong>2. Participación</strong>
+              <strong>2. Participation</strong>
               <br />
-              Podrán participar en este sorteo únicamente aquellas personas que
-              cumplan los siguientes requisitos:
+              Only individuals who meet the following requirements may
+              participate in this contest:
             </p>
             <ul className="list-disc list-inside pl-4">
-              <li>Ser mayor de edad en su país de residencia.</li>
+              <li>Be of legal age in their country of residence.</li>
               <li>
-                Tener una cuenta activa de Instagram con contenido relacionado a
-                una o varias de las siguientes verticales: decoración, bodas,
-                recetas, moda, belleza, lifestyle, viajes y bienestar.
+                Have an active Instagram account with content related to one or
+                more of the following categories: decoration, weddings, recipes,
+                fashion, beauty, lifestyle, travel, and wellness.
               </li>
-              <li>No haber tenido una cuenta de Pinterest anteriormente ni haber colaborado con Pinterest en el pasado.</li>
-              <li>Crear una cuenta nueva de Pinterest.</li>
-              <li>Conectar su cuenta de Instagram con Pinterest.</li>
-              <li>Aceptar la función de autopublicación de contenido de los últimos 90 días desde Instagram a Pinterest.</li>
-              <li>Asistir al webinar oficial organizado por Pinterest.</li>
+              <li>
+                Have never had a Pinterest account before nor collaborated with
+                Pinterest in the past.
+              </li>
+              <li>Create a new Pinterest account.</li>
+              <li>Connect their Instagram account with Pinterest.</li>
+              <li>
+                Accept the autopublish function for content from the last 90
+                days from Instagram to Pinterest.
+              </li>
+              <li>Attend the official webinar organized by Pinterest.</li>
             </ul>
             <p>
-              <strong>3. Vigencia</strong>
+              <strong>3. Validity</strong>
               <br />
-              El período de participación finaliza el 15 de mayo. Solo se tomarán
-              en cuenta los registros completados durante este periodo.
+              The participation period ends on May 15th. Only registrations
+              completed during this period will be considered.
             </p>
             <p>
-              <strong>4. Premios</strong>
+              <strong>4. Prizes</strong>
               <br />
-              Los premios serán los siguientes:
+              The prizes are as follows:
             </p>
             <ul className="list-disc list-inside pl-4">
-              <li>1 (un) ganador recibirá una tarjeta de regalo Amazon de $1,000 USD.</li>
-              <li>10 (diez) participantes adicionales recibirán tarjetas de regalo Amazon de $100 USD cada uno.</li>
+              <li>
+                1 (one) winner will receive a $1,000 USD Amazon gift card.
+              </li>
+              <li>
+                10 (ten) additional participants will receive $100 USD Amazon
+                gift cards each.
+              </li>
             </ul>
             <p>
-              Los premios no son transferibles, no se podrán cambiar por dinero en
-              efectivo ni sustituir por ningún otro beneficio.
+              Prizes are non-transferable, cannot be exchanged for cash, nor
+              substituted for any other benefit.
             </p>
             <p>
-              <strong>5. Selección de Ganadores</strong>
+              <strong>5. Winner Selection</strong>
               <br />
-              Los ganadores serán seleccionados de manera aleatoria entre todos
-              los participantes que hayan completado correctamente todos los
-              pasos del programa. Los ganadores serán notificados por correo
-              electrónico y tendrán un plazo de 5 días hábiles para aceptar su
-              premio. En caso de no recibir respuesta, se seleccionará a un nuevo
-              ganador.
+              Winners will be randomly selected among all participants who have
+              correctly completed all the program steps. Winners will be
+              notified via email and have 5 business days to accept their prize.
+              If no response is received, a new winner will be selected.
             </p>
             <p>
-              <strong>6. Responsabilidad</strong>
+              <strong>6. Liability</strong>
               <br />
-              La participación en este sorteo implica la aceptación de estos
-              términos y condiciones. La Neta y Pinterest no se hacen
-              responsables por fallos técnicos, interrupciones de servicio o
-              problemas ajenos al control de los organizadores.
+              Participation in this contest implies acceptance of these terms
+              and conditions. La Neta and Pinterest are not responsible for
+              technical failures, service interruptions, or issues beyond the
+              organizers' control.
             </p>
             <p>
-              <strong>7. Protección de Datos</strong>
+              <strong>7. Data Protection</strong>
               <br />
-              La información proporcionada por los participantes será utilizada
-              únicamente con fines de validación de participación y contacto de
-              ganadores. Se manejará de acuerdo con la política de privacidad de
-              La Neta.
+              Information provided by participants will be used solely for
+              participation validation and winner contact. It will be handled in
+              accordance with La Neta's privacy policy.
             </p>
             <p>
-              <strong>8. Aceptación</strong>
+              <strong>8. Acceptance</strong>
               <br />
-              Al participar en este sorteo, los usuarios aceptan completamente
-              estos Términos y Condiciones.
+              By participating in this contest, users fully accept these Terms
+              and Conditions.
             </p>
             <p>
-              <strong>9. Consentimiento para el Uso de Datos</strong>
+              <strong>9. Consent for Data Usage</strong>
               <br />
-              Al participar en este programa, el usuario acepta y autoriza
-              expresamente que La Neta, en colaboración con Pinterest, recopile y
-              utilice los datos proporcionados en el formulario de inscripción,
-              así como aquellos derivados de su actividad en la plataforma
-              Pinterest, con fines de análisis, seguimiento y optimización del
-              programa. Esto incluye, pero no se limita a: nombre, correo
-              electrónico, cuenta de Instagram vinculada, cuenta de Pinterest
-              creada, estadísticas de contenido compartido y comportamiento
-              dentro de Pinterest.
+              By participating in this program, the user expressly consents and
+              authorizes La Neta, in collaboration with Pinterest, to collect
+              and use the data provided in the registration form, as well as
+              data derived from their activity on the Pinterest platform, for
+              analysis, tracking, and program optimization purposes. This
+              includes, but is not limited to: name, email, linked Instagram
+              account, created Pinterest account, shared content statistics, and
+              behavior within Pinterest.
             </p>
             <p>
-              Esta información será tratada de manera confidencial y utilizada
-              exclusivamente para mejorar la experiencia del participante,
-              verificar el cumplimiento de los requisitos del programa y diseñar
-              futuras iniciativas para creadores de contenido. En ningún caso
-              será vendida o compartida con terceros ajenos al programa.
+              This information will be treated confidentially and used
+              exclusively to improve the participant experience, verify
+              compliance with program requirements, and design future
+              initiatives for content creators. Under no circumstances will it
+              be sold or shared with third parties outside the program.
             </p>
             <div className="flex justify-center">
               <button
                 className="text-blue-800 hover:font-semibold mt-4"
                 onClick={() => {
                   setIsDialogOpen(false);
-                  onAcceptTerms(); // Llama al callback para marcar el checkbox
+                  onAcceptTerms(); // Calls callback to check the checkbox
                 }}
               >
-                Aceptar términos y condiciones
+                Accept terms and conditions
               </button>
             </div>
           </div>
@@ -160,12 +167,12 @@ export function TermsCheckbox({
                   participation are subject to change by Meta at any time.
                 </p>
                 <p className="mt-2 text-justify">
-                  Global Media Review Inc. (our agency) is not responsible for any
-                  changes, adjustments, missing payments, or modifications in
-                  program terms made by Meta. Meta reserves the right to change
-                  or discontinue benefits without prior notice. We (the agency)
-                  assume no responsibility or liability for the payments,
-                  benefits, or decisions made by Meta.
+                  Global Media Review Inc. (our agency) is not responsible for
+                  any changes, adjustments, missing payments, or modifications
+                  in program terms made by Meta. Meta reserves the right to
+                  change or discontinue benefits without prior notice. We (the
+                  agency) assume no responsibility or liability for the
+                  payments, benefits, or decisions made by Meta.
                 </p>
               </li>
               <li>
@@ -194,16 +201,18 @@ export function TermsCheckbox({
                   <li>Email Address</li>
                   <li>Phone Number</li>
                   <li>
-                    Social Media Usernames (Instagram, Facebook, TikTok, YouTube,
-                    and others provided)
+                    Social Media Usernames (Instagram, Facebook, TikTok,
+                    YouTube, and others provided)
                   </li>
-                  <li>Audience Metrics, engagement rate, and follower counts</li>
+                  <li>
+                    Audience Metrics, engagement rate, and follower counts
+                  </li>
                 </ul>
                 <p className="mt-2 text-justify">
                   You further authorize us to share your provided information
-                  with trusted third-party partners and brands for the purpose of
-                  facilitating creator partnerships, marketing opportunities, or
-                  similar commercial engagements.
+                  with trusted third-party partners and brands for the purpose
+                  of facilitating creator partnerships, marketing opportunities,
+                  or similar commercial engagements.
                 </p>
               </li>
               <li>
@@ -272,8 +281,12 @@ export function TermsCheckbox({
     }
   };
 
-  const termsText = formType === "pinterest" ? "términos y condiciones" : "terms and conditions";
-  const termsColor = formType === "pinterest" ? "text-blue-600" : "text-blue-600";
+  const termsText =
+    formType === "pinterest"
+      ? "términos y condiciones"
+      : "terms and conditions";
+  const termsColor =
+    formType === "pinterest" ? "text-blue-600" : "text-blue-600";
 
   return (
     <div className="flex items-start space-x-2 pt-4">

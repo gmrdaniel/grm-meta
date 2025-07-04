@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
@@ -17,7 +16,7 @@ export default function AdminInventory() {
   const [activeTab, setActiveTab] = useState("list");
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [filters, setFilters] = useState<CreatorFilter>({});
-  
+
   const { refetch } = useQuery({
     queryKey: ["creators"],
     queryFn: () => fetchCreators(1, 10, filters),
@@ -44,47 +43,55 @@ export default function AdminInventory() {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
-            <h1 className="text-2xl font-bold mb-6">Inventario de Creadores</h1>
-            
-            <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab}>
+            <h1 className="text-2xl font-bold mb-6">Creator Inventory</h1>
+
+            <Tabs
+              defaultValue="list"
+              value={activeTab}
+              onValueChange={setActiveTab}
+            >
               <TabsList className="mb-6">
-                <TabsTrigger value="list">Lista de Creadores</TabsTrigger>
-                <TabsTrigger value="create">Crear Creador</TabsTrigger>
-                <TabsTrigger value="import">Importar Creadores</TabsTrigger>
+                <TabsTrigger value="list">Creator List</TabsTrigger>
+                <TabsTrigger value="create">Create Creator</TabsTrigger>
+                <TabsTrigger value="import">Import Creators</TabsTrigger>
                 {selectedCreator && (
-                  <TabsTrigger value="detail">Detalle del Creador</TabsTrigger>
+                  <TabsTrigger value="detail">Creator Detail</TabsTrigger>
                 )}
               </TabsList>
-              
+
               <TabsContent value="list" className="space-y-6">
-                <CreatorsList 
+                <CreatorsList
                   onCreatorSelect={handleCreatorSelect}
                   filters={filters}
                   onFilterChange={handleFilterChange}
                 />
               </TabsContent>
-              
+
               <TabsContent value="create" className="space-y-6">
                 <div className="max-w-3xl mx-auto">
-                  <h2 className="text-xl font-semibold mb-6">Agregar Nuevo Creador</h2>
-                  <CreatorForm 
+                  <h2 className="text-xl font-semibold mb-6">
+                    Add New Creator
+                  </h2>
+                  <CreatorForm
                     onSuccess={() => {
                       setActiveTab("list");
-                    }} 
+                    }}
                   />
                 </div>
               </TabsContent>
 
               <TabsContent value="import" className="space-y-6">
-                <ImportCreators onSuccess={() => {
-                  refetch();
-                  toast.success("Creadores importados correctamente");
-                }} />
+                <ImportCreators
+                  onSuccess={() => {
+                    refetch();
+                    toast.success("Creators imported successfully");
+                  }}
+                />
               </TabsContent>
 
               {selectedCreator && (
                 <TabsContent value="detail" className="space-y-6">
-                  <CreatorDetail 
+                  <CreatorDetail
                     creator={selectedCreator}
                     onBack={handleBackToList}
                     onUpdate={() => {
