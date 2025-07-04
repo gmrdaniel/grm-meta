@@ -116,9 +116,6 @@ export default function AdminDashboard() {
                   <ProjectCard
                     key={projectSummary.projectId}
                     projectSummary={projectSummary}
-                    onDownloadExcel={async () =>
-                      exportToExcel(projectSummary.projectId)
-                    }
                   />
                 ))}
               </div>
