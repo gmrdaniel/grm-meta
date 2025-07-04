@@ -5,12 +5,10 @@ import { ModalInvitationList } from "./invitation/ModalInvitationList";
 
 interface ProjectCardProps {
   projectSummary: ProjectSummary;
-  onDownloadExcel: () => Promise<void>;
 }
 
 export function ProjectCard({
   projectSummary,
-  onDownloadExcel,
 }: ProjectCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,16 +30,6 @@ export function ProjectCard({
 
   const statItemClass = "m-2 text-gray-700 font-semibold";
 
-  const handleDownload = async () => {
-    setIsLoading(true);
-    try {
-      await onDownloadExcel();
-    } catch (err) {
-      console.error("Error downloading Excel:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="flex justify-between flex-col bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-200/50 hover:shadow-lg transition-all duration-300">
