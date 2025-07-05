@@ -1,14 +1,9 @@
-CREATE OR REPLACE FUNCTION public.get_admin_invitation_stats()
-RETURNS TABLE (
-  project_id UUID,
-  project_name TEXT,
-  status TEXT,
-  invitation_count INTEGER
-)
-LANGUAGE sql
-SECURITY DEFINER
-AS $$
-  SELECT *
-  FROM public.project_invitation_status_counts
-  WHERE get_user_role(auth.uid()) = 'admin'::text;
-$$;
+create or replace view project_invitation_status_counts as
+select
+  p.id as project_id,
+  p.name as project_name,
+  ci.status,
+  count(*) as invitation_count
+from projects p
+join creator_invitations ci on ci.project_id = p.id
+group by p.id, p.name, ci.status;
