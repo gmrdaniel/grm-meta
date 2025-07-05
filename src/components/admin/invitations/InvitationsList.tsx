@@ -63,6 +63,7 @@ import { ModalInvitationList } from "@/components/invitation/ModalInvitationList
 import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
 import { useDebounce } from "@/hooks/use-debounce";
 //import { Cross2Icon } from "@radix-ui/react-icons";
+import { RequestUpdateDialog } from "./RequestUpdateDialog";
 
 const InvitationsList = () => {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
+  const [requestUpdateInvitation, setRequestUpdateInvitation] = useState<string | null>(null);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -522,11 +524,19 @@ const handleStatusChange = (
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Reset to pending
                       </DropdownMenuItem>
+                      
                     )}
                     
 
                     <DropdownMenuSeparator />
-
+                      <DropdownMenuItem
+                        onClick={() => setRequestUpdateInvitation(invitation.id)}
+                        className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-blue-600"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Request update
+                      </DropdownMenuItem>
+                      
                     <AlertDialog
                       open={selectedInvitation === invitation.id}
                       onOpenChange={(open) =>
@@ -566,6 +576,20 @@ const handleStatusChange = (
                     </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                
+                {/* Diálogo de Request Update */}
+                {requestUpdateInvitation === invitation.id && (
+                  <RequestUpdateDialog
+                    isOpen={!!requestUpdateInvitation}
+                    onOpenChange={(open) => {
+                      if (!open) setRequestUpdateInvitation(null);
+                    }}
+                    project={invitation.projects?.name}
+                    email={invitation.email}
+                    name={invitation.first_name}
+                    invitation_id={invitation.id} 
+                  />
+                )}
               </TableCell>
             </TableRow>
           ))}

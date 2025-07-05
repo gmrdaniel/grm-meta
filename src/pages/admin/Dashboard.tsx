@@ -47,50 +47,6 @@ export default function AdminDashboard() {
     "db68c27d-f0cf-49f4-8cf0-954220e9f14e": "Welcome & Identification",
   };
 
-  const exportToExcel = (projectId: string) => {
-    const projectInvitations = inProcessInvitations.find(
-      (p) => p.projectId === projectId
-    )?.invitations;
-
-    if (!projectInvitations || projectInvitations.length === 0) {
-      alert("There are no in-process invitations to export.");
-      return;
-    }
-
-    // Transform invitations to replace IDs with step names
-    const transformedInvitations = projectInvitations.map((invitation) => {
-      const transformed = { ...invitation };
-
-      Object.keys(transformed).forEach((key) => {
-        const value = transformed[key];
-        if (typeof value === "string" && STEP_NAMES[value]) {
-          transformed[key] = STEP_NAMES[value];
-        }
-        // Add further transformations here if needed
-      });
-
-      return transformed;
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(transformedInvitations);
-    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
-
-    // Clean header names: replace underscores and capitalize words
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-      const cell = worksheet[cellAddress];
-      if (cell && cell.v) {
-        cell.v = cell.v
-          .toString()
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (char: string) => char.toUpperCase());
-      }
-    }
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Invitations");
-    XLSX.writeFile(workbook, `In_Process_Invitations_${projectId}.xlsx`);
-  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -116,9 +72,6 @@ export default function AdminDashboard() {
                   <ProjectCard
                     key={projectSummary.projectId}
                     projectSummary={projectSummary}
-                    onDownloadExcel={async () =>
-                      exportToExcel(projectSummary.projectId)
-                    }
                   />
                 ))}
               </div>

@@ -10,7 +10,7 @@ import {
 import { fetchInvitationsByDateAndStatus } from "@/services/invitation";
 import { exportToExcel } from "@/utils/exportToExcel";
 import { Button } from "../ui/button";
-import { Download } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProjects } from "@/services/project/projectService";
 import { Project } from "@/types/project";
@@ -18,11 +18,13 @@ import { Project } from "@/types/project";
 interface ButtonDownloadInvitationsProps {
   onClick: () => void;
   exporting: boolean;
+  progressPercent: number;
 }
 
 const ButtonDownloadInvitations = ({
   onClick,
   exporting,
+  progressPercent,
 }: ButtonDownloadInvitationsProps) => (
   <Button
     onClick={onClick}
@@ -30,8 +32,17 @@ const ButtonDownloadInvitations = ({
     variant="outline"
     className="flex items-center gap-2 mr-4"
   >
-    <Download size={16} />
-    {exporting ? "Exporting..." : "Export Invitations"}
+    {exporting ? (
+      <>
+        <Loader2 className="animate-spin h-4 w-4" />
+        Exporting {progressPercent}%
+      </>
+    ) : (
+      <>
+        <Download size={16} />
+        Export Invitations
+      </>
+    )}
   </Button>
 );
 
@@ -62,6 +73,7 @@ export const ModalInvitationList = ({
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [exporting, setExporting] = useState<boolean>(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
   const today = new Date().toISOString().split("T")[0];
 
   const StatusList = [
@@ -73,13 +85,14 @@ export const ModalInvitationList = ({
   ];
 
   const resetForm = () => {
+    setExporting(false)
     setStartDate("");
     setEndDate("");
     setSelectedStatuses([]);
     if (resetProjectOnClose) {
       setCurrentProject(undefined);
     } else {
-      setCurrentProject(preselectedProject); // conserva la selección original
+      setCurrentProject(preselectedProject);
     }
   };
 
@@ -107,6 +120,7 @@ export const ModalInvitationList = ({
 
     try {
       setExporting(true);
+      setProgress({ current: 0, total: 0 });
 
       const from = startDate ? new Date(startDate) : undefined;
       const to = endDate ? new Date(endDate) : new Date();
@@ -115,10 +129,18 @@ export const ModalInvitationList = ({
         currentProject.id,
         from,
         to,
-        selectedStatuses
+        selectedStatuses,
+        1000,
+        (fetchedCount) => {
+          setProgress({
+            current: fetchedCount,
+            total: fetchedCount,
+          });
+        }
       );
 
       exportToExcel(data, "invitations", from, to, selectedStatuses);
+      toast.success("Invitations exported sucessfully.");
     } catch (e) {
       console.error("Error :", e);
       toast.error("An error has occurred");
@@ -150,10 +172,21 @@ export const ModalInvitationList = ({
     }
   }, [preselectedProject]);
 
+  const progressPercent =
+    progress.total > 0
+      ? Math.min(100, Math.round((progress.current / progress.total) * 100))
+      : 0;
+
+  console.log("Progreso:", {
+    current: progress.current,
+    total: progress.total,
+    percent: progressPercent,
+  });
+
   return (
     <Modal
       onOpenChange={(open) => {
-        if (!open) resetForm(); // limpia al cerrar
+        if (!open) resetForm();
       }}
       options={{
         title: "Export Invitations",
@@ -161,6 +194,7 @@ export const ModalInvitationList = ({
           <ButtonDownloadInvitations
             onClick={generateXlsx}
             exporting={exporting}
+            progressPercent={progressPercent}
           />
         ),
       }}
@@ -199,8 +233,11 @@ export const ModalInvitationList = ({
           </div>
         )}
 
+        {/* Date Range */}
         <div className="w-full">
-          <label className="mb-1 mt-3 block text-sm font-medium">From date:</label>
+          <label className="mb-1 mt-3 block text-sm font-medium">
+            From date:
+          </label>
           <div className="relative w-full max-w-sm">
             <input
               max={today}
@@ -221,7 +258,9 @@ export const ModalInvitationList = ({
             )}
           </div>
 
-          <label className="mb-1 mt-3 block text-sm font-medium">To date:</label>
+          <label className="mb-1 mt-3 block text-sm font-medium">
+            To date:
+          </label>
           <div className="relative w-full max-w-sm">
             <input
               max={today}
@@ -242,6 +281,7 @@ export const ModalInvitationList = ({
             )}
           </div>
 
+          {/* Status Checkboxes */}
           <div className="w-full my-4">
             <label className="mb-2 mt-3 block text-sm font-medium">
               Filter by state

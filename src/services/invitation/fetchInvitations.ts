@@ -149,12 +149,16 @@ export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
 
   return data as CreatorInvitation[];
 };
+
+
+
 export const fetchInvitationsByDateAndStatus = async (
   projectId: string,
   dateFrom?: Date,
   dateTo?: Date,
   statusList: readonly string[] = [],
-  pageSize = 1000 // Supabase limit per request
+  pageSize = 1000,
+  onProgress?: (count: number) => void
 ): Promise<CreatorInvitation[]> => {
   let allResults: CreatorInvitation[] = [];
   let from = 0;
@@ -163,31 +167,28 @@ export const fetchInvitationsByDateAndStatus = async (
 
   while (hasMore) {
     let query = supabase
-      .from('creator_invitations')
-      .select(`
-        *,
-        projects(*)
-      `)
-      .eq('project_id', projectId)
-      .order('created_at', { ascending: false })
+      .from("creator_invitations")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false })
       .range(from, to);
 
     if (dateFrom) {
-      query = query.gte('created_at', dateFrom.toISOString());
+      query = query.gte("created_at", dateFrom.toISOString());
     }
 
     if (dateTo) {
-      query = query.lte('created_at', dateTo.toISOString());
+      query = query.lte("created_at", dateTo.toISOString());
     }
 
     if (statusList.length > 0) {
-      query = query.in('status', statusList);
+      query = query.in("status", statusList);
     }
 
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching invitations by page:', error);
+      console.error("Error fetching invitations by page:", error);
       throw new Error(error.message);
     }
 
@@ -196,13 +197,18 @@ export const fetchInvitationsByDateAndStatus = async (
     }
 
     allResults = allResults.concat(data);
+    onProgress?.(allResults.length); // actualiza progreso parcial
     hasMore = data.length === pageSize;
     from += pageSize;
     to += pageSize;
   }
 
+  // 🔁 Forzar update final con total real
+  onProgress?.(allResults.length);
   return allResults;
 };
+
+
 
 
 
