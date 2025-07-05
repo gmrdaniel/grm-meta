@@ -19,9 +19,9 @@ export function YouTubeFields({ form }: YouTubeFieldsProps) {
           name="usuario_youtube"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Usuario YouTube</FormLabel>
+              <FormLabel>Youtube User</FormLabel>
               <FormControl>
-                <Input placeholder="@usuario" {...field} />
+                <Input placeholder="@user" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -32,7 +32,7 @@ export function YouTubeFields({ form }: YouTubeFieldsProps) {
           name="seguidores_youtube"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Seguidores YouTube</FormLabel>
+              <FormLabel>YouTube Followers</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
@@ -63,7 +63,7 @@ export function YouTubeFields({ form }: YouTubeFieldsProps) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Elegible YouTube</FormLabel>
+                <FormLabel>YouTube Eligible</FormLabel>
               </div>
             </FormItem>
           )}

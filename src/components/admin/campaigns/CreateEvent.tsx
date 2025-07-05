@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,11 +28,11 @@ interface CreateEventProps {
 
 // Define el esquema del formulario de eventos
 const formSchema = z.object({
-  projectId: z.string().min(1, "Debes seleccionar un proyecto"),
-  eventName: z.string().min(1, "El nombre del evento es obligatorio"),
-  description: z.string().optional(),
-  deadline: z.string().optional(), // Fecha en formato ISO
-  linkTerms: z.string().url("Debe ser una URL válida").optional(),
+projectId: z.string().min(1, "You must select a project"),
+eventName: z.string().min(1, "The event name is required"),
+description: z.string().optional(),
+deadline: z.string().optional(), // Date in ISO format
+linkTerms: z.string().url("Must be a valid URL").optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,20 +62,20 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
-        .from('projects')
-        .select('id, name')
-        .order('name');
+        .from("projects")
+        .select("id, name")
+        .order("name");
 
       if (error) {
-        toast.error('Error al cargar los proyectos');
+        toast.error("Error loading projects");
         console.error(error);
         return;
       }
 
       setProjects(data || []);
     } catch (error) {
-      console.error('Error al cargar proyectos:', error);
-      toast.error('Error al cargar los proyectos');
+      console.error("Error loading projects:", error);
+      toast.error("Error loading projects");
     }
   };
 
@@ -80,12 +86,14 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
       // Primero verificamos si la tabla tiene los campos adicionales
       // Si no existen, solo insertamos los campos básicos
       const { data, error } = await supabase
-        .from('invitation_events')
+        .from("invitation_events")
         .insert({
           id_project: values.projectId,
           event_name: values.eventName,
           description: values.description || null,
-          deadline: values.deadline ? new Date(values.deadline).toISOString() : null,
+          deadline: values.deadline
+            ? new Date(values.deadline).toISOString()
+            : null,
           link_terms: values.linkTerms || null,
         })
         .select()
@@ -94,9 +102,10 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
       if (error) {
         // Si hay un error porque los campos adicionales no existen,
         // intentamos insertar solo los campos básicos
-        if (error.code === '42703') { // Código para columna inexistente en PostgreSQL
+        if (error.code === "42703") {
+          // Código para columna inexistente en PostgreSQL
           const { data: basicData, error: basicError } = await supabase
-            .from('invitation_events')
+            .from("invitation_events")
             .insert({
               id_project: values.projectId,
               event_name: values.eventName,
@@ -108,7 +117,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
             throw basicError;
           }
 
-          toast.success('Evento creado exitosamente (solo con campos básicos)');
+          toast.success("Event created successfully (with basic fields only)");
           form.reset();
           onSuccess?.();
           return;
@@ -116,12 +125,12 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
         throw error;
       }
 
-      toast.success('Evento creado exitosamente');
+      toast.success("Event created successfully");
       form.reset();
       onSuccess?.();
     } catch (error) {
-      console.error('Error al crear evento:', error);
-      toast.error(`Error al crear evento: ${error.message}`);
+      console.error("Error creating event:", error);
+      toast.error(`Error creating event: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -130,7 +139,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
   return (
     <div className="space-y-6 min-w-full ">
       <div className="transition-all duration-300 ease-in-out">
-        <h2 className="text-xl font-bold mb-4">Crear Nuevo Evento</h2>
+        <h2 className="text-xl font-bold mb-4">Create New Event</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(createEvent)} className="space-y-4">
             <FormField
@@ -138,7 +147,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proyecto</FormLabel>
+                  <FormLabel>Project</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -165,10 +174,10 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               name="eventName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre del Evento</FormLabel>
+                  <FormLabel>Event Name</FormLabel>
                   <Input
                     {...field}
-                    placeholder="Nombre del evento"
+                    placeholder="Event Name"
                     disabled={isSubmitting}
                   />
                   <FormMessage />
@@ -181,10 +190,10 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <Textarea
                     {...field}
-                    placeholder="Descripción del evento"
+                    placeholder="Event Description"
                     disabled={isSubmitting}
                     rows={4}
                   />
@@ -193,17 +202,17 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               )}
             />
 
-            <FormField
+           <FormField
               control={form.control}
               name="deadline"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha límite</FormLabel>
+                  <FormLabel>Deadline date</FormLabel>
                   <Input
                     {...field}
                     type="date"
                     disabled={isSubmitting}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={new Date().toISOString().split("T")[0]}
                   />
                   <FormMessage />
                 </FormItem>
@@ -215,7 +224,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               name="linkTerms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Enlace</FormLabel>
+                  <FormLabel>Link</FormLabel>
                   <Input
                     {...field}
                     placeholder="https://ejemplo.com/terminos"
@@ -231,7 +240,7 @@ const CreateEvent: React.FC<CreateEventProps> = ({ onSuccess }) => {
               className="w-full mt-4"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creando..." : "Crear Evento"}
+              {isSubmitting ? "Creating..." : "Create Event"}
             </Button>
           </form>
         </Form>

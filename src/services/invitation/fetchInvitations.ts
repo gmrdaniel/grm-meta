@@ -150,24 +150,68 @@ export const fetchAllInvitations = async (): Promise<CreatorInvitation[]> => {
   return data as CreatorInvitation[];
 };
 
-export const fetchInvitationsByRange = async (projectId: string, fechaDesde: Date): Promise<CreatorInvitation[]> => {
-  const { data, error } = await supabase
-    .from('creator_invitations')
-    .select(`
-    *,
-    projects(*)
-  `)
-    .eq('project_id', projectId)
-    .gte('created_at', fechaDesde.toISOString())
-    .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching all invitations:', error);
-    throw new Error(error.message);
+
+export const fetchInvitationsByDateAndStatus = async (
+  projectId: string,
+  dateFrom?: Date,
+  dateTo?: Date,
+  statusList: readonly string[] = [],
+  pageSize = 1000,
+  onProgress?: (count: number) => void
+): Promise<CreatorInvitation[]> => {
+  let allResults: CreatorInvitation[] = [];
+  let from = 0;
+  let to = pageSize - 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    let query = supabase
+      .from("creator_invitations")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (dateFrom) {
+      query = query.gte("created_at", dateFrom.toISOString());
+    }
+
+    if (dateTo) {
+      query = query.lte("created_at", dateTo.toISOString());
+    }
+
+    if (statusList.length > 0) {
+      query = query.in("status", statusList);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching invitations by page:", error);
+      throw new Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      break;
+    }
+
+    allResults = allResults.concat(data);
+    onProgress?.(allResults.length); // actualiza progreso parcial
+    hasMore = data.length === pageSize;
+    from += pageSize;
+    to += pageSize;
   }
 
-  return data as CreatorInvitation[];
+  // 🔁 Forzar update final con total real
+  onProgress?.(allResults.length);
+  return allResults;
 };
+
+
+
+
+
 
 
 export const fetchInvitationsWithProfile = async (projectId: string): Promise<CreatorInvitation[]> => {
@@ -190,7 +234,7 @@ export const fetchInvitationsWithProfile = async (projectId: string): Promise<Cr
     console.error('Error fetching all invitations:', error);
     throw new Error(error.message);
   }
-
+  
   return data as CreatorInvitation[];
 };
 

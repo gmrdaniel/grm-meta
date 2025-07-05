@@ -19,9 +19,9 @@ export function TikTokFields({ form }: TikTokFieldsProps) {
           name="usuario_tiktok"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Usuario TikTok *</FormLabel>
+              <FormLabel>Tiktok User *</FormLabel>
               <FormControl>
-                <Input placeholder="@usuario" {...field} />
+                <Input placeholder="@user" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -50,7 +50,7 @@ export function TikTokFields({ form }: TikTokFieldsProps) {
           name="seguidores_tiktok"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Seguidores TikTok</FormLabel>
+              <FormLabel>Tiktok Followers</FormLabel>
               <FormControl>
                 <Input 
                   type="number" 
@@ -81,7 +81,7 @@ export function TikTokFields({ form }: TikTokFieldsProps) {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Elegible TikTok</FormLabel>
+                <FormLabel>TikTok Eligible</FormLabel>
               </div>
             </FormItem>
           )}

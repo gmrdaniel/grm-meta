@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -15,7 +21,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { X } from "lucide-react";
 import { Event } from "@/services/events/eventService";
 
@@ -27,16 +39,20 @@ interface EditEventProps {
 
 // Define el esquema del formulario de eventos
 const formSchema = z.object({
-  projectId: z.string().min(1, "Debes seleccionar un proyecto"),
-  eventName: z.string().min(1, "El nombre del evento es obligatorio"),
+  projectId: z.string().min(1, "You must select a project"),
+  eventName: z.string().min(1, "Event name is required"),
   description: z.string().optional(),
-  deadline: z.string().optional(), // Fecha en formato ISO
-  linkTerms: z.string().url("Debe ser una URL válida").optional().or(z.literal('')),
+  deadline: z.string().optional(), // Date in ISO format
+  linkTerms: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => {
+const EditEvent: React.FC<EditEventProps> = ({
+  event,
+  onSuccess,
+  onCancel,
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
 
@@ -47,7 +63,9 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
       projectId: event.id_project || "",
       eventName: event.event_name || "",
       description: event.description || "",
-      deadline: event.deadline ? new Date(event.deadline).toISOString().split('T')[0] : "",
+      deadline: event.deadline
+        ? new Date(event.deadline).toISOString().split("T")[0]
+        : "",
       linkTerms: event.link_terms || "",
     },
   });
@@ -61,20 +79,20 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
-        .from('projects')
-        .select('id, name')
-        .order('name');
+        .from("projects")
+        .select("id, name")
+        .order("name");
 
       if (error) {
-        toast.error('Error al cargar los proyectos');
+        toast.error("Error al cargar los proyectos");
         console.error(error);
         return;
       }
 
       setProjects(data || []);
     } catch (error) {
-      console.error('Error al cargar proyectos:', error);
-      toast.error('Error al cargar los proyectos');
+      console.error("Error al cargar proyectos:", error);
+      toast.error("Error loading projects");
     }
   };
 
@@ -83,23 +101,25 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
     setIsSubmitting(true);
     try {
       const { error } = await supabase
-        .from('invitation_events')
+        .from("invitation_events")
         .update({
           id_project: values.projectId,
           event_name: values.eventName,
           description: values.description || null,
-          deadline: values.deadline ? new Date(values.deadline).toISOString() : null,
+          deadline: values.deadline
+            ? new Date(values.deadline).toISOString()
+            : null,
           link_terms: values.linkTerms || null,
         })
-        .eq('id', event.id);
+        .eq("id", event.id);
 
       if (error) throw error;
 
-      toast.success('Evento actualizado exitosamente');
+      toast.success("Event updated successfully");
       onSuccess?.();
     } catch (error) {
-      console.error('Error al actualizar evento:', error);
-      toast.error(`Error al actualizar evento: ${error.message}`);
+      console.error("Error al actualizar evento:", error);
+      toast.error(`Error updating event: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -108,10 +128,10 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">Editar Evento</CardTitle>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <CardTitle className="text-xl font-bold">Edit Event</CardTitle>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onCancel}
           className="h-8 w-8"
         >
@@ -126,14 +146,14 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
               name="projectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proyecto</FormLabel>
+                  <FormLabel>Proyect</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecciona un proyecto" />
+                      <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                     <SelectContent>
                       {projects?.map((project) => (
@@ -153,10 +173,10 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
               name="eventName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre del Evento</FormLabel>
+                  <FormLabel>Event Name</FormLabel>
                   <Input
                     {...field}
-                    placeholder="Nombre del evento"
+                    placeholder="Event Name"
                     disabled={isSubmitting}
                   />
                   <FormMessage />
@@ -169,10 +189,10 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <Textarea
                     {...field}
-                    placeholder="Descripción del evento"
+                    placeholder="Event Description"
                     disabled={isSubmitting}
                     rows={4}
                   />
@@ -186,12 +206,8 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
               name="deadline"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Fecha límite</FormLabel>
-                  <Input
-                    {...field}
-                    type="date"
-                    disabled={isSubmitting}
-                  />
+                  <FormLabel>Deadline</FormLabel>
+                  <Input {...field} type="date" disabled={isSubmitting} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -202,7 +218,7 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
               name="linkTerms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Enlace</FormLabel>
+                  <FormLabel>Link</FormLabel>
                   <Input
                     {...field}
                     placeholder="https://ejemplo.com/terminos"
@@ -214,11 +230,16 @@ const EditEvent: React.FC<EditEventProps> = ({ event, onSuccess, onCancel }) => 
             />
           </CardContent>
           <CardFooter className="border-t px-6 py-4 flex justify-between">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              Cancelar
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </CardFooter>
         </form>
