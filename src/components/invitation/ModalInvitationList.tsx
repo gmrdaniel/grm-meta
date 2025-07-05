@@ -174,11 +174,6 @@ export const ModalInvitationList = ({
       ? Math.min(100, Math.round((progress.current / progress.total) * 100))
       : 0;
 
-  console.log("Progreso:", {
-    current: progress.current,
-    total: progress.total,
-    percent: progressPercent,
-  });
 
   return (
     <Modal
