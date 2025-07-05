@@ -65,9 +65,9 @@ export const ModalInvitationList = ({
   onProjectSelect,
   resetProjectOnClose = false,
 }: ModalInvitationListProps) => {
-  const [currentProject, setCurrentProject] = useState<Partial<Project> | undefined>(
-    preselectedProject
-  );
+  const [currentProject, setCurrentProject] = useState<
+    Partial<Project> | undefined
+  >(preselectedProject);
   const [projectsList, setProjectsList] = useState<Project[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
@@ -85,7 +85,7 @@ export const ModalInvitationList = ({
   ];
 
   const resetForm = () => {
-    setExporting(false)
+    setExporting(false);
     setStartDate("");
     setEndDate("");
     setSelectedStatuses([]);
@@ -131,11 +131,8 @@ export const ModalInvitationList = ({
         to,
         selectedStatuses,
         1000,
-        (fetchedCount) => {
-          setProgress({
-            current: fetchedCount,
-            total: fetchedCount,
-          });
+        ({ current, total }) => {
+          setProgress({ current, total });
         }
       );
 
