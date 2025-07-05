@@ -158,8 +158,28 @@ export const fetchInvitationsByDateAndStatus = async (
   dateTo?: Date,
   statusList: readonly string[] = [],
   pageSize = 1000,
-  onProgress?: (count: number) => void
+  onProgress?: (progress: { current: number; total: number }) => void
 ): Promise<CreatorInvitation[]> => {
+  // Paso 1: obtener el total
+  let countQuery = supabase
+    .from("creator_invitations")
+    .select("*", { count: "exact", head: true })
+    .eq("project_id", projectId);
+
+  if (dateFrom) countQuery = countQuery.gte("created_at", dateFrom.toISOString());
+  if (dateTo) countQuery = countQuery.lte("created_at", dateTo.toISOString());
+  if (statusList.length > 0) countQuery = countQuery.in("status", statusList);
+
+  const { count, error: countError } = await countQuery;
+
+  if (countError) {
+    console.error("Error counting invitations:", countError);
+    throw new Error(countError.message);
+  }
+
+  const total = count || 0;
+
+  // Paso 2: paginar
   let allResults: CreatorInvitation[] = [];
   let from = 0;
   let to = pageSize - 1;
@@ -173,17 +193,9 @@ export const fetchInvitationsByDateAndStatus = async (
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (dateFrom) {
-      query = query.gte("created_at", dateFrom.toISOString());
-    }
-
-    if (dateTo) {
-      query = query.lte("created_at", dateTo.toISOString());
-    }
-
-    if (statusList.length > 0) {
-      query = query.in("status", statusList);
-    }
+    if (dateFrom) query = query.gte("created_at", dateFrom.toISOString());
+    if (dateTo) query = query.lte("created_at", dateTo.toISOString());
+    if (statusList.length > 0) query = query.in("status", statusList);
 
     const { data, error } = await query;
 
@@ -192,27 +204,23 @@ export const fetchInvitationsByDateAndStatus = async (
       throw new Error(error.message);
     }
 
-    if (!data || data.length === 0) {
-      break;
-    }
+    if (!data || data.length === 0) break;
 
     allResults = allResults.concat(data);
-    onProgress?.(allResults.length); // actualiza progreso parcial
+
+    // 🔁 Progreso parcial
+    onProgress?.({ current: allResults.length, total });
+
     hasMore = data.length === pageSize;
     from += pageSize;
     to += pageSize;
   }
 
-  // 🔁 Forzar update final con total real
-  onProgress?.(allResults.length);
+  // Progreso final (por si acaso)
+  onProgress?.({ current: allResults.length, total });
+
   return allResults;
 };
-
-
-
-
-
-
 
 export const fetchInvitationsWithProfile = async (projectId: string): Promise<CreatorInvitation[]> => {
   const { data, error } = await supabase
