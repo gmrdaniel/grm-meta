@@ -54,6 +54,8 @@ interface ModalInvitationListProps {
   disableProjectSelector?: boolean;
   onProjectSelect?: (project: Project) => void;
   resetProjectOnClose?: boolean;
+ triggerClassName?: string;
+  useDefaultTriggerStyles?: boolean; 
 }
 
 export const ModalInvitationList = ({
@@ -63,6 +65,8 @@ export const ModalInvitationList = ({
   showProjectSelector = true,
   disableProjectSelector = false,
   onProjectSelect,
+  useDefaultTriggerStyles = true, // <- por defecto activado
+  triggerClassName,
   resetProjectOnClose = false,
 }: ModalInvitationListProps) => {
   const [currentProject, setCurrentProject] = useState<Project | undefined>(
@@ -188,8 +192,13 @@ export const ModalInvitationList = ({
       onOpenChange={(open) => {
         if (!open) resetForm();
       }}
+      
       options={{
         title: "Export Invitations",
+        triggerClassName: useDefaultTriggerStyles
+  ? triggerClassName || ""
+  : undefined,
+
         ButtonComponent: (
           <ButtonDownloadInvitations
             onClick={generateXlsx}
@@ -197,6 +206,9 @@ export const ModalInvitationList = ({
             progressPercent={progressPercent}
           />
         ),
+        
+        
+      
       }}
     >
       <div className="mt-4 md:mt-0 flex flex-col">

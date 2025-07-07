@@ -7,12 +7,26 @@ interface ModalProps {
   options?: {
     title?: string;
     ButtonComponent?: JSX.Element;
+
+    // Opcionales: si no se pasan, se usan los estilos actuales
+    triggerClassName?: string;
+    contentClassName?: string;
+    overlayClassName?: string;
+    titleClassName?: string;
   };
   onOpenChange?: (open: boolean) => void;
 }
 
-export const Modal = ({ children, options, onOpenChange }: ModalProps) => {
-  const { title, ButtonComponent } = options || {};
+export const Modal = ({ children, options = {}, onOpenChange }: ModalProps) => {
+  const {
+    title,
+    ButtonComponent,
+    triggerClassName,
+    contentClassName,
+    overlayClassName,
+    titleClassName,
+  } = options;
+
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,20 +34,36 @@ export const Modal = ({ children, options, onOpenChange }: ModalProps) => {
       open={open}
       onOpenChange={(val) => {
         setOpen(val);
-        onOpenChange?.(val); // ✅ Notifica al padre
+        onOpenChange?.(val);
       }}
     >
       <Dialog.Trigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          className={triggerClassName || "flex items-center gap-2"}
+        >
           {title}
         </Button>
       </Dialog.Trigger>
+
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/40 z-40" />
-        <Dialog.Content className="fixed z-50 top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg">
+        <Dialog.Overlay
+          className={overlayClassName || "fixed inset-0 bg-black/40 z-40"}
+        />
+        <Dialog.Content
+          className={
+            contentClassName ||
+            "fixed z-50 top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg"
+          }
+        >
           {title && (
-            <Dialog.Title className="text-lg font-semibold">{title}</Dialog.Title>
+            <Dialog.Title
+              className={titleClassName || "text-lg font-semibold"}
+            >
+              {title}
+            </Dialog.Title>
           )}
+
           <div className="text-sm text-gray-500 mb-4">{children}</div>
 
           <div className="flex justify-end">

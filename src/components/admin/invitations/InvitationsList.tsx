@@ -8,7 +8,7 @@ import {
   fetchInvitationsWithPagination,
   fetchAllInvitations,
   exportInvitationsToExcel,
-  getProjects, 
+  getProjects,
 } from "@/services/invitationService";
 import {
   Check,
@@ -71,11 +71,11 @@ const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isExporting, setIsExporting] = useState(false);
-  
+
   // Inicializar los estados con valores de localStorage si existen
   const [filterStatus, setFilterStatus] = useState<string>(
     localStorage.getItem("invitationsFilterStatus") || "all"
@@ -143,19 +143,19 @@ const InvitationsList = () => {
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
-    const isFbStepDisabled = (status: string) => {
+  const isFbStepDisabled = (status: string) => {
     return status === "pending" || status === "in process";
   };
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
       status,
-      resetFbStep = false
+      resetFbStep = false,
     }: {
       id: string;
       status: "pending" | "rejected" | "completed" | "in process" | "approved";
       resetFbStep?: boolean;
-    }) => updateInvitationStatus(id, status,false),
+    }) => updateInvitationStatus(id, status, false),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       toast.success("Invitation status updated");
@@ -194,19 +194,20 @@ const InvitationsList = () => {
     },
   });
 
-const handleStatusChange = (
-  id: string,
-  newStatus: "pending" | "rejected" | "completed" | "in process"| "approved"
-) => {
-  // Determine if fb_step_completed should be false based on the new status
-  const shouldResetFbStep = newStatus === "pending" || newStatus === "in process";
-  
-  updateStatusMutation.mutate({ 
-    id, 
-    status: newStatus,
-    resetFbStep: shouldResetFbStep 
-  });
-};
+  const handleStatusChange = (
+    id: string,
+    newStatus: "pending" | "rejected" | "completed" | "in process" | "approved"
+  ) => {
+    // Determine if fb_step_completed should be false based on the new status
+    const shouldResetFbStep =
+      newStatus === "pending" || newStatus === "in process";
+
+    updateStatusMutation.mutate({
+      id,
+      status: newStatus,
+      resetFbStep: shouldResetFbStep,
+    });
+  };
   const confirmDelete = () => {
     if (selectedInvitation) {
       deleteMutation.mutate(selectedInvitation);
@@ -246,7 +247,7 @@ const handleStatusChange = (
             Pending
           </Badge>
         );
-        case "completed":
+      case "completed":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             Completed
@@ -258,7 +259,7 @@ const handleStatusChange = (
             Accepted
           </Badge>
         );
-        case "approved":
+      case "approved":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             Approved
@@ -328,8 +329,7 @@ const handleStatusChange = (
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <ModalInvitationList />
-        <ModalRegisteredsList />
+        {/* 
         <Button
           onClick={handleExportInvitations}
           disabled={isExporting}
@@ -338,7 +338,7 @@ const handleStatusChange = (
         >
           <Download size={16} />
           {isExporting ? "Exporting..." : "Export All Invitations"}
-        </Button>
+        </Button> */}
       </div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
         <input
@@ -359,6 +359,8 @@ const handleStatusChange = (
               setCurrentPage(1);
             }}
           >
+            <ModalInvitationList triggerClassName="bg-[#007BFF] text-white font-normal hover:font-bold hover:text-white text-sm px-5 py-2 rounded-md hover:bg-[#0066cc] transition-all shadow-md"
+  useDefaultTriggerStyles={true}/>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -371,7 +373,7 @@ const handleStatusChange = (
               <SelectItem value="in process">In Process</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select
             value={filterProject}
             onValueChange={(value) => {
@@ -399,7 +401,7 @@ const handleStatusChange = (
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Invitation Code</TableHead>
-            <TableHead>Project</TableHead> 
+            <TableHead>Project</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
@@ -432,10 +434,8 @@ const handleStatusChange = (
                   )}
                 </div>
               </TableCell>
-              
-              <TableCell>
-                {invitation.projects?.name || "N/A"}
-              </TableCell>
+
+              <TableCell>{invitation.projects?.name || "N/A"}</TableCell>
               <TableCell>
                 {invitation.invitation_type === "new_user"
                   ? "New User"
@@ -523,7 +523,6 @@ const handleStatusChange = (
                         Reset to pending
                       </DropdownMenuItem>
                     )}
-                    
 
                     <DropdownMenuSeparator />
 

@@ -97,14 +97,16 @@ export function ProjectCard({
 
       {/* Modal solo si hay "in process" */}
       {inProcess > 0 && (
-        <ModalInvitationList
-          preselectedProject={{
-            id: project_id,
-            name: project_name,
-          }}
-          resetProjectOnClose={false}
-          disableProjectSelector={true}
-        />
+    <ModalInvitationList useDefaultTriggerStyles={true}
+  preselectedProject={{
+    id: project_id,
+    name: project_name,
+  }}
+  resetProjectOnClose={false}
+  disableProjectSelector={true}
+/>
+
+
       )}
     </div>
   );
