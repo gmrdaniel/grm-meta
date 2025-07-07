@@ -8,7 +8,7 @@ import {
   fetchInvitationsWithPagination,
   fetchAllInvitations,
   exportInvitationsToExcel,
-  getProjects, 
+  getProjects,
 } from "@/services/invitationService";
 import {
   Check,
@@ -60,9 +60,7 @@ import {
 import InvitationsPagination from "./InvitationsPagination";
 import { useNavigate } from "react-router-dom";
 import { ModalInvitationList } from "@/components/invitation/ModalInvitationList";
-import { ModalRegisteredsList } from "@/components/invitation/ModalRegisteredsList";
 import { useDebounce } from "@/hooks/use-debounce";
-//import { Cross2Icon } from "@radix-ui/react-icons";
 import { RequestUpdateDialog } from "./RequestUpdateDialog";
 
 const InvitationsList = () => {
@@ -72,12 +70,14 @@ const InvitationsList = () => {
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(
     null
   );
-  const [requestUpdateInvitation, setRequestUpdateInvitation] = useState<string | null>(null);
-  
+  const [requestUpdateInvitation, setRequestUpdateInvitation] = useState<
+    string | null
+  >(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isExporting, setIsExporting] = useState(false);
-  
+
   // Inicializar los estados con valores de localStorage si existen
   const [filterStatus, setFilterStatus] = useState<string>(
     localStorage.getItem("invitationsFilterStatus") || "all"
@@ -145,19 +145,19 @@ const InvitationsList = () => {
   const invitations = data?.data || [];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
-    const isFbStepDisabled = (status: string) => {
+  const isFbStepDisabled = (status: string) => {
     return status === "pending" || status === "in process";
   };
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
       status,
-      resetFbStep = false
+      resetFbStep = false,
     }: {
       id: string;
       status: "pending" | "rejected" | "completed" | "in process" | "approved";
       resetFbStep?: boolean;
-    }) => updateInvitationStatus(id, status,false),
+    }) => updateInvitationStatus(id, status, false),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       toast.success("Invitation status updated");
@@ -196,19 +196,20 @@ const InvitationsList = () => {
     },
   });
 
-const handleStatusChange = (
-  id: string,
-  newStatus: "pending" | "rejected" | "completed" | "in process"| "approved"
-) => {
-  // Determine if fb_step_completed should be false based on the new status
-  const shouldResetFbStep = newStatus === "pending" || newStatus === "in process";
-  
-  updateStatusMutation.mutate({ 
-    id, 
-    status: newStatus,
-    resetFbStep: shouldResetFbStep 
-  });
-};
+  const handleStatusChange = (
+    id: string,
+    newStatus: "pending" | "rejected" | "completed" | "in process" | "approved"
+  ) => {
+    // Determine if fb_step_completed should be false based on the new status
+    const shouldResetFbStep =
+      newStatus === "pending" || newStatus === "in process";
+
+    updateStatusMutation.mutate({
+      id,
+      status: newStatus,
+      resetFbStep: shouldResetFbStep,
+    });
+  };
   const confirmDelete = () => {
     if (selectedInvitation) {
       deleteMutation.mutate(selectedInvitation);
@@ -248,7 +249,7 @@ const handleStatusChange = (
             Pending
           </Badge>
         );
-        case "completed":
+      case "completed":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             Completed
@@ -260,7 +261,7 @@ const handleStatusChange = (
             Accepted
           </Badge>
         );
-        case "approved":
+      case "approved":
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             Approved
@@ -274,21 +275,6 @@ const handleStatusChange = (
         );
       default:
         return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const handleExportInvitations = async () => {
-    try {
-      setIsExporting(true);
-      // Fetch all invitations for export
-      const allInvitations = await fetchAllInvitations();
-      // Export to Excel
-      exportInvitationsToExcel(allInvitations);
-    } catch (error) {
-      console.error("Error exporting invitations:", error);
-      toast.error("Failed to export invitations");
-    } finally {
-      setIsExporting(false);
     }
   };
 
@@ -330,8 +316,7 @@ const handleStatusChange = (
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <ModalInvitationList />
-        <ModalRegisteredsList />
+        {/* 
         <Button
           onClick={handleExportInvitations}
           disabled={isExporting}
@@ -340,7 +325,7 @@ const handleStatusChange = (
         >
           <Download size={16} />
           {isExporting ? "Exporting..." : "Export All Invitations"}
-        </Button>
+        </Button> */}
       </div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
         <input
@@ -361,6 +346,10 @@ const handleStatusChange = (
               setCurrentPage(1);
             }}
           >
+            <ModalInvitationList
+              triggerClassName="bg-[#007BFF] text-white font-normal hover:font-bold hover:text-white text-sm px-5 py-2 rounded-md hover:bg-[#0066cc] transition-all shadow-md"
+              useDefaultTriggerStyles={true}
+            />
             <SelectTrigger className="w-48">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -373,7 +362,7 @@ const handleStatusChange = (
               <SelectItem value="in process">In Process</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select
             value={filterProject}
             onValueChange={(value) => {
@@ -401,7 +390,7 @@ const handleStatusChange = (
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Invitation Code</TableHead>
-            <TableHead>Project</TableHead> 
+            <TableHead>Project</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
@@ -434,10 +423,8 @@ const handleStatusChange = (
                   )}
                 </div>
               </TableCell>
-              
-              <TableCell>
-                {invitation.projects?.name || "N/A"}
-              </TableCell>
+
+              <TableCell>{invitation.projects?.name || "N/A"}</TableCell>
               <TableCell>
                 {invitation.invitation_type === "new_user"
                   ? "New User"
@@ -524,19 +511,17 @@ const handleStatusChange = (
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Reset to pending
                       </DropdownMenuItem>
-                      
                     )}
-                    
 
                     <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setRequestUpdateInvitation(invitation.id)}
-                        className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-blue-600"
-                      >
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Request update
-                      </DropdownMenuItem>
-                      
+                    <DropdownMenuItem
+                      onClick={() => setRequestUpdateInvitation(invitation.id)}
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer rounded-sm select-none outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none text-blue-600"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Request update
+                    </DropdownMenuItem>
+
                     <AlertDialog
                       open={selectedInvitation === invitation.id}
                       onOpenChange={(open) =>
@@ -576,7 +561,7 @@ const handleStatusChange = (
                     </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
+
                 {/* Diálogo de Request Update */}
                 {requestUpdateInvitation === invitation.id && (
                   <RequestUpdateDialog
@@ -587,7 +572,7 @@ const handleStatusChange = (
                     project={invitation.projects?.name}
                     email={invitation.email}
                     name={invitation.first_name}
-                    invitation_id={invitation.id} 
+                    invitation_id={invitation.id}
                   />
                 )}
               </TableCell>
