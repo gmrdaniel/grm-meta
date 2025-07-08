@@ -158,7 +158,7 @@ const ImportProcessedCreators: React.FC = () => {
       [
         "user@example.com",
         "approved",
-        "2025-05-20",
+        "7/7/2025",
         "123456789",
         "987654321",
       ],
