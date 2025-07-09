@@ -7,7 +7,7 @@ import { CreateInvitationData, CreatorInvitation } from "@/types/invitation";
  */
 export const updateInvitationStatus = async (
   id: string, 
-  status: 'pending' | 'rejected' | 'completed' | 'in process' | "approved",
+  status: 'pending' | 'rejected' | 'completed' | 'in process' | "approved" | "fixing",
   fb_step_completed: boolean = false
 ): Promise<CreatorInvitation> => {
   const { data, error } = await supabase

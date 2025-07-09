@@ -500,12 +500,25 @@ export default function InvitationStepperPage() {
       fb_profile_owner_id: fb_profile_owner_id, //Profile ID
       status: "completed",
     });
-
+  
     if (!result) {
       toast.error("Error saving your Facebook page");
       return false;
     }
-
+  
+    // Actualizar el registro en invitation_fixing a is_fixed = true
+    const { error: fixingError } = await supabase
+      .from('invitation_fixing')
+      .update({ is_fixed: true, fixed_at: new Date().toISOString() })
+      .eq('invitation_id', invitationId)
+      .eq('is_fixed', false);
+  
+    if (fixingError) {
+      console.error("Error updating invitation_fixing:", fixingError);
+      // No retornamos false aquí para no interrumpir el flujo principal
+      // ya que la actualización de la invitación fue exitosa
+    }
+  
     return true;
   };
 

@@ -1,4 +1,4 @@
-import { findInvitationByCode } from "@/integrations/supabase/client";
+import { findInvitationByCode, supabase } from "@/integrations/supabase/client";
 import { fetchProjectStages } from "@/services/project/projectService";
 import { useEffect, useState } from "react";
 
@@ -61,7 +61,36 @@ export const useInvitationLoader = ({
 
         const stagesData = await fetchProjectStages(invitationData.project_id);
         setProjectStages(stagesData);
+        if (invitationData.status === "fixing") {
+          // Consultar la tabla invitation_fixing para obtener detalles
+          const { data, error } = await supabase
+            .from("invitation_fixing")
+            .select("*")
+            .eq("invitation_id", invitationData.id)
+            .eq("is_fixed", false)
+            .maybeSingle();
+          
+          if (data) {
+            // Configurar la UI según el motivo de la corrección
+            switch(data.reason) {
+              case "profile":
+                // Dirigir al usuario a la edición de perfil
+                const profileStep = stepList.find(step => step.id === "completeProfile");
+                if (profileStep) setCurrentStep(profileStep);
+                break;
+              case "page":
+                // Dirigir al usuario a la edición de página de Facebook
+                const fbStep = stepList.find(step => step.id === "fbcreation");
+                if (fbStep) setCurrentStep(fbStep);
+                break;
+              case "other":
+                // Para el caso "other", continuamos con el flujo normal
+                break;
+            }
+          }
+        }
 
+        // Continúa con el código existente para establecer el paso actual basado en current_stage_id
         if (invitationData.current_stage_id) {
           const currentStage = stagesData.find(
             (s) => s.id === invitationData.current_stage_id

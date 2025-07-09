@@ -269,7 +269,24 @@ export function RequestUpdateDialog({
           console.error("Error adding record to invitation_fixing:", fixingError);
           toast.error(`Error recording update request: ${fixingError.message}`);
         } else {
-          toast.success("Notification sent and update request recorded");
+          if (reason === "profile" || reason === "page") {
+            const { error: updateError } = await supabase
+              .from('creator_invitations')
+              .update({
+                status: "fixing",
+                fb_step_completed: false
+              })
+              .eq('id', invitation_id);
+            
+            if (updateError) {
+              console.error("Error updating invitation status:", updateError);
+              toast.error(`Error updating invitation status: ${updateError.message}`);
+            } else {
+              toast.success("Notification sent, update request recorded, and invitation status updated");
+            }
+          } else {
+            toast.success("Notification sent and update request recorded");
+          }
         }
       } else {
         toast.success("Notification sent successfully");

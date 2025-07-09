@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ExternalLink, Check } from "lucide-react";
+import { ExternalLink, Check, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FacebookPageFormProps {
   formData: {
@@ -19,6 +20,7 @@ interface FacebookPageFormProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCheckboxChange: (name: string, checked: boolean) => void;
   onSubmit: () => void;
+  invitation_id?: string; // Add this prop to receive the invitation ID
 }
 
 export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
@@ -28,7 +30,79 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
   onInputChange,
   onCheckboxChange,
   onSubmit,
+  invitation_id,
 }) => {
+  const [fixingInfo, setFixingInfo] = useState<{ reason: string; description: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [invitationData, setInvitationData] = useState<any>(null);
+
+  useEffect(() => {
+    // Solo fetch fixing info if we have an invitation_id
+    if (invitation_id) {
+      const fetchFixingInfo = async () => {
+        setLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from("invitation_fixing")
+            .select("reason, description")
+            .eq("invitation_id", invitation_id)
+            .eq("is_fixed", false)
+            .maybeSingle();
+          
+          if (error) {
+            console.error("Error fetching fixing info:", error);
+          } else if (data) {
+            setFixingInfo(data);
+            
+            // Si la razón es "page", marcar automáticamente el checkbox de perfil como true
+            if (data.reason === "page") {
+              onCheckboxChange("verifyProfileOwnership", true);
+            }
+            // Si la razón es "profile", marcar automáticamente el checkbox de página como true
+            else if (data.reason === "profile") {
+              onCheckboxChange("verifyPageOwnership", true);
+            }
+          }
+
+          // Obtener información de la invitación para prellenar campos
+          const { data: invData, error: invError } = await supabase
+            .from("creator_invitations")
+            .select("facebook_page, facebook_profile")
+            .eq("id", invitation_id)
+            .single();
+
+          if (invError) {
+            console.error("Error fetching invitation data:", invError);
+          } else if (invData) {
+            setInvitationData(invData);
+            
+            // Prellenar los campos del formulario si hay datos y los campos están vacíos
+            if (invData.facebook_page && !formData.facebookPageUrl) {
+              onInputChange({
+                target: { name: "facebookPageUrl", value: invData.facebook_page }
+              } as React.ChangeEvent<HTMLInputElement>);
+            }
+            
+            if (invData.facebook_profile && !formData.facebookProfileUrl) {
+              onInputChange({
+                target: { name: "facebookProfileUrl", value: invData.facebook_profile }
+              } as React.ChangeEvent<HTMLInputElement>);
+            }
+            
+            // Marcar el checkbox de Instagram como true si es una edición
+            onCheckboxChange("linkInstagram", true);
+          }
+        } catch (err) {
+          console.error("Error in fetchFixingInfo:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchFixingInfo();
+    }
+  }, [invitation_id, formData.facebookPageUrl, formData.facebookProfileUrl, onInputChange]);
+
   const isSubmitDisabled =
     submitting ||
     !formData.facebookPageUrl.trim() ||
@@ -44,6 +118,15 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
           Connect Your Facebook Accounts
         </h1>
       </div>
+
+      {fixingInfo && fixingInfo.reason === "page" && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            <p className="font-semibold mb-1">Your Facebook page information needs to be updated: {fixingInfo.reason}</p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {error && (
         <Alert variant="destructive">
@@ -97,6 +180,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 pattern="https://www\.facebook\.com/.*"
                 required
                 placeholder="https://www.facebook.com/yourpage"
+                disabled={fixingInfo?.reason === "profile"}
               />
             </div>
           </div>
@@ -109,6 +193,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               onCheckedChange={(checked) =>
                 onCheckboxChange("verifyPageOwnership", checked as boolean)
               }
+              disabled={fixingInfo?.reason === "profile"}
             />
             <Label
               htmlFor="verifyPageOwnership"
@@ -157,6 +242,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
                 pattern="https://www\.facebook\.com/.*"
                 required
                 placeholder="https://facebook.com/profile.php?id=..."
+                disabled={fixingInfo?.reason === "page"}
               />
             </div>
           </div>
@@ -169,6 +255,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               onCheckedChange={(checked) =>
                 onCheckboxChange("verifyProfileOwnership", checked as boolean)
               }
+              disabled={fixingInfo?.reason === "page"}
             />
             <Label htmlFor="verifyProfileOwnership" className="text-sm font-semibold">
               This is my own profile
@@ -187,7 +274,7 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
             className="flex items-center text-blue-500 hover:underline text-sm"
           >
             <span className="text-xs">Learn how to link your Instagram account to your Facebook Page</span>
-            <ExternalLink className="h-4 w-4 ml-1 text-xs ml-[0.5px]" />
+            <ExternalLink className="h-4 w-4 ml-1 text-xs" />
           </a>
 
           <div className="flex items-center space-x-2">
@@ -198,9 +285,10 @@ export const FacebookPageForm: React.FC<FacebookPageFormProps> = ({
               onCheckedChange={(checked) =>
                 onCheckboxChange("linkInstagram", checked as boolean)
               }
+              disabled={!!invitation_id}
             />
             <Label htmlFor="linkInstagram" className="text-sm font-semibold">
-              I’ve linked my Instagram professional account and my Facebook Page
+              I've linked my Instagram professional account and my Facebook Page
             </Label>
           </div>
         </div>
