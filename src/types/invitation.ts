@@ -21,7 +21,7 @@ export interface CreatorInvitation {
   facebook_profile?: string | null;
   invitation_code: string;
   invitation_url: string;
-  status: "pending" | "accepted" | "rejected" | "completed"| "approved";
+  status: "pending" | "accepted" | "rejected" | "completed" | "approved" | "fixing";
   invitation_type: string;
   created_at: string;
   updated_at: string;

@@ -109,6 +109,7 @@ any) => {
             onInputChange={handleFacebookInputChange}
             onCheckboxChange={handleCheckboxFacebookChange}
             onSubmit={handleFacebookSubmit}
+            invitation_id={invitation?.id} // Pass the invitation ID
           />
         )}
     </>
