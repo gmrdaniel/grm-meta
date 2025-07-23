@@ -1,8 +1,7 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
-const supabase = supabaseClient as any;
+import { supabase } from "@/integrations/supabase/client-bypass";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatsCard } from "@/components/StatsCard";
 import {

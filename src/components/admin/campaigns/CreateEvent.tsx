@@ -20,8 +20,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
-const supabase = supabaseClient as any;
+import { supabase } from "@/integrations/supabase/client-bypass";
 
 interface CreateEventProps {
   onSuccess?: () => void;

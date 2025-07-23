@@ -17,8 +17,7 @@ import { FileUploader } from "@/components/admin/inventory/import-templates/comp
 import { Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDescription } from "@/components/ui/alert";
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
-const supabase = supabaseClient as any;
+import { supabase } from "@/integrations/supabase/client-bypass";
 import { createInvitation } from "@/services/invitation/createInvitation";
 import { sendEmail } from "@/services/email/sendIEmail";
 import { CreateInvitationData } from "@/types/invitation";
