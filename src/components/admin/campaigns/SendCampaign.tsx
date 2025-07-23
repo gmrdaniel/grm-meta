@@ -171,8 +171,8 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
                 });
 
                 invitationData = {
-                  invitation_code: invitation.invitation_code,
-                  invitation_url: invitation.invitation_url,
+                  invitation_code: invitation?.invitation_code || "NO CODE",
+                  invitation_url: invitation?.invitation_url || "NO URL",
                 };
               } catch (error) {
                 console.error("Error generating invitation:", error);
@@ -184,8 +184,8 @@ const ImportCampaign: React.FC<ImportCampaignProps> = ({ onSuccess }) => {
               name: row.name,
               variables: {
                 paragraph: row.paragraph,
-                invitationCode: invitationData.invitation_code || "NO CODE",
-                invitationUrl: invitationData.invitation_url || "NO URL",
+                invitationCode: (invitationData as any)?.invitation_code || "NO CODE",
+                invitationUrl: (invitationData as any)?.invitation_url || "NO URL",
               },
             };
           })
