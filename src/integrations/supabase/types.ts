@@ -157,6 +157,36 @@ export type Database = {
         }
         Relationships: []
       }
+      country_phone_codes: {
+        Row: {
+          created_at: string | null
+          id: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name_en: string
+          name_es: string
+          phone_code: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name_en?: string
+          name_es?: string
+          phone_code?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       creator_inventory: {
         Row: {
           apellido: string
@@ -378,6 +408,60 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      invitation_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string
+          id: string
+          id_project: string
+          location: string | null
+          max_participants: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date: string
+          id?: string
+          id_project: string
+          location?: string | null
+          max_participants?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          id_project?: string
+          location?: string | null
+          max_participants?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitation_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitation_events_id_project_fkey"
+            columns: ["id_project"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_logs: {
         Row: {
