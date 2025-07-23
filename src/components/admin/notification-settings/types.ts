@@ -12,4 +12,7 @@ export type NotificationSetting = {
     stage_id: string | null;
     created_at: string;
     stage_name?: string;
+    sequence_order?: number | null;
+    campaign_name?: string | null;
+    invitation_event_id?: string | null;
   };

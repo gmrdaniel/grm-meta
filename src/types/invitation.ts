@@ -33,6 +33,8 @@ export interface CreatorInvitation {
   is_professional_account?: boolean;
   fb_profile_id?: string | null;
   fb_profile_owner_id?: string | null;
+  project_stages?: { name: string } | null;
+  pinterest_url?: string | null;
 }
 
 export type CreateInvitationData = {

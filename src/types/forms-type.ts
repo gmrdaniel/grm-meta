@@ -3,4 +3,7 @@ export interface ProfileFormData {
     phoneCountryCode: string;
     phoneNumber: string;
     phoneVerified: boolean;
+    instagramUser?: string;
+    socialMediaHandle?: string;
+    isIGProfessional?: boolean;
   }

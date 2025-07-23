@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   name: string;
-  slug: string;
+  slug?: string | null;
   status: "draft" | "active" | "pending" | "archived";
   created_at: string;
   updated_at: string;
