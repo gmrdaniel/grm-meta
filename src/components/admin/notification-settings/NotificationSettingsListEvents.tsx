@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";

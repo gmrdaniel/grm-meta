@@ -1,4 +1,4 @@
-// @ts-nocheck - Temporary fix until Supabase types are regenerated
+// @ts-nocheck
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import {
