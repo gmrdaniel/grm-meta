@@ -157,36 +157,6 @@ export type Database = {
         }
         Relationships: []
       }
-      country_phone_codes: {
-        Row: {
-          created_at: string | null
-          id: string
-          name_en: string
-          name_es: string
-          phone_code: string
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name_en: string
-          name_es: string
-          phone_code: string
-          status?: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name_en?: string
-          name_es?: string
-          phone_code?: string
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       creator_inventory: {
         Row: {
           apellido: string
@@ -263,6 +233,8 @@ export type Database = {
           email: string
           facebook_page: string | null
           facebook_profile: string | null
+          fb_profile_id: string | null
+          fb_profile_owner_id: string | null
           fb_step_completed: boolean
           first_name: string
           id: string
@@ -277,12 +249,14 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          registration_notification_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           stage_updated_at: string | null
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
+          youtube_social_media: string | null
         }
         Insert: {
           created_at?: string
@@ -290,6 +264,8 @@ export type Database = {
           email: string
           facebook_page?: string | null
           facebook_profile?: string | null
+          fb_profile_id?: string | null
+          fb_profile_owner_id?: string | null
           fb_step_completed?: boolean
           first_name: string
           id?: string
@@ -304,12 +280,14 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          registration_notification_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           stage_updated_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
+          youtube_social_media?: string | null
         }
         Update: {
           created_at?: string
@@ -317,6 +295,8 @@ export type Database = {
           email?: string
           facebook_page?: string | null
           facebook_profile?: string | null
+          fb_profile_id?: string | null
+          fb_profile_owner_id?: string | null
           fb_step_completed?: boolean
           first_name?: string
           id?: string
@@ -331,12 +311,14 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
+          registration_notification_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
           stage_updated_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
+          youtube_social_media?: string | null
         }
         Relationships: [
           {
@@ -350,7 +332,57 @@ export type Database = {
             foreignKeyName: "creator_invitations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "creator_invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_registration_notification"
+            columns: ["registration_notification_id"]
+            isOneToOne: false
+            referencedRelation: "notification_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_invitations_events: {
+        Row: {
+          creator_invitation_id: string
+          id: string
+          invitation_event_id: string
+          sending_date: string
+        }
+        Insert: {
+          creator_invitation_id: string
+          id?: string
+          invitation_event_id: string
+          sending_date?: string
+        }
+        Update: {
+          creator_invitation_id?: string
+          id?: string
+          invitation_event_id?: string
+          sending_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_invitations_events_creator_invitation_id_fkey"
+            columns: ["creator_invitation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_invitations_events_invitation_event_id_fkey"
+            columns: ["invitation_event_id"]
+            isOneToOne: false
+            referencedRelation: "invitation_events"
             referencedColumns: ["id"]
           },
         ]
@@ -411,48 +443,36 @@ export type Database = {
       }
       invitation_events: {
         Row: {
-          created_at: string
-          created_by: string | null
+          deadline: string | null
           description: string | null
-          event_date: string
+          event_name: string
           id: string
           id_project: string
-          location: string | null
-          max_participants: number | null
-          title: string
-          updated_at: string
+          link_terms: string | null
         }
         Insert: {
-          created_at?: string
-          created_by?: string | null
+          deadline?: string | null
           description?: string | null
-          event_date: string
+          event_name: string
           id?: string
           id_project: string
-          location?: string | null
-          max_participants?: number | null
-          title: string
-          updated_at?: string
+          link_terms?: string | null
         }
         Update: {
-          created_at?: string
-          created_by?: string | null
+          deadline?: string | null
           description?: string | null
-          event_date?: string
+          event_name?: string
           id?: string
           id_project?: string
-          location?: string | null
-          max_participants?: number | null
-          title?: string
-          updated_at?: string
+          link_terms?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "invitation_events_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "invitation_events_id_project_fkey"
+            columns: ["id_project"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "invitation_events_id_project_fkey"
@@ -463,8 +483,48 @@ export type Database = {
           },
         ]
       }
+      invitation_fixing: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          fixed_at: string | null
+          id: string
+          invitation_id: string
+          is_fixed: boolean | null
+          reason: Database["public"]["Enums"]["fixing_reason"]
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          fixed_at?: string | null
+          id?: string
+          invitation_id: string
+          is_fixed?: boolean | null
+          reason: Database["public"]["Enums"]["fixing_reason"]
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          fixed_at?: string | null
+          id?: string
+          invitation_id?: string
+          is_fixed?: boolean | null
+          reason?: Database["public"]["Enums"]["fixing_reason"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitation_fixing_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "creator_invitations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_logs: {
         Row: {
+          campaign_id: number | null
+          campaign_name: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at: string | null
           error_message: string | null
@@ -477,6 +537,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          campaign_id?: number | null
+          campaign_name?: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
           error_message?: string | null
@@ -489,6 +551,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          campaign_id?: number | null
+          campaign_name?: string | null
           channel?: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
           error_message?: string | null
@@ -526,51 +590,79 @@ export type Database = {
       }
       notification_settings: {
         Row: {
+          campaign_id: number | null
+          campaign_name: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at: string | null
+          days_after: number | null
           delay_days: number
+          email_status: string | null
           enabled: boolean
           frequency_days: number
           id: string
+          invitation_event_id: string | null
           max_notifications: number
           message: string
+          sequence_order: number | null
           stage_id: string | null
           subject: string | null
           target_status: string | null
           template_id: string | null
+          time_hour: string | null
           type: Database["public"]["Enums"]["notification_types"]
         }
         Insert: {
+          campaign_id?: number | null
+          campaign_name?: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
+          days_after?: number | null
           delay_days?: number
+          email_status?: string | null
           enabled?: boolean
           frequency_days?: number
           id?: string
+          invitation_event_id?: string | null
           max_notifications?: number
           message: string
+          sequence_order?: number | null
           stage_id?: string | null
           subject?: string | null
           target_status?: string | null
           template_id?: string | null
+          time_hour?: string | null
           type: Database["public"]["Enums"]["notification_types"]
         }
         Update: {
+          campaign_id?: number | null
+          campaign_name?: string | null
           channel?: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
+          days_after?: number | null
           delay_days?: number
+          email_status?: string | null
           enabled?: boolean
           frequency_days?: number
           id?: string
+          invitation_event_id?: string | null
           max_notifications?: number
           message?: string
+          sequence_order?: number | null
           stage_id?: string | null
           subject?: string | null
           target_status?: string | null
           template_id?: string | null
+          time_hour?: string | null
           type?: Database["public"]["Enums"]["notification_types"]
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_notification_settings_invitation_event"
+            columns: ["invitation_event_id"]
+            isOneToOne: false
+            referencedRelation: "invitation_events"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notification_settings_stage_id_fkey"
             columns: ["stage_id"]
@@ -681,6 +773,13 @@ export type Database = {
             foreignKeyName: "profile_projects_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "profile_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -782,6 +881,13 @@ export type Database = {
             foreignKeyName: "project_allowed_countries_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "project_allowed_countries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -810,6 +916,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "content_categories"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_content_categories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_content_categories_project_id_fkey"
@@ -846,6 +959,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "social_media_platforms"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_social_media_platforms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_social_media_platforms_project_id_fkey"
@@ -903,6 +1023,13 @@ export type Database = {
           view?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "project_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
+          },
           {
             foreignKeyName: "project_stages_project_id_fkey"
             columns: ["project_id"]
@@ -1089,6 +1216,13 @@ export type Database = {
             foreignKeyName: "tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_invitation_status_counts"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1165,6 +1299,15 @@ export type Database = {
       }
     }
     Views: {
+      project_invitation_status_counts: {
+        Row: {
+          invitation_count: number | null
+          project_id: string | null
+          project_name: string | null
+          status: Database["public"]["Enums"]["invitation_status"] | null
+        }
+        Relationships: []
+      }
       summary_creator: {
         Row: {
           apellido: string | null
@@ -1188,6 +1331,8 @@ export type Database = {
           email: string
           facebook_page: string | null
           facebook_profile: string | null
+          fb_profile_id: string | null
+          fb_profile_owner_id: string | null
           fb_step_completed: boolean
           first_name: string
           id: string
@@ -1202,12 +1347,23 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
+          registration_notification_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
           stage_updated_at: string | null
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
+          youtube_social_media: string | null
+        }[]
+      }
+      get_admin_invitation_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          project_id: string
+          project_name: string
+          status: string
+          invitation_count: number
         }[]
       }
       get_creators_by_project_stage: {
@@ -1272,6 +1428,7 @@ export type Database = {
     }
     Enums: {
       creator_quality: "low" | "medium" | "high"
+      fixing_reason: "profile" | "page" | "other"
       invitation_status:
         | "pending"
         | "accepted"
@@ -1279,10 +1436,12 @@ export type Database = {
         | "completed"
         | "sended"
         | "in process"
+        | "approved"
+        | "fixing"
       meta_verification_status: "review" | "accepted" | "rejected"
       notification_channel: "sms" | "email"
       notification_status: "sent" | "failed" | "pending"
-      notification_types: "reminder" | "notification" | "alert"
+      notification_types: "reminder" | "notification" | "alert" | "notice"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
@@ -1413,6 +1572,7 @@ export const Constants = {
   public: {
     Enums: {
       creator_quality: ["low", "medium", "high"],
+      fixing_reason: ["profile", "page", "other"],
       invitation_status: [
         "pending",
         "accepted",
@@ -1420,11 +1580,13 @@ export const Constants = {
         "completed",
         "sended",
         "in process",
+        "approved",
+        "fixing",
       ],
       meta_verification_status: ["review", "accepted", "rejected"],
       notification_channel: ["sms", "email"],
       notification_status: ["sent", "failed", "pending"],
-      notification_types: ["reminder", "notification", "alert"],
+      notification_types: ["reminder", "notification", "alert", "notice"],
       task_status: ["pending", "in_progress", "completed", "review"],
       user_role: ["admin", "creator"],
     },
