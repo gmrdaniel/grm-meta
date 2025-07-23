@@ -17,7 +17,8 @@ import { FileUploader } from "@/components/admin/inventory/import-templates/comp
 import { Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
+const supabase = supabaseClient as any;
 import { createInvitation } from "@/services/invitation/createInvitation";
 import { sendEmail } from "@/services/email/sendIEmail";
 import { CreateInvitationData } from "@/types/invitation";
@@ -213,7 +214,8 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
   // Función para verificar si un usuario existe en creator_invitations
   const checkUserExistsAndStatus = async (email: string) => {
     // Verificamos directamente en creator_invitations
-    const { data: invitationData, error: invitationError } = await supabase
+    // @ts-ignore - Using type assertion due to enum mismatch  
+    const { data: invitationData, error: invitationError } = await (supabase as any)
       .from("creator_invitations")
       .select("status")
       .eq("email", email)
@@ -462,8 +464,9 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
             else if (status === "pending") {
               try {
                 // En lugar de crear una nueva invitación, obtenemos la existente
+                // @ts-ignore - Using type assertion due to enum mismatch
                 const { data: existingInvitation, error: fetchError } =
-                  await supabase
+                  await (supabase as any)
                     .from("creator_invitations")
                     .select("*")
                     .eq("email", email)
@@ -515,7 +518,8 @@ const EventInvitation: React.FC<EventInvitationProps> = ({ onSuccess }) => {
 
                 // Si hay campos para actualizar, hacemos la actualización
                 if (needsUpdate) {
-                  const { error: updateError } = await supabase
+                  // @ts-ignore - Using type assertion for update data
+                  const { error: updateError } = await (supabase as any)
                     .from("creator_invitations")
                     .update(updateData)
                     .eq("id", invitation.id);

@@ -1,7 +1,8 @@
 // @ts-nocheck
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
+const supabase = supabaseClient as any;
 import { Card, CardContent } from "@/components/ui/card";
 import { StatsCard } from "@/components/StatsCard";
 import {
@@ -152,7 +153,8 @@ export function CampaignStats() {
       }
 
       // Obtenemos usuarios convertidos (status = 'completed')
-      const { data: convertedData, error: convertedError } = await supabase
+      // @ts-ignore - Using type assertion due to enum mismatch
+      const { data: convertedData, error: convertedError } = await (supabase as any)
         .from("creator_invitations")
         .select("id")
         .eq("status", "completed")
@@ -160,8 +162,9 @@ export function CampaignStats() {
 
       if (convertedError) throw convertedError;
 
-      // Obtenemos usuarios interesados (status = 'in process')
-      const { data: interestedData, error: interestedError } = await supabase
+      // Obtenemos usuarios interesados (status = 'in process')  
+      // @ts-ignore - Using type assertion due to enum mismatch
+      const { data: interestedData, error: interestedError } = await (supabase as any)
         .from("creator_invitations")
         .select("id")
         .eq("status", "in process")
