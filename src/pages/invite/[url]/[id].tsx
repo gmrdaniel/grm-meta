@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase, findInvitationByCode } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 import { toast } from "sonner";
 
 const InvitationPage = () => {
@@ -57,19 +58,19 @@ const InvitationPage = () => {
         // Method 3: Try custom RPC function as last resort
         if (!invitationData) {
           console.log('InvitationPage - Trying custom RPC function');
-          const { data: rpcData, error: rpcError } = await findInvitationByCode(id);
+          const rpcData = await fetchInvitationByCode(id);
           
-          console.log('InvitationPage - Custom RPC function result:', { data: rpcData, error: rpcError });
+          console.log('InvitationPage - Custom RPC function result:', { data: rpcData });
           
-          if (rpcData && rpcData.length > 0) {
+          if (rpcData) {
             // Fetch project details separately since RPC doesn't support joins
             const { data: projectData } = await supabase
               .from('projects')
               .select('*')
-              .eq('id', rpcData[0].project_id)
+              .eq('id', rpcData.project_id)
               .maybeSingle();
               
-            invitationData = rpcData[0];
+            invitationData = rpcData;
             if (projectData) {
               invitationData.projects = projectData;
             }

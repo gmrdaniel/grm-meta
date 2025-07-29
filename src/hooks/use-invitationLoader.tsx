@@ -1,4 +1,5 @@
-import { findInvitationByCode, supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchInvitationByCode } from "@/services/invitation/fetchInvitations";
 import { fetchProjectStages } from "@/services/project/projectService";
 import { useEffect, useState } from "react";
 
@@ -33,14 +34,13 @@ export const useInvitationLoader = ({
           return;
         }
 
-        const { data, error } = await findInvitationByCode(invitation_code);
-
-        if (error || !data?.length) {
+        const invitationData = await fetchInvitationByCode(invitation_code);
+        
+        if (!invitationData) {
           setError("Invalid invitation code or invitation not found");
           return;
         }
 
-        const invitationData = data[0];
         /* 
           if (invitationData.status === 'completed') {
             setError('This invitation has already been accepted');
