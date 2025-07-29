@@ -94,135 +94,147 @@ export type Database = {
         }
         Relationships: []
       }
-      content_categories: {
+      country_phone_codes: {
         Row: {
-          created_at: string | null
-          id: string
-          key: string
-          name_en: string
-          name_es: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          key: string
-          name_en: string
-          name_es: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          key?: string
-          name_en?: string
-          name_es?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      countries: {
-        Row: {
-          created_at: string | null
-          description: string | null
+          created_at: string
           id: string
           iso2: string
           iso3: string
           name_en: string
           name_es: string
           phone_code: string
-          updated_at: string | null
+          status: Database["public"]["Enums"]["country_status"]
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          description?: string | null
+          created_at?: string
           id?: string
           iso2: string
           iso3: string
           name_en: string
           name_es: string
           phone_code: string
-          updated_at?: string | null
+          status?: Database["public"]["Enums"]["country_status"]
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          description?: string | null
+          created_at?: string
           id?: string
           iso2?: string
           iso3?: string
           name_en?: string
           name_es?: string
           phone_code?: string
-          updated_at?: string | null
+          status?: Database["public"]["Enums"]["country_status"]
+          updated_at?: string
         }
         Relationships: []
       }
       creator_inventory: {
         Row: {
           apellido: string
+          codigo_invitacion: string | null
           correo: string
           elegible_tiktok: boolean | null
           elegible_youtube: boolean | null
           engagement_tiktok: number | null
           engagement_youtube: number | null
+          enviado_hubspot: boolean | null
           estatus: string | null
+          fecha_consulta_videos: string | null
           fecha_creacion: string | null
+          fecha_descarga_yt: string | null
+          fecha_envio_hubspot: string | null
           id: string
           lada_telefono: string | null
           nombre: string
           page_facebook: string | null
+          region: string | null
           secuid_tiktok: string | null
           seguidores_pinterest: number | null
           seguidores_tiktok: number | null
           seguidores_youtube: number | null
           telefono: string | null
+          tiene_invitacion: boolean | null
+          tiene_nombre_real:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
+          tiene_prompt_generado: boolean | null
+          usuario_asignado: string | null
           usuario_pinterest: string | null
           usuario_tiktok: string | null
           usuario_youtube: string | null
+          views_youtube: number | null
         }
         Insert: {
           apellido: string
+          codigo_invitacion?: string | null
           correo: string
           elegible_tiktok?: boolean | null
           elegible_youtube?: boolean | null
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
+          enviado_hubspot?: boolean | null
           estatus?: string | null
+          fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
+          fecha_descarga_yt?: string | null
+          fecha_envio_hubspot?: string | null
           id?: string
           lada_telefono?: string | null
           nombre: string
           page_facebook?: string | null
+          region?: string | null
           secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           telefono?: string | null
+          tiene_invitacion?: boolean | null
+          tiene_nombre_real?:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
+          tiene_prompt_generado?: boolean | null
+          usuario_asignado?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
+          views_youtube?: number | null
         }
         Update: {
           apellido?: string
+          codigo_invitacion?: string | null
           correo?: string
           elegible_tiktok?: boolean | null
           elegible_youtube?: boolean | null
           engagement_tiktok?: number | null
           engagement_youtube?: number | null
+          enviado_hubspot?: boolean | null
           estatus?: string | null
+          fecha_consulta_videos?: string | null
           fecha_creacion?: string | null
+          fecha_descarga_yt?: string | null
+          fecha_envio_hubspot?: string | null
           id?: string
           lada_telefono?: string | null
           nombre?: string
           page_facebook?: string | null
+          region?: string | null
           secuid_tiktok?: string | null
           seguidores_pinterest?: number | null
           seguidores_tiktok?: number | null
           seguidores_youtube?: number | null
           telefono?: string | null
+          tiene_invitacion?: boolean | null
+          tiene_nombre_real?:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
+          tiene_prompt_generado?: boolean | null
+          usuario_asignado?: string | null
           usuario_pinterest?: string | null
           usuario_tiktok?: string | null
           usuario_youtube?: string | null
+          views_youtube?: number | null
         }
         Relationships: []
       }
@@ -232,93 +244,66 @@ export type Database = {
           current_stage_id: string | null
           email: string
           facebook_page: string | null
-          facebook_profile: string | null
-          fb_profile_id: string | null
-          fb_profile_owner_id: string | null
-          fb_step_completed: boolean
-          first_name: string
+          full_name: string
           id: string
           instagram_user: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
-          is_business_account: boolean | null
-          is_professional_account: boolean | null
-          last_name: string | null
           phone_country_code: string | null
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
-          registration_notification_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
-          stage_updated_at: string | null
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
-          youtube_social_media: string | null
         }
         Insert: {
           created_at?: string
           current_stage_id?: string | null
           email: string
           facebook_page?: string | null
-          facebook_profile?: string | null
-          fb_profile_id?: string | null
-          fb_profile_owner_id?: string | null
-          fb_step_completed?: boolean
-          first_name: string
+          full_name: string
           id?: string
           instagram_user?: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
-          is_business_account?: boolean | null
-          is_professional_account?: boolean | null
-          last_name?: string | null
           phone_country_code?: string | null
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
-          registration_notification_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
-          stage_updated_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
-          youtube_social_media?: string | null
         }
         Update: {
           created_at?: string
           current_stage_id?: string | null
           email?: string
           facebook_page?: string | null
-          facebook_profile?: string | null
-          fb_profile_id?: string | null
-          fb_profile_owner_id?: string | null
-          fb_step_completed?: boolean
-          first_name?: string
+          full_name?: string
           id?: string
           instagram_user?: string | null
           invitation_code?: string
           invitation_type?: string
           invitation_url?: string
-          is_business_account?: boolean | null
-          is_professional_account?: boolean | null
-          last_name?: string | null
           phone_country_code?: string | null
           phone_number?: string | null
           phone_verified?: boolean | null
           project_id?: string | null
-          registration_notification_id?: string | null
+          residence_country_id?: string | null
           social_media_handle?: string | null
           social_media_type?: string | null
-          stage_updated_at?: string | null
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
           youtube_channel?: string | null
-          youtube_social_media?: string | null
         }
         Relationships: [
           {
@@ -332,201 +317,202 @@ export type Database = {
             foreignKeyName: "creator_invitations_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "creator_invitations_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_registration_notification"
-            columns: ["registration_notification_id"]
-            isOneToOne: false
-            referencedRelation: "notification_settings"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      creator_invitations_events: {
+      email_creators: {
         Row: {
-          creator_invitation_id: string
+          created_at: string
+          email: string
+          full_name: string
           id: string
-          invitation_event_id: string
-          sending_date: string
+          instagram_link: string | null
+          link_invitation: string | null
+          prompt: string | null
+          prompt_output: string | null
+          source_file: string | null
+          status: string
+          tiktok_link: string
+          updated_at: string
         }
         Insert: {
-          creator_invitation_id: string
+          created_at?: string
+          email: string
+          full_name: string
           id?: string
-          invitation_event_id: string
-          sending_date?: string
+          instagram_link?: string | null
+          link_invitation?: string | null
+          prompt?: string | null
+          prompt_output?: string | null
+          source_file?: string | null
+          status?: string
+          tiktok_link: string
+          updated_at?: string
         }
         Update: {
-          creator_invitation_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string
           id?: string
-          invitation_event_id?: string
-          sending_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "creator_invitations_events_creator_invitation_id_fkey"
-            columns: ["creator_invitation_id"]
-            isOneToOne: false
-            referencedRelation: "creator_invitations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "creator_invitations_events_invitation_event_id_fkey"
-            columns: ["invitation_event_id"]
-            isOneToOne: false
-            referencedRelation: "invitation_events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      creator_profile_categories: {
-        Row: {
-          content_category_id: string
-          creator_profile_id: string
-          id: string
-        }
-        Insert: {
-          content_category_id: string
-          creator_profile_id: string
-          id?: string
-        }
-        Update: {
-          content_category_id?: string
-          creator_profile_id?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "creator_profile_categories_content_category_id_fkey"
-            columns: ["content_category_id"]
-            isOneToOne: false
-            referencedRelation: "content_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "creator_profile_categories_creator_profile_id_fkey"
-            columns: ["creator_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      email_templates: {
-        Row: {
-          created_at: string | null
-          html: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string | null
-          html: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string | null
-          html?: string
-          id?: string
-          name?: string
+          instagram_link?: string | null
+          link_invitation?: string | null
+          prompt?: string | null
+          prompt_output?: string | null
+          source_file?: string | null
+          status?: string
+          tiktok_link?: string
+          updated_at?: string
         }
         Relationships: []
       }
-      invitation_events: {
+      excel_imports: {
         Row: {
-          deadline: string | null
-          description: string | null
-          event_name: string
+          created_at: string
+          email: string
           id: string
-          id_project: string
-          link_terms: string | null
+          link: string
+          message: string | null
+          name: string
+          source: string
+          updated_at: string
         }
         Insert: {
-          deadline?: string | null
-          description?: string | null
-          event_name: string
+          created_at?: string
+          email: string
           id?: string
-          id_project: string
-          link_terms?: string | null
+          link: string
+          message?: string | null
+          name: string
+          source: string
+          updated_at?: string
         }
         Update: {
-          deadline?: string | null
-          description?: string | null
-          event_name?: string
+          created_at?: string
+          email?: string
           id?: string
-          id_project?: string
-          link_terms?: string | null
+          link?: string
+          message?: string | null
+          name?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      facebook_reels: {
+        Row: {
+          created_at: string
+          fb_id: string
+          fecha: string | null
+          id: string
+          length_in_seconds: number | null
+          timestamp: number | null
+          updated_at: string
+          url: string | null
+          video_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          fb_id: string
+          fecha?: string | null
+          id?: string
+          length_in_seconds?: number | null
+          timestamp?: number | null
+          updated_at?: string
+          url?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          fb_id?: string
+          fecha?: string | null
+          id?: string
+          length_in_seconds?: number | null
+          timestamp?: number | null
+          updated_at?: string
+          url?: string | null
+          video_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "invitation_events_id_project_fkey"
-            columns: ["id_project"]
+            foreignKeyName: "fk_facebook_reels_fb_id"
+            columns: ["fb_id"]
             isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "invitation_events_id_project_fkey"
-            columns: ["id_project"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
+            referencedRelation: "facebook_tracking"
+            referencedColumns: ["fb_id"]
           },
         ]
       }
-      invitation_fixing: {
+      facebook_tracking: {
         Row: {
-          created_at: string | null
-          description: string | null
-          fixed_at: string | null
+          approved_date: string | null
+          created_at: string
+          facebook_status: string
+          fb_id: string
           id: string
-          invitation_id: string
-          is_fixed: boolean | null
-          reason: Database["public"]["Enums"]["fixing_reason"]
+          name: string
+          onboarded_date: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          description?: string | null
-          fixed_at?: string | null
+          approved_date?: string | null
+          created_at?: string
+          facebook_status: string
+          fb_id: string
           id?: string
-          invitation_id: string
-          is_fixed?: boolean | null
-          reason: Database["public"]["Enums"]["fixing_reason"]
+          name: string
+          onboarded_date?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          description?: string | null
-          fixed_at?: string | null
+          approved_date?: string | null
+          created_at?: string
+          facebook_status?: string
+          fb_id?: string
           id?: string
-          invitation_id?: string
-          is_fixed?: boolean | null
-          reason?: Database["public"]["Enums"]["fixing_reason"]
+          name?: string
+          onboarded_date?: string | null
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invitation_fixing_invitation_id_fkey"
-            columns: ["invitation_id"]
-            isOneToOne: false
-            referencedRelation: "creator_invitations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      meta_creators: {
+        Row: {
+          approved_date: string | null
+          created_at: string
+          facebook_status: string
+          fb_id: string
+          id: string
+          name: string
+          onboarded_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_date?: string | null
+          created_at?: string
+          facebook_status: string
+          fb_id: string
+          id?: string
+          name: string
+          onboarded_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_date?: string | null
+          created_at?: string
+          facebook_status?: string
+          fb_id?: string
+          id?: string
+          name?: string
+          onboarded_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       notification_logs: {
         Row: {
-          campaign_id: number | null
-          campaign_name: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
-          created_at: string | null
           error_message: string | null
           id: string
           invitation_id: string
@@ -534,13 +520,9 @@ export type Database = {
           sent_at: string | null
           stage_id: string | null
           status: Database["public"]["Enums"]["notification_status"]
-          updated_at: string | null
         }
         Insert: {
-          campaign_id?: number | null
-          campaign_name?: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
-          created_at?: string | null
           error_message?: string | null
           id?: string
           invitation_id: string
@@ -548,13 +530,9 @@ export type Database = {
           sent_at?: string | null
           stage_id?: string | null
           status: Database["public"]["Enums"]["notification_status"]
-          updated_at?: string | null
         }
         Update: {
-          campaign_id?: number | null
-          campaign_name?: string | null
           channel?: Database["public"]["Enums"]["notification_channel"]
-          created_at?: string | null
           error_message?: string | null
           id?: string
           invitation_id?: string
@@ -562,7 +540,6 @@ export type Database = {
           sent_at?: string | null
           stage_id?: string | null
           status?: Database["public"]["Enums"]["notification_status"]
-          updated_at?: string | null
         }
         Relationships: [
           {
@@ -590,91 +567,50 @@ export type Database = {
       }
       notification_settings: {
         Row: {
-          campaign_id: number | null
-          campaign_name: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at: string | null
-          days_after: number | null
           delay_days: number
-          email_status: string | null
           enabled: boolean
           frequency_days: number
           id: string
-          invitation_event_id: string | null
           max_notifications: number
           message: string
-          sequence_order: number | null
           stage_id: string | null
           subject: string | null
-          target_status: string | null
-          template_id: string | null
-          time_hour: string | null
           type: Database["public"]["Enums"]["notification_types"]
         }
         Insert: {
-          campaign_id?: number | null
-          campaign_name?: string | null
           channel: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
-          days_after?: number | null
           delay_days?: number
-          email_status?: string | null
           enabled?: boolean
           frequency_days?: number
           id?: string
-          invitation_event_id?: string | null
           max_notifications?: number
           message: string
-          sequence_order?: number | null
           stage_id?: string | null
           subject?: string | null
-          target_status?: string | null
-          template_id?: string | null
-          time_hour?: string | null
           type: Database["public"]["Enums"]["notification_types"]
         }
         Update: {
-          campaign_id?: number | null
-          campaign_name?: string | null
           channel?: Database["public"]["Enums"]["notification_channel"]
           created_at?: string | null
-          days_after?: number | null
           delay_days?: number
-          email_status?: string | null
           enabled?: boolean
           frequency_days?: number
           id?: string
-          invitation_event_id?: string | null
           max_notifications?: number
           message?: string
-          sequence_order?: number | null
           stage_id?: string | null
           subject?: string | null
-          target_status?: string | null
-          template_id?: string | null
-          time_hour?: string | null
           type?: Database["public"]["Enums"]["notification_types"]
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_notification_settings_invitation_event"
-            columns: ["invitation_event_id"]
-            isOneToOne: false
-            referencedRelation: "invitation_events"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "notification_settings_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
             referencedRelation: "project_stages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_settings_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -717,264 +653,38 @@ export type Database = {
           },
         ]
       }
-      profile_projects: {
-        Row: {
-          admin_id: string
-          created_at: string | null
-          fb_profile_id: string | null
-          fb_profile_owner_id: string | null
-          id: string
-          joined_at: string
-          profile_id: string
-          project_id: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          admin_id: string
-          created_at?: string | null
-          fb_profile_id?: string | null
-          fb_profile_owner_id?: string | null
-          id: string
-          joined_at?: string
-          profile_id: string
-          project_id: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          admin_id?: string
-          created_at?: string | null
-          fb_profile_id?: string | null
-          fb_profile_owner_id?: string | null
-          id?: string
-          joined_at?: string
-          profile_id?: string
-          project_id?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profile_projects_admin_id_fkey"
-            columns: ["admin_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_projects_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_projects_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "profile_projects_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
-          country_of_residence_id: string | null
           created_at: string
           email: string | null
           first_name: string | null
           id: string
           last_name: string | null
-          meta_verified:
-            | Database["public"]["Enums"]["meta_verification_status"]
-            | null
-          phone_country_code: string | null
-          phone_number: string | null
-          pinterest_url: string | null
           profile_photo_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
-          country_of_residence_id?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
-          meta_verified?:
-            | Database["public"]["Enums"]["meta_verification_status"]
-            | null
-          phone_country_code?: string | null
-          phone_number?: string | null
-          pinterest_url?: string | null
           profile_photo_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
-          country_of_residence_id?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
-          meta_verified?:
-            | Database["public"]["Enums"]["meta_verification_status"]
-            | null
-          phone_country_code?: string | null
-          phone_number?: string | null
-          pinterest_url?: string | null
           profile_photo_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_country_of_residence_id_fkey"
-            columns: ["country_of_residence_id"]
-            isOneToOne: false
-            referencedRelation: "countries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_allowed_countries: {
-        Row: {
-          country_id: string
-          created_at: string | null
-          description: string | null
-          id: string
-          project_id: string
-        }
-        Insert: {
-          country_id: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          project_id: string
-        }
-        Update: {
-          country_id?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          project_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_allowed_countries_country_id_fkey"
-            columns: ["country_id"]
-            isOneToOne: false
-            referencedRelation: "countries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_allowed_countries_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_allowed_countries_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_content_categories: {
-        Row: {
-          content_category_id: string
-          id: string
-          project_id: string
-        }
-        Insert: {
-          content_category_id: string
-          id?: string
-          project_id: string
-        }
-        Update: {
-          content_category_id?: string
-          id?: string
-          project_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_content_categories_content_category_id_fkey"
-            columns: ["content_category_id"]
-            isOneToOne: false
-            referencedRelation: "content_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_content_categories_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_content_categories_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_social_media_platforms: {
-        Row: {
-          created_at: string | null
-          id: string
-          platform_id: string
-          project_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          platform_id: string
-          project_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          platform_id?: string
-          project_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_social_media_platforms_platform_id_fkey"
-            columns: ["platform_id"]
-            isOneToOne: false
-            referencedRelation: "social_media_platforms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_social_media_platforms_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_social_media_platforms_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       project_stages: {
         Row: {
@@ -1027,13 +737,6 @@ export type Database = {
             foreignKeyName: "project_stages_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_stages_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1044,7 +747,6 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          slug: string | null
           status: string
           updated_at: string
         }
@@ -1052,7 +754,6 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
-          slug?: string | null
           status?: string
           updated_at?: string
         }
@@ -1060,92 +761,137 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
-          slug?: string | null
           status?: string
           updated_at?: string
         }
         Relationships: []
       }
-      social_media_platforms: {
+      prompt_templates: {
         Row: {
-          created_at: string | null
+          active: boolean
+          content: string
+          created_at: string
+          created_by: string | null
           id: string
           name: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          active?: boolean
+          content: string
+          created_at?: string
+          created_by?: string | null
           id?: string
           name: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          active?: boolean
+          content?: string
+          created_at?: string
+          created_by?: string | null
           id?: string
           name?: string
+          updated_at?: string
         }
         Relationships: []
       }
-      social_media_profile: {
+      sms_logs: {
         Row: {
-          bio: string | null
-          company_trained: boolean | null
-          creator_id: string
-          engagement_rate: number | null
-          followers: number | null
-          following: number | null
+          country_code: string
+          created_at: string | null
+          direction: Database["public"]["Enums"]["sms_direction"]
+          error_message: string | null
           id: string
-          monthly_views: number | null
-          quality: Database["public"]["Enums"]["creator_quality"] | null
-          social_media_platform_id: string
-          total_likes: number | null
-          total_views: number | null
-          username: string
-          website: string | null
+          message: string
+          phone_number: string
+          recipient_name: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          template_id: string | null
+          twilio_message_id: string | null
+          twilio_response: Json | null
+          updated_at: string | null
         }
         Insert: {
-          bio?: string | null
-          company_trained?: boolean | null
-          creator_id: string
-          engagement_rate?: number | null
-          followers?: number | null
-          following?: number | null
-          id: string
-          monthly_views?: number | null
-          quality?: Database["public"]["Enums"]["creator_quality"] | null
-          social_media_platform_id: string
-          total_likes?: number | null
-          total_views?: number | null
-          username: string
-          website?: string | null
+          country_code: string
+          created_at?: string | null
+          direction?: Database["public"]["Enums"]["sms_direction"]
+          error_message?: string | null
+          id?: string
+          message: string
+          phone_number: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          twilio_message_id?: string | null
+          twilio_response?: Json | null
+          updated_at?: string | null
         }
         Update: {
-          bio?: string | null
-          company_trained?: boolean | null
-          creator_id?: string
-          engagement_rate?: number | null
-          followers?: number | null
-          following?: number | null
+          country_code?: string
+          created_at?: string | null
+          direction?: Database["public"]["Enums"]["sms_direction"]
+          error_message?: string | null
           id?: string
-          monthly_views?: number | null
-          quality?: Database["public"]["Enums"]["creator_quality"] | null
-          social_media_platform_id?: string
-          total_likes?: number | null
-          total_views?: number | null
-          username?: string
-          website?: string | null
+          message?: string
+          phone_number?: string
+          recipient_name?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          twilio_message_id?: string | null
+          twilio_response?: Json | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "social_media_profile_creator_id_fkey"
-            columns: ["creator_id"]
+            foreignKeyName: "sms_logs_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "sms_templates"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      sms_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          message: string
+          name: string
+          project_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message: string
+          name: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message?: string
+          name?: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "social_media_profile_social_media_platform_id_fkey"
-            columns: ["social_media_platform_id"]
+            foreignKeyName: "sms_templates_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "social_media_platforms"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1216,13 +962,6 @@ export type Database = {
             foreignKeyName: "tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_invitation_status_counts"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -1234,6 +973,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tiktok_users: {
+        Row: {
+          create_time: number | null
+          created_at: string
+          custom_verify: string | null
+          email: string | null
+          enterprise_verify_reason: string | null
+          favoriting_count: number | null
+          follower_count: number | null
+          following_count: number | null
+          google_account: string | null
+          has_email: boolean | null
+          id: string
+          language: string | null
+          nickname: string | null
+          region: string | null
+          sec_user_id: string
+          share_desc: string | null
+          share_desc_info: string | null
+          share_title: string | null
+          share_title_myself: string | null
+          share_title_other: string | null
+          share_url: string | null
+          signature: string | null
+          total_favorited: number | null
+          uid: string | null
+          unique_id: string | null
+          updated_at: string
+          user_rate: number | null
+          user_tags: Json | null
+          verification_type: number | null
+          verify_info: string | null
+        }
+        Insert: {
+          create_time?: number | null
+          created_at?: string
+          custom_verify?: string | null
+          email?: string | null
+          enterprise_verify_reason?: string | null
+          favoriting_count?: number | null
+          follower_count?: number | null
+          following_count?: number | null
+          google_account?: string | null
+          has_email?: boolean | null
+          id?: string
+          language?: string | null
+          nickname?: string | null
+          region?: string | null
+          sec_user_id: string
+          share_desc?: string | null
+          share_desc_info?: string | null
+          share_title?: string | null
+          share_title_myself?: string | null
+          share_title_other?: string | null
+          share_url?: string | null
+          signature?: string | null
+          total_favorited?: number | null
+          uid?: string | null
+          unique_id?: string | null
+          updated_at?: string
+          user_rate?: number | null
+          user_tags?: Json | null
+          verification_type?: number | null
+          verify_info?: string | null
+        }
+        Update: {
+          create_time?: number | null
+          created_at?: string
+          custom_verify?: string | null
+          email?: string | null
+          enterprise_verify_reason?: string | null
+          favoriting_count?: number | null
+          follower_count?: number | null
+          following_count?: number | null
+          google_account?: string | null
+          has_email?: boolean | null
+          id?: string
+          language?: string | null
+          nickname?: string | null
+          region?: string | null
+          sec_user_id?: string
+          share_desc?: string | null
+          share_desc_info?: string | null
+          share_title?: string | null
+          share_title_myself?: string | null
+          share_title_other?: string | null
+          share_url?: string | null
+          signature?: string | null
+          total_favorited?: number | null
+          uid?: string | null
+          unique_id?: string | null
+          updated_at?: string
+          user_rate?: number | null
+          user_tags?: Json | null
+          verification_type?: number | null
+          verify_info?: string | null
+        }
+        Relationships: []
       }
       tiktok_video: {
         Row: {
@@ -1297,32 +1135,109 @@ export type Database = {
           },
         ]
       }
+      youtube_shorts: {
+        Row: {
+          comments: number | null
+          created_at: string
+          creator_id: string
+          duration: number | null
+          id: string
+          likes: number | null
+          published_date: string | null
+          title: string | null
+          updated_at: string
+          url: string | null
+          video_id: string
+          views: number | null
+        }
+        Insert: {
+          comments?: number | null
+          created_at?: string
+          creator_id: string
+          duration?: number | null
+          id?: string
+          likes?: number | null
+          published_date?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+          video_id: string
+          views?: number | null
+        }
+        Update: {
+          comments?: number | null
+          created_at?: string
+          creator_id?: string
+          duration?: number | null
+          id?: string
+          likes?: number | null
+          published_date?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string | null
+          video_id?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "youtube_shorts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      project_invitation_status_counts: {
+      facebook_reels_dias_validos_por_mes: {
         Row: {
-          invitation_count: number | null
-          project_id: string | null
-          project_name: string | null
-          status: Database["public"]["Enums"]["invitation_status"] | null
+          dias_validos: number | null
+          fb_id: string | null
+          mes: string | null
+          total_videos: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_facebook_reels_fb_id"
+            columns: ["fb_id"]
+            isOneToOne: false
+            referencedRelation: "facebook_tracking"
+            referencedColumns: ["fb_id"]
+          },
+        ]
       }
       summary_creator: {
         Row: {
           apellido: string | null
+          average_duration_tiktok: number | null
+          average_duration_youtube: number | null
           correo: string | null
-          date_last_post: number | null
-          duration_average: number | null
-          engagement: number | null
+          date_last_post_tiktok: number | null
+          engagement_tiktok: number | null
+          engagement_youtube: number | null
+          enviado_hubspot: boolean | null
+          fecha_creacion: string | null
+          fecha_envio_hubspot: string | null
           nombre: string | null
           seguidores_tiktok: number | null
+          seguidores_youtube: number | null
+          tiene_invitacion: boolean | null
+          tiene_nombre_real:
+            | Database["public"]["Enums"]["nombre_real_status"]
+            | null
+          tiene_prompt_generado: boolean | null
           usuario_tiktok: string | null
+          usuario_youtube: string | null
         }
         Relationships: []
       }
     }
     Functions: {
+      execute_task_search: {
+        Args: { query_text: string }
+        Returns: Json
+      }
       find_invitation_by_code: {
         Args: { code_param: string }
         Returns: {
@@ -1330,40 +1245,22 @@ export type Database = {
           current_stage_id: string | null
           email: string
           facebook_page: string | null
-          facebook_profile: string | null
-          fb_profile_id: string | null
-          fb_profile_owner_id: string | null
-          fb_step_completed: boolean
-          first_name: string
+          full_name: string
           id: string
           instagram_user: string | null
           invitation_code: string
           invitation_type: string
           invitation_url: string
-          is_business_account: boolean | null
-          is_professional_account: boolean | null
-          last_name: string | null
           phone_country_code: string | null
           phone_number: string | null
           phone_verified: boolean | null
           project_id: string | null
-          registration_notification_id: string | null
+          residence_country_id: string | null
           social_media_handle: string | null
           social_media_type: string | null
-          stage_updated_at: string | null
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
           youtube_channel: string | null
-          youtube_social_media: string | null
-        }[]
-      }
-      get_admin_invitation_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          project_id: string
-          project_name: string
-          status: string
-          invitation_count: number
         }[]
       }
       get_creators_by_project_stage: {
@@ -1427,21 +1324,13 @@ export type Database = {
       }
     }
     Enums: {
-      creator_quality: "low" | "medium" | "high"
-      fixing_reason: "profile" | "page" | "other"
-      invitation_status:
-        | "pending"
-        | "accepted"
-        | "rejected"
-        | "completed"
-        | "sended"
-        | "in process"
-        | "approved"
-        | "fixing"
-      meta_verification_status: "review" | "accepted" | "rejected"
+      country_status: "active" | "inactive"
+      invitation_status: "pending" | "accepted" | "rejected" | "completed"
+      nombre_real_status: "pendiente" | "proceso" | "error" | "completado"
       notification_channel: "sms" | "email"
       notification_status: "sent" | "failed" | "pending"
-      notification_types: "reminder" | "notification" | "alert" | "notice"
+      notification_types: "reminder" | "notification" | "alert"
+      sms_direction: "inbound" | "outbound"
       task_status: "pending" | "in_progress" | "completed" | "review"
       user_role: "admin" | "creator"
     }
@@ -1571,22 +1460,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      creator_quality: ["low", "medium", "high"],
-      fixing_reason: ["profile", "page", "other"],
-      invitation_status: [
-        "pending",
-        "accepted",
-        "rejected",
-        "completed",
-        "sended",
-        "in process",
-        "approved",
-        "fixing",
-      ],
-      meta_verification_status: ["review", "accepted", "rejected"],
+      country_status: ["active", "inactive"],
+      invitation_status: ["pending", "accepted", "rejected", "completed"],
+      nombre_real_status: ["pendiente", "proceso", "error", "completado"],
       notification_channel: ["sms", "email"],
       notification_status: ["sent", "failed", "pending"],
-      notification_types: ["reminder", "notification", "alert", "notice"],
+      notification_types: ["reminder", "notification", "alert"],
+      sms_direction: ["inbound", "outbound"],
       task_status: ["pending", "in_progress", "completed", "review"],
       user_role: ["admin", "creator"],
     },
